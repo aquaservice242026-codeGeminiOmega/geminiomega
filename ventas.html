@@ -1,0 +1,380 @@
+<!-- ventas.html - Módulo de Ventas -->
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaService - Ventas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50" x-data="ventasApp()">
+
+    <!-- Sidebar -->
+    <aside class="fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 hidden lg:block">
+        <div class="p-6">
+            <div class="flex items-center space-x-3 mb-8">
+                <i class="fas fa-tint text-3xl"></i>
+                <div>
+                    <h1 class="text-xl font-bold">AquaService</h1>
+                    <p class="text-xs text-blue-200">Sistema de Gestión</p>
+                </div>
+            </div>
+
+            <nav class="space-y-2">
+                <a href="index.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-home w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="ventas.html" class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
+                    <i class="fas fa-shopping-cart w-5"></i>
+                    <span class="font-medium">Ventas</span>
+                </a>
+                <a href="clientes.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-users w-5"></i>
+                    <span>Clientes</span>
+                </a>
+                <a href="inventario.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-boxes w-5"></i>
+                    <span>Inventario</span>
+                </a>
+                <a href="usuarios.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-user-cog w-5"></i>
+                    <span>Usuarios</span>
+                </a>
+                <a href="reportes.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-chart-line w-5"></i>
+                    <span>Reportes</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold">AD
+                </div>
+                <div>
+                    <p class="text-sm font-medium">Admin</p>
+                    <p class="text-xs text-blue-200">Sucursal Principal</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="lg:ml-64 min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Punto de Venta</h2>
+                <p class="text-sm text-gray-500">Venta de agua potabilizada</p>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <div class="bg-blue-50 px-4 py-2 rounded-lg">
+                    <span class="text-sm text-gray-600">Tasa USD: </span>
+                    <span class="font-bold text-blue-600">Bs. 38.50</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="p-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Products Section -->
+                <div class="lg:col-span-2 space-y-4">
+                    <!-- Quick Add Buttons -->
+                    <div class="bg-white rounded-2xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Agregar Rápido</h3>
+                        <div class="grid grid-cols-3 gap-4">
+                            <button @click="addProduct(1)"
+                                class="bg-gradient-to-br from-cyan-400 to-cyan-600 text-white p-6 rounded-xl hover:shadow-lg transition-all">
+                                <i class="fas fa-tint text-4xl mb-2"></i>
+                                <p class="font-bold text-lg">5 Litros</p>
+                                <p class="text-sm opacity-90">$2.50</p>
+                                <p class="text-xs mt-1">Stock: 45</p>
+                            </button>
+
+                            <button @click="addProduct(2)"
+                                class="bg-gradient-to-br from-blue-400 to-blue-600 text-white p-6 rounded-xl hover:shadow-lg transition-all">
+                                <i class="fas fa-tint text-4xl mb-2"></i>
+                                <p class="font-bold text-lg">10 Litros</p>
+                                <p class="text-sm opacity-90">$4.00</p>
+                                <p class="text-xs mt-1">Stock: 38</p>
+                            </button>
+
+                            <button @click="addProduct(3)"
+                                class="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6 rounded-xl hover:shadow-lg transition-all">
+                                <i class="fas fa-tint text-4xl mb-2"></i>
+                                <p class="font-bold text-lg">20 Litros</p>
+                                <p class="text-sm opacity-90">$7.00</p>
+                                <p class="text-xs mt-1">Stock: 52</p>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Toggle -->
+                    <div class="bg-white rounded-2xl shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800">Tipo de Entrega</h3>
+                                <p class="text-sm text-gray-500">Selecciona el método de entrega</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button @click="deliveryType = 'pickup'"
+                                    :class="deliveryType === 'pickup' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+                                    class="px-4 py-2 rounded-lg font-medium transition">
+                                    <i class="fas fa-store mr-2"></i>Retiro
+                                </button>
+                                <button @click="deliveryType = 'delivery'"
+                                    :class="deliveryType === 'delivery' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+                                    class="px-4 py-2 rounded-lg font-medium transition">
+                                    <i class="fas fa-truck mr-2"></i>Delivery
+                                </button>
+                            </div>
+                        </div>
+
+                        <div x-show="deliveryType === 'delivery'" class="mt-4 p-4 bg-blue-50 rounded-lg">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Dirección de Entrega</label>
+                            <textarea x-model="deliveryAddress" placeholder="Ingrese la dirección exacta del cliente..."
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                            <p class="text-xs text-gray-500 mt-1">Costo de delivery: $1.00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cart Section -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-2xl shadow-sm p-6 sticky top-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center justify-between">
+                            <span><i class="fas fa-shopping-cart text-blue-500 mr-2"></i>Carrito</span>
+                            <button @click="clearCart()" class="text-red-500 text-sm hover:underline">Limpiar</button>
+                        </h3>
+
+                        <!-- Cart Items -->
+                        <div class="space-y-3 max-h-96 overflow-y-auto mb-4">
+                            <template x-for="(item, index) in cart" :key="index">
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex-1">
+                                        <h4 class="font-medium text-gray-800" x-text="item.name"></h4>
+                                        <p class="text-sm text-blue-600" x-text="'$' + item.price.toFixed(2) + ' c/u'">
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <button @click="updateQuantity(index, -1)"
+                                            class="w-7 h-7 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">
+                                            <i class="fas fa-minus text-xs"></i>
+                                        </button>
+                                        <span class="font-semibold w-6 text-center" x-text="item.quantity"></span>
+                                        <button @click="updateQuantity(index, 1)"
+                                            class="w-7 h-7 bg-blue-500 text-white rounded-full flex items-center justify-center hover:bg-blue-600">
+                                            <i class="fas fa-plus text-xs"></i>
+                                        </button>
+                                        <button @click="removeFromCart(index)"
+                                            class="ml-2 text-red-500 hover:text-red-700">
+                                            <i class="fas fa-trash text-sm"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <div x-show="cart.length === 0" class="text-center py-8 text-gray-400">
+                                <i class="fas fa-shopping-cart text-4xl mb-2"></i>
+                                <p>Carrito vacío</p>
+                            </div>
+                        </div>
+
+                        <!-- Totals -->
+                        <div class="border-t pt-4 space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Subtotal:</span>
+                                <span class="font-medium" x-text="'$' + subtotal.toFixed(2)"></span>
+                            </div>
+                            <div x-show="deliveryType === 'delivery'" class="flex justify-between text-sm">
+                                <span class="text-gray-600">Delivery:</span>
+                                <span class="font-medium">$1.00</span>
+                            </div>
+                            <div class="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t">
+                                <span>Total USD:</span>
+                                <span class="text-blue-600" x-text="'$' + totalUSD.toFixed(2)"></span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Total Bs.:</span>
+                                <span class="font-medium text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></span>
+                            </div>
+                        </div>
+
+                        <!-- Customer Selection -->
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Cliente</label>
+                            <select x-model="selectedCustomer"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                                <option value="">Seleccionar cliente...</option>
+                                <option value="1">María González</option>
+                                <option value="2">Carlos Rodríguez</option>
+                                <option value="3">Ana Martínez</option>
+                            </select>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Método de Pago</label>
+                            <select x-model="paymentMethod"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                                <option value="efectivo">Efectivo</option>
+                                <option value="pago_movil">Pago Móvil</option>
+                                <option value="tarjeta">Tarjeta de Débito</option>
+                                <option value="credito">Cuenta por Cobrar</option>
+                            </select>
+                        </div>
+
+                        <button @click="processSale()" :disabled="cart.length === 0"
+                            class="w-full mt-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-xl font-semibold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                            <i class="fas fa-check-circle mr-2"></i>Procesar Venta
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function ventasApp() {
+            return {
+                cart: [],
+                deliveryType: 'pickup',
+                deliveryAddress: '',
+                selectedCustomer: '',
+                paymentMethod: 'efectivo',
+                exchangeRate: 38.50,
+
+                products: {
+                    1: { id: 1, name: 'Botellón 5L', price: 2.50, stock: 45 },
+                    2: { id: 2, name: 'Botellón 10L', price: 4.00, stock: 38 },
+                    3: { id: 3, name: 'Botellón 20L', price: 7.00, stock: 52 }
+                },
+
+                get subtotal() {
+                    return this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                },
+
+                get totalUSD() {
+                    let total = this.subtotal;
+                    if (this.deliveryType === 'delivery') total += 1.00;
+                    return total;
+                },
+
+                get totalBs() {
+                    return this.totalUSD * this.exchangeRate;
+                },
+
+                addProduct(productId) {
+                    const product = this.products[productId];
+                    const existingItem = this.cart.find(item => item.id === productId);
+
+                    if (existingItem) {
+                        if (existingItem.quantity < product.stock) {
+                            existingItem.quantity++;
+                            alertify.success('Cantidad actualizada');
+                        } else {
+                            alertify.error('Stock insuficiente');
+                        }
+                    } else {
+                        this.cart.push({
+                            ...product,
+                            quantity: 1
+                        });
+                        alertify.success('Producto agregado');
+                    }
+                },
+
+                updateQuantity(index, change) {
+                    const item = this.cart[index];
+                    const newQuantity = item.quantity + change;
+                    const product = this.products[item.id];
+
+                    if (newQuantity > 0 && newQuantity <= product.stock) {
+                        item.quantity = newQuantity;
+                    } else if (newQuantity <= 0) {
+                        this.removeFromCart(index);
+                    } else {
+                        alertify.error('Stock insuficiente');
+                    }
+                },
+
+                removeFromCart(index) {
+                    this.cart.splice(index, 1);
+                    alertify.warning('Producto eliminado');
+                },
+
+                clearCart() {
+                    if (this.cart.length > 0) {
+                        alertify.confirm('¿Limpiar carrito?', () => {
+                            this.cart = [];
+                            alertify.success('Carrito limpiado');
+                        }, () => { });
+                    }
+                },
+
+                processSale() {
+                    if (this.cart.length === 0) {
+                        alertify.error('El carrito está vacío');
+                        return;
+                    }
+
+                    if (!this.selectedCustomer) {
+                        alertify.error('Debe seleccionar un cliente');
+                        return;
+                    }
+
+                    if (this.deliveryType === 'delivery' && !this.deliveryAddress) {
+                        alertify.error('Debe ingresar la dirección de entrega');
+                        return;
+                    }
+
+                    alertify.confirm('Confirmar Venta',
+                        `Total: $${this.totalUSD.toFixed(2)} (Bs. ${this.totalBs.toFixed(2)})\nMétodo: ${this.paymentMethod}`,
+                        () => {
+                            // Aquí se guardaría en Supabase
+                            alertify.success('¡Venta procesada exitosamente!');
+                            this.cart = [];
+                            this.deliveryAddress = '';
+                        },
+                        () => {
+                            alertify.info('Venta cancelada');
+                        }
+                    );
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

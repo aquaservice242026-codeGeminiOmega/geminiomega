@@ -1,0 +1,182 @@
+<!-- usuarios.html - Módulo de Usuarios -->
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaService - Usuarios</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50" x-data="usuariosApp()">
+
+    <!-- Sidebar -->
+    <aside class="fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 hidden lg:block">
+        <div class="p-6">
+            <div class="flex items-center space-x-3 mb-8">
+                <i class="fas fa-tint text-3xl"></i>
+                <div>
+                    <h1 class="text-xl font-bold">AquaService</h1>
+                    <p class="text-xs text-blue-200">Sistema de Gestión</p>
+                </div>
+            </div>
+
+            <nav class="space-y-2">
+                <a href="index.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-home w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="ventas.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-shopping-cart w-5"></i>
+                    <span>Ventas</span>
+                </a>
+                <a href="clientes.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-users w-5"></i>
+                    <span>Clientes</span>
+                </a>
+                <a href="inventario.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-boxes w-5"></i>
+                    <span>Inventario</span>
+                </a>
+                <a href="usuarios.html" class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
+                    <i class="fas fa-user-cog w-5"></i>
+                    <span class="font-medium">Usuarios</span>
+                </a>
+                <a href="reportes.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-chart-line w-5"></i>
+                    <span>Reportes</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold">AD
+                </div>
+                <div>
+                    <p class="text-sm font-medium">Admin</p>
+                    <p class="text-xs text-blue-200">Sucursal Principal</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="lg:ml-64 min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Usuarios del Sistema</h2>
+                <p class="text-sm text-gray-500">Gestión de accesos y permisos</p>
+            </div>
+            <button @click="openModal()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                <i class="fas fa-plus mr-2"></i>Nuevo Usuario
+            </button>
+        </header>
+
+        <!-- Content -->
+        <main class="p-6">
+            <!-- Users Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <template x-for="user in users" :key="user.id">
+                    <div class="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-shadow">
+                        <div class="flex items-start justify-between mb-4">
+                            <div
+                                class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center text-white font-bold text-xl">
+                                <span x-text="user.initials"></span>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                                :class="user.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+                                x-text="user.active ? 'Activo' : 'Inactivo'"></span>
+                        </div>
+
+                        <h3 class="text-lg font-semibold text-gray-900" x-text="user.name"></h3>
+                        <p class="text-sm text-gray-500 mb-4" x-text="user.email"></p>
+
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center text-sm">
+                                <i class="fas fa-user-tag w-5 text-gray-400"></i>
+                                <span class="text-gray-700" x-text="user.role"></span>
+                            </div>
+                            <div class="flex items-center text-sm">
+                                <i class="fas fa-building w-5 text-gray-400"></i>
+                                <span class="text-gray-700" x-text="user.branch"></span>
+                            </div>
+                        </div>
+
+                        <div class="flex space-x-2 pt-4 border-t">
+                            <button @click="editUser(user)"
+                                class="flex-1 bg-blue-50 text-blue-600 py-2 rounded-lg hover:bg-blue-100 text-sm font-medium">
+                                <i class="fas fa-edit mr-1"></i>Editar
+                            </button>
+                            <button @click="toggleStatus(user)"
+                                class="flex-1 bg-gray-50 text-gray-600 py-2 rounded-lg hover:bg-gray-100 text-sm font-medium">
+                                <i class="fas fa-power-off mr-1"></i><span
+                                    x-text="user.active ? 'Desactivar' : 'Activar'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function usuariosApp() {
+            return {
+                users: [
+                    { id: 1, name: 'Admin Principal', email: 'admin@aquaservice.com', role: 'Administrador', branch: 'Sucursal Principal', active: true, initials: 'AP' },
+                    { id: 2, name: 'Juan Pérez', email: 'juan@aquaservice.com', role: 'Vendedor', branch: 'Sucursal Principal', active: true, initials: 'JP' },
+                    { id: 3, name: 'María López', email: 'maria@aquaservice.com', role: 'Vendedora', branch: 'Sucursal Norte', active: true, initials: 'ML' },
+                    { id: 4, name: 'Carlos Ruiz', email: 'carlos@aquaservice.com', role: 'Delivery', branch: 'Sucursal Principal', active: false, initials: 'CR' },
+                ],
+
+                openModal() {
+                    alertify.prompt('Nuevo Usuario', 'Complete los datos del usuario:', '',
+                        (evt, value) => {
+                            alertify.success('Usuario creado');
+                        },
+                        () => { }
+                    );
+                },
+
+                editUser(user) {
+                    alertify.message('Editando: ' + user.name);
+                },
+
+                toggleStatus(user) {
+                    user.active = !user.active;
+                    alertify.success(user.active ? 'Usuario activado' : 'Usuario desactivado');
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
