@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -41,21 +42,39 @@
     </script>
 
     <style>
-        [x-cloak] { display: none !important; }
-        body { font-family: 'Inter', sans-serif; }
-        .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
-        .sidebar-item { transition: all 0.3s; }
-        .sidebar-item:hover, .sidebar-item.active {
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+        }
+
+        .sidebar-item {
+            transition: all 0.3s;
+        }
+
+        .sidebar-item:hover,
+        .sidebar-item.active {
             background: rgba(255, 255, 255, 0.2);
             border-left: 4px solid #fff;
         }
-        .card-hover { transition: all 0.3s ease; }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
         .card-hover:hover {
             transform: translateY(-3px);
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
+
 <body class="bg-gray-50" x-data="dashboardApp()" x-init="initDashboard()">
 
     <!-- Sidebar -->
@@ -126,7 +145,7 @@
 
     <!-- Main Content -->
     <div class="lg:ml-64 min-h-screen flex flex-col">
-        
+
         <!-- Header -->
         <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
             <div>
@@ -232,7 +251,9 @@
                 <!-- Ventas de la Semana -->
                 <div class="bg-white rounded-2xl shadow-sm p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Ventas de la Semana</h3>
-                    <canvas id="salesChart" height="250"></canvas>
+                    <div style="position: relative; height: 200px;">
+                        <canvas id="salesChart"></canvas>
+                    </div>
                 </div>
 
                 <!-- Distribución por Producto -->
@@ -330,10 +351,12 @@
                                     <h4 class="font-semibold text-gray-800">Tanque Principal</h4>
                                     <p class="text-sm text-gray-500">Capacidad: 5,000L</p>
                                 </div>
-                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">85%</span>
+                                <span
+                                    class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">85%</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
-                                <div class="bg-gradient-to-r from-blue-400 to-blue-600 h-3 rounded-full" style="width: 85%"></div>
+                                <div class="bg-gradient-to-r from-blue-400 to-blue-600 h-3 rounded-full"
+                                    style="width: 85%"></div>
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">4,250L disponibles</span>
@@ -348,10 +371,12 @@
                                     <h4 class="font-semibold text-gray-800">Tanque Respaldo</h4>
                                     <p class="text-sm text-gray-500">Capacidad: 3,000L</p>
                                 </div>
-                                <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">60%</span>
+                                <span
+                                    class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">60%</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
-                                <div class="bg-gradient-to-r from-yellow-400 to-yellow-600 h-3 rounded-full" style="width: 60%"></div>
+                                <div class="bg-gradient-to-r from-yellow-400 to-yellow-600 h-3 rounded-full"
+                                    style="width: 60%"></div>
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">1,800L disponibles</span>
@@ -485,19 +510,40 @@
                                     borderColor: '#0ea5e9',
                                     backgroundColor: 'rgba(14, 165, 233, 0.1)',
                                     tension: 0.4,
-                                    fill: true
+                                    fill: true,
+                                    borderWidth: 2,
+                                    pointRadius: 3,
+                                    pointHoverRadius: 5
                                 }]
                             },
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
-                                plugins: { legend: { display: false } },
+                                plugins: {
+                                    legend: { display: false }
+                                },
                                 scales: {
                                     y: {
                                         beginAtZero: true,
+                                        max: 700,
                                         ticks: {
-                                            callback: function(value) { return '$' + value; }
+                                            callback: function (value) { return '$' + value; },
+                                            stepSize: 100
+                                        },
+                                        grid: {
+                                            color: 'rgba(0, 0, 0, 0.05)'
                                         }
+                                    },
+                                    x: {
+                                        grid: {
+                                            display: false
+                                        }
+                                    }
+                                },
+                                layout: {
+                                    padding: {
+                                        top: 10,
+                                        bottom: 10
                                     }
                                 }
                             }
@@ -529,4 +575,5 @@
         }
     </script>
 </body>
+
 </html>
