@@ -1,0 +1,15 @@
+# Supabase
+supabase/
+!supabase/functions/
+
+# Archivos temporales
+*.tmp
+*.temp
+.DS_Store
+
+# Variables de entorno
+.env
+.env.local
+
+# Node modules
+node_modules/
