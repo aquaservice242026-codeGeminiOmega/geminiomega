@@ -9,11 +9,6 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
 
-    <!-- Alertify - Carga con fallback -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -44,7 +39,7 @@
 
 <body class="bg-gray-50" x-data="usuariosApp()" x-init="initUsuarios()">
 
-    <!-- Sidebar (igual que antes) -->
+    <!-- Sidebar -->
     <aside class="fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 hidden lg:block">
         <div class="p-6">
             <div class="mb-6">
@@ -149,6 +144,10 @@
                                 <i class="fas fa-building w-5 text-gray-400"></i>
                                 <span class="text-gray-700 capitalize" x-text="user.branch"></span>
                             </div>
+                            <div class="flex items-center text-sm" x-show="user.phone">
+                                <i class="fas fa-phone w-5 text-gray-400"></i>
+                                <span class="text-gray-700" x-text="user.phone || 'Sin teléfono'"></span>
+                            </div>
                         </div>
 
                         <div class="flex space-x-2 pt-4 border-t">
@@ -174,7 +173,7 @@
         </main>
     </div>
 
-    <!-- Modal (igual que antes) -->
+    <!-- Modal Crear/Editar Usuario -->
     <div x-show="showModal" x-cloak class="modal-overlay" @click.self="closeModal()">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4" @click.stop>
             <div class="px-6 py-4 border-b flex justify-between items-center">
@@ -189,30 +188,35 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nombre Completo *</label>
                     <input type="text" x-model="formData.full_name"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Ej: Juan Pérez">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
                     <input type="email" x-model="formData.email" :disabled="editingUser"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                        placeholder="usuario@aquaservice.com">
                 </div>
 
                 <div x-show="!editingUser">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña *</label>
                     <input type="password" x-model="formData.password"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Mínimo 6 caracteres">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
                     <input type="tel" x-model="formData.phone"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0412-1234567">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Rol *</label>
-                    <select x-model="formData.role" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                    <select x-model="formData.role"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">Seleccionar rol...</option>
                         <option value="admin">Administrador</option>
                         <option value="vendedor">Vendedor</option>
@@ -223,7 +227,8 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Sucursal *</label>
-                    <select x-model="formData.branch" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                    <select x-model="formData.branch"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">Seleccionar sucursal...</option>
                         <option value="geminis">Geminis</option>
                         <option value="omega">Omega</option>
@@ -234,7 +239,7 @@
             <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3">
                 <button @click="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
                 <button @click="saveUser()" :disabled="saving"
-                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50">
+                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
                     <i class="fas fa-save mr-2" x-show="!saving"></i>
                     <i class="fas fa-circle-notch fa-spin mr-2" x-show="saving"></i>
                     <span x-text="saving ? 'Guardando...' : 'Guardar'"></span>
@@ -243,19 +248,28 @@
         </div>
     </div>
 
+    <!-- Alertify AL FINAL del body (antes del script principal) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
+
     <script>
+        // ============================================
+        // CONFIGURACIÓN DE SUPABASE
+        // ============================================
         const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Función helper para notificaciones con fallback
+        // ============================================
+        // FUNCIONES HELPER (con fallback si alertify no carga)
+        // ============================================
         function notify(message, type = 'success') {
             if (typeof alertify !== 'undefined') {
                 if (type === 'success') alertify.success(message);
                 else if (type === 'error') alertify.error(message);
                 else alertify.message(message);
             } else {
-                // Fallback a alert si alertify no está cargado
                 alert(message);
             }
         }
@@ -264,7 +278,6 @@
             if (typeof alertify !== 'undefined') {
                 alertify.confirm(message, onConfirm, onCancel);
             } else {
-                // Fallback simple
                 if (window.confirm(message)) {
                     onConfirm();
                 } else {
@@ -279,6 +292,9 @@
             window.location.href = 'login.html';
         }
 
+        // ============================================
+        // APLICACIÓN DE USUARIOS
+        // ============================================
         function usuariosApp() {
             return {
                 users: [],
@@ -300,12 +316,19 @@
                 },
 
                 async initUsuarios() {
+                    // Configurar Alertify si está disponible
+                    if (typeof alertify !== 'undefined') {
+                        alertify.set('notifier', { position: 'top-right', delay: 3 });
+                    }
+
+                    // 1. Verificar autenticación
                     const { data: { session } } = await supabase.auth.getSession();
                     if (!session) {
                         window.location.href = 'login.html';
                         return;
                     }
 
+                    // 2. Obtener perfil del usuario actual
                     try {
                         const { data: profile } = await supabase
                             .from('profiles')
@@ -319,8 +342,9 @@
                             this.userBranch = profile.branch;
                             this.userInitials = this.getInitials(profile.full_name);
 
+                            // Verificar que sea admin
                             if (profile.role !== 'admin') {
-                                notify('No tienes permisos para acceder', 'error');
+                                notify('No tienes permisos para acceder a esta sección', 'error');
                                 setTimeout(() => {
                                     window.location.href = 'index.html';
                                 }, 2000);
@@ -328,9 +352,10 @@
                             }
                         }
                     } catch (err) {
-                        console.error('Error:', err);
+                        console.error('Error obteniendo perfil:', err);
                     }
 
+                    // 3. Cargar usuarios
                     await this.loadUsers();
                 },
 
@@ -354,12 +379,23 @@
 
                 getInitials(name) {
                     if (!name) return '??';
-                    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                    return name.split(' ')
+                        .map(n => n[0])
+                        .join('')
+                        .substring(0, 2)
+                        .toUpperCase();
                 },
 
                 openCreateModal() {
                     this.editingUser = null;
-                    this.formData = { full_name: '', email: '', password: '', phone: '', role: '', branch: '' };
+                    this.formData = {
+                        full_name: '',
+                        email: '',
+                        password: '',
+                        phone: '',
+                        role: '',
+                        branch: ''
+                    };
                     this.showModal = true;
                 },
 
@@ -378,10 +414,33 @@
                 closeModal() {
                     this.showModal = false;
                     this.editingUser = null;
-                    this.formData = { full_name: '', email: '', password: '', phone: '', role: '', branch: '' };
+                    this.formData = {
+                        full_name: '',
+                        email: '',
+                        password: '',
+                        phone: '',
+                        role: '',
+                        branch: ''
+                    };
                 },
 
                 async saveUser() {
+                    console.log('=== INICIANDO CREACIÓN DE USUARIO ===');
+
+                    // 1. Verificar sesión activa
+                    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+                    console.log('Sesión:', session);
+                    console.log('Error de sesión:', sessionError);
+                    console.log('¿Hay token?', !!session?.access_token);
+
+                    if (!session) {
+                        notify('Tu sesión ha expirado. Inicia sesión nuevamente.', 'error');
+                        setTimeout(() => window.location.href = 'login.html', 2000);
+                        return;
+                    }
+
+                    // 2. Validaciones
                     if (!this.formData.full_name || !this.formData.email || !this.formData.role || !this.formData.branch) {
                         notify('Por favor completa todos los campos obligatorios', 'error');
                         return;
@@ -401,6 +460,7 @@
 
                     try {
                         if (this.editingUser) {
+                            // EDITAR usuario existente
                             const { error } = await supabase
                                 .from('profiles')
                                 .update({
@@ -415,11 +475,20 @@
                             if (error) throw error;
                             notify('Usuario actualizado exitosamente');
                         } else {
+                            // CREAR nuevo usuario usando Edge Function
+                            console.log('Llamando a Edge Function...');
+                            console.log('Datos a enviar:', {
+                                email: this.formData.email,
+                                full_name: this.formData.full_name,
+                                role: this.formData.role,
+                                branch: this.formData.branch
+                            });
+
                             const response = await fetch(`${SUPABASE_URL}/functions/v1/create-user`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                                    'Authorization': `Bearer ${session.access_token}`
                                 },
                                 body: JSON.stringify({
                                     email: this.formData.email,
@@ -431,10 +500,14 @@
                                 })
                             });
 
+                            console.log('Respuesta HTTP:', response.status);
+
                             const result = await response.json();
+                            console.log('Resultado completo:', result);
 
                             if (!response.ok) {
-                                throw new Error(result.error || 'Error al crear usuario');
+                                console.error('Error detallado:', result);
+                                throw new Error(result.error || `Error ${response.status}`);
                             }
 
                             notify(result.message || 'Usuario creado exitosamente');
@@ -444,7 +517,7 @@
                         await this.loadUsers();
 
                     } catch (err) {
-                        console.error('Error:', err);
+                        console.error('Error completo:', err);
                         notify(err.message || 'Error al guardar usuario', 'error');
                     } finally {
                         this.saving = false;
