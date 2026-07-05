@@ -1,4 +1,3 @@
-<!-- inventario.html - Módulo de Inventario -->
 <!DOCTYPE html>
 <html lang="es">
 
@@ -7,10 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AquaService - Inventario</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -26,63 +24,73 @@
         .gradient-bg {
             background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
         }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
     </style>
 </head>
 
-<body class="bg-gray-50" x-data="inventarioApp()">
+<body class="bg-gray-50" x-data="inventarioApp()" x-init="initInventario()">
 
     <!-- Sidebar -->
     <aside class="fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 hidden lg:block">
         <div class="p-6">
-            <div class="flex items-center space-x-3 mb-8">
-                <i class="fas fa-tint text-3xl"></i>
-                <div>
-                    <h1 class="text-xl font-bold">AquaService</h1>
-                    <p class="text-xs text-blue-200">Sistema de Gestión</p>
+            <div class="mb-6">
+                <div class="flex items-center space-x-3 mb-3">
+                    <i class="fas fa-tint text-3xl"></i>
+                    <div>
+                        <h1 class="text-xl font-bold">AquaService</h1>
+                        <p class="text-xs text-blue-200">Sistema de Gestión</p>
+                    </div>
+                </div>
+                <div class="bg-white bg-opacity-10 rounded-lg px-3 py-2">
+                    <p class="text-xs text-blue-200 mb-0.5">Sucursal</p>
+                    <p class="font-semibold capitalize text-sm" x-text="userBranch || 'Cargando...'"></p>
                 </div>
             </div>
 
             <nav class="space-y-2">
                 <a href="index.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-home w-5"></i>
-                    <span>Dashboard</span>
+                    <i class="fas fa-home w-5"></i><span>Dashboard</span>
                 </a>
                 <a href="ventas.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-shopping-cart w-5"></i>
-                    <span>Ventas</span>
+                    <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
                 </a>
                 <a href="clientes.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-users w-5"></i>
-                    <span>Clientes</span>
+                    <i class="fas fa-users w-5"></i><span>Clientes</span>
                 </a>
                 <a href="inventario.html"
                     class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
-                    <i class="fas fa-boxes w-5"></i>
-                    <span class="font-medium">Inventario</span>
+                    <i class="fas fa-boxes w-5"></i><span class="font-medium">Inventario</span>
                 </a>
                 <a href="usuarios.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-user-cog w-5"></i>
-                    <span>Usuarios</span>
+                    <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
                 </a>
                 <a href="reportes.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-chart-line w-5"></i>
-                    <span>Reportes</span>
+                    <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
                 </a>
             </nav>
         </div>
 
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold">AD
-                </div>
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
+                    x-text="userInitials"></div>
                 <div>
-                    <p class="text-sm font-medium">Admin</p>
-                    <p class="text-xs text-blue-200">Sucursal Principal</p>
+                    <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
+                    <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
                 </div>
             </div>
         </div>
@@ -94,198 +102,496 @@
         <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">Inventario</h2>
-                <p class="text-sm text-gray-500">Control de stock y tanques</p>
+                <p class="text-sm text-gray-500">Control de stock y tanques - <span class="capitalize font-semibold"
+                        x-text="userBranch"></span></p>
             </div>
-            <button @click="openModal()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-                <i class="fas fa-plus mr-2"></i>Agregar Stock
-            </button>
+            <div class="flex items-center space-x-4">
+                <button @click="openAddStockModal()"
+                    class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    <i class="fas fa-plus mr-2"></i>Agregar Stock
+                </button>
+                <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Salir
+                </button>
+            </div>
         </header>
 
         <!-- Content -->
         <main class="p-6">
-            <!-- Inventory Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <!-- 5L Bottles -->
-                <div class="bg-white rounded-2xl shadow-sm p-6 border-t-4 border-cyan-500">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-tint text-cyan-600 text-3xl"></i>
-                        </div>
-                        <span
-                            class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">Disponible</span>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-800">Botellones 5L</h3>
-                    <p class="text-4xl font-bold text-gray-900 mt-2">45</p>
-                    <p class="text-sm text-gray-500 mt-1">unidades en stock</p>
-                    <div class="mt-4 pt-4 border-t">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">Precio:</span>
-                            <span class="font-semibold">$2.50</span>
-                        </div>
-                        <div class="flex justify-between text-sm mt-1">
-                            <span class="text-gray-600">Valor total:</span>
-                            <span class="font-semibold text-green-600">$112.50</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 10L Bottles -->
-                <div class="bg-white rounded-2xl shadow-sm p-6 border-t-4 border-blue-500">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-tint text-blue-600 text-3xl"></i>
-                        </div>
-                        <span
-                            class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">Disponible</span>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-800">Botellones 10L</h3>
-                    <p class="text-4xl font-bold text-gray-900 mt-2">38</p>
-                    <p class="text-sm text-gray-500 mt-1">unidades en stock</p>
-                    <div class="mt-4 pt-4 border-t">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">Precio:</span>
-                            <span class="font-semibold">$4.00</span>
-                        </div>
-                        <div class="flex justify-between text-sm mt-1">
-                            <span class="text-gray-600">Valor total:</span>
-                            <span class="font-semibold text-green-600">$152.00</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 20L Bottles -->
-                <div class="bg-white rounded-2xl shadow-sm p-6 border-t-4 border-blue-700">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-tint text-blue-700 text-3xl"></i>
-                        </div>
-                        <span
-                            class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">Disponible</span>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-800">Botellones 20L</h3>
-                    <p class="text-4xl font-bold text-gray-900 mt-2">52</p>
-                    <p class="text-sm text-gray-500 mt-1">unidades en stock</p>
-                    <div class="mt-4 pt-4 border-t">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">Precio:</span>
-                            <span class="font-semibold">$7.00</span>
-                        </div>
-                        <div class="flex justify-between text-sm mt-1">
-                            <span class="text-gray-600">Valor total:</span>
-                            <span class="font-semibold text-green-600">$364.00</span>
-                        </div>
-                    </div>
-                </div>
+            <!-- Loading -->
+            <div x-show="loading" class="text-center py-12">
+                <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500"></i>
+                <p class="mt-4 text-gray-600">Cargando inventario...</p>
             </div>
 
-            <!-- Water Tanks -->
-            <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                    <i class="fas fa-database text-blue-500 mr-2"></i>
-                    Tanques de Almacenamiento
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="border border-gray-200 rounded-xl p-4">
-                        <div class="flex justify-between items-start mb-3">
-                            <div>
-                                <h4 class="font-semibold text-gray-800">Tanque Principal</h4>
-                                <p class="text-sm text-gray-500">Capacidad: 5,000L</p>
+            <div x-show="!loading">
+                <!-- Inventory Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <template x-for="item in inventoryItems" :key="item.id">
+                        <div class="bg-white rounded-2xl shadow-sm p-6 border-t-4" :class="{
+                                'border-cyan-500': item.size_liters === 5,
+                                'border-blue-500': item.size_liters === 13,
+                                'border-blue-700': item.size_liters === 20,
+                                'border-purple-500': item.product_type === 'cap'
+                            }">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-16 h-16 rounded-full flex items-center justify-center" :class="{
+                                        'bg-cyan-100': item.size_liters === 5,
+                                        'bg-blue-100': item.size_liters === 13 || item.size_liters === 20,
+                                        'bg-purple-100': item.product_type === 'cap'
+                                    }">
+                                    <i :class="item.product_type === 'cap' ? 'fas fa-circle text-purple-600 text-3xl' : 'fas fa-tint text-3xl'"
+                                        :style="{color: item.size_liters === 5 ? '#0891b2' : item.size_liters === 13 ? '#3b82f6' : item.size_liters === 20 ? '#1d4ed8' : '#9333ea'}"></i>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                                    :class="item.quantity > item.min_stock ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                                    x-text="item.quantity > item.min_stock ? 'Disponible' : 'Stock Bajo'"></span>
                             </div>
-                            <span
-                                class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">85%</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
-                            <div class="bg-gradient-to-r from-blue-400 to-blue-600 h-4 rounded-full" style="width: 85%">
+                            <h3 class="text-lg font-semibold text-gray-800" x-text="item.name"></h3>
+                            <p class="text-4xl font-bold text-gray-900 mt-2" x-text="item.quantity"></p>
+                            <p class="text-sm text-gray-500 mt-1">unidades en stock</p>
+                            <div class="mt-4 pt-4 border-t">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Precio:</span>
+                                    <span class="font-semibold" x-text="'$' + item.price.toFixed(2)"></span>
+                                </div>
+                                <div class="flex justify-between text-sm mt-1">
+                                    <span class="text-gray-600">Valor total:</span>
+                                    <span class="font-semibold text-green-600"
+                                        x-text="'$' + (item.price * item.quantity).toFixed(2)"></span>
+                                </div>
+                                <div class="flex justify-between text-sm mt-1">
+                                    <span class="text-gray-600">Stock mínimo:</span>
+                                    <span class="font-semibold" x-text="item.min_stock"></span>
+                                </div>
                             </div>
                         </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">4,250L disponibles</span>
-                            <span class="font-semibold text-blue-600">750L usados hoy</span>
-                        </div>
-                    </div>
+                    </template>
+                </div>
 
-                    <div class="border border-gray-200 rounded-xl p-4">
-                        <div class="flex justify-between items-start mb-3">
-                            <div>
-                                <h4 class="font-semibold text-gray-800">Tanque Respaldo</h4>
-                                <p class="text-sm text-gray-500">Capacidad: 3,000L</p>
+                <!-- Water Tanks -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-database text-blue-500 mr-2"></i>
+                        Tanques de Almacenamiento
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <template x-for="tank in tanks" :key="tank.id">
+                            <div class="border border-gray-200 rounded-xl p-4">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800" x-text="tank.name"></h4>
+                                        <p class="text-sm text-gray-500"
+                                            x-text="'Capacidad: ' + tank.capacity_liters.toLocaleString() + 'L'"></p>
+                                    </div>
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold" :class="{
+                                            'bg-green-100 text-green-800': (tank.current_liters / tank.capacity_liters) > 0.7,
+                                            'bg-yellow-100 text-yellow-800': (tank.current_liters / tank.capacity_liters) > 0.4 && (tank.current_liters / tank.capacity_liters) <= 0.7,
+                                            'bg-red-100 text-red-800': (tank.current_liters / tank.capacity_liters) <= 0.4
+                                        }"
+                                        x-text="Math.round((tank.current_liters / tank.capacity_liters) * 100) + '%'"></span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+                                    <div class="h-4 rounded-full transition-all duration-500" :class="{
+                                            'bg-gradient-to-r from-blue-400 to-blue-600': (tank.current_liters / tank.capacity_liters) > 0.7,
+                                            'bg-gradient-to-r from-yellow-400 to-yellow-600': (tank.current_liters / tank.capacity_liters) > 0.4 && (tank.current_liters / tank.capacity_liters) <= 0.7,
+                                            'bg-gradient-to-r from-red-400 to-red-600': (tank.current_liters / tank.capacity_liters) <= 0.4
+                                        }"
+                                        :style="'width: ' + ((tank.current_liters / tank.capacity_liters) * 100) + '%'">
+                                    </div>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600"
+                                        x-text="tank.current_liters.toLocaleString() + 'L disponibles'"></span>
+                                    <span class="font-semibold" :class="{
+                                            'text-blue-600': (tank.current_liters / tank.capacity_liters) > 0.7,
+                                            'text-yellow-600': (tank.current_liters / tank.capacity_liters) > 0.4 && (tank.current_liters / tank.capacity_liters) <= 0.7,
+                                            'text-red-600': (tank.current_liters / tank.capacity_liters) <= 0.4
+                                        }"
+                                        x-text="(tank.capacity_liters - tank.current_liters).toLocaleString() + 'L usados'"></span>
+                                </div>
+                                <div class="mt-2 text-xs text-gray-500" x-show="tank.current_liters < tank.min_level">
+                                    <i class="fas fa-exclamation-triangle text-red-500 mr-1"></i>
+                                    Nivel bajo - Mínimo recomendado: <span x-text="tank.min_level + 'L'"></span>
+                                </div>
                             </div>
-                            <span
-                                class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">60%</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
-                            <div class="bg-gradient-to-r from-yellow-400 to-yellow-600 h-4 rounded-full"
-                                style="width: 60%"></div>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">1,800L disponibles</span>
-                            <span class="font-semibold text-yellow-600">1,200L usados hoy</span>
+                        </template>
+
+                        <div x-show="tanks.length === 0" class="col-span-full text-center py-8 text-gray-400">
+                            <i class="fas fa-database text-4xl mb-2"></i>
+                            <p>No hay tanques registrados para esta sucursal</p>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Stock Movements -->
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <div class="p-6 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-800">Movimientos de Inventario</h3>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cantidad
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Motivo</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            <tr>
-                                <td class="px-6 py-4 text-sm text-gray-900">05/07/2026 10:30</td>
-                                <td class="px-6 py-4 text-sm text-gray-900">Botellón 20L</td>
-                                <td class="px-6 py-4"><span
-                                        class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">Salida</span></td>
-                                <td class="px-6 py-4 text-sm font-semibold">-3</td>
-                                <td class="px-6 py-4 text-sm text-gray-500">Venta - Cliente María González</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 text-sm text-gray-900">05/07/2026 09:15</td>
-                                <td class="px-6 py-4 text-sm text-gray-900">Botellón 10L</td>
-                                <td class="px-6 py-4"><span
-                                        class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">Entrada</span>
-                                </td>
-                                <td class="px-6 py-4 text-sm font-semibold">+20</td>
-                                <td class="px-6 py-4 text-sm text-gray-500">Recarga de tanque</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 text-sm text-gray-900">04/07/2026 16:45</td>
-                                <td class="px-6 py-4 text-sm text-gray-900">Botellón 5L</td>
-                                <td class="px-6 py-4"><span
-                                        class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">Salida</span></td>
-                                <td class="px-6 py-4 text-sm font-semibold">-5</td>
-                                <td class="px-6 py-4 text-sm text-gray-500">Venta - Delivery</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <!-- Stock Movements -->
+                <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-800">Movimientos Recientes</h3>
+                        <button @click="loadMovements()" class="text-blue-500 hover:text-blue-700 text-sm">
+                            <i class="fas fa-sync-alt mr-1"></i>Actualizar
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cantidad
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Motivo
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <template x-for="movement in movements" :key="movement.id">
+                                    <tr>
+                                        <td class="px-6 py-4 text-sm text-gray-900"
+                                            x-text="formatDate(movement.created_at)"></td>
+                                        <td class="px-6 py-4 text-sm text-gray-900" x-text="movement.product_name"></td>
+                                        <td class="px-6 py-4">
+                                            <span class="px-2 py-1 rounded text-xs"
+                                                :class="movement.movement_type === 'entrada' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                                                x-text="movement.movement_type === 'entrada' ? 'Entrada' : 'Salida'"></span>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm font-semibold"
+                                            :class="movement.movement_type === 'entrada' ? 'text-green-600' : 'text-red-600'"
+                                            x-text="(movement.movement_type === 'entrada' ? '+' : '-') + movement.quantity">
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-gray-500" x-text="movement.reason"></td>
+                                    </tr>
+                                </template>
+
+                                <tr x-show="movements.length === 0">
+                                    <td colspan="5" class="px-6 py-8 text-center text-gray-400">
+                                        <i class="fas fa-history text-4xl mb-2"></i>
+                                        <p>No hay movimientos registrados</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
+    <!-- Modal Agregar Stock -->
+    <div x-show="showAddStockModal" x-cloak class="modal-overlay" @click.self="closeAddStockModal()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4" @click.stop>
+            <div class="px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="text-xl font-bold text-gray-800">Agregar Stock</h3>
+                <button @click="closeAddStockModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Producto *</label>
+                    <select x-model="addStockForm.product_id"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="">Seleccionar producto...</option>
+                        <template x-for="item in inventoryItems" :key="item.id">
+                            <option :value="item.id" x-text="item.name + ' (Stock actual: ' + item.quantity + ')'">
+                            </option>
+                        </template>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Cantidad a Agregar *</label>
+                    <input type="number" x-model.number="addStockForm.quantity" min="1"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="Ej: 50">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Motivo</label>
+                    <select x-model="addStockForm.reason"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="Recarga de inventario">Recarga de inventario</option>
+                        <option value="Devolución de cliente">Devolución de cliente</option>
+                        <option value="Ajuste de inventario">Ajuste de inventario</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+
+                <div x-show="addStockForm.reason === 'Otro'">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Especificar motivo</label>
+                    <input type="text" x-model="addStockForm.custom_reason"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="Ingrese el motivo">
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3">
+                <button @click="closeAddStockModal()"
+                    class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
+                <button @click="addStock()" :disabled="saving"
+                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50">
+                    <i class="fas fa-save mr-2" x-show="!saving"></i>
+                    <i class="fas fa-circle-notch fa-spin mr-2" x-show="saving"></i>
+                    <span x-text="saving ? 'Guardando...' : 'Agregar Stock'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertify -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
+
     <script>
+        const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function logout() {
+            await supabase.auth.signOut();
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        function notify(message, type = 'success') {
+            if (typeof alertify !== 'undefined') {
+                if (type === 'success') alertify.success(message);
+                else if (type === 'error') alertify.error(message);
+                else alertify.message(message);
+            } else {
+                alert(message);
+            }
+        }
+
         function inventarioApp() {
             return {
-                openModal() {
-                    alertify.prompt('Agregar Stock', 'Ingrese cantidad a agregar:', '',
-                        (evt, value) => {
-                            alertify.success('Stock actualizado: +' + value);
-                        },
-                        () => { }
-                    );
+                loading: true,
+                saving: false,
+                inventoryItems: [],
+                tanks: [],
+                movements: [],
+
+                // User info
+                userName: '',
+                userRole: '',
+                userBranch: '',
+                userInitials: '??',
+
+                // Modal
+                showAddStockModal: false,
+                addStockForm: {
+                    product_id: '',
+                    quantity: 0,
+                    reason: 'Recarga de inventario',
+                    custom_reason: ''
+                },
+
+                async initInventario() {
+                    if (typeof alertify !== 'undefined') {
+                        alertify.set('notifier', { position: 'top-right' });
+                    }
+
+                    // Verificar autenticación
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (!session) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
+                    // Obtener perfil del usuario
+                    try {
+                        const { data: profile } = await supabase
+                            .from('profiles')
+                            .select('full_name, role, branch')
+                            .eq('id', session.user.id)
+                            .single();
+
+                        if (profile) {
+                            this.userName = profile.full_name;
+                            this.userRole = profile.role;
+                            this.userBranch = profile.branch;
+                            this.userInitials = this.getInitials(profile.full_name);
+                        }
+                    } catch (err) {
+                        console.error('Error obteniendo perfil:', err);
+                    }
+
+                    // Cargar datos
+                    await this.loadInventory();
+                    await this.loadTanks();
+                    await this.loadMovements();
+                },
+
+                async loadInventory() {
+                    this.loading = true;
+                    try {
+                        const { data, error } = await supabase
+                            .from('inventory')
+                            .select(`
+                                id,
+                                quantity,
+                                min_stock,
+                                products!inner(
+                                    id,
+                                    name,
+                                    size_liters,
+                                    product_type,
+                                    product_prices!inner(price_usd)
+                                )
+                            `)
+                            .eq('branch', this.userBranch)
+                            .eq('products.product_prices.branch', this.userBranch);
+
+                        if (error) throw error;
+
+                        this.inventoryItems = data.map(item => ({
+                            id: item.products.id,
+                            name: item.products.name,
+                            size_liters: item.products.size_liters,
+                            product_type: item.products.product_type,
+                            quantity: item.quantity,
+                            min_stock: item.min_stock,
+                            price: parseFloat(item.products.product_prices[0].price_usd)
+                        }));
+
+                    } catch (err) {
+                        console.error('Error cargando inventario:', err);
+                        notify('Error al cargar inventario: ' + err.message, 'error');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async loadTanks() {
+                    try {
+                        const { data, error } = await supabase
+                            .from('tanks')
+                            .select('*')
+                            .eq('branch', this.userBranch)
+                            .order('name');
+
+                        if (error) throw error;
+                        this.tanks = data || [];
+
+                    } catch (err) {
+                        console.error('Error cargando tanques:', err);
+                    }
+                },
+
+                async loadMovements() {
+                    try {
+                        // Obtener movimientos de ventas recientes
+                        const { data: salesData, error: salesError } = await supabase
+                            .from('sale_items')
+                            .select(`
+                                id,
+                                quantity,
+                                created_at,
+                                sales!inner(branch, customer_name, created_at),
+                                products!inner(name)
+                            `)
+                            .eq('sales.branch', this.userBranch)
+                            .order('created_at', { ascending: false })
+                            .limit(10);
+
+                        if (salesError) throw salesError;
+
+                        this.movements = (salesData || []).map(item => ({
+                            id: 'sale_' + item.id,
+                            created_at: item.created_at,
+                            product_name: item.products.name,
+                            movement_type: 'salida',
+                            quantity: item.quantity,
+                            reason: 'Venta - ' + (item.sales.customer_name || 'Cliente no registrado')
+                        }));
+
+                    } catch (err) {
+                        console.error('Error cargando movimientos:', err);
+                    }
+                },
+
+                getInitials(name) {
+                    if (!name) return '??';
+                    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                },
+
+                formatDate(dateString) {
+                    if (!dateString) return 'N/A';
+                    const date = new Date(dateString);
+                    return date.toLocaleString('es-ES', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                },
+
+                openAddStockModal() {
+                    this.addStockForm = {
+                        product_id: '',
+                        quantity: 0,
+                        reason: 'Recarga de inventario',
+                        custom_reason: ''
+                    };
+                    this.showAddStockModal = true;
+                },
+
+                closeAddStockModal() {
+                    this.showAddStockModal = false;
+                },
+
+                async addStock() {
+                    if (!this.addStockForm.product_id) {
+                        notify('Debe seleccionar un producto', 'error');
+                        return;
+                    }
+
+                    if (!this.addStockForm.quantity || this.addStockForm.quantity <= 0) {
+                        notify('La cantidad debe ser mayor a 0', 'error');
+                        return;
+                    }
+
+                    this.saving = true;
+
+                    try {
+                        const reason = this.addStockForm.reason === 'Otro'
+                            ? this.addStockForm.custom_reason
+                            : this.addStockForm.reason;
+
+                        // Actualizar inventario
+                        const { error: invError } = await supabase
+                            .from('inventory')
+                            .update({
+                                quantity: supabase.rpc('increment_inventory', {
+                                    product_id_param: this.addStockForm.product_id,
+                                    branch_param: this.userBranch,
+                                    quantity_to_increment: this.addStockForm.quantity
+                                })
+                            })
+                            .eq('product_id', this.addStockForm.product_id)
+                            .eq('branch', this.userBranch);
+
+                        if (invError) throw invError;
+
+                        notify(`Stock agregado: +${this.addStockForm.quantity} unidades`);
+                        this.closeAddStockModal();
+
+                        // Recargar datos
+                        await this.loadInventory();
+
+                    } catch (err) {
+                        console.error('Error agregando stock:', err);
+                        notify('Error al agregar stock: ' + err.message, 'error');
+                    } finally {
+                        this.saving = false;
+                    }
                 }
             }
         }
