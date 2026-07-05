@@ -54,6 +54,11 @@
             transform: translateY(-3px);
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
     </style>
 </head>
 <body class="bg-gray-50" x-data="dashboardApp()" x-init="initDashboard()">
@@ -226,19 +231,23 @@
                 </div>
             </div>
 
-            <!-- Gráficos -->
+            <!-- Gráficos - CORREGIDOS -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-
+                
                 <!-- Ventas de la Semana -->
                 <div class="bg-white rounded-2xl shadow-sm p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Ventas de la Semana</h3>
-                    <canvas id="salesChart" height="250"></canvas>
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
                 </div>
 
                 <!-- Distribución por Producto -->
                 <div class="bg-white rounded-2xl shadow-sm p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Distribución por Producto</h3>
-                    <canvas id="productChart" height="250"></canvas>
+                    <div class="chart-container">
+                        <canvas id="productChart"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -456,10 +465,10 @@
                         console.error('Error:', err);
                     }
 
-                    // 3. Inicializar gráficos
-                    this.$nextTick(() => {
+                    // 3. Esperar un poco y luego inicializar gráficos
+                    setTimeout(() => {
                         this.initCharts();
-                    });
+                    }, 100);
                 },
 
                 getInitials(name) {
@@ -472,6 +481,14 @@
                 },
 
                 initCharts() {
+                    // Destruir gráficos existentes si los hay
+                    if (this.salesChart) {
+                        this.salesChart.destroy();
+                    }
+                    if (this.productChart) {
+                        this.productChart.destroy();
+                    }
+
                     // Gráfico de Ventas Semanales
                     const salesCtx = document.getElementById('salesChart');
                     if (salesCtx) {
@@ -491,12 +508,18 @@
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
-                                plugins: { legend: { display: false } },
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                },
                                 scales: {
                                     y: {
                                         beginAtZero: true,
                                         ticks: {
-                                            callback: function(value) { return '$' + value; }
+                                            callback: function(value) {
+                                                return '$' + value;
+                                            }
                                         }
                                     }
                                 }
@@ -520,7 +543,15 @@
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
-                                plugins: { legend: { position: 'bottom' } }
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            padding: 15,
+                                            usePointStyle: true
+                                        }
+                                    }
+                                }
                             }
                         });
                     }
