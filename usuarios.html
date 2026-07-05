@@ -8,9 +8,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
+
+    <!-- Alertify - Carga con fallback -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -41,7 +44,7 @@
 
 <body class="bg-gray-50" x-data="usuariosApp()" x-init="initUsuarios()">
 
-    <!-- Sidebar -->
+    <!-- Sidebar (igual que antes) -->
     <aside class="fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 hidden lg:block">
         <div class="p-6">
             <div class="mb-6">
@@ -99,7 +102,6 @@
 
     <!-- Main Content -->
     <div class="lg:ml-64 min-h-screen">
-        <!-- Header -->
         <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">Usuarios del Sistema</h2>
@@ -116,15 +118,12 @@
             </div>
         </header>
 
-        <!-- Content -->
         <main class="p-6">
-            <!-- Loading -->
             <div x-show="loading" class="text-center py-12">
                 <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500"></i>
                 <p class="mt-4 text-gray-600">Cargando usuarios...</p>
             </div>
 
-            <!-- Users Grid -->
             <div x-show="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <template x-for="user in users" :key="user.id">
                     <div class="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-shadow">
@@ -150,10 +149,6 @@
                                 <i class="fas fa-building w-5 text-gray-400"></i>
                                 <span class="text-gray-700 capitalize" x-text="user.branch"></span>
                             </div>
-                            <div class="flex items-center text-sm">
-                                <i class="fas fa-phone w-5 text-gray-400"></i>
-                                <span class="text-gray-700" x-text="user.phone || 'Sin teléfono'"></span>
-                            </div>
                         </div>
 
                         <div class="flex space-x-2 pt-4 border-t">
@@ -171,7 +166,6 @@
                     </div>
                 </template>
 
-                <!-- Empty State -->
                 <div x-show="users.length === 0 && !loading" class="col-span-full text-center py-12">
                     <i class="fas fa-users text-6xl text-gray-300 mb-4"></i>
                     <p class="text-gray-500">No hay usuarios registrados</p>
@@ -180,7 +174,7 @@
         </main>
     </div>
 
-    <!-- Modal Crear/Editar Usuario -->
+    <!-- Modal (igual que antes) -->
     <div x-show="showModal" x-cloak class="modal-overlay" @click.self="closeModal()">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4" @click.stop>
             <div class="px-6 py-4 border-b flex justify-between items-center">
@@ -195,35 +189,30 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nombre Completo *</label>
                     <input type="text" x-model="formData.full_name"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Ej: Juan Pérez">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
                     <input type="email" x-model="formData.email" :disabled="editingUser"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-                        placeholder="usuario@aquaservice.com">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100">
                 </div>
 
                 <div x-show="!editingUser">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña *</label>
                     <input type="password" x-model="formData.password"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Mínimo 6 caracteres">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
                     <input type="tel" x-model="formData.phone"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="0412-1234567">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Rol *</label>
-                    <select x-model="formData.role"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <select x-model="formData.role" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
                         <option value="">Seleccionar rol...</option>
                         <option value="admin">Administrador</option>
                         <option value="vendedor">Vendedor</option>
@@ -234,8 +223,7 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Sucursal *</label>
-                    <select x-model="formData.branch"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <select x-model="formData.branch" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
                         <option value="">Seleccionar sucursal...</option>
                         <option value="geminis">Geminis</option>
                         <option value="omega">Omega</option>
@@ -244,11 +232,9 @@
             </div>
 
             <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3">
-                <button @click="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">
-                    Cancelar
-                </button>
+                <button @click="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
                 <button @click="saveUser()" :disabled="saving"
-                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50">
                     <i class="fas fa-save mr-2" x-show="!saving"></i>
                     <i class="fas fa-circle-notch fa-spin mr-2" x-show="saving"></i>
                     <span x-text="saving ? 'Guardando...' : 'Guardar'"></span>
@@ -261,6 +247,31 @@
         const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Función helper para notificaciones con fallback
+        function notify(message, type = 'success') {
+            if (typeof alertify !== 'undefined') {
+                if (type === 'success') alertify.success(message);
+                else if (type === 'error') alertify.error(message);
+                else alertify.message(message);
+            } else {
+                // Fallback a alert si alertify no está cargado
+                alert(message);
+            }
+        }
+
+        function confirmDialog(message, onConfirm, onCancel) {
+            if (typeof alertify !== 'undefined') {
+                alertify.confirm(message, onConfirm, onCancel);
+            } else {
+                // Fallback simple
+                if (window.confirm(message)) {
+                    onConfirm();
+                } else {
+                    onCancel();
+                }
+            }
+        }
 
         async function logout() {
             await supabase.auth.signOut();
@@ -289,10 +300,6 @@
                 },
 
                 async initUsuarios() {
-                    if (typeof alertify !== 'undefined') {
-                        alertify.set('notifier', { position: 'top-right' });
-                    }
-
                     const { data: { session } } = await supabase.auth.getSession();
                     if (!session) {
                         window.location.href = 'login.html';
@@ -313,7 +320,7 @@
                             this.userInitials = this.getInitials(profile.full_name);
 
                             if (profile.role !== 'admin') {
-                                alertify.error('No tienes permisos para acceder a esta sección');
+                                notify('No tienes permisos para acceder', 'error');
                                 setTimeout(() => {
                                     window.location.href = 'index.html';
                                 }, 2000);
@@ -339,7 +346,7 @@
                         this.users = data || [];
                     } catch (err) {
                         console.error('Error cargando usuarios:', err);
-                        alertify.error('Error al cargar usuarios');
+                        notify('Error al cargar usuarios', 'error');
                     } finally {
                         this.loading = false;
                     }
@@ -347,23 +354,12 @@
 
                 getInitials(name) {
                     if (!name) return '??';
-                    return name.split(' ')
-                        .map(n => n[0])
-                        .join('')
-                        .substring(0, 2)
-                        .toUpperCase();
+                    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
                 },
 
                 openCreateModal() {
                     this.editingUser = null;
-                    this.formData = {
-                        full_name: '',
-                        email: '',
-                        password: '',
-                        phone: '',
-                        role: '',
-                        branch: ''
-                    };
+                    this.formData = { full_name: '', email: '', password: '', phone: '', role: '', branch: '' };
                     this.showModal = true;
                 },
 
@@ -382,29 +378,22 @@
                 closeModal() {
                     this.showModal = false;
                     this.editingUser = null;
-                    this.formData = {
-                        full_name: '',
-                        email: '',
-                        password: '',
-                        phone: '',
-                        role: '',
-                        branch: ''
-                    };
+                    this.formData = { full_name: '', email: '', password: '', phone: '', role: '', branch: '' };
                 },
 
                 async saveUser() {
                     if (!this.formData.full_name || !this.formData.email || !this.formData.role || !this.formData.branch) {
-                        alertify.error('Por favor completa todos los campos obligatorios');
+                        notify('Por favor completa todos los campos obligatorios', 'error');
                         return;
                     }
 
                     if (!this.editingUser && !this.formData.password) {
-                        alertify.error('La contraseña es obligatoria');
+                        notify('La contraseña es obligatoria', 'error');
                         return;
                     }
 
                     if (!this.editingUser && this.formData.password.length < 6) {
-                        alertify.error('La contraseña debe tener al menos 6 caracteres');
+                        notify('La contraseña debe tener al menos 6 caracteres', 'error');
                         return;
                     }
 
@@ -424,7 +413,7 @@
                                 .eq('id', this.editingUser.id);
 
                             if (error) throw error;
-                            alertify.success('Usuario actualizado exitosamente');
+                            notify('Usuario actualizado exitosamente');
                         } else {
                             const response = await fetch(`${SUPABASE_URL}/functions/v1/create-user`, {
                                 method: 'POST',
@@ -448,15 +437,15 @@
                                 throw new Error(result.error || 'Error al crear usuario');
                             }
 
-                            alertify.success(result.message || 'Usuario creado exitosamente');
+                            notify(result.message || 'Usuario creado exitosamente');
                         }
 
                         this.closeModal();
                         await this.loadUsers();
 
                     } catch (err) {
-                        console.error('Error guardando usuario:', err);
-                        alertify.error(err.message || 'Error al guardar usuario');
+                        console.error('Error:', err);
+                        notify(err.message || 'Error al guardar usuario', 'error');
                     } finally {
                         this.saving = false;
                     }
@@ -465,7 +454,7 @@
                 async toggleStatus(user) {
                     const action = user.is_active ? 'desactivar' : 'activar';
 
-                    alertify.confirm(
+                    confirmDialog(
                         `¿Estás seguro de ${action} a ${user.full_name}?`,
                         async () => {
                             try {
@@ -477,14 +466,14 @@
                                 if (error) throw error;
 
                                 user.is_active = !user.is_active;
-                                alertify.success(`Usuario ${action}do exitosamente`);
+                                notify(`Usuario ${action}do exitosamente`);
                             } catch (err) {
                                 console.error('Error:', err);
-                                alertify.error('Error al cambiar estado del usuario');
+                                notify('Error al cambiar estado del usuario', 'error');
                             }
                         },
                         () => {
-                            alertify.warning('Operación cancelada');
+                            notify('Operación cancelada');
                         }
                     );
                 }
