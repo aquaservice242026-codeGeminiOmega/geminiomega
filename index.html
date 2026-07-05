@@ -245,7 +245,7 @@
                 </div>
             </div>
 
-            <!-- Gráficos -->
+            <!-- Gráficos - CORREGIDOS AMBOS -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
                 <!-- Ventas de la Semana -->
@@ -259,7 +259,9 @@
                 <!-- Distribución por Producto -->
                 <div class="bg-white rounded-2xl shadow-sm p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Distribución por Producto</h3>
-                    <canvas id="productChart" height="250"></canvas>
+                    <div style="position: relative; height: 200px;">
+                        <canvas id="productChart"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -519,9 +521,7 @@
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
-                                plugins: {
-                                    legend: { display: false }
-                                },
+                                plugins: { legend: { display: false } },
                                 scales: {
                                     y: {
                                         beginAtZero: true,
@@ -550,7 +550,7 @@
                         });
                     }
 
-                    // Gráfico de Distribución por Producto
+                    // Gráfico de Distribución por Producto - CORREGIDO
                     const productCtx = document.getElementById('productChart');
                     if (productCtx) {
                         this.productChart = new Chart(productCtx, {
@@ -560,13 +560,32 @@
                                 datasets: [{
                                     data: [15, 18, 15],
                                     backgroundColor: ['#06b6d4', '#0ea5e9', '#0284c7'],
-                                    borderWidth: 0
+                                    borderWidth: 0,
+                                    cutout: '70%'
                                 }]
                             },
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
-                                plugins: { legend: { position: 'bottom' } }
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            padding: 15,
+                                            usePointStyle: true,
+                                            pointStyle: 'circle',
+                                            font: {
+                                                size: 11
+                                            }
+                                        }
+                                    }
+                                },
+                                layout: {
+                                    padding: {
+                                        top: 10,
+                                        bottom: 10
+                                    }
+                                }
                             }
                         });
                     }
