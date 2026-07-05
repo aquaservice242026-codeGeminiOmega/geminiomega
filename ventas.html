@@ -9,10 +9,6 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -133,8 +129,8 @@
                 <div class="lg:col-span-2 space-y-4">
                     <!-- Quick Add Buttons -->
                     <div class="bg-white rounded-2xl shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Agregar Rápido</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Productos Disponibles</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <template x-for="product in products" :key="product.id">
                                 <button @click="addProduct(product)"
                                     class="bg-gradient-to-br from-cyan-400 to-cyan-600 text-white p-6 rounded-xl hover:shadow-lg transition-all">
@@ -146,47 +142,18 @@
                             </template>
                         </div>
                     </div>
-
-                    <!-- Delivery Toggle -->
-                    <div class="bg-white rounded-2xl shadow-sm p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-800">Tipo de Entrega</h3>
-                                <p class="text-sm text-gray-500">Selecciona el método de entrega</p>
-                            </div>
-                            <div class="flex space-x-2">
-                                <button @click="deliveryType = 'pickup'"
-                                    :class="deliveryType === 'pickup' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
-                                    class="px-4 py-2 rounded-lg font-medium transition">
-                                    <i class="fas fa-store mr-2"></i>Retiro
-                                </button>
-                                <button @click="deliveryType = 'delivery'"
-                                    :class="deliveryType === 'delivery' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
-                                    class="px-4 py-2 rounded-lg font-medium transition">
-                                    <i class="fas fa-truck mr-2"></i>Delivery
-                                </button>
-                            </div>
-                        </div>
-
-                        <div x-show="deliveryType === 'delivery'" class="mt-4 p-4 bg-blue-50 rounded-lg">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Dirección de Entrega</label>
-                            <textarea x-model="deliveryAddress" placeholder="Ingrese la dirección exacta del cliente..."
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
-                            <p class="text-xs text-gray-500 mt-1">Costo de delivery: $1.00</p>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Cart Section -->
                 <div class="lg:col-span-1">
-                    <div class="bg-white rounded-2xl shadow-sm p-6 sticky top-6">
+                    <div class="bg-white rounded-2xl shadow-sm p-6 sticky top-6 space-y-4">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center justify-between">
                             <span><i class="fas fa-shopping-cart text-blue-500 mr-2"></i>Carrito</span>
                             <button @click="clearCart()" class="text-red-500 text-sm hover:underline">Limpiar</button>
                         </h3>
 
                         <!-- Cart Items -->
-                        <div class="space-y-3 max-h-96 overflow-y-auto mb-4">
+                        <div class="space-y-3 max-h-64 overflow-y-auto mb-4">
                             <template x-for="(item, index) in cart" :key="index">
                                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                     <div class="flex-1">
@@ -224,10 +191,6 @@
                                 <span class="text-gray-600">Subtotal:</span>
                                 <span class="font-medium" x-text="'$' + subtotal.toFixed(2)"></span>
                             </div>
-                            <div x-show="deliveryType === 'delivery'" class="flex justify-between text-sm">
-                                <span class="text-gray-600">Delivery:</span>
-                                <span class="font-medium">$1.00</span>
-                            </div>
                             <div class="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t">
                                 <span>Total USD:</span>
                                 <span class="text-blue-600" x-text="'$' + totalUSD.toFixed(2)"></span>
@@ -238,16 +201,45 @@
                             </div>
                         </div>
 
-                        <!-- Customer Selection -->
-                        <div class="mt-4">
+                        <!-- Delivery Toggle - MOVIDO AQUI -->
+                        <div class="border-t pt-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <div>
+                                    <h4 class="text-sm font-semibold text-gray-800">Tipo de Entrega</h4>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button @click="deliveryType = 'pickup'"
+                                        :class="deliveryType === 'pickup' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+                                        class="px-3 py-1.5 rounded-lg text-sm font-medium transition">
+                                        <i class="fas fa-store mr-1"></i>Retiro
+                                    </button>
+                                    <button @click="deliveryType = 'delivery'"
+                                        :class="deliveryType === 'delivery' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+                                        class="px-3 py-1.5 rounded-lg text-sm font-medium transition">
+                                        <i class="fas fa-truck mr-1"></i>Delivery
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div x-show="deliveryType === 'delivery'" class="p-3 bg-blue-50 rounded-lg">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Dirección de Entrega</label>
+                                <textarea x-model="deliveryAddress" placeholder="Ingrese la dirección exacta..."
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                                <p class="text-xs text-gray-500 mt-1">Costo de delivery: $1.00</p>
+                            </div>
+                        </div>
+
+                        <!-- Customer Selection - CON BOTÓN MÁS VISIBLE -->
+                        <div class="border-t pt-4">
                             <div class="flex items-center justify-between mb-2">
                                 <label class="block text-sm font-medium text-gray-700">Cliente</label>
-                                <button @click="openCustomerModal()" class="text-blue-500 text-sm hover:underline">
-                                    <i class="fas fa-plus mr-1"></i>Nuevo
+                                <button @click="openCustomerModal()"
+                                    class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-medium transition">
+                                    <i class="fas fa-user-plus mr-1"></i>Nuevo Cliente
                                 </button>
                             </div>
                             <select x-model="selectedCustomer"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 text-sm">
                                 <option value="">Seleccionar cliente...</option>
                                 <template x-for="customer in customers" :key="customer.id">
                                     <option :value="customer.id" x-text="customer.full_name"></option>
@@ -256,10 +248,10 @@
                         </div>
 
                         <!-- Payment Method -->
-                        <div class="mt-4">
+                        <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Método de Pago</label>
                             <select x-model="paymentMethod"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 text-sm">
                                 <option value="cash">Efectivo</option>
                                 <option value="transfer">Pago Móvil</option>
                                 <option value="card">Tarjeta de Débito</option>
@@ -268,7 +260,7 @@
                         </div>
 
                         <button @click="processSale()" :disabled="cart.length === 0 || processing"
-                            class="w-full mt-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-xl font-semibold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                            class="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-xl font-semibold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all">
                             <i class="fas fa-circle-notch fa-spin mr-2" x-show="processing"></i>
                             <i class="fas fa-check-circle mr-2" x-show="!processing"></i>
                             <span x-text="processing ? 'Procesando...' : 'Procesar Venta'"></span>
@@ -338,6 +330,11 @@
             </div>
         </div>
     </div>
+
+    <!-- Alertify - AL FINAL DEL BODY -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
 
     <script>
         // Configuración de Supabase
@@ -665,20 +662,16 @@
 
                         // 3. Actualizar inventario
                         for (const item of this.cart) {
-                            const { error: invError } = await supabase
-                                .from('inventory')
-                                .update({
-                                    quantity: supabase.rpc('decrement_inventory', {
-                                        product_id_param: item.id,
-                                        branch_param: this.userBranch,
-                                        quantity_to_decrement: item.quantity
-                                    })
-                                })
-                                .eq('product_id', item.id)
-                                .eq('branch', this.userBranch);
+                            const { error: invError } = await supabase.rpc('decrement_inventory', {
+                                product_id_param: item.id,
+                                branch_param: this.userBranch,
+                                quantity_to_decrement: item.quantity
+                            });
 
                             if (invError) {
                                 console.error('Error actualizando inventario:', invError);
+                                notify('Error actualizando inventario: ' + invError.message, 'error');
+                                return;
                             }
                         }
 
