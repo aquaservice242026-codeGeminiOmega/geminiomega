@@ -1,4 +1,3 @@
-<!-- usuarios.html - Módulo de Usuarios prueba -->
 <!DOCTYPE html>
 <html lang="es">
 
@@ -7,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AquaService - Usuarios</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
@@ -26,62 +26,72 @@
         .gradient-bg {
             background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
         }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
     </style>
 </head>
 
-<body class="bg-gray-50" x-data="usuariosApp()">
+<body class="bg-gray-50" x-data="usuariosApp()" x-init="initUsuarios()">
 
     <!-- Sidebar -->
     <aside class="fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 hidden lg:block">
         <div class="p-6">
-            <div class="flex items-center space-x-3 mb-8">
-                <i class="fas fa-tint text-3xl"></i>
-                <div>
-                    <h1 class="text-xl font-bold">AquaService</h1>
-                    <p class="text-xs text-blue-200">Sistema de Gestión</p>
+            <div class="mb-6">
+                <div class="flex items-center space-x-3 mb-3">
+                    <i class="fas fa-tint text-3xl"></i>
+                    <div>
+                        <h1 class="text-xl font-bold">AquaService</h1>
+                        <p class="text-xs text-blue-200">Sistema de Gestión</p>
+                    </div>
+                </div>
+                <div class="bg-white bg-opacity-10 rounded-lg px-3 py-2">
+                    <p class="text-xs text-blue-200 mb-0.5">Sucursal</p>
+                    <p class="font-semibold capitalize text-sm" x-text="userBranch || 'Cargando...'"></p>
                 </div>
             </div>
 
             <nav class="space-y-2">
                 <a href="index.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-home w-5"></i>
-                    <span>Dashboard</span>
+                    <i class="fas fa-home w-5"></i><span>Dashboard</span>
                 </a>
                 <a href="ventas.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-shopping-cart w-5"></i>
-                    <span>Ventas</span>
+                    <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
                 </a>
                 <a href="clientes.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-users w-5"></i>
-                    <span>Clientes</span>
+                    <i class="fas fa-users w-5"></i><span>Clientes</span>
                 </a>
                 <a href="inventario.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-boxes w-5"></i>
-                    <span>Inventario</span>
+                    <i class="fas fa-boxes w-5"></i><span>Inventario</span>
                 </a>
                 <a href="usuarios.html" class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
-                    <i class="fas fa-user-cog w-5"></i>
-                    <span class="font-medium">Usuarios</span>
+                    <i class="fas fa-user-cog w-5"></i><span class="font-medium">Usuarios</span>
                 </a>
                 <a href="reportes.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-chart-line w-5"></i>
-                    <span>Reportes</span>
+                    <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
                 </a>
             </nav>
         </div>
 
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold">AD
-                </div>
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
+                    x-text="userInitials"></div>
                 <div>
-                    <p class="text-sm font-medium">Admin</p>
-                    <p class="text-xs text-blue-200">Sucursal Principal</p>
+                    <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
+                    <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
                 </div>
             </div>
         </div>
@@ -95,38 +105,54 @@
                 <h2 class="text-2xl font-bold text-gray-800">Usuarios del Sistema</h2>
                 <p class="text-sm text-gray-500">Gestión de accesos y permisos</p>
             </div>
-            <button @click="openModal()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-                <i class="fas fa-plus mr-2"></i>Nuevo Usuario
-            </button>
+            <div class="flex items-center space-x-4">
+                <button @click="openCreateModal()"
+                    class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    <i class="fas fa-plus mr-2"></i>Nuevo Usuario
+                </button>
+                <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Salir
+                </button>
+            </div>
         </header>
 
         <!-- Content -->
         <main class="p-6">
+            <!-- Loading -->
+            <div x-show="loading" class="text-center py-12">
+                <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500"></i>
+                <p class="mt-4 text-gray-600">Cargando usuarios...</p>
+            </div>
+
             <!-- Users Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div x-show="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <template x-for="user in users" :key="user.id">
                     <div class="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-shadow">
                         <div class="flex items-start justify-between mb-4">
                             <div
                                 class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center text-white font-bold text-xl">
-                                <span x-text="user.initials"></span>
+                                <span x-text="getInitials(user.full_name)"></span>
                             </div>
                             <span class="px-3 py-1 rounded-full text-xs font-semibold"
-                                :class="user.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
-                                x-text="user.active ? 'Activo' : 'Inactivo'"></span>
+                                :class="user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                                x-text="user.is_active ? 'Activo' : 'Inactivo'"></span>
                         </div>
 
-                        <h3 class="text-lg font-semibold text-gray-900" x-text="user.name"></h3>
+                        <h3 class="text-lg font-semibold text-gray-900" x-text="user.full_name"></h3>
                         <p class="text-sm text-gray-500 mb-4" x-text="user.email"></p>
 
                         <div class="space-y-2 mb-4">
                             <div class="flex items-center text-sm">
                                 <i class="fas fa-user-tag w-5 text-gray-400"></i>
-                                <span class="text-gray-700" x-text="user.role"></span>
+                                <span class="text-gray-700 capitalize" x-text="user.role"></span>
                             </div>
                             <div class="flex items-center text-sm">
                                 <i class="fas fa-building w-5 text-gray-400"></i>
-                                <span class="text-gray-700" x-text="user.branch"></span>
+                                <span class="text-gray-700 capitalize" x-text="user.branch"></span>
+                            </div>
+                            <div class="flex items-center text-sm" x-show="user.phone">
+                                <i class="fas fa-phone w-5 text-gray-400"></i>
+                                <span class="text-gray-700" x-text="user.phone || 'Sin teléfono'"></span>
                             </div>
                         </div>
 
@@ -136,43 +162,350 @@
                                 <i class="fas fa-edit mr-1"></i>Editar
                             </button>
                             <button @click="toggleStatus(user)"
-                                class="flex-1 bg-gray-50 text-gray-600 py-2 rounded-lg hover:bg-gray-100 text-sm font-medium">
-                                <i class="fas fa-power-off mr-1"></i><span
-                                    x-text="user.active ? 'Desactivar' : 'Activar'"></span>
+                                :class="user.is_active ? 'bg-gray-50 text-gray-600 hover:bg-gray-100' : 'bg-green-50 text-green-600 hover:bg-green-100'"
+                                class="flex-1 py-2 rounded-lg text-sm font-medium">
+                                <i class="fas fa-power-off mr-1"></i>
+                                <span x-text="user.is_active ? 'Desactivar' : 'Activar'"></span>
                             </button>
                         </div>
                     </div>
                 </template>
+
+                <!-- Empty State -->
+                <div x-show="users.length === 0 && !loading" class="col-span-full text-center py-12">
+                    <i class="fas fa-users text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500">No hay usuarios registrados</p>
+                </div>
             </div>
         </main>
     </div>
 
+    <!-- Modal Crear/Editar Usuario -->
+    <div x-show="showModal" x-cloak class="modal-overlay" @click.self="closeModal()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4" @click.stop>
+            <!-- Header -->
+            <div class="px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="text-xl font-bold text-gray-800" x-text="editingUser ? 'Editar Usuario' : 'Nuevo Usuario'">
+                </h3>
+                <button @click="closeModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-6 space-y-4">
+                <!-- Nombre Completo -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre Completo *</label>
+                    <input type="text" x-model="formData.full_name"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Ej: Juan Pérez">
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                    <input type="email" x-model="formData.email" :disabled="editingUser"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                        placeholder="usuario@aquaservice.com">
+                </div>
+
+                <!-- Password (solo al crear) -->
+                <div x-show="!editingUser">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña *</label>
+                    <input type="password" x-model="formData.password"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Mínimo 6 caracteres">
+                </div>
+
+                <!-- Teléfono -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+                    <input type="tel" x-model="formData.phone"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0412-1234567">
+                </div>
+
+                <!-- Rol -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Rol *</label>
+                    <select x-model="formData.role"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Seleccionar rol...</option>
+                        <option value="admin">Administrador</option>
+                        <option value="vendedor">Vendedor</option>
+                        <option value="delivery">Delivery</option>
+                        <option value="cajero">Cajero</option>
+                    </select>
+                </div>
+
+                <!-- Sucursal -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Sucursal *</label>
+                    <select x-model="formData.branch"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Seleccionar sucursal...</option>
+                        <option value="geminis">Geminis</option>
+                        <option value="omega">Omega</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3">
+                <button @click="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                    Cancelar
+                </button>
+                <button @click="saveUser()" :disabled="saving"
+                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-save mr-2" x-show="!saving"></i>
+                    <i class="fas fa-circle-notch fa-spin mr-2" x-show="saving"></i>
+                    <span x-text="saving ? 'Guardando...' : 'Guardar'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Configuración de Supabase
+        const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Función de logout
+        async function logout() {
+            await supabase.auth.signOut();
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
         function usuariosApp() {
             return {
-                users: [
-                    { id: 1, name: 'Admin Principal', email: 'admin@aquaservice.com', role: 'Administrador', branch: 'Sucursal Principal', active: true, initials: 'AP' },
-                    { id: 2, name: 'Juan Pérez', email: 'juan@aquaservice.com', role: 'Vendedor', branch: 'Sucursal Principal', active: true, initials: 'JP' },
-                    { id: 3, name: 'María López', email: 'maria@aquaservice.com', role: 'Vendedora', branch: 'Sucursal Norte', active: true, initials: 'ML' },
-                    { id: 4, name: 'Carlos Ruiz', email: 'carlos@aquaservice.com', role: 'Delivery', branch: 'Sucursal Principal', active: false, initials: 'CR' },
-                ],
+                users: [],
+                loading: true,
+                showModal: false,
+                saving: false,
+                editingUser: null,
+                userName: '',
+                userRole: '',
+                userBranch: '',
+                userInitials: '??',
+                formData: {
+                    full_name: '',
+                    email: '',
+                    password: '',
+                    phone: '',
+                    role: '',
+                    branch: ''
+                },
 
-                openModal() {
-                    alertify.prompt('Nuevo Usuario', 'Complete los datos del usuario:', '',
-                        (evt, value) => {
-                            alertify.success('Usuario creado');
-                        },
-                        () => { }
-                    );
+                async initUsuarios() {
+                    // Configurar Alertify
+                    if (typeof alertify !== 'undefined') {
+                        alertify.set('notifier', { position: 'top-right' });
+                    }
+
+                    // Verificar autenticación
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (!session) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
+                    // Obtener perfil del usuario actual
+                    try {
+                        const { data: profile } = await supabase
+                            .from('profiles')
+                            .select('full_name, role, branch')
+                            .eq('id', session.user.id)
+                            .single();
+
+                        if (profile) {
+                            this.userName = profile.full_name;
+                            this.userRole = profile.role;
+                            this.userBranch = profile.branch;
+                            this.userInitials = this.getInitials(profile.full_name);
+
+                            // Verificar que sea admin
+                            if (profile.role !== 'admin') {
+                                alertify.error('No tienes permisos para acceder a esta sección');
+                                setTimeout(() => {
+                                    window.location.href = 'index.html';
+                                }, 2000);
+                                return;
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Error:', err);
+                    }
+
+                    // Cargar usuarios
+                    await this.loadUsers();
+                },
+
+                async loadUsers() {
+                    this.loading = true;
+                    try {
+                        const { data, error } = await supabase
+                            .from('profiles')
+                            .select('*')
+                            .order('full_name');
+
+                        if (error) throw error;
+                        this.users = data || [];
+                    } catch (err) {
+                        console.error('Error cargando usuarios:', err);
+                        alertify.error('Error al cargar usuarios');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                getInitials(name) {
+                    if (!name) return '??';
+                    return name.split(' ')
+                        .map(n => n[0])
+                        .join('')
+                        .substring(0, 2)
+                        .toUpperCase();
+                },
+
+                openCreateModal() {
+                    this.editingUser = null;
+                    this.formData = {
+                        full_name: '',
+                        email: '',
+                        password: '',
+                        phone: '',
+                        role: '',
+                        branch: ''
+                    };
+                    this.showModal = true;
                 },
 
                 editUser(user) {
-                    alertify.message('Editando: ' + user.name);
+                    this.editingUser = user;
+                    this.formData = {
+                        full_name: user.full_name,
+                        email: user.email,
+                        phone: user.phone || '',
+                        role: user.role,
+                        branch: user.branch
+                    };
+                    this.showModal = true;
                 },
 
-                toggleStatus(user) {
-                    user.active = !user.active;
-                    alertify.success(user.active ? 'Usuario activado' : 'Usuario desactivado');
+                closeModal() {
+                    this.showModal = false;
+                    this.editingUser = null;
+                    this.formData = {
+                        full_name: '',
+                        email: '',
+                        password: '',
+                        phone: '',
+                        role: '',
+                        branch: ''
+                    };
+                },
+
+                async saveUser() {
+                    // Validaciones
+                    if (!this.formData.full_name || !this.formData.email || !this.formData.role || !this.formData.branch) {
+                        alertify.error('Por favor completa todos los campos obligatorios');
+                        return;
+                    }
+
+                    if (!this.editingUser && !this.formData.password) {
+                        alertify.error('La contraseña es obligatoria');
+                        return;
+                    }
+
+                    if (!this.editingUser && this.formData.password.length < 6) {
+                        alertify.error('La contraseña debe tener al menos 6 caracteres');
+                        return;
+                    }
+
+                    this.saving = true;
+
+                    try {
+                        if (this.editingUser) {
+                            // EDITAR usuario existente
+                            const { error } = await supabase
+                                .from('profiles')
+                                .update({
+                                    full_name: this.formData.full_name,
+                                    phone: this.formData.phone,
+                                    role: this.formData.role,
+                                    branch: this.formData.branch,
+                                    updated_at: new Date().toISOString()
+                                })
+                                .eq('id', this.editingUser.id);
+
+                            if (error) throw error;
+                            alertify.success('Usuario actualizado exitosamente');
+                        } else {
+                            // CREAR nuevo usuario usando Edge Function
+                            const response = await fetch(`${SUPABASE_URL}/functions/v1/create-user`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                                },
+                                body: JSON.stringify({
+                                    email: this.formData.email,
+                                    password: this.formData.password,
+                                    full_name: this.formData.full_name,
+                                    phone: this.formData.phone,
+                                    role: this.formData.role,
+                                    branch: this.formData.branch
+                                })
+                            });
+
+                            const result = await response.json();
+
+                            if (!response.ok) {
+                                throw new Error(result.error || 'Error al crear usuario');
+                            }
+
+                            alertify.success(result.message || 'Usuario creado exitosamente');
+                        }
+
+                        this.closeModal();
+                        await this.loadUsers();
+
+                    } catch (err) {
+                        console.error('Error guardando usuario:', err);
+                        alertify.error(err.message || 'Error al guardar usuario');
+                    } finally {
+                        this.saving = false;
+                    }
+                },
+
+                async toggleStatus(user) {
+                    const action = user.is_active ? 'desactivar' : 'activar';
+
+                    alertify.confirm(
+                        `¿Estás seguro de ${action} a ${user.full_name}?`,
+                        async () => {
+                            try {
+                                const { error } = await supabase
+                                    .from('profiles')
+                                    .update({ is_active: !user.is_active })
+                                    .eq('id', user.id);
+
+                                if (error) throw error;
+
+                                user.is_active = !user.is_active;
+                                alertify.success(`Usuario ${action}do exitosamente`);
+                            } catch (err) {
+                                console.error('Error:', err);
+                                alertify.error('Error al cambiar estado del usuario');
+                            }
+                        },
+                        () => {
+                            alertify.warning('Operación cancelada');
+                        }
+                    );
                 }
             }
         }
