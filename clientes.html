@@ -1,17 +1,14 @@
-<!-- clientes.html - Módulo de Clientes lecto-->
 <!DOCTYPE html>
 <html lang="es">
-<!-- prueba -->
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AquaService - Clientes</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -27,62 +24,72 @@
         .gradient-bg {
             background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
         }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
     </style>
 </head>
 
-<body class="bg-gray-50" x-data="clientesApp()">
+<body class="bg-gray-50" x-data="clientesApp()" x-init="initClientes()">
 
     <!-- Sidebar -->
     <aside class="fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 hidden lg:block">
         <div class="p-6">
-            <div class="flex items-center space-x-3 mb-8">
-                <i class="fas fa-tint text-3xl"></i>
-                <div>
-                    <h1 class="text-xl font-bold">AquaService</h1>
-                    <p class="text-xs text-blue-200">Sistema de Gestión</p>
+            <div class="mb-6">
+                <div class="flex items-center space-x-3 mb-3">
+                    <i class="fas fa-tint text-3xl"></i>
+                    <div>
+                        <h1 class="text-xl font-bold">AquaService</h1>
+                        <p class="text-xs text-blue-200">Sistema de Gestión</p>
+                    </div>
+                </div>
+                <div class="bg-white bg-opacity-10 rounded-lg px-3 py-2">
+                    <p class="text-xs text-blue-200 mb-0.5">Sucursal</p>
+                    <p class="font-semibold capitalize text-sm" x-text="userBranch || 'Cargando...'"></p>
                 </div>
             </div>
 
             <nav class="space-y-2">
                 <a href="index.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-home w-5"></i>
-                    <span>Dashboard</span>
+                    <i class="fas fa-home w-5"></i><span>Dashboard</span>
                 </a>
                 <a href="ventas.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-shopping-cart w-5"></i>
-                    <span>Ventas</span>
+                    <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
                 </a>
                 <a href="clientes.html" class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
-                    <i class="fas fa-users w-5"></i>
-                    <span class="font-medium">Clientes</span>
+                    <i class="fas fa-users w-5"></i><span class="font-medium">Clientes</span>
                 </a>
                 <a href="inventario.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-boxes w-5"></i>
-                    <span>Inventario</span>
+                    <i class="fas fa-boxes w-5"></i><span>Inventario</span>
                 </a>
                 <a href="usuarios.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-user-cog w-5"></i>
-                    <span>Usuarios</span>
+                    <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
                 </a>
                 <a href="reportes.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-chart-line w-5"></i>
-                    <span>Reportes</span>
+                    <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
                 </a>
             </nav>
         </div>
 
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold">AD
-                </div>
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
+                    x-text="userInitials"></div>
                 <div>
-                    <p class="text-sm font-medium">Admin</p>
-                    <p class="text-xs text-blue-200">Sucursal Principal</p>
+                    <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
+                    <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
                 </div>
             </div>
         </div>
@@ -93,275 +100,462 @@
         <!-- Header -->
         <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
             <div>
-                <h2 class="text-2xl font-bold text-gray-800">Gestión de Clientes</h2>
-                <p class="text-sm text-gray-500">Administra tu base de clientes</p>
+                <h2 class="text-2xl font-bold text-gray-800">Clientes</h2>
+                <p class="text-sm text-gray-500">Gestión de clientes de <span class="capitalize font-semibold"
+                        x-text="userBranch"></span></p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <!-- Buscador -->
+                <div class="relative">
+                    <input type="text" x-model="searchQuery" @input="filterCustomers()" placeholder="Buscar cliente..."
+                        class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+                <button @click="openCreateModal()"
+                    class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    <i class="fas fa-user-plus mr-2"></i>Nuevo Cliente
+                </button>
+                <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Salir
+                </button>
             </div>
         </header>
 
         <!-- Content -->
         <main class="p-6">
-            <!-- Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div class="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl shadow-lg p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-blue-100 text-sm">Total Clientes</p>
-                            <p class="text-4xl font-bold mt-1" x-text="clientes.length"></p>
-                        </div>
-                        <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                            <i class="fas fa-users text-3xl"></i>
-                        </div>
-                    </div>
-                </div>
+            <!-- Loading -->
+            <div x-show="loading" class="text-center py-12">
+                <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500"></i>
+                <p class="mt-4 text-gray-600">Cargando clientes...</p>
+            </div>
 
-                <div class="bg-gradient-to-br from-green-400 to-green-600 rounded-2xl shadow-lg p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-green-100 text-sm">Clientes Activos</p>
-                            <p class="text-4xl font-bold mt-1">42</p>
-                        </div>
-                        <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                            <i class="fas fa-user-check text-3xl"></i>
-                        </div>
-                    </div>
+            <!-- Stats Cards -->
+            <div x-show="!loading" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-xl shadow-sm p-4 border-l-4 border-blue-500">
+                    <p class="text-sm text-gray-600">Total Clientes</p>
+                    <p class="text-2xl font-bold text-gray-900" x-text="filteredCustomers.length"></p>
                 </div>
-
-                <div class="bg-gradient-to-br from-red-400 to-red-600 rounded-2xl shadow-lg p-6 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-red-100 text-sm">Con Deuda</p>
-                            <p class="text-4xl font-bold mt-1">8</p>
-                        </div>
-                        <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                            <i class="fas fa-exclamation-circle text-3xl"></i>
-                        </div>
-                    </div>
+                <div class="bg-white rounded-xl shadow-sm p-4 border-l-4 border-green-500">
+                    <p class="text-sm text-gray-600">Activos</p>
+                    <p class="text-2xl font-bold text-gray-900"
+                        x-text="filteredCustomers.filter(c => c.is_active).length"></p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-4 border-l-4 border-red-500">
+                    <p class="text-sm text-gray-600">Inactivos</p>
+                    <p class="text-2xl font-bold text-gray-900"
+                        x-text="filteredCustomers.filter(c => !c.is_active).length"></p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-4 border-l-4 border-yellow-500">
+                    <p class="text-sm text-gray-600">Con Recomendación</p>
+                    <p class="text-2xl font-bold text-gray-900"
+                        x-text="filteredCustomers.filter(c => c.recommended_by).length"></p>
                 </div>
             </div>
 
-            <!-- Search and Actions -->
-            <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="relative flex-1 max-w-md">
-                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <input type="text" x-model="searchQuery" placeholder="Buscar por nombre, cédula o teléfono..."
-                            class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <button @click="openModal()"
-                        class="bg-blue-500 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-600 transition-colors flex items-center justify-center">
-                        <i class="fas fa-plus mr-2"></i>Nuevo Cliente
-                    </button>
-                </div>
-            </div>
+            <!-- Customers Grid -->
+            <div x-show="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <template x-for="customer in filteredCustomers" :key="customer.id">
+                    <div class="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-shadow">
+                        <div class="flex items-start justify-between mb-4">
+                            <div
+                                class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center text-white font-bold text-xl">
+                                <span x-text="getInitials(customer.full_name)"></span>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                                :class="customer.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                                x-text="customer.is_active ? 'Activo' : 'Inactivo'"></span>
+                        </div>
 
-            <!-- Clients Table -->
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 border-b border-gray-200">
-                            <tr>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Cliente
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Cédula
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Teléfono
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Dirección
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Deuda</th>
-                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase">Acciones
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            <template x-for="client in filteredClients" :key="client.id">
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center">
-                                            <div
-                                                class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center text-white font-bold">
-                                                <span x-text="client.initials"></span>
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900" x-text="client.name">
-                                                </div>
-                                                <div class="text-xs text-gray-500"
-                                                    x-text="client.referredBy ? 'Ref: ' + client.referredBy : ''"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900" x-text="client.id"></td>
-                                    <td class="px-6 py-4 text-sm text-gray-900" x-text="client.phone"></td>
-                                    <td class="px-6 py-4 text-sm text-gray-500" x-text="client.address"></td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-3 py-1 rounded-full text-xs font-semibold"
-                                            :class="client.debt > 0 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'"
-                                            x-text="client.debt > 0 ? '$' + client.debt.toFixed(2) : 'Al día'"></span>
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <button @click="viewClient(client)"
-                                            class="text-blue-600 hover:text-blue-900 mr-3">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        <button @click="editClient(client)"
-                                            class="text-green-600 hover:text-green-900 mr-3">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button @click="deleteClient(client.id)"
-                                            class="text-red-600 hover:text-red-900">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
+                        <h3 class="text-lg font-semibold text-gray-900" x-text="customer.full_name"></h3>
+                        <p class="text-sm text-gray-500 mb-4" x-text="customer.email || 'Sin email'"></p>
+
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center text-sm" x-show="customer.phone">
+                                <i class="fas fa-phone w-5 text-gray-400"></i>
+                                <span class="text-gray-700" x-text="customer.phone || 'Sin teléfono'"></span>
+                            </div>
+                            <div class="flex items-center text-sm" x-show="customer.address">
+                                <i class="fas fa-map-marker-alt w-5 text-gray-400"></i>
+                                <span class="text-gray-700 truncate"
+                                    x-text="customer.address || 'Sin dirección'"></span>
+                            </div>
+                            <div class="flex items-center text-sm" x-show="customer.recommended_by">
+                                <i class="fas fa-user-check w-5 text-green-400"></i>
+                                <span class="text-gray-700">Recomendado por: <span class="font-medium"
+                                        x-text="customer.recommended_by"></span></span>
+                            </div>
+                        </div>
+
+                        <div class="text-xs text-gray-400 mb-4">
+                            <i class="fas fa-calendar-alt mr-1"></i>
+                            Registrado: <span x-text="formatDate(customer.created_at)"></span>
+                        </div>
+
+                        <div class="flex space-x-2 pt-4 border-t">
+                            <button @click="editCustomer(customer)"
+                                class="flex-1 bg-blue-50 text-blue-600 py-2 rounded-lg hover:bg-blue-100 text-sm font-medium">
+                                <i class="fas fa-edit mr-1"></i>Editar
+                            </button>
+                            <button @click="toggleStatus(customer)"
+                                :class="customer.is_active ? 'bg-gray-50 text-gray-600 hover:bg-gray-100' : 'bg-green-50 text-green-600 hover:bg-green-100'"
+                                class="flex-1 py-2 rounded-lg text-sm font-medium">
+                                <i class="fas fa-power-off mr-1"></i>
+                                <span x-text="customer.is_active ? 'Desactivar' : 'Activar'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Empty State -->
+                <div x-show="filteredCustomers.length === 0 && !loading" class="col-span-full text-center py-12">
+                    <i class="fas fa-users text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 mb-2">No hay clientes registrados</p>
+                    <p class="text-sm text-gray-400" x-show="searchQuery">Intenta con otra búsqueda</p>
+                    <p class="text-sm text-gray-400" x-show="!searchQuery">Haz clic en "Nuevo Cliente" para comenzar</p>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Modal Nuevo/Editar Cliente -->
-    <div x-show="showModal" x-transition.opacity class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="fixed inset-0 bg-black opacity-50" @click="showModal = false"></div>
+    <!-- Modal Crear/Editar Cliente -->
+    <div x-show="showModal" x-cloak class="modal-overlay" @click.self="closeModal()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4" @click.stop>
+            <div class="px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="text-xl font-bold text-gray-800"
+                    x-text="editingCustomer ? 'Editar Cliente' : 'Nuevo Cliente'"></h3>
+                <button @click="closeModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
 
-            <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full relative z-10">
-                <div class="gradient-bg p-6 text-white rounded-t-2xl">
-                    <button @click="showModal = false" class="absolute top-4 right-4 text-white hover:text-gray-200">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
-                    <h3 class="text-xl font-bold" x-text="editingClient ? 'Editar Cliente' : 'Nuevo Cliente'"></h3>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre Completo *</label>
+                    <input type="text" x-model="formData.full_name"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Ej: Juan Pérez">
                 </div>
 
-                <form @submit.prevent="saveClient()" class="p-6 space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo *</label>
-                            <input type="text" x-model="formData.name" required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Cédula *</label>
-                            <input type="text" x-model="formData.id" required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                    </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+                    <input type="tel" x-model="formData.phone"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0412-1234567">
+                </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
-                            <input type="tel" x-model="formData.phone" required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                            <input type="email" x-model="formData.email"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                    </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" x-model="formData.email"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="cliente@email.com">
+                </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Dirección Exacta *</label>
-                        <textarea x-model="formData.address" required rows="3"
-                            placeholder="Calle, número de casa, referencia..."
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
-                        <p class="text-xs text-gray-500 mt-1">Necesaria para servicio de delivery</p>
-                    </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Dirección</label>
+                    <textarea x-model="formData.address" rows="3"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Dirección completa del cliente"></textarea>
+                </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Recomendado por</label>
-                        <input type="text" x-model="formData.referredBy"
-                            placeholder="Nombre de quien recomendó al cliente"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                    </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Recomendado por</label>
+                    <input type="text" x-model="formData.recommended_by"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Nombre de quien recomendó al cliente">
+                </div>
 
-                    <div class="flex justify-end space-x-3 pt-4">
-                        <button type="button" @click="showModal = false"
-                            class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-                            Cancelar
-                        </button>
-                        <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                            Guardar
-                        </button>
-                    </div>
-                </form>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Notas</label>
+                    <textarea x-model="formData.notes" rows="2"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Notas adicionales (opcional)"></textarea>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3">
+                <button @click="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
+                <button @click="saveCustomer()" :disabled="saving"
+                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-save mr-2" x-show="!saving"></i>
+                    <i class="fas fa-circle-notch fa-spin mr-2" x-show="saving"></i>
+                    <span x-text="saving ? 'Guardando...' : 'Guardar'"></span>
+                </button>
             </div>
         </div>
     </div>
 
+    <!-- Alertify -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
+
     <script>
+        const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function logout() {
+            await supabase.auth.signOut();
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        function notify(message, type = 'success') {
+            if (typeof alertify !== 'undefined') {
+                if (type === 'success') alertify.success(message);
+                else if (type === 'error') alertify.error(message);
+                else alertify.message(message);
+            } else {
+                alert(message);
+            }
+        }
+
         function clientesApp() {
             return {
-                searchQuery: '',
+                customers: [],
+                filteredCustomers: [],
+                loading: true,
+                saving: false,
                 showModal: false,
-                editingClient: null,
+                editingCustomer: null,
+                searchQuery: '',
+
+                // User info
+                userName: '',
+                userRole: '',
+                userBranch: '',
+                userInitials: '??',
+
+                // Form data
                 formData: {
-                    id: '',
-                    name: '',
+                    full_name: '',
                     phone: '',
                     email: '',
                     address: '',
-                    referredBy: '',
-                    debt: 0
-                },
-                clientes: [
-                    { id: '12345678', name: 'María González', phone: '+58 412 1234567', email: 'maria@email.com', address: 'Av. Principal, Casa #123', referredBy: 'Carlos Rodríguez', debt: 0, initials: 'MG' },
-                    { id: '87654321', name: 'Carlos Rodríguez', phone: '+58 414 7654321', email: 'carlos@email.com', address: 'Calle 5, Edificio Azul, Apto 4B', referredBy: '', debt: 45.00, initials: 'CR' },
-                    { id: '11223344', name: 'Ana Martínez', phone: '+58 416 1122334', email: 'ana@email.com', address: 'Urbanización Los Pinos, Casa 45', referredBy: 'María González', debt: 0, initials: 'AM' },
-                ],
-
-                get filteredClients() {
-                    if (this.searchQuery === '') return this.clientes;
-                    return this.clientes.filter(c =>
-                        c.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                        c.id.includes(this.searchQuery) ||
-                        c.phone.includes(this.searchQuery)
-                    );
+                    recommended_by: '',
+                    notes: ''
                 },
 
-                openModal() {
-                    this.editingClient = null;
-                    this.formData = { id: '', name: '', phone: '', email: '', address: '', referredBy: '', debt: 0 };
-                    this.showModal = true;
-                },
-
-                editClient(client) {
-                    this.editingClient = client;
-                    this.formData = { ...client };
-                    this.showModal = true;
-                },
-
-                saveClient() {
-                    if (this.editingClient) {
-                        const index = this.clientes.findIndex(c => c.id === this.editingClient.id);
-                        this.clientes[index] = {
-                            ...this.formData,
-                            initials: this.formData.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
-                        };
-                        alertify.success('Cliente actualizado');
-                    } else {
-                        this.clientes.push({
-                            ...this.formData,
-                            initials: this.formData.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
-                        });
-                        alertify.success('Cliente registrado');
+                async initClientes() {
+                    if (typeof alertify !== 'undefined') {
+                        alertify.set('notifier', { position: 'top-right' });
                     }
-                    this.showModal = false;
+
+                    // Verificar autenticación
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (!session) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
+                    // Obtener perfil del usuario
+                    try {
+                        const { data: profile } = await supabase
+                            .from('profiles')
+                            .select('full_name, role, branch')
+                            .eq('id', session.user.id)
+                            .single();
+
+                        if (profile) {
+                            this.userName = profile.full_name;
+                            this.userRole = profile.role;
+                            this.userBranch = profile.branch;
+                            this.userInitials = this.getInitials(profile.full_name);
+                        }
+                    } catch (err) {
+                        console.error('Error obteniendo perfil:', err);
+                    }
+
+                    // Cargar clientes
+                    await this.loadCustomers();
                 },
 
-                deleteClient(id) {
-                    alertify.confirm('¿Eliminar cliente?', 'Esta acción no se puede deshacer',
-                        () => {
-                            this.clientes = this.clientes.filter(c => c.id !== id);
-                            alertify.success('Cliente eliminado');
-                        },
-                        () => { }
+                async loadCustomers() {
+                    this.loading = true;
+                    try {
+                        const { data, error } = await supabase
+                            .from('customers')
+                            .select('*')
+                            .eq('branch', this.userBranch)
+                            .order('created_at', { ascending: false });
+
+                        if (error) throw error;
+
+                        this.customers = data || [];
+                        this.filteredCustomers = [...this.customers];
+
+                    } catch (err) {
+                        console.error('Error cargando clientes:', err);
+                        notify('Error al cargar clientes: ' + err.message, 'error');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                filterCustomers() {
+                    if (!this.searchQuery) {
+                        this.filteredCustomers = [...this.customers];
+                        return;
+                    }
+
+                    const query = this.searchQuery.toLowerCase();
+                    this.filteredCustomers = this.customers.filter(c =>
+                        c.full_name?.toLowerCase().includes(query) ||
+                        c.phone?.toLowerCase().includes(query) ||
+                        c.email?.toLowerCase().includes(query) ||
+                        c.recommended_by?.toLowerCase().includes(query)
                     );
                 },
 
-                viewClient(client) {
-                    alertify.message('Viendo: ' + client.name);
+                getInitials(name) {
+                    if (!name) return '??';
+                    return name.split(' ')
+                        .map(n => n[0])
+                        .join('')
+                        .substring(0, 2)
+                        .toUpperCase();
+                },
+
+                formatDate(dateString) {
+                    if (!dateString) return 'N/A';
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('es-ES', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                },
+
+                openCreateModal() {
+                    this.editingCustomer = null;
+                    this.formData = {
+                        full_name: '',
+                        phone: '',
+                        email: '',
+                        address: '',
+                        recommended_by: '',
+                        notes: ''
+                    };
+                    this.showModal = true;
+                },
+
+                editCustomer(customer) {
+                    this.editingCustomer = customer;
+                    this.formData = {
+                        full_name: customer.full_name,
+                        phone: customer.phone || '',
+                        email: customer.email || '',
+                        address: customer.address || '',
+                        recommended_by: customer.recommended_by || '',
+                        notes: customer.notes || ''
+                    };
+                    this.showModal = true;
+                },
+
+                closeModal() {
+                    this.showModal = false;
+                    this.editingCustomer = null;
+                    this.formData = {
+                        full_name: '',
+                        phone: '',
+                        email: '',
+                        address: '',
+                        recommended_by: '',
+                        notes: ''
+                    };
+                },
+
+                async saveCustomer() {
+                    if (!this.formData.full_name) {
+                        notify('El nombre es obligatorio', 'error');
+                        return;
+                    }
+
+                    this.saving = true;
+
+                    try {
+                        if (this.editingCustomer) {
+                            // Actualizar cliente existente
+                            const { error } = await supabase
+                                .from('customers')
+                                .update({
+                                    full_name: this.formData.full_name,
+                                    phone: this.formData.phone,
+                                    email: this.formData.email,
+                                    address: this.formData.address,
+                                    recommended_by: this.formData.recommended_by,
+                                    notes: this.formData.notes,
+                                    updated_at: new Date().toISOString()
+                                })
+                                .eq('id', this.editingCustomer.id);
+
+                            if (error) throw error;
+
+                            notify('Cliente actualizado exitosamente');
+
+                            // Actualizar en la lista local
+                            const index = this.customers.findIndex(c => c.id === this.editingCustomer.id);
+                            if (index !== -1) {
+                                this.customers[index] = {
+                                    ...this.customers[index],
+                                    ...this.formData
+                                };
+                            }
+                        } else {
+                            // Crear nuevo cliente
+                            const { data, error } = await supabase
+                                .from('customers')
+                                .insert({
+                                    full_name: this.formData.full_name,
+                                    phone: this.formData.phone,
+                                    email: this.formData.email,
+                                    address: this.formData.address,
+                                    recommended_by: this.formData.recommended_by,
+                                    notes: this.formData.notes,
+                                    branch: this.userBranch
+                                })
+                                .select()
+                                .single();
+
+                            if (error) throw error;
+
+                            notify('Cliente creado exitosamente');
+                            this.customers.unshift(data);
+                        }
+
+                        this.filterCustomers();
+                        this.closeModal();
+
+                    } catch (err) {
+                        console.error('Error guardando cliente:', err);
+                        notify('Error al guardar cliente: ' + err.message, 'error');
+                    } finally {
+                        this.saving = false;
+                    }
+                },
+
+                async toggleStatus(customer) {
+                    const action = customer.is_active ? 'desactivar' : 'activar';
+
+                    if (!confirm(`¿Estás seguro de ${action} a ${customer.full_name}?`)) {
+                        return;
+                    }
+
+                    try {
+                        const { error } = await supabase
+                            .from('customers')
+                            .update({ is_active: !customer.is_active })
+                            .eq('id', customer.id);
+
+                        if (error) throw error;
+
+                        customer.is_active = !customer.is_active;
+                        notify(`Cliente ${action}do exitosamente`);
+
+                    } catch (err) {
+                        console.error('Error:', err);
+                        notify('Error al cambiar estado: ' + err.message, 'error');
+                    }
                 }
             }
         }
