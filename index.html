@@ -25,6 +25,21 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
     <style>
         [x-cloak] { display: none !important; }
         body { font-family: 'Inter', sans-serif; }
@@ -41,11 +56,12 @@
         }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50" x-data="dashboardApp()" x-init="initDashboard()">
 
     <!-- Sidebar -->
     <aside class="fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 hidden lg:block">
         <div class="p-6">
+            <!-- Logo y Sucursal -->
             <div class="mb-6">
                 <div class="flex items-center space-x-3 mb-3">
                     <i class="fas fa-tint text-3xl"></i>
@@ -54,9 +70,10 @@
                         <p class="text-xs text-blue-200">Sistema de Gestión</p>
                     </div>
                 </div>
+                <!-- Sucursal -->
                 <div class="bg-white bg-opacity-10 rounded-lg px-3 py-2">
                     <p class="text-xs text-blue-200 mb-0.5">Sucursal</p>
-                    <p class="font-semibold capitalize text-sm" id="sidebar-branch">Cargando...</p>
+                    <p class="font-semibold capitalize text-sm" x-text="userBranch || 'Cargando...'"></p>
                 </div>
             </div>
 
@@ -65,37 +82,43 @@
                     <i class="fas fa-home w-5"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="ventas.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                <a href="ventas.html"
+                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
                     <i class="fas fa-shopping-cart w-5"></i>
                     <span>Ventas</span>
                 </a>
-                <a href="clientes.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                <a href="clientes.html"
+                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
                     <i class="fas fa-users w-5"></i>
                     <span>Clientes</span>
                 </a>
-                <a href="inventario.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                <a href="inventario.html"
+                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
                     <i class="fas fa-boxes w-5"></i>
                     <span>Inventario</span>
                 </a>
-                <a href="usuarios.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                <a href="usuarios.html"
+                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
                     <i class="fas fa-user-cog w-5"></i>
                     <span>Usuarios</span>
                 </a>
-                <a href="reportes.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                <a href="reportes.html"
+                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
                     <i class="fas fa-chart-line w-5"></i>
                     <span>Reportes</span>
                 </a>
             </nav>
         </div>
 
+        <!-- Perfil de Usuario -->
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold" id="user-initials">
-                    ??
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold">
+                    <span x-text="userInitials"></span>
                 </div>
                 <div>
-                    <p class="text-sm font-medium" id="user-name">Usuario</p>
-                    <p class="text-xs text-blue-200 capitalize" id="user-role">Cargando...</p>
+                    <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
+                    <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
                 </div>
             </div>
         </div>
@@ -112,18 +135,22 @@
             </div>
 
             <div class="flex items-center space-x-4">
+                <!-- Tasa de Cambio -->
                 <div class="hidden md:flex items-center bg-blue-50 px-4 py-2 rounded-lg">
                     <i class="fas fa-dollar-sign text-green-600 mr-2"></i>
                     <span class="text-sm text-gray-600">Tasa: </span>
                     <span class="text-sm font-bold text-blue-600 ml-1">Bs. 38.50</span>
                 </div>
 
+                <!-- Notificaciones -->
                 <button class="relative p-2 text-gray-400 hover:text-gray-600">
                     <i class="fas fa-bell text-xl"></i>
                     <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                 </button>
 
-                <button onclick="logout()" class="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition shadow-sm">
+                <!-- Botón Cerrar Sesión -->
+                <button onclick="logout()"
+                    class="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition shadow-sm">
                     <i class="fas fa-sign-out-alt"></i>
                     <span class="font-medium">Salir</span>
                 </button>
@@ -133,14 +160,18 @@
         <!-- Content -->
         <main class="flex-1 p-6">
 
-            <!-- Tarjetas -->
+            <!-- Tarjetas de Estadísticas -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+
+                <!-- Ventas Hoy -->
                 <div class="bg-white rounded-2xl shadow-sm p-6 card-hover border-l-4 border-blue-500">
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-sm text-gray-600 mb-1">Ventas Hoy</p>
                             <p class="text-3xl font-bold text-gray-900">24</p>
-                            <p class="text-xs text-green-600 mt-2"><i class="fas fa-arrow-up"></i> 12% vs ayer</p>
+                            <p class="text-xs text-green-600 mt-2">
+                                <i class="fas fa-arrow-up"></i> 12% vs ayer
+                            </p>
                         </div>
                         <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                             <i class="fas fa-shopping-cart text-blue-600 text-xl"></i>
@@ -148,12 +179,15 @@
                     </div>
                 </div>
 
+                <!-- Ingresos Hoy -->
                 <div class="bg-white rounded-2xl shadow-sm p-6 card-hover border-l-4 border-green-500">
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-sm text-gray-600 mb-1">Ingresos Hoy</p>
                             <p class="text-3xl font-bold text-gray-900">$485</p>
-                            <p class="text-xs text-green-600 mt-2"><i class="fas fa-arrow-up"></i> 8% vs ayer</p>
+                            <p class="text-xs text-green-600 mt-2">
+                                <i class="fas fa-arrow-up"></i> 8% vs ayer
+                            </p>
                         </div>
                         <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                             <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
@@ -161,6 +195,7 @@
                     </div>
                 </div>
 
+                <!-- Botellones Vendidos -->
                 <div class="bg-white rounded-2xl shadow-sm p-6 card-hover border-l-4 border-cyan-500">
                     <div class="flex justify-between items-start">
                         <div>
@@ -174,12 +209,15 @@
                     </div>
                 </div>
 
+                <!-- Cuentas por Cobrar -->
                 <div class="bg-white rounded-2xl shadow-sm p-6 card-hover border-l-4 border-red-500">
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-sm text-gray-600 mb-1">Cuentas por Cobrar</p>
                             <p class="text-3xl font-bold text-gray-900">$1,240</p>
-                            <p class="text-xs text-red-600 mt-2"><i class="fas fa-exclamation-circle"></i> 8 clientes</p>
+                            <p class="text-xs text-red-600 mt-2">
+                                <i class="fas fa-exclamation-circle"></i> 8 clientes
+                            </p>
                         </div>
                         <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
                             <i class="fas fa-file-invoice-dollar text-red-600 text-xl"></i>
@@ -188,175 +226,306 @@
                 </div>
             </div>
 
-            <!-- Gráficos - SIMPLIFICADOS -->
+            <!-- Gráficos -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+
+                <!-- Ventas de la Semana -->
                 <div class="bg-white rounded-2xl shadow-sm p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Ventas de la Semana</h3>
-                    <div style="position: relative; height: 300px;">
-                        <canvas id="salesChart"></canvas>
-                    </div>
+                    <canvas id="salesChart" height="250"></canvas>
                 </div>
 
+                <!-- Distribución por Producto -->
                 <div class="bg-white rounded-2xl shadow-sm p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Distribución por Producto</h3>
-                    <div style="position: relative; height: 300px;">
-                        <canvas id="productChart"></canvas>
-                    </div>
+                    <canvas id="productChart" height="250"></canvas>
                 </div>
             </div>
 
-            <!-- Actividad Reciente -->
-            <div class="bg-white rounded-2xl shadow-sm p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Actividad Reciente</h3>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-check text-green-600"></i>
+            <!-- Actividad Reciente y Tanques -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- Actividad Reciente -->
+                <div class="bg-white rounded-2xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Actividad Reciente</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-check text-green-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 text-sm">Venta completada</p>
+                                    <p class="text-xs text-gray-500">María González - 3 botellones 20L</p>
+                                </div>
                             </div>
-                            <div>
-                                <p class="font-medium text-gray-900 text-sm">Venta completada</p>
-                                <p class="text-xs text-gray-500">María González - 3 botellones 20L</p>
+                            <div class="text-right">
+                                <p class="font-semibold text-green-600 text-sm">+$21.00</p>
+                                <p class="text-xs text-gray-500">Hace 5 min</p>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <p class="font-semibold text-green-600 text-sm">+$21.00</p>
-                            <p class="text-xs text-gray-500">Hace 5 min</p>
+
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-truck text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 text-sm">Delivery en ruta</p>
+                                    <p class="text-xs text-gray-500">5 pedidos pendientes</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-semibold text-blue-600 text-sm">En proceso</p>
+                                <p class="text-xs text-gray-500">Hace 15 min</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-exclamation text-yellow-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 text-sm">Stock bajo</p>
+                                    <p class="text-xs text-gray-500">Botellones 5L: Solo 10 unidades</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-semibold text-yellow-600 text-sm">Reponer</p>
+                                <p class="text-xs text-gray-500">Hace 1 hora</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user-plus text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 text-sm">Nuevo cliente</p>
+                                    <p class="text-xs text-gray-500">Pedro López registrado</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-semibold text-purple-600 text-sm">Nuevo</p>
+                                <p class="text-xs text-gray-500">Hace 2 horas</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tanques de Agua -->
+                <div class="bg-white rounded-2xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-database text-blue-500 mr-2"></i>
+                        Tanques de Almacenamiento
+                    </h3>
+
+                    <div class="space-y-4">
+                        <!-- Tanque Principal -->
+                        <div class="border border-gray-200 rounded-xl p-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Tanque Principal</h4>
+                                    <p class="text-sm text-gray-500">Capacidad: 5,000L</p>
+                                </div>
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">85%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
+                                <div class="bg-gradient-to-r from-blue-400 to-blue-600 h-3 rounded-full" style="width: 85%"></div>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">4,250L disponibles</span>
+                                <span class="font-semibold text-blue-600">750L usados hoy</span>
+                            </div>
+                        </div>
+
+                        <!-- Tanque Respaldo -->
+                        <div class="border border-gray-200 rounded-xl p-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Tanque Respaldo</h4>
+                                    <p class="text-sm text-gray-500">Capacidad: 3,000L</p>
+                                </div>
+                                <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">60%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
+                                <div class="bg-gradient-to-r from-yellow-400 to-yellow-600 h-3 rounded-full" style="width: 60%"></div>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">1,800L disponibles</span>
+                                <span class="font-semibold text-yellow-600">1,200L usados hoy</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
 
+        <!-- Footer -->
         <footer class="bg-white border-t px-6 py-4 text-center text-sm text-gray-500">
             <p>&copy; 2026 AquaService. Todos los derechos reservados.</p>
         </footer>
     </div>
 
+    <!-- ============================================ -->
+    <!-- SCRIPTS PRINCIPALES -->
+    <!-- ============================================ -->
     <script>
         // ============================================
         // CONFIGURACIÓN DE SUPABASE
         // ============================================
         const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
-        
+
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // ============================================
-        // INICIALIZACIÓN - FUERA DE ALPINE
+        // FUNCIÓN DE LOGOUT (Global)
         // ============================================
-        document.addEventListener('DOMContentLoaded', async function() {
-            // 1. Verificar autenticación
-            const { data: { session } } = await supabase.auth.getSession();
-            
-            if (!session) {
-                window.location.href = 'login.html';
-                return;
-            }
-
-            // 2. Obtener perfil
+        async function logout() {
             try {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('full_name, role, branch')
-                    .eq('id', session.user.id)
-                    .single();
-
-                if (profile) {
-                    document.getElementById('user-name').textContent = profile.full_name;
-                    document.getElementById('user-role').textContent = profile.role;
-                    document.getElementById('sidebar-branch').textContent = profile.branch;
-                    
-                    const initials = profile.full_name.split(' ')
-                        .map(n => n[0])
-                        .join('')
-                        .substring(0, 2)
-                        .toUpperCase();
-                    document.getElementById('user-initials').textContent = initials;
-                    
-                    localStorage.setItem('user_id', session.user.id);
-                    localStorage.setItem('user_name', profile.full_name);
-                    localStorage.setItem('user_role', profile.role);
-                    localStorage.setItem('user_branch', profile.branch);
+                await supabase.auth.signOut();
+                localStorage.clear();
+                if (typeof alertify !== 'undefined') {
+                    alertify.success('Sesión cerrada correctamente');
                 }
-            } catch (err) {
-                console.error('Error:', err);
-            }
-
-            // 3. Inicializar gráficos (UNA SOLA VEZ)
-            initCharts();
-        });
-
-        // ============================================
-        // GRÁFICOS - Vanilla JS (sin Alpine)
-        // ============================================
-        function initCharts() {
-            // Ventas
-            const salesCtx = document.getElementById('salesChart');
-            if (salesCtx) {
-                new Chart(salesCtx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-                        datasets: [{
-                            label: 'Ventas ($)',
-                            data: [320, 450, 380, 520, 480, 620, 485],
-                            borderColor: '#0ea5e9',
-                            backgroundColor: 'rgba(14, 165, 233, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: { callback: value => '$' + value }
-                            }
-                        }
-                    }
-                });
-            }
-
-            // Productos
-            const productCtx = document.getElementById('productChart');
-            if (productCtx) {
-                new Chart(productCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['5 Litros', '10 Litros', '20 Litros'],
-                        datasets: [{
-                            data: [15, 18, 15],
-                            backgroundColor: ['#06b6d4', '#0ea5e9', '#0284c7'],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'bottom' }
-                        }
-                    }
-                });
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+            } catch (error) {
+                console.error('Error al cerrar sesión:', error);
+                window.location.href = 'login.html';
             }
         }
 
         // ============================================
-        // LOGOUT
+        // APLICACIÓN DASHBOARD
         // ============================================
-        async function logout() {
-            await supabase.auth.signOut();
-            localStorage.clear();
-            if (typeof alertify !== 'undefined') {
-                alertify.success('Sesión cerrada');
+        function dashboardApp() {
+            return {
+                userName: '',
+                userRole: '',
+                userBranch: '',
+                userInitials: '??',
+                salesChart: null,
+                productChart: null,
+
+                async initDashboard() {
+                    // Configurar Alertify
+                    if (typeof alertify !== 'undefined') {
+                        alertify.set('notifier', { position: 'top-right' });
+                    }
+
+                    // 1. Verificar autenticación
+                    const { data: { session } } = await supabase.auth.getSession();
+
+                    if (!session) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
+                    // 2. Obtener perfil del usuario
+                    try {
+                        const { data: profile, error } = await supabase
+                            .from('profiles')
+                            .select('full_name, role, branch')
+                            .eq('id', session.user.id)
+                            .single();
+
+                        if (error) {
+                            console.error('Error al obtener perfil:', error);
+                            this.userName = session.user.email;
+                            this.userRole = 'usuario';
+                            this.userBranch = 'geminis';
+                            this.userInitials = 'US';
+                        } else {
+                            this.userName = profile.full_name;
+                            this.userRole = profile.role;
+                            this.userBranch = profile.branch;
+                            this.userInitials = this.getInitials(profile.full_name);
+                        }
+
+                        localStorage.setItem('user_id', session.user.id);
+                        localStorage.setItem('user_name', this.userName);
+                        localStorage.setItem('user_role', this.userRole);
+                        localStorage.setItem('user_branch', this.userBranch);
+
+                    } catch (err) {
+                        console.error('Error:', err);
+                    }
+
+                    // 3. Inicializar gráficos
+                    this.$nextTick(() => {
+                        this.initCharts();
+                    });
+                },
+
+                getInitials(name) {
+                    if (!name) return '??';
+                    return name.split(' ')
+                        .map(n => n[0])
+                        .join('')
+                        .substring(0, 2)
+                        .toUpperCase();
+                },
+
+                initCharts() {
+                    // Gráfico de Ventas Semanales
+                    const salesCtx = document.getElementById('salesChart');
+                    if (salesCtx) {
+                        this.salesChart = new Chart(salesCtx, {
+                            type: 'line',
+                            data: {
+                                labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                                datasets: [{
+                                    label: 'Ventas ($)',
+                                    data: [320, 450, 380, 520, 480, 620, 485],
+                                    borderColor: '#0ea5e9',
+                                    backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                                    tension: 0.4,
+                                    fill: true
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            callback: function(value) { return '$' + value; }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    // Gráfico de Distribución por Producto
+                    const productCtx = document.getElementById('productChart');
+                    if (productCtx) {
+                        this.productChart = new Chart(productCtx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: ['5 Litros', '10 Litros', '20 Litros'],
+                                datasets: [{
+                                    data: [15, 18, 15],
+                                    backgroundColor: ['#06b6d4', '#0ea5e9', '#0284c7'],
+                                    borderWidth: 0
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { position: 'bottom' } }
+                            }
+                        });
+                    }
+                }
             }
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 1000);
         }
     </script>
 </body>
