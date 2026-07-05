@@ -108,8 +108,11 @@
                 <div class="bg-blue-50 px-4 py-2 rounded-lg flex items-center space-x-2">
                     <span class="text-sm text-gray-600">Tasa USD:</span>
                     <input type="number" x-model="exchangeRate" step="0.01"
-                        class="w-20 px-2 py-1 text-sm font-bold text-blue-600 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-center"
-                        @change="saveExchangeRate()">
+                        class="w-24 px-2 py-1 text-sm font-bold text-blue-600 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-center"
+                        @change="updateExchangeRate()">
+                    <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800" title="Recargar tasa">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
                 </div>
                 <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
                     <i class="fas fa-sign-out-alt mr-2"></i>Salir
@@ -129,7 +132,6 @@
 
                 <!-- Products Section -->
                 <div class="lg:col-span-2 space-y-4">
-                    <!-- Quick Add Buttons -->
                     <div class="bg-white rounded-2xl shadow-sm p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Productos Disponibles</h3>
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -237,7 +239,7 @@
                                 <label class="block text-sm font-medium text-gray-700">Cliente</label>
                                 <button @click="openCustomerModal()"
                                     class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-medium transition">
-                                    <i class="fas fa-user-plus mr-1"></i>Nuevo Cliente
+                                    <i class="fas fa-user-plus mr-1"></i>Nuevo
                                 </button>
                             </div>
                             <select x-model="selectedCustomer"
@@ -249,7 +251,7 @@
                             </select>
                         </div>
 
-                        <!-- Payment Method - ACTUALIZADO -->
+                        <!-- Payment Method -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Método de Pago</label>
                             <select x-model="paymentMethod"
@@ -263,40 +265,49 @@
                             </select>
                         </div>
 
-                        <!-- Campos adicionales según método de pago -->
-                        <div x-show="paymentMethod === 'pago_movil' || paymentMethod === 'transferencia'"
+                        <!-- Payment Reference -->
+                        <div x-show="['pago_movil', 'transferencia'].includes(paymentMethod)"
                             class="p-3 bg-yellow-50 rounded-lg">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Referencia / Número de
-                                Operación</label>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Referencia / Últimos 4
+                                dígitos</label>
                             <input type="text" x-model="paymentReference"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                placeholder="Últimos 4 dígitos o número completo">
+                                placeholder="Ej: 1234">
                         </div>
 
+                        <!-- Cash BS Fields -->
                         <div x-show="paymentMethod === 'efectivo_bs'" class="p-3 bg-green-50 rounded-lg">
                             <label class="block text-xs font-medium text-gray-700 mb-1">Monto Recibido (Bs.)</label>
-                            <input type="number" x-model="amountReceivedBs" step="0.01"
+                            <input type="number" x-model.number="amountReceivedBs" step="0.01"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                placeholder="Monto recibido en bolívares">
-                            <div x-show="amountReceivedBs > 0" class="mt-2 text-xs">
-                                <p class="text-gray-600">Monto en USD: <span class="font-bold"
+                                placeholder="Monto en bolívares">
+                            <div x-show="amountReceivedBs > 0" class="mt-2 text-xs space-y-1">
+                                <p class="text-gray-600">En USD: <span class="font-bold"
                                         x-text="'$' + (amountReceivedBs / exchangeRate).toFixed(2)"></span></p>
-                                <p class="text-gray-600">Cambio: <span class="font-bold text-green-600"
-                                        x-text="'Bs. ' + (amountReceivedBs - totalBs).toFixed(2)"></span></p>
+                                <p x-show="amountReceivedBs >= totalBs" class="text-green-600 font-semibold">Cambio: Bs.
+                                    <span x-text="(amountReceivedBs - totalBs).toFixed(2)"></span>
+                                </p>
+                                <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs.
+                                    <span x-text="(totalBs - amountReceivedBs).toFixed(2)"></span>
+                                </p>
                             </div>
                         </div>
 
+                        <!-- Cash USD Fields -->
                         <div x-show="paymentMethod === 'efectivo_divisas'" class="p-3 bg-green-50 rounded-lg">
                             <label class="block text-xs font-medium text-gray-700 mb-1">Monto Recibido (USD)</label>
-                            <input type="number" x-model="amountReceivedUsd" step="0.01"
+                            <input type="number" x-model.number="amountReceivedUsd" step="0.01"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                placeholder="Monto recibido en dólares">
+                                placeholder="Monto en dólares">
                             <div x-show="amountReceivedUsd > 0" class="mt-2 text-xs">
-                                <p class="text-gray-600">Cambio: <span class="font-bold text-green-600"
-                                        x-text="'$' + (amountReceivedUsd - totalUSD).toFixed(2)"></span></p>
+                                <p x-show="amountReceivedUsd >= totalUSD" class="text-green-600 font-semibold">Cambio:
+                                    $<span x-text="(amountReceivedUsd - totalUSD).toFixed(2)"></span></p>
+                                <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta:
+                                    $<span x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
                             </div>
                         </div>
 
+                        <!-- Credit Warning -->
                         <div x-show="paymentMethod === 'credito'" class="p-3 bg-red-50 rounded-lg">
                             <p class="text-xs text-red-600">
                                 <i class="fas fa-exclamation-circle mr-1"></i>
@@ -359,7 +370,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Recomendado por</label>
                     <input type="text" x-model="newCustomer.recommended_by"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        placeholder="Nombre de quien recomendó al cliente">
+                        placeholder="Nombre de quien recomendó">
                 </div>
             </div>
 
@@ -376,13 +387,12 @@
         </div>
     </div>
 
-    <!-- Alertify - AL FINAL DEL BODY -->
+    <!-- Alertify -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
 
     <script>
-        // Configuración de Supabase
         const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -454,20 +464,12 @@
                         alertify.set('notifier', { position: 'top-right' });
                     }
 
-                    // Cargar tasa de cambio guardada
-                    const savedRate = localStorage.getItem('exchangeRate');
-                    if (savedRate) {
-                        this.exchangeRate = parseFloat(savedRate);
-                    }
-
-                    // Verificar autenticación
                     const { data: { session } } = await supabase.auth.getSession();
                     if (!session) {
                         window.location.href = 'login.html';
                         return;
                     }
 
-                    // Obtener perfil del usuario
                     try {
                         const { data: profile } = await supabase
                             .from('profiles')
@@ -485,14 +487,57 @@
                         console.error('Error obteniendo perfil:', err);
                     }
 
-                    // Cargar datos
+                    await this.loadExchangeRate();
                     await this.loadProducts();
                     await this.loadCustomers();
                 },
 
-                saveExchangeRate() {
-                    localStorage.setItem('exchangeRate', this.exchangeRate);
-                    notify('Tasa de cambio actualizada');
+                async loadExchangeRate() {
+                    try {
+                        // Intentar obtener tasa de la base de datos
+                        const { data, error } = await supabase.rpc('get_active_exchange_rate', {
+                            branch_param: this.userBranch
+                        });
+
+                        if (error) throw error;
+
+                        if (data) {
+                            this.exchangeRate = parseFloat(data);
+                            console.log('Tasa cargada de BD:', this.exchangeRate);
+                        }
+                    } catch (err) {
+                        console.log('Usando tasa por defecto (38.50)');
+                        this.exchangeRate = 38.50;
+                    }
+                },
+
+                async updateExchangeRate() {
+                    try {
+                        // Actualizar tasa en la base de datos
+                        const { error } = await supabase
+                            .from('exchange_rates')
+                            .update({ is_active: false })
+                            .eq('is_active', true);
+
+                        if (error) throw error;
+
+                        const { error: insertError } = await supabase
+                            .from('exchange_rates')
+                            .insert({
+                                rate: this.exchangeRate,
+                                branch: this.userBranch,
+                                is_active: true
+                            });
+
+                        if (insertError) throw insertError;
+
+                        notify('Tasa de cambio actualizada');
+                    } catch (err) {
+                        console.error('Error actualizando tasa:', err);
+                        // Guardar en localStorage como fallback
+                        localStorage.setItem('exchangeRate', this.exchangeRate);
+                        notify('Tasa guardada localmente');
+                    }
                 },
 
                 async loadProducts() {
@@ -522,7 +567,7 @@
 
                     } catch (err) {
                         console.error('Error cargando productos:', err);
-                        notify('Error al cargar productos', 'error');
+                        notify('Error al cargar productos: ' + err.message, 'error');
                     } finally {
                         this.loading = false;
                     }
@@ -591,15 +636,13 @@
 
                 removeFromCart(index) {
                     this.cart.splice(index, 1);
-                    notify('Producto eliminado', 'warning');
+                    notify('Producto eliminado');
                 },
 
                 clearCart() {
-                    if (this.cart.length > 0) {
-                        if (confirm('¿Limpiar carrito?')) {
-                            this.cart = [];
-                            notify('Carrito limpiado');
-                        }
+                    if (this.cart.length > 0 && confirm('¿Limpiar carrito?')) {
+                        this.cart = [];
+                        notify('Carrito limpiado');
                     }
                 },
 
@@ -649,7 +692,7 @@
 
                     } catch (err) {
                         console.error('Error creando cliente:', err);
-                        notify('Error al crear cliente', 'error');
+                        notify('Error al crear cliente: ' + err.message, 'error');
                     } finally {
                         this.savingCustomer = false;
                     }
@@ -666,15 +709,25 @@
                         return;
                     }
 
-                    // Validar referencia para pago móvil y transferencia
-                    if ((this.paymentMethod === 'pago_movil' || this.paymentMethod === 'transferencia') && !this.paymentReference) {
+                    // Validar referencia
+                    if (['pago_movil', 'transferencia'].includes(this.paymentMethod) && !this.paymentReference) {
                         notify('Debe ingresar la referencia de pago', 'error');
                         return;
                     }
 
-                    const customerName = this.selectedCustomer
-                        ? this.customers.find(c => c.id === this.selectedCustomer)?.full_name
-                        : 'Cliente no registrado';
+                    // Validar monto recibido para efectivo
+                    if (this.paymentMethod === 'efectivo_bs' && this.amountReceivedBs < this.totalBs) {
+                        notify('El monto recibido es insuficiente', 'error');
+                        return;
+                    }
+
+                    if (this.paymentMethod === 'efectivo_divisas' && this.amountReceivedUsd < this.totalUSD) {
+                        notify('El monto recibido es insuficiente', 'error');
+                        return;
+                    }
+
+                    const customer = this.customers.find(c => c.id === this.selectedCustomer);
+                    const customerName = customer?.full_name || 'Cliente no registrado';
 
                     const methodNames = {
                         'efectivo_bs': 'Efectivo Bs',
@@ -693,46 +746,48 @@
 
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
-                        const customer = this.customers.find(c => c.id === this.selectedCustomer);
 
-                        // Construir notas con información del pago
-                        let notes = '';
+                        // Construir notas
+                        let notes = [];
                         if (this.deliveryType === 'delivery') {
-                            notes += `Delivery a: ${this.deliveryAddress}\n`;
+                            notes.push(`Delivery: ${this.deliveryAddress}`);
                         }
                         if (this.paymentReference) {
-                            notes += `Referencia: ${this.paymentReference}\n`;
+                            notes.push(`Ref: ${this.paymentReference}`);
                         }
                         if (this.paymentMethod === 'efectivo_bs' && this.amountReceivedBs > 0) {
-                            notes += `Recibido Bs: ${this.amountReceivedBs.toFixed(2)}\n`;
-                            notes += `Cambio Bs: ${(this.amountReceivedBs - this.totalBs).toFixed(2)}\n`;
+                            notes.push(`Recibido Bs: ${this.amountReceivedBs.toFixed(2)}`);
+                            notes.push(`Cambio Bs: ${(this.amountReceivedBs - this.totalBs).toFixed(2)}`);
                         }
                         if (this.paymentMethod === 'efectivo_divisas' && this.amountReceivedUsd > 0) {
-                            notes += `Recibido USD: $${this.amountReceivedUsd.toFixed(2)}\n`;
-                            notes += `Cambio USD: $${(this.amountReceivedUsd - this.totalUSD).toFixed(2)}\n`;
+                            notes.push(`Recibido USD: $${this.amountReceivedUsd.toFixed(2)}`);
+                            notes.push(`Cambio USD: $${(this.amountReceivedUsd - this.totalUSD).toFixed(2)}`);
                         }
 
-                        // 1. Crear la venta
+                        // 1. Crear venta
                         const { data: sale, error: saleError } = await supabase
                             .from('sales')
                             .insert({
                                 branch: this.userBranch,
                                 customer_id: this.selectedCustomer || null,
-                                customer_name: customer?.full_name || 'Cliente no registrado',
+                                customer_name: customerName,
                                 subtotal: this.subtotal,
                                 tax: 0,
                                 total: this.totalUSD,
                                 payment_method: this.paymentMethod,
                                 status: this.paymentMethod === 'credito' ? 'pending' : 'completed',
-                                notes: notes.trim() || null,
+                                notes: notes.join('\n') || null,
                                 created_by: session.user.id
                             })
                             .select()
                             .single();
 
-                        if (saleError) throw saleError;
+                        if (saleError) {
+                            console.error('Error creando venta:', saleError);
+                            throw saleError;
+                        }
 
-                        // 2. Crear los items de la venta
+                        // 2. Crear items
                         const saleItems = this.cart.map(item => ({
                             sale_id: sale.id,
                             product_id: item.id,
@@ -747,7 +802,7 @@
 
                         if (itemsError) throw itemsError;
 
-                        // 3. Actualizar inventario
+                        // 3. Actualizar inventario - USANDO RPC
                         for (const item of this.cart) {
                             const { error: invError } = await supabase.rpc('decrement_inventory', {
                                 product_id_param: item.id,
@@ -756,15 +811,14 @@
                             });
 
                             if (invError) {
-                                console.error('Error actualizando inventario:', invError);
-                                notify('Error actualizando inventario: ' + invError.message, 'error');
-                                return;
+                                console.error('Error en inventario:', invError);
+                                throw new Error(`Stock insuficiente para ${item.name}. Disponible en inventario.`);
                             }
                         }
 
                         notify('¡Venta procesada exitosamente!');
 
-                        // Limpiar carrito y campos
+                        // Limpiar
                         this.cart = [];
                         this.deliveryAddress = '';
                         this.selectedCustomer = '';
@@ -775,8 +829,8 @@
                         await this.loadProducts();
 
                     } catch (err) {
-                        console.error('Error procesando venta:', err);
-                        notify('Error al procesar la venta: ' + err.message, 'error');
+                        console.error('Error completo:', err);
+                        notify('Error: ' + err.message, 'error');
                     } finally {
                         this.processing = false;
                     }
