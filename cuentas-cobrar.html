@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaService - Cuentas por Cobrar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50" x-data="cuentasApp()" x-init="initCuentas()">
+
+    <!-- Sidebar -->
+    <aside class="fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 hidden lg:block">
+        <div class="p-6">
+            <div class="mb-6">
+                <div class="flex items-center space-x-3 mb-3">
+                    <i class="fas fa-tint text-3xl"></i>
+                    <div>
+                        <h1 class="text-xl font-bold">AquaService</h1>
+                        <p class="text-xs text-blue-200">Sistema de Gestión</p>
+                    </div>
+                </div>
+                <div class="bg-white bg-opacity-10 rounded-lg px-3 py-2">
+                    <p class="text-xs text-blue-200 mb-0.5">Sucursal</p>
+                    <p class="font-semibold capitalize text-sm" x-text="userBranch || 'Cargando...'"></p>
+                </div>
+            </div>
+
+            <nav class="space-y-2">
+                <a href="index.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-home w-5"></i><span>Dashboard</span>
+                </a>
+                <a href="ventas.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
+                </a>
+                <a href="clientes.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-users w-5"></i><span>Clientes</span>
+                </a>
+                <a href="inventario.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-boxes w-5"></i><span>Inventario</span>
+                </a>
+                <a href="cuentas-cobrar.html"
+                    class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
+                    <i class="fas fa-file-invoice-dollar w-5"></i><span class="font-medium">Cuentas por Cobrar</span>
+                </a>
+                <a href="usuarios.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
+                </a>
+                <a href="reportes.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
+                    x-text="userInitials"></div>
+                <div>
+                    <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
+                    <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="lg:ml-64 min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Cuentas por Cobrar</h2>
+                <p class="text-sm text-gray-500">Gestión de créditos y pagos pendientes</p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button @click="loadCuentas()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    <i class="fas fa-sync-alt mr-2"></i>Actualizar
+                </button>
+                <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Salir
+                </button>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="p-6">
+            <!-- Loading -->
+            <div x-show="loading" class="text-center py-12">
+                <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500"></i>
+                <p class="mt-4 text-gray-600">Cargando cuentas...</p>
+            </div>
+
+            <div x-show="!loading">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-white rounded-2xl shadow-sm p-6 border-l-4 border-red-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Total por Cobrar</p>
+                                <p class="text-3xl font-bold text-gray-900" x-text="'$' + stats.totalCredit.toFixed(2)">
+                                </p>
+                                <p class="text-xs text-gray-500 mt-2" x-text="stats.totalAccounts + ' cuentas'"></p>
+                            </div>
+                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-dollar-sign text-red-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm p-6 border-l-4 border-yellow-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Cuentas Vencidas</p>
+                                <p class="text-3xl font-bold text-gray-900" x-text="stats.overdueAccounts"></p>
+                                <p class="text-xs text-red-600 mt-2" x-text="'$' + stats.overdueAmount.toFixed(2)"></p>
+                            </div>
+                            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm p-6 border-l-4 border-blue-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Cuentas Pendientes</p>
+                                <p class="text-3xl font-bold text-gray-900" x-text="stats.pendingAccounts"></p>
+                                <p class="text-xs text-blue-600 mt-2" x-text="'$' + stats.pendingAmount.toFixed(2)"></p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-clock text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm p-6 border-l-4 border-green-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Cuentas Canceladas</p>
+                                <p class="text-3xl font-bold text-gray-900" x-text="stats.paidAccounts"></p>
+                                <p class="text-xs text-green-600 mt-2">Este mes</p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="bg-white rounded-2xl shadow-sm p-4 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Buscar</label>
+                            <input type="text" x-model="filters.search" @input="filterCuentas()"
+                                placeholder="Nombre del cliente..."
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                            <select x-model="filters.status" @change="filterCuentas()"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="">Todos</option>
+                                <option value="pending">Pendiente</option>
+                                <option value="partial">Parcial</option>
+                                <option value="paid">Cancelado</option>
+                                <option value="overdue">Vencido</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Límite</label>
+                            <select x-model="filters.dateFilter" @change="filterCuentas()"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="">Todas</option>
+                                <option value="overdue">Vencidas</option>
+                                <option value="today">Hoy</option>
+                                <option value="week">Esta semana</option>
+                                <option value="month">Este mes</option>
+                            </select>
+                        </div>
+
+                        <div class="flex items-end">
+                            <button @click="resetFilters()"
+                                class="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                                <i class="fas fa-undo mr-2"></i>Limpiar Filtros
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accounts Table -->
+                <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliente
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Teléfono
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pagado
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Pendiente</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha
+                                        Límite</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <template x-for="account in filteredCuentas" :key="account.id">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4">
+                                            <div>
+                                                <p class="font-medium text-gray-900" x-text="account.customer_name"></p>
+                                                <p class="text-xs text-gray-500" x-show="account.customer_id_card"
+                                                    x-text="'ID: ' + account.customer_id_card"></p>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-gray-600"
+                                            x-text="account.customer_phone || 'N/A'"></td>
+                                        <td class="px-6 py-4">
+                                            <p class="font-semibold text-gray-900"
+                                                x-text="'$' + account.total_amount.toFixed(2)"></p>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <p class="text-green-600 font-medium"
+                                                x-text="'$' + account.paid_amount.toFixed(2)"></p>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <p class="font-bold text-red-600"
+                                                x-text="'$' + account.remaining_amount.toFixed(2)"></p>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div>
+                                                <p class="text-sm" x-text="formatDate(account.payment_date)"></p>
+                                                <p class="text-xs text-red-600" x-show="isOverdue(account)"
+                                                    x-text="getDaysOverdue(account) + ' días vencido'"></p>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span class="px-2 py-1 rounded-full text-xs font-semibold" :class="{
+                                                    'bg-red-100 text-red-800': account.status === 'pending' || isOverdue(account),
+                                                    'bg-yellow-100 text-yellow-800': account.status === 'partial',
+                                                    'bg-green-100 text-green-800': account.status === 'paid'
+                                                }" x-text="getStatusText(account)"></span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="flex space-x-2">
+                                                <button @click="viewAccount(account)"
+                                                    class="text-blue-600 hover:text-blue-800" title="Ver detalles">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button @click="openPaymentModal(account)"
+                                                    x-show="account.status !== 'paid'"
+                                                    class="text-green-600 hover:text-green-800" title="Registrar pago">
+                                                    <i class="fas fa-money-bill-wave"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+
+                                <tr x-show="filteredCuentas.length === 0">
+                                    <td colspan="8" class="px-6 py-12 text-center text-gray-400">
+                                        <i class="fas fa-inbox text-4xl mb-2"></i>
+                                        <p>No se encontraron cuentas</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Ver Detalles -->
+    <div x-show="showViewModal" x-cloak class="modal-overlay" @click.self="showViewModal = false">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto" @click.stop>
+            <div class="px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="text-xl font-bold text-gray-800">
+                    <i class="fas fa-file-invoice text-blue-600 mr-2"></i>
+                    Detalles de Cuenta
+                </h3>
+                <button @click="showViewModal = false" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-4" x-show="selectedAccount">
+                <!-- Info Cliente -->
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-gray-800 mb-3">Información del Cliente</h4>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <p class="text-gray-600">Nombre:</p>
+                            <p class="font-medium" x-text="selectedAccount?.customer_name"></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Teléfono:</p>
+                            <p class="font-medium" x-text="selectedAccount?.customer_phone || 'N/A'"></p>
+                        </div>
+                        <div x-show="selectedAccount?.customer_id_card">
+                            <p class="text-gray-600">Cédula/ID:</p>
+                            <p class="font-medium" x-text="selectedAccount?.customer_id_card"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Financiera -->
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-gray-800 mb-3">Información Financiera</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Monto Total:</span>
+                            <span class="font-bold" x-text="'$' + selectedAccount?.total_amount.toFixed(2)"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Pagado:</span>
+                            <span class="font-bold text-green-600"
+                                x-text="'$' + selectedAccount?.paid_amount.toFixed(2)"></span>
+                        </div>
+                        <div class="flex justify-between border-t border-green-200 pt-2">
+                            <span class="text-gray-800 font-semibold">Pendiente:</span>
+                            <span class="font-bold text-xl text-red-600"
+                                x-text="'$' + selectedAccount?.remaining_amount.toFixed(2)"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Términos -->
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-gray-800 mb-3">Términos del Crédito</h4>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <p class="text-gray-600">Fecha Límite:</p>
+                            <p class="font-medium" x-text="formatDate(selectedAccount?.payment_date)"></p>
+                        </div>
+                        <div x-show="selectedAccount?.payment_terms">
+                            <p class="text-gray-600">Condiciones:</p>
+                            <p class="font-medium" x-text="selectedAccount?.payment_terms"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notas -->
+                <div x-show="selectedAccount?.notes">
+                    <h4 class="font-semibold text-gray-800 mb-2">Notas</h4>
+                    <p class="text-sm text-gray-600 bg-gray-50 p-3 rounded" x-text="selectedAccount?.notes"></p>
+                </div>
+
+                <!-- Historial de Pagos -->
+                <div>
+                    <h4 class="font-semibold text-gray-800 mb-3">Historial de Pagos</h4>
+                    <div class="space-y-2">
+                        <template x-for="payment in accountPayments" :key="payment.id">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="font-medium text-sm" x-text="formatDate(payment.payment_date)"></p>
+                                    <p class="text-xs text-gray-500" x-text="payment.payment_method"></p>
+                                    <p class="text-xs text-gray-500" x-show="payment.notes" x-text="payment.notes"></p>
+                                </div>
+                                <p class="font-bold text-green-600" x-text="'$' + payment.amount.toFixed(2)"></p>
+                            </div>
+                        </template>
+                        <p x-show="accountPayments.length === 0" class="text-sm text-gray-400 text-center py-4">
+                            No hay pagos registrados
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end">
+                <button @click="showViewModal = false"
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Registrar Pago -->
+    <div x-show="showPaymentModal" x-cloak class="modal-overlay" @click.self="closePaymentModal()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4" @click.stop>
+            <div class="px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="text-xl font-bold text-gray-800">
+                    <i class="fas fa-money-bill-wave text-green-600 mr-2"></i>
+                    Registrar Pago
+                </h3>
+                <button @click="closePaymentModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <p class="text-sm text-gray-600">Cliente:</p>
+                    <p class="font-semibold" x-text="selectedAccount?.customer_name"></p>
+                    <div class="mt-2 flex justify-between text-sm">
+                        <span class="text-gray-600">Pendiente:</span>
+                        <span class="font-bold text-red-600"
+                            x-text="'$' + selectedAccount?.remaining_amount.toFixed(2)"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Monto del Pago *</label>
+                    <input type="number" x-model.number="paymentForm.amount" step="0.01" min="0.01"
+                        :max="selectedAccount?.remaining_amount"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="0.00">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Método de Pago *</label>
+                    <select x-model="paymentForm.payment_method"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="efectivo">Efectivo</option>
+                        <option value="transferencia">Transferencia</option>
+                        <option value="pago_movil">Pago Móvil</option>
+                        <option value="punto_venta">Punto de Venta</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Referencia</label>
+                    <input type="text" x-model="paymentForm.reference"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="Número de operación, últimos 4 dígitos, etc.">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Notas</label>
+                    <textarea x-model="paymentForm.notes" rows="2"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="Observaciones adicionales"></textarea>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3">
+                <button @click="closePaymentModal()"
+                    class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
+                <button @click="registerPayment()" :disabled="processing || !canRegisterPayment()"
+                    class="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50">
+                    <i class="fas fa-save mr-2" x-show="!processing"></i>
+                    <i class="fas fa-circle-notch fa-spin mr-2" x-show="processing"></i>
+                    <span x-text="processing ? 'Procesando...' : 'Registrar Pago'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function logout() {
+            await supabase.auth.signOut();
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        function notify(message, type = 'success') {
+            if (typeof alertify !== 'undefined') {
+                if (type === 'success') alertify.success(message);
+                else if (type === 'error') alertify.error(message);
+                else alertify.message(message);
+            } else {
+                alert(message);
+            }
+        }
+
+        function cuentasApp() {
+            return {
+                loading: true,
+                processing: false,
+                cuentas: [],
+                filteredCuentas: [],
+                accountPayments: [],
+                selectedAccount: null,
+                showViewModal: false,
+                showPaymentModal: false,
+
+                userName: '',
+                userRole: '',
+                userBranch: '',
+                userInitials: '??',
+
+                stats: {
+                    totalCredit: 0,
+                    totalAccounts: 0,
+                    overdueAccounts: 0,
+                    overdueAmount: 0,
+                    pendingAccounts: 0,
+                    pendingAmount: 0,
+                    paidAccounts: 0
+                },
+
+                filters: {
+                    search: '',
+                    status: '',
+                    dateFilter: ''
+                },
+
+                paymentForm: {
+                    amount: 0,
+                    payment_method: 'efectivo',
+                    reference: '',
+                    notes: ''
+                },
+
+                async initCuentas() {
+                    if (typeof alertify !== 'undefined') {
+                        alertify.set('notifier', { position: 'top-right' });
+                    }
+
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (!session) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
+                    try {
+                        const { data: profile } = await supabase
+                            .from('profiles')
+                            .select('full_name, role, branch')
+                            .eq('id', session.user.id)
+                            .single();
+
+                        if (profile) {
+                            this.userName = profile.full_name;
+                            this.userRole = profile.role;
+                            this.userBranch = profile.branch;
+                            this.userInitials = this.getInitials(profile.full_name);
+                        }
+
+                        await this.loadCuentas();
+
+                    } catch (err) {
+                        console.error('Error inicializando:', err);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async loadCuentas() {
+                    this.loading = true;
+                    try {
+                        const { data, error } = await supabase
+                            .from('credit_accounts')
+                            .select('*')
+                            .eq('branch', this.userBranch || 'geminis')
+                            .order('created_at', { ascending: false });
+
+                        if (error) throw error;
+
+                        this.cuentas = data || [];
+                        this.calculateStats();
+                        this.filterCuentas();
+
+                    } catch (err) {
+                        console.error('Error cargando cuentas:', err);
+                        notify('Error al cargar cuentas: ' + err.message, 'error');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                calculateStats() {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    this.stats.totalCredit = this.cuentas.reduce((sum, c) => sum + c.remaining_amount, 0);
+                    this.stats.totalAccounts = this.cuentas.length;
+
+                    this.stats.overdueAccounts = this.cuentas.filter(c => {
+                        const paymentDate = new Date(c.payment_date);
+                        return c.status !== 'paid' && paymentDate < today;
+                    }).length;
+
+                    this.stats.overdueAmount = this.cuentas
+                        .filter(c => {
+                            const paymentDate = new Date(c.payment_date);
+                            return c.status !== 'paid' && paymentDate < today;
+                        })
+                        .reduce((sum, c) => sum + c.remaining_amount, 0);
+
+                    this.stats.pendingAccounts = this.cuentas.filter(c => c.status === 'pending').length;
+                    this.stats.pendingAmount = this.cuentas
+                        .filter(c => c.status === 'pending')
+                        .reduce((sum, c) => sum + c.remaining_amount, 0);
+
+                    const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                    this.stats.paidAccounts = this.cuentas.filter(c => {
+                        const createdAt = new Date(c.created_at);
+                        return c.status === 'paid' && createdAt >= thisMonth;
+                    }).length;
+                },
+
+                filterCuentas() {
+                    let filtered = [...this.cuentas];
+
+                    // Filtro de búsqueda
+                    if (this.filters.search) {
+                        const search = this.filters.search.toLowerCase();
+                        filtered = filtered.filter(c =>
+                            c.customer_name.toLowerCase().includes(search) ||
+                            (c.customer_id_card && c.customer_id_card.toLowerCase().includes(search))
+                        );
+                    }
+
+                    // Filtro de estado
+                    if (this.filters.status) {
+                        if (this.filters.status === 'overdue') {
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            filtered = filtered.filter(c => {
+                                const paymentDate = new Date(c.payment_date);
+                                return c.status !== 'paid' && paymentDate < today;
+                            });
+                        } else {
+                            filtered = filtered.filter(c => c.status === this.filters.status);
+                        }
+                    }
+
+                    // Filtro de fecha
+                    if (this.filters.dateFilter) {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+
+                        if (this.filters.dateFilter === 'overdue') {
+                            filtered = filtered.filter(c => {
+                                const paymentDate = new Date(c.payment_date);
+                                return c.status !== 'paid' && paymentDate < today;
+                            });
+                        } else if (this.filters.dateFilter === 'today') {
+                            filtered = filtered.filter(c => {
+                                const paymentDate = new Date(c.payment_date);
+                                return paymentDate.toDateString() === today.toDateString();
+                            });
+                        } else if (this.filters.dateFilter === 'week') {
+                            const weekAgo = new Date(today);
+                            weekAgo.setDate(weekAgo.getDate() - 7);
+                            filtered = filtered.filter(c => {
+                                const paymentDate = new Date(c.payment_date);
+                                return paymentDate >= weekAgo;
+                            });
+                        } else if (this.filters.dateFilter === 'month') {
+                            const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+                            filtered = filtered.filter(c => {
+                                const paymentDate = new Date(c.payment_date);
+                                return paymentDate >= monthStart;
+                            });
+                        }
+                    }
+
+                    this.filteredCuentas = filtered;
+                },
+
+                resetFilters() {
+                    this.filters = {
+                        search: '',
+                        status: '',
+                        dateFilter: ''
+                    };
+                    this.filterCuentas();
+                },
+
+                isOverdue(account) {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const paymentDate = new Date(account.payment_date);
+                    return account.status !== 'paid' && paymentDate < today;
+                },
+
+                getDaysOverdue(account) {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const paymentDate = new Date(account.payment_date);
+                    const diffTime = Math.abs(today - paymentDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    return diffDays;
+                },
+
+                getStatusText(account) {
+                    if (this.isOverdue(account)) return 'Vencido';
+                    if (account.status === 'pending') return 'Pendiente';
+                    if (account.status === 'partial') return 'Parcial';
+                    if (account.status === 'paid') return 'Cancelado';
+                    return account.status;
+                },
+
+                formatDate(dateString) {
+                    if (!dateString) return 'N/A';
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('es-VE', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                },
+
+                getInitials(name) {
+                    if (!name) return '??';
+                    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                },
+
+                async viewAccount(account) {
+                    this.selectedAccount = account;
+
+                    // Cargar pagos
+                    try {
+                        const { data, error } = await supabase
+                            .from('credit_payments')
+                            .select('*')
+                            .eq('credit_account_id', account.id)
+                            .order('payment_date', { ascending: false });
+
+                        if (error) throw error;
+                        this.accountPayments = data || [];
+
+                    } catch (err) {
+                        console.error('Error cargando pagos:', err);
+                    }
+
+                    this.showViewModal = true;
+                },
+
+                openPaymentModal(account) {
+                    this.selectedAccount = account;
+                    this.paymentForm = {
+                        amount: 0,
+                        payment_method: 'efectivo',
+                        reference: '',
+                        notes: ''
+                    };
+                    this.showPaymentModal = true;
+                },
+
+                closePaymentModal() {
+                    this.showPaymentModal = false;
+                    this.selectedAccount = null;
+                },
+
+                canRegisterPayment() {
+                    if (!this.paymentForm.amount || this.paymentForm.amount <= 0) return false;
+                    if (this.paymentForm.amount > this.selectedAccount?.remaining_amount) return false;
+                    return true;
+                },
+
+                async registerPayment() {
+                    if (!this.canRegisterPayment()) {
+                        notify('Ingrese un monto válido', 'error');
+                        return;
+                    }
+
+                    if (!confirm(`¿Registrar pago de $${this.paymentForm.amount.toFixed(2)}?`)) {
+                        return;
+                    }
+
+                    this.processing = true;
+
+                    try {
+                        const { data: { session } } = await supabase.auth.getSession();
+
+                        // Registrar pago
+                        const { error: paymentError } = await supabase
+                            .from('credit_payments')
+                            .insert({
+                                credit_account_id: this.selectedAccount.id,
+                                amount: this.paymentForm.amount,
+                                payment_method: this.paymentForm.payment_method,
+                                reference: this.paymentForm.reference,
+                                notes: this.paymentForm.notes,
+                                created_by: session.user.id
+                            });
+
+                        if (paymentError) throw paymentError;
+
+                        notify('Pago registrado exitosamente');
+                        this.closePaymentModal();
+                        await this.loadCuentas();
+
+                    } catch (err) {
+                        console.error('Error registrando pago:', err);
+                        notify('Error: ' + err.message, 'error');
+                    } finally {
+                        this.processing = false;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
