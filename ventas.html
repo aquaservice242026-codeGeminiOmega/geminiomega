@@ -134,6 +134,15 @@
                 <div class="lg:col-span-2 space-y-4">
                     <div class="bg-white rounded-2xl shadow-sm p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Productos Disponibles</h3>
+
+                        <!-- Empty State -->
+                        <div x-show="products.length === 0" class="text-center py-8 text-gray-400">
+                            <i class="fas fa-box-open text-6xl mb-4"></i>
+                            <p class="text-lg mb-2">No hay productos disponibles</p>
+                            <p class="text-sm">Verifique el nivel de los tanques en el módulo de Inventario</p>
+                        </div>
+
+                        <!-- Products Grid -->
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <template x-for="product in products" :key="product.id">
                                 <button @click="addProduct(product)"
@@ -487,13 +496,32 @@
                         console.error('Error obteniendo perfil:', err);
                     }
 
+                    // Cargar tasa primero (con persistencia)
                     await this.loadExchangeRate();
+
+                    // Luego cargar productos y clientes
                     await this.loadProducts();
                     await this.loadCustomers();
                 },
 
                 async loadExchangeRate() {
                     try {
+                        // 1. Intentar obtener de localStorage con fecha
+                        const savedData = localStorage.getItem('exchangeRate_' + this.userBranch);
+                        if (savedData) {
+                            const parsed = JSON.parse(savedData);
+                            const savedDate = new Date(parsed.date);
+                            const today = new Date();
+
+                            // Si es la misma fecha, usar la tasa guardada
+                            if (savedDate.toDateString() === today.toDateString()) {
+                                this.exchangeRate = parsed.rate;
+                                console.log('Tasa cargada de localStorage:', this.exchangeRate, '- Fecha:', parsed.date);
+                                return;
+                            }
+                        }
+
+                        // 2. Si no hay o es de otra fecha, obtener de BD
                         const { data, error } = await supabase.rpc('get_active_exchange_rate', {
                             branch_param: this.userBranch
                         });
@@ -503,15 +531,32 @@
                         if (data) {
                             this.exchangeRate = parseFloat(data);
                             console.log('Tasa cargada de BD:', this.exchangeRate);
+
+                            // Guardar en localStorage con fecha actual
+                            localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({
+                                rate: this.exchangeRate,
+                                date: new Date().toISOString()
+                            }));
+                        } else {
+                            // Valor por defecto
+                            this.exchangeRate = 38.50;
+                            console.log('Usando tasa por defecto:', this.exchangeRate);
                         }
                     } catch (err) {
-                        console.log('Usando tasa por defecto (38.50)');
-                        this.exchangeRate = 38.50;
+                        console.error('Error cargando tasa:', err);
+                        // Fallback a localStorage o valor por defecto
+                        const savedData = localStorage.getItem('exchangeRate_' + this.userBranch);
+                        if (savedData) {
+                            this.exchangeRate = JSON.parse(savedData).rate;
+                        } else {
+                            this.exchangeRate = 38.50;
+                        }
                     }
                 },
 
                 async updateExchangeRate() {
                     try {
+                        // Actualizar en BD
                         const { error } = await supabase
                             .from('exchange_rates')
                             .update({ is_active: false })
@@ -529,10 +574,20 @@
 
                         if (insertError) throw insertError;
 
-                        notify('Tasa de cambio actualizada');
+                        // Guardar en localStorage con fecha
+                        localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({
+                            rate: this.exchangeRate,
+                            date: new Date().toISOString()
+                        }));
+
+                        notify('Tasa de cambio actualizada y guardada');
                     } catch (err) {
                         console.error('Error actualizando tasa:', err);
-                        localStorage.setItem('exchangeRate', this.exchangeRate);
+                        // Guardar solo en localStorage
+                        localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({
+                            rate: this.exchangeRate,
+                            date: new Date().toISOString()
+                        }));
                         notify('Tasa guardada localmente');
                     }
                 },
@@ -540,6 +595,8 @@
                 async loadProducts() {
                     this.loading = true;
                     try {
+                        console.log('=== Cargando productos para:', this.userBranch);
+
                         // Obtener inventario virtual basado en tanques
                         const { data: virtualInventory, error: virtualError } = await supabase
                             .rpc('calculate_virtual_inventory', {
@@ -547,31 +604,44 @@
                             });
 
                         if (virtualError) {
-                            console.error('Error calculando inventario:', virtualError);
+                            console.error('Error RPC:', virtualError);
                             throw virtualError;
                         }
 
                         console.log('Inventario virtual recibido:', virtualInventory);
 
-                        // Filtrar solo botellones (excluir tapas si tienen stock 0)
-                        const bottlesOnly = (virtualInventory || []).filter(item => {
-                            // Incluir si es botellón (size_liters no es null) y tiene stock
-                            return item.size_liters !== null && item.virtual_stock > 0;
+                        if (!virtualInventory || virtualInventory.length === 0) {
+                            console.warn('No hay inventario virtual disponible');
+                            this.products = [];
+                            return;
+                        }
+
+                        // Filtrar solo botellones con stock > 0
+                        const bottlesOnly = virtualInventory.filter(item => {
+                            const hasStock = item.virtual_stock > 0;
+                            const isBottle = item.size_liters !== null && item.size_liters > 0;
+                            return hasStock && isBottle;
                         });
 
-                        // Mapear productos para el carrito
-                        this.products = bottlesOnly.map(item => ({
-                            id: item.product_id || item.id,
-                            name: item.product_name,
-                            size_liters: item.size_liters,
-                            price: parseFloat(item.price) || 0,
-                            stock: item.virtual_stock || 0
-                        }));
+                        console.log('Botellones disponibles:', bottlesOnly);
 
-                        console.log('Productos cargados:', this.products);
+                        // Mapear productos
+                        this.products = bottlesOnly.map(item => {
+                            const product = {
+                                id: item.product_id || item.id,
+                                name: item.product_name,
+                                size_liters: item.size_liters,
+                                price: parseFloat(item.price) || 0,
+                                stock: parseInt(item.virtual_stock) || 0
+                            };
+                            console.log('Producto:', product);
+                            return product;
+                        });
+
+                        console.log('Productos finales cargados:', this.products);
 
                         if (this.products.length === 0) {
-                            notify('No hay productos disponibles. Verifique el nivel de los tanques.', 'error');
+                            notify('No hay botellones disponibles. Verifique el nivel de los tanques.', 'warning');
                         }
 
                     } catch (err) {
@@ -594,6 +664,7 @@
 
                         if (error) throw error;
                         this.customers = data || [];
+                        console.log('Clientes cargados:', this.customers.length);
                     } catch (err) {
                         console.error('Error cargando clientes:', err);
                     }
@@ -606,7 +677,7 @@
 
                 addProduct(product) {
                     if (product.stock <= 0) {
-                        notify('Producto sin stock disponible en tanques', 'error');
+                        notify('Producto sin stock disponible', 'error');
                         return;
                     }
 
@@ -617,7 +688,7 @@
                             existingItem.quantity++;
                             notify('Cantidad actualizada');
                         } else {
-                            notify('Stock insuficiente en tanques', 'error');
+                            notify('Stock insuficiente', 'error');
                         }
                     } else {
                         this.cart.push({
@@ -641,7 +712,7 @@
                     } else if (newQuantity <= 0) {
                         this.removeFromCart(index);
                     } else {
-                        notify('Stock insuficiente en tanques', 'error');
+                        notify('Stock insuficiente', 'error');
                     }
                 },
 
@@ -810,7 +881,7 @@
 
                         if (itemsError) throw itemsError;
 
-                        // 3. Descontar del tanque usando la función RPC
+                        // 3. Descontar del tanque
                         for (const item of this.cart) {
                             const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
                                 branch_param: this.userBranch,
@@ -829,7 +900,7 @@
                             }
                         }
 
-                        notify('¡Venta procesada exitosamente! Agua descontada del tanque.');
+                        notify('¡Venta procesada exitosamente!');
 
                         this.cart = [];
                         this.deliveryAddress = '';
