@@ -76,8 +76,12 @@
 
 <body class="bg-gray-50" x-data="inventarioApp()" x-init="initInventario()">
 
+    <!-- Overlay para móvil -->
+    <div class="sidebar-overlay" :class="{ 'show': mobileMenuOpen }" @click="mobileMenuOpen = false"></div>
+
     <!-- Sidebar -->
-    <aside class="fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 hidden lg:block">
+    <aside class="sidebar-mobile fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 lg:block"
+        :class="{ 'open': mobileMenuOpen }">
         <div class="p-6">
             <div class="mb-6">
                 <div class="flex items-center space-x-3 mb-3">
@@ -94,27 +98,31 @@
             </div>
 
             <nav class="space-y-2">
-                <a href="index.html"
+                <a href="index.html" @click="mobileMenuOpen = false"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-home w-5"></i><span>Dashboard</span>
                 </a>
-                <a href="ventas.html"
+                <a href="ventas.html" @click="mobileMenuOpen = false"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
                 </a>
-                <a href="clientes.html"
+                <a href="cuentas-cobrar.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-file-invoice-dollar w-5"></i><span>Cuentas por Cobrar</span>
+                </a>
+                <a href="clientes.html" @click="mobileMenuOpen = false"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-users w-5"></i><span>Clientes</span>
                 </a>
-                <a href="inventario.html"
+                <a href="inventario.html" @click="mobileMenuOpen = false"
                     class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
                     <i class="fas fa-boxes w-5"></i><span class="font-medium">Inventario</span>
                 </a>
-                <a href="usuarios.html"
+                <a href="usuarios.html" @click="mobileMenuOpen = false"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
                 </a>
-                <a href="reportes.html"
+                <a href="reportes.html" @click="mobileMenuOpen = false"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
                 </a>
@@ -137,10 +145,18 @@
     <div class="lg:ml-64 min-h-screen">
         <!-- Header -->
         <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800">Inventario</h2>
-                <p class="text-sm text-gray-500">Control basado en capacidad de tanques - <span
-                        class="capitalize font-semibold" x-text="userBranch"></span></p>
+            <div class="flex items-center space-x-4">
+                <!-- Botón Menú Móvil -->
+                <button @click="mobileMenuOpen = !mobileMenuOpen"
+                    class="menu-toggle lg:hidden text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Inventario</h2>
+                    <p class="text-sm text-gray-500">Control basado en capacidad de tanques - <span
+                            class="capitalize font-semibold" x-text="userBranch"></span></p>
+                </div>
             </div>
             <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
                 <i class="fas fa-sign-out-alt mr-2"></i>Salir
@@ -342,6 +358,10 @@
 
         function inventarioApp() {
             return {
+                // Variables del menú responsive
+                mobileMenuOpen: false,
+                currentPage: 'inventario',
+
                 loading: true,
                 virtualInventory: [],
                 tanks: [],
