@@ -732,30 +732,30 @@
                         notify('El carrito está vacío', 'error');
                         return;
                     }
-
+                
                     if (this.deliveryType === 'delivery' && !this.deliveryAddress) {
                         notify('Debe ingresar la dirección de entrega', 'error');
                         return;
                     }
-
+                
                     if (['pago_movil', 'transferencia'].includes(this.paymentMethod) && !this.paymentReference) {
                         notify('Debe ingresar la referencia de pago', 'error');
                         return;
                     }
-
+                
                     if (this.paymentMethod === 'efectivo_bs' && this.amountReceivedBs < this.totalBs) {
                         notify('El monto recibido es insuficiente', 'error');
                         return;
                     }
-
+                
                     if (this.paymentMethod === 'efectivo_divisas' && this.amountReceivedUsd < this.totalUSD) {
                         notify('El monto recibido es insuficiente', 'error');
                         return;
                     }
-
+                
                     const customer = this.customers.find(c => c.id === this.selectedCustomer);
                     const customerName = customer?.full_name || 'Cliente no registrado';
-
+                
                     const methodNames = {
                         'efectivo_bs': 'Efectivo Bs',
                         'efectivo_divisas': 'Efectivo Divisas',
@@ -764,16 +764,16 @@
                         'punto_venta': 'Punto de Venta',
                         'credito': 'Crédito'
                     };
-
+                
                     if (!confirm(`Confirmar venta para "${customerName}"\nMétodo: ${methodNames[this.paymentMethod]}\nTotal: $${this.totalUSD.toFixed(2)} (Bs. ${this.totalBs.toFixed(2)})?`)) {
                         return;
                     }
-
+                
                     this.processing = true;
-
+                
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
-
+                
                         let notes = [];
                         if (this.deliveryType === 'delivery') {
                             notes.push(`Delivery: ${this.deliveryAddress}`);
@@ -789,8 +789,33 @@
                             notes.push(`Recibido USD: $${this.amountReceivedUsd.toFixed(2)}`);
                             notes.push(`Cambio USD: $${(this.amountReceivedUsd - this.totalUSD).toFixed(2)}`);
                         }
-
-                        // 1. Crear venta
+                
+                        // 1. Obtener los product_id REALES desde la base de datos
+                        // (porque calculate_virtual_inventory no los retorna correctamente)
+                        console.log('Buscando product_id reales...');
+                        
+                        const { data: productsFromDB, error: productsError } = await supabase
+                            .from('products')
+                            .select('id, name, size_liters')
+                            .eq('is_active', true);
+                
+                        if (productsError) {
+                            throw new Error('Error obteniendo productos: ' + productsError.message);
+                        }
+                
+                        console.log('Productos de BD:', productsFromDB);
+                
+                        // Crear un mapa de size_liters -> product_id
+                        const sizeToProductId = {};
+                        productsFromDB.forEach(p => {
+                            if (p.size_liters) {
+                                sizeToProductId[p.size_liters] = p.id;
+                            }
+                        });
+                
+                        console.log('Mapa size -> id:', sizeToProductId);
+                
+                        // 2. Crear venta
                         const { data: sale, error: saleError } = await supabase
                             .from('sales')
                             .insert({
@@ -807,54 +832,70 @@
                             })
                             .select()
                             .single();
-
+                
                         if (saleError) throw saleError;
-
-                        // 2. Crear items
-                        const saleItems = this.cart.map(item => ({
-                            sale_id: sale.id,
-                            product_id: item.product_id,
-                            quantity: item.quantity,
-                            unit_price: item.price,
-                            total: item.price * item.quantity
-                        }));
-
+                
+                        // 3. Crear items con product_id reales
+                        const saleItems = this.cart.map(item => {
+                            const realProductId = sizeToProductId[item.size_liters];
+                            console.log(`Item: ${item.name}, size: ${item.size_liters}, real_id: ${realProductId}`);
+                            
+                            return {
+                                sale_id: sale.id,
+                                product_id: realProductId,  // Usar el ID real
+                                quantity: item.quantity,
+                                unit_price: item.price,
+                                total: item.price * item.quantity
+                            };
+                        });
+                
                         const { error: itemsError } = await supabase
                             .from('sale_items')
                             .insert(saleItems);
-
+                
                         if (itemsError) throw itemsError;
-
-                        // 3. Descontar del tanque usando la función
+                
+                        // 4. Descontar del tanque usando los product_id reales
                         for (const item of this.cart) {
+                            const realProductId = sizeToProductId[item.size_liters];
+                            
+                            if (!realProductId) {
+                                console.warn(`No se encontró product_id para ${item.name} (size: ${item.size_liters})`);
+                                continue;
+                            }
+                
+                            console.log(`Descontando del tanque: product_id=${realProductId}, quantity=${item.quantity}`);
+                
                             const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
                                 branch_param: this.userBranch,
-                                product_id_param: item.product_id,
+                                product_id_param: realProductId,  // Usar el ID real
                                 quantity_param: item.quantity,
                                 user_id_param: session.user.id
                             });
-
+                
                             if (tankError) {
                                 console.error('Error descontando del tanque:', tankError);
                                 throw new Error(`Error procesando venta: ${tankError.message}`);
                             }
-
+                
                             if (!tankResult || !tankResult.success) {
                                 throw new Error(`Agua insuficiente: ${tankResult?.error || 'Error desconocido'}`);
                             }
+                
+                            console.log('Tanque actualizado:', tankResult);
                         }
-
+                
                         notify('¡Venta procesada exitosamente! Agua descontada del tanque.');
-
+                
                         this.cart = [];
                         this.deliveryAddress = '';
                         this.selectedCustomer = '';
                         this.paymentReference = '';
                         this.amountReceivedBs = 0;
                         this.amountReceivedUsd = 0;
-
+                
                         await this.loadProducts();
-
+                
                     } catch (err) {
                         console.error('Error completo:', err);
                         notify('Error: ' + err.message, 'error');
