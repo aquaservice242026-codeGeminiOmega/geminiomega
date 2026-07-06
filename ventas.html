@@ -101,7 +101,7 @@
         <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">Punto de Venta</h2>
-                <p class="text-sm text-gray-500">Venta de agua potabilizada</p>
+                <p class="text-sm text-gray-500">Venta de agua potabilizada - Stock basado en tanques</p>
             </div>
 
             <div class="flex items-center space-x-4">
@@ -141,7 +141,7 @@
                                     <i class="fas fa-tint text-4xl mb-2"></i>
                                     <p class="font-bold text-lg" x-text="product.name"></p>
                                     <p class="text-sm opacity-90" x-text="'$' + product.price.toFixed(2)"></p>
-                                    <p class="text-xs mt-1" x-text="'Stock: ' + product.stock"></p>
+                                    <p class="text-xs mt-1" x-text="'Disponible: ' + product.stock"></p>
                                 </button>
                             </template>
                         </div>
@@ -494,7 +494,6 @@
 
                 async loadExchangeRate() {
                     try {
-                        // Intentar obtener tasa de la base de datos
                         const { data, error } = await supabase.rpc('get_active_exchange_rate', {
                             branch_param: this.userBranch
                         });
@@ -513,7 +512,6 @@
 
                 async updateExchangeRate() {
                     try {
-                        // Actualizar tasa en la base de datos
                         const { error } = await supabase
                             .from('exchange_rates')
                             .update({ is_active: false })
@@ -534,7 +532,6 @@
                         notify('Tasa de cambio actualizada');
                     } catch (err) {
                         console.error('Error actualizando tasa:', err);
-                        // Guardar en localStorage como fallback
                         localStorage.setItem('exchangeRate', this.exchangeRate);
                         notify('Tasa guardada localmente');
                     }
@@ -543,27 +540,33 @@
                 async loadProducts() {
                     this.loading = true;
                     try {
-                        const { data: products, error } = await supabase
-                            .from('products')
-                            .select(`
-                                id,
-                                name,
-                                size_liters,
-                                product_prices!inner(price_usd),
-                                inventory!inner(quantity)
-                            `)
-                            .eq('product_prices.branch', this.userBranch)
-                            .eq('inventory.branch', this.userBranch)
-                            .eq('is_active', true);
+                        // Cargar inventario virtual basado en tanques
+                        const { data: virtualInventory, error: virtualError } = await supabase
+                            .rpc('calculate_virtual_inventory', {
+                                branch_param: this.userBranch
+                            });
 
-                        if (error) throw error;
+                        if (virtualError) throw virtualError;
 
-                        this.products = products.map(p => ({
-                            id: p.id,
-                            name: p.name,
-                            price: parseFloat(p.product_prices[0].price_usd),
-                            stock: p.inventory[0].quantity
-                        }));
+                        // Cargar precios
+                        const { data: prices, error: pricesError } = await supabase
+                            .from('product_prices')
+                            .select('product_id, price_usd')
+                            .eq('branch', this.userBranch);
+
+                        if (pricesError) throw pricesError;
+
+                        // Combinar inventario virtual con precios
+                        this.products = (virtualInventory || []).map(item => {
+                            const price = prices?.find(p => p.product_id === item.product_id);
+                            return {
+                                id: item.product_id,
+                                name: item.product_name,
+                                size_liters: item.size_liters,
+                                price: parseFloat(price?.price_usd || 0),
+                                stock: item.virtual_stock
+                            };
+                        });
 
                     } catch (err) {
                         console.error('Error cargando productos:', err);
@@ -596,7 +599,7 @@
 
                 addProduct(product) {
                     if (product.stock <= 0) {
-                        notify('Producto sin stock', 'error');
+                        notify('Producto sin stock disponible en tanques', 'error');
                         return;
                     }
 
@@ -607,12 +610,13 @@
                             existingItem.quantity++;
                             notify('Cantidad actualizada');
                         } else {
-                            notify('Stock insuficiente', 'error');
+                            notify('Stock insuficiente en tanques', 'error');
                         }
                     } else {
                         this.cart.push({
                             id: product.id,
                             name: product.name,
+                            size_liters: product.size_liters,
                             price: product.price,
                             stock: product.stock,
                             quantity: 1
@@ -630,7 +634,7 @@
                     } else if (newQuantity <= 0) {
                         this.removeFromCart(index);
                     } else {
-                        notify('Stock insuficiente', 'error');
+                        notify('Stock insuficiente en tanques', 'error');
                     }
                 },
 
@@ -709,13 +713,11 @@
                         return;
                     }
 
-                    // Validar referencia
                     if (['pago_movil', 'transferencia'].includes(this.paymentMethod) && !this.paymentReference) {
                         notify('Debe ingresar la referencia de pago', 'error');
                         return;
                     }
 
-                    // Validar monto recibido para efectivo
                     if (this.paymentMethod === 'efectivo_bs' && this.amountReceivedBs < this.totalBs) {
                         notify('El monto recibido es insuficiente', 'error');
                         return;
@@ -747,7 +749,6 @@
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
 
-                        // Construir notas
                         let notes = [];
                         if (this.deliveryType === 'delivery') {
                             notes.push(`Delivery: ${this.deliveryAddress}`);
@@ -802,23 +803,27 @@
 
                         if (itemsError) throw itemsError;
 
-                        // 3. Actualizar inventario - USANDO RPC
+                        // 3. Descontar del tanque usando la función RPC
                         for (const item of this.cart) {
-                            const { error: invError } = await supabase.rpc('decrement_inventory', {
-                                product_id_param: item.id,
+                            const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
                                 branch_param: this.userBranch,
-                                quantity_to_decrement: item.quantity
+                                product_id_param: item.id,
+                                quantity_param: item.quantity,
+                                user_id_param: session.user.id
                             });
 
-                            if (invError) {
-                                console.error('Error en inventario:', invError);
-                                throw new Error(`Stock insuficiente para ${item.name}. Disponible en inventario.`);
+                            if (tankError) {
+                                console.error('Error descontando del tanque:', tankError);
+                                throw new Error(`Error procesando venta: ${tankError.message}`);
+                            }
+
+                            if (!tankResult.success) {
+                                throw new Error(`Agua insuficiente: ${tankResult.error}`);
                             }
                         }
 
-                        notify('¡Venta procesada exitosamente!');
+                        notify('¡Venta procesada exitosamente! Agua descontada del tanque.');
 
-                        // Limpiar
                         this.cart = [];
                         this.deliveryAddress = '';
                         this.selectedCustomer = '';
