@@ -532,7 +532,7 @@
                             this.exchangeRate = parseFloat(data);
                             console.log('Tasa cargada de BD:', this.exchangeRate);
 
-                            // Guardar en localStorage con fecha actual
+                            // Guardar en localStorage con fecha
                             localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({
                                 rate: this.exchangeRate,
                                 date: new Date().toISOString()
@@ -625,10 +625,11 @@
 
                         console.log('Botellones disponibles:', bottlesOnly);
 
-                        // Mapear productos
+                        // Mapear productos - USAR size_liters COMO ID (ya que es único)
                         this.products = bottlesOnly.map(item => {
                             const product = {
-                                id: item.product_id || item.id,
+                                id: 'size_' + item.size_liters,  // ID único basado en tamaño
+                                product_id: item.product_id,     // Guardar el ID real por si acaso
                                 name: item.product_name,
                                 size_liters: item.size_liters,
                                 price: parseFloat(item.price) || 0,
@@ -693,6 +694,7 @@
                     } else {
                         this.cart.push({
                             id: product.id,
+                            product_id: product.product_id,
                             name: product.name,
                             size_liters: product.size_liters,
                             price: product.price,
@@ -869,7 +871,7 @@
                         // 2. Crear items
                         const saleItems = this.cart.map(item => ({
                             sale_id: sale.id,
-                            product_id: item.id,
+                            product_id: item.product_id,
                             quantity: item.quantity,
                             unit_price: item.price,
                             total: item.price * item.quantity
@@ -885,7 +887,7 @@
                         for (const item of this.cart) {
                             const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
                                 branch_param: this.userBranch,
-                                product_id_param: item.id,
+                                product_id_param: item.product_id,
                                 quantity_param: item.quantity,
                                 user_id_param: session.user.id
                             });
@@ -895,8 +897,8 @@
                                 throw new Error(`Error procesando venta: ${tankError.message}`);
                             }
 
-                            if (!tankResult.success) {
-                                throw new Error(`Agua insuficiente: ${tankResult.error}`);
+                            if (!tankResult || !tankResult.success) {
+                                throw new Error(`Agua insuficiente: ${tankResult?.error || 'Error desconocido'}`);
                             }
                         }
 
