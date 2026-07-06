@@ -5,73 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AquaService - Dashboard</title>
-
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
-
-    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
-
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- Alertify.js -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
-
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                }
-            }
-        }
-    </script>
-
     <style>
-        [x-cloak] {
-            display: none !important;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-
-        .gradient-bg {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-        }
-
-        .sidebar-item {
-            transition: all 0.3s;
-        }
-
-        .sidebar-item:hover,
-        .sidebar-item.active {
-            background: rgba(255, 255, 255, 0.2);
-            border-left: 4px solid #fff;
-        }
-
-        .card-hover {
-            transition: all 0.3s ease;
-        }
-
-        .card-hover:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-        }
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
+        .sidebar-item { transition: all 0.3s; }
+        .sidebar-item:hover, .sidebar-item.active { background: rgba(255, 255, 255, 0.2); border-left: 4px solid #fff; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
     </style>
 </head>
 
@@ -80,7 +31,6 @@
     <!-- Sidebar -->
     <aside class="fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 hidden lg:block">
         <div class="p-6">
-            <!-- Logo y Sucursal -->
             <div class="mb-6">
                 <div class="flex items-center space-x-3 mb-3">
                     <i class="fas fa-tint text-3xl"></i>
@@ -89,52 +39,35 @@
                         <p class="text-xs text-blue-200">Sistema de Gestión</p>
                     </div>
                 </div>
-                <!-- Sucursal -->
                 <div class="bg-white bg-opacity-10 rounded-lg px-3 py-2">
                     <p class="text-xs text-blue-200 mb-0.5">Sucursal</p>
                     <p class="font-semibold capitalize text-sm" x-text="userBranch || 'Cargando...'"></p>
                 </div>
             </div>
-
             <nav class="space-y-2">
                 <a href="index.html" class="sidebar-item active flex items-center space-x-3 px-4 py-3 rounded-lg">
-                    <i class="fas fa-home w-5"></i>
-                    <span>Dashboard</span>
+                    <i class="fas fa-home w-5"></i><span>Dashboard</span>
                 </a>
-                <a href="ventas.html"
-                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
-                    <i class="fas fa-shopping-cart w-5"></i>
-                    <span>Ventas</span>
+                <a href="ventas.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                    <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
                 </a>
-                <a href="clientes.html"
-                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
-                    <i class="fas fa-users w-5"></i>
-                    <span>Clientes</span>
+                <a href="clientes.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                    <i class="fas fa-users w-5"></i><span>Clientes</span>
                 </a>
-                <a href="inventario.html"
-                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
-                    <i class="fas fa-boxes w-5"></i>
-                    <span>Inventario</span>
+                <a href="inventario.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                    <i class="fas fa-boxes w-5"></i><span>Inventario</span>
                 </a>
-                <a href="usuarios.html"
-                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
-                    <i class="fas fa-user-cog w-5"></i>
-                    <span>Usuarios</span>
+                <a href="usuarios.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                    <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
                 </a>
-                <a href="reportes.html"
-                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
-                    <i class="fas fa-chart-line w-5"></i>
-                    <span>Reportes</span>
+                <a href="reportes.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                    <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
                 </a>
             </nav>
         </div>
-
-        <!-- Perfil de Usuario -->
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold">
-                    <span x-text="userInitials"></span>
-                </div>
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold" x-text="userInitials"></div>
                 <div>
                     <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
                     <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
@@ -145,272 +78,227 @@
 
     <!-- Main Content -->
     <div class="lg:ml-64 min-h-screen flex flex-col">
-
-        <!-- Header -->
         <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
                 <p class="text-sm text-gray-500">Resumen general del negocio</p>
             </div>
-
             <div class="flex items-center space-x-4">
-                <!-- Tasa de Cambio -->
                 <div class="hidden md:flex items-center bg-blue-50 px-4 py-2 rounded-lg">
                     <i class="fas fa-dollar-sign text-green-600 mr-2"></i>
                     <span class="text-sm text-gray-600">Tasa: </span>
-                    <span class="text-sm font-bold text-blue-600 ml-1">Bs. 38.50</span>
+                    <span class="text-sm font-bold text-blue-600 ml-1" x-text="'Bs. ' + exchangeRate.toFixed(2)"></span>
                 </div>
-
-                <!-- Notificaciones -->
                 <button class="relative p-2 text-gray-400 hover:text-gray-600">
                     <i class="fas fa-bell text-xl"></i>
                     <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                 </button>
-
-                <!-- Botón Cerrar Sesión -->
-                <button onclick="logout()"
-                    class="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition shadow-sm">
+                <button onclick="logout()" class="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition shadow-sm">
                     <i class="fas fa-sign-out-alt"></i>
                     <span class="font-medium">Salir</span>
                 </button>
             </div>
         </header>
 
-        <!-- Content -->
         <main class="flex-1 p-6">
-
-            <!-- Tarjetas de Estadísticas -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-
-                <!-- Ventas Hoy -->
-                <div class="bg-white rounded-2xl shadow-sm p-6 card-hover border-l-4 border-blue-500">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-sm text-gray-600 mb-1">Ventas Hoy</p>
-                            <p class="text-3xl font-bold text-gray-900">24</p>
-                            <p class="text-xs text-green-600 mt-2">
-                                <i class="fas fa-arrow-up"></i> 12% vs ayer
-                            </p>
-                        </div>
-                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-shopping-cart text-blue-600 text-xl"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Ingresos Hoy -->
-                <div class="bg-white rounded-2xl shadow-sm p-6 card-hover border-l-4 border-green-500">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-sm text-gray-600 mb-1">Ingresos Hoy</p>
-                            <p class="text-3xl font-bold text-gray-900">$485</p>
-                            <p class="text-xs text-green-600 mt-2">
-                                <i class="fas fa-arrow-up"></i> 8% vs ayer
-                            </p>
-                        </div>
-                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Botellones Vendidos -->
-                <div class="bg-white rounded-2xl shadow-sm p-6 card-hover border-l-4 border-cyan-500">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-sm text-gray-600 mb-1">Botellones Vendidos</p>
-                            <p class="text-3xl font-bold text-gray-900">48</p>
-                            <p class="text-xs text-gray-500 mt-2">5L: 15 | 10L: 18 | 20L: 15</p>
-                        </div>
-                        <div class="w-12 h-12 bg-cyan-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-tint text-cyan-600 text-xl"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Cuentas por Cobrar -->
-                <div class="bg-white rounded-2xl shadow-sm p-6 card-hover border-l-4 border-red-500">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-sm text-gray-600 mb-1">Cuentas por Cobrar</p>
-                            <p class="text-3xl font-bold text-gray-900">$1,240</p>
-                            <p class="text-xs text-red-600 mt-2">
-                                <i class="fas fa-exclamation-circle"></i> 8 clientes
-                            </p>
-                        </div>
-                        <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-file-invoice-dollar text-red-600 text-xl"></i>
-                        </div>
-                    </div>
-                </div>
+            <div x-show="loading" class="text-center py-12">
+                <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500"></i>
+                <p class="mt-4 text-gray-600">Cargando dashboard...</p>
             </div>
 
-            <!-- Gráficos - CORREGIDOS AMBOS -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-
-                <!-- Ventas de la Semana -->
-                <div class="bg-white rounded-2xl shadow-sm p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Ventas de la Semana</h3>
-                    <div style="position: relative; height: 200px;">
-                        <canvas id="salesChart"></canvas>
+            <div x-show="!loading">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-white rounded-2xl shadow-sm p-6 card-hover border-l-4 border-blue-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Ventas Hoy</p>
+                                <p class="text-3xl font-bold text-gray-900" x-text="stats.todaySales"></p>
+                                <p class="text-xs text-gray-500 mt-2" x-show="stats.yesterdaySales > 0">
+                                    <i :class="getSalesTrendClass()"></i> 
+                                    <span x-text="getSalesTrendText()"></span>
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-shopping-cart text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Distribución por Producto -->
-                <div class="bg-white rounded-2xl shadow-sm p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Distribución por Producto</h3>
-                    <div style="position: relative; height: 200px;">
-                        <canvas id="productChart"></canvas>
+                    <div class="bg-white rounded-2xl shadow-sm p-6 card-hover border-l-4 border-green-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Ingresos Hoy</p>
+                                <p class="text-3xl font-bold text-gray-900" x-text="'$' + stats.todayRevenue.toFixed(2)"></p>
+                                <p class="text-xs text-gray-500 mt-2">
+                                    <span x-text="'Bs. ' + (stats.todayRevenue * exchangeRate).toFixed(2)"></span>
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Actividad Reciente y Tanques -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                <!-- Actividad Reciente -->
-                <div class="bg-white rounded-2xl shadow-sm p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Actividad Reciente</h3>
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-check text-green-600"></i>
-                                </div>
-                                <div>
-                                    <p class="font-medium text-gray-900 text-sm">Venta completada</p>
-                                    <p class="text-xs text-gray-500">María González - 3 botellones 20L</p>
-                                </div>
+                    <div class="bg-white rounded-2xl shadow-sm p-6 card-hover border-l-4 border-cyan-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Botellones Vendidos</p>
+                                <p class="text-3xl font-bold text-gray-900" x-text="stats.totalBottlesSold"></p>
+                                <p class="text-xs text-gray-500 mt-2" x-text="getBottlesBreakdown()"></p>
                             </div>
-                            <div class="text-right">
-                                <p class="font-semibold text-green-600 text-sm">+$21.00</p>
-                                <p class="text-xs text-gray-500">Hace 5 min</p>
+                            <div class="w-12 h-12 bg-cyan-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-tint text-cyan-600 text-xl"></i>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-truck text-blue-600"></i>
-                                </div>
-                                <div>
-                                    <p class="font-medium text-gray-900 text-sm">Delivery en ruta</p>
-                                    <p class="text-xs text-gray-500">5 pedidos pendientes</p>
-                                </div>
+                    <div class="bg-white rounded-2xl shadow-sm p-6 card-hover border-l-4 border-red-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Cuentas por Cobrar</p>
+                                <p class="text-3xl font-bold text-gray-900" x-text="'$' + stats.creditAccounts.toFixed(2)"></p>
+                                <p class="text-xs text-red-600 mt-2">
+                                    <i class="fas fa-exclamation-circle"></i> 
+                                    <span x-text="stats.creditCustomers + ' clientes'"></span>
+                                </p>
                             </div>
-                            <div class="text-right">
-                                <p class="font-semibold text-blue-600 text-sm">En proceso</p>
-                                <p class="text-xs text-gray-500">Hace 15 min</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-exclamation text-yellow-600"></i>
-                                </div>
-                                <div>
-                                    <p class="font-medium text-gray-900 text-sm">Stock bajo</p>
-                                    <p class="text-xs text-gray-500">Botellones 5L: Solo 10 unidades</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-semibold text-yellow-600 text-sm">Reponer</p>
-                                <p class="text-xs text-gray-500">Hace 1 hora</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-user-plus text-purple-600"></i>
-                                </div>
-                                <div>
-                                    <p class="font-medium text-gray-900 text-sm">Nuevo cliente</p>
-                                    <p class="text-xs text-gray-500">Pedro López registrado</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-semibold text-purple-600 text-sm">Nuevo</p>
-                                <p class="text-xs text-gray-500">Hace 2 horas</p>
+                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-file-invoice-dollar text-red-600 text-xl"></i>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Tanques de Agua -->
-                <div class="bg-white rounded-2xl shadow-sm p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-database text-blue-500 mr-2"></i>
-                        Tanques de Almacenamiento
-                    </h3>
-
-                    <div class="space-y-4">
-                        <!-- Tanque Principal -->
-                        <div class="border border-gray-200 rounded-xl p-4">
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <h4 class="font-semibold text-gray-800">Tanque Principal</h4>
-                                    <p class="text-sm text-gray-500">Capacidad: 5,000L</p>
-                                </div>
-                                <span
-                                    class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">85%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
-                                <div class="bg-gradient-to-r from-blue-400 to-blue-600 h-3 rounded-full"
-                                    style="width: 85%"></div>
-                            </div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">4,250L disponibles</span>
-                                <span class="font-semibold text-blue-600">750L usados hoy</span>
-                            </div>
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-white rounded-2xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Ventas de la Semana</h3>
+                        <div style="position: relative; height: 200px;">
+                            <canvas id="salesChart"></canvas>
                         </div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Distribución por Producto</h3>
+                        <div style="position: relative; height: 200px;">
+                            <canvas id="productChart"></canvas>
+                        </div>
+                    </div>
+                </div>
 
-                        <!-- Tanque Respaldo -->
-                        <div class="border border-gray-200 rounded-xl p-4">
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <h4 class="font-semibold text-gray-800">Tanque Respaldo</h4>
-                                    <p class="text-sm text-gray-500">Capacidad: 3,000L</p>
+                <!-- Activity & Tanks -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-2xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Actividad Reciente</h3>
+                        <div x-show="recentActivity.length === 0" class="text-center py-8 text-gray-400">
+                            <i class="fas fa-history text-4xl mb-2"></i>
+                            <p>No hay actividad reciente</p>
+                        </div>
+                        <div class="space-y-3">
+                            <template x-for="activity in recentActivity" :key="activity.id">
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 rounded-full flex items-center justify-center"
+                                            :class="{
+                                                'bg-green-100': activity.type === 'sale',
+                                                'bg-blue-100': activity.type === 'delivery',
+                                                'bg-yellow-100': activity.type === 'low_stock',
+                                                'bg-purple-100': activity.type === 'new_customer'
+                                            }">
+                                            <i :class="{
+                                                'fas fa-check text-green-600': activity.type === 'sale',
+                                                'fas fa-truck text-blue-600': activity.type === 'delivery',
+                                                'fas fa-exclamation text-yellow-600': activity.type === 'low_stock',
+                                                'fas fa-user-plus text-purple-600': activity.type === 'new_customer'
+                                            }"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900 text-sm" x-text="activity.title"></p>
+                                            <p class="text-xs text-gray-500" x-text="activity.description"></p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-semibold text-sm" 
+                                            :class="{
+                                                'text-green-600': activity.type === 'sale',
+                                                'text-blue-600': activity.type === 'delivery',
+                                                'text-yellow-600': activity.type === 'low_stock',
+                                                'text-purple-600': activity.type === 'new_customer'
+                                            }"
+                                            x-text="activity.amount || activity.status"></p>
+                                        <p class="text-xs text-gray-500" x-text="activity.time"></p>
+                                    </div>
                                 </div>
-                                <span
-                                    class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">60%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
-                                <div class="bg-gradient-to-r from-yellow-400 to-yellow-600 h-3 rounded-full"
-                                    style="width: 60%"></div>
-                            </div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">1,800L disponibles</span>
-                                <span class="font-semibold text-yellow-600">1,200L usados hoy</span>
-                            </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-database text-blue-500 mr-2"></i>
+                            Tanques de Almacenamiento
+                        </h3>
+                        <div x-show="tanks.length === 0" class="text-center py-8 text-gray-400">
+                            <i class="fas fa-database text-4xl mb-2"></i>
+                            <p>No hay tanques registrados</p>
+                        </div>
+                        <div class="space-y-4">
+                            <template x-for="tank in tanks" :key="tank.id">
+                                <div class="border border-gray-200 rounded-xl p-4">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div>
+                                            <h4 class="font-semibold text-gray-800" x-text="tank.name"></h4>
+                                            <p class="text-sm text-gray-500" x-text="'Capacidad: ' + tank.capacity_liters.toLocaleString() + 'L'"></p>
+                                        </div>
+                                        <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                                            :class="{
+                                                'bg-green-100 text-green-800': tank.percentage > 70,
+                                                'bg-yellow-100 text-yellow-800': tank.percentage > 40 && tank.percentage <= 70,
+                                                'bg-red-100 text-red-800': tank.percentage <= 40
+                                            }"
+                                            x-text="tank.percentage + '%'"></span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
+                                        <div class="h-3 rounded-full transition-all duration-500"
+                                            :class="{
+                                                'bg-gradient-to-r from-blue-400 to-blue-600': tank.percentage > 70,
+                                                'bg-gradient-to-r from-yellow-400 to-yellow-600': tank.percentage > 40 && tank.percentage <= 70,
+                                                'bg-gradient-to-r from-red-400 to-red-600': tank.percentage <= 40
+                                            }"
+                                            :style="'width: ' + tank.percentage + '%'"></div>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600" x-text="tank.current_liters.toLocaleString() + 'L disponibles'"></span>
+                                        <span class="font-semibold"
+                                            :class="{
+                                                'text-blue-600': tank.percentage > 70,
+                                                'text-yellow-600': tank.percentage > 40 && tank.percentage <= 70,
+                                                'text-red-600': tank.percentage <= 40
+                                            }"
+                                            x-text="(tank.capacity_liters - tank.current_liters).toLocaleString() + 'L usados'"></span>
+                                    </div>
+                                    <div x-show="tank.current_liters < tank.min_level" class="mt-2 text-xs text-red-600">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                                        Nivel bajo - Mínimo: <span x-text="tank.min_level + 'L'"></span>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
 
-        <!-- Footer -->
         <footer class="bg-white border-t px-6 py-4 text-center text-sm text-gray-500">
             <p>&copy; 2026 AquaService. Todos los derechos reservados.</p>
         </footer>
     </div>
 
-    <!-- ============================================ -->
-    <!-- SCRIPTS PRINCIPALES -->
-    <!-- ============================================ -->
     <script>
-        // ============================================
-        // CONFIGURACIÓN DE SUPABASE
-        // ============================================
         const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
-
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // ============================================
-        // FUNCIÓN DE LOGOUT (Global)
-        // ============================================
         async function logout() {
             try {
                 await supabase.auth.signOut();
@@ -427,88 +315,291 @@
             }
         }
 
-        // ============================================
-        // APLICACIÓN DASHBOARD
-        // ============================================
         function dashboardApp() {
             return {
+                loading: true,
                 userName: '',
                 userRole: '',
                 userBranch: '',
                 userInitials: '??',
+                exchangeRate: 38.50,
                 salesChart: null,
                 productChart: null,
+                
+                stats: {
+                    todaySales: 0,
+                    yesterdaySales: 0,
+                    todayRevenue: 0,
+                    totalBottlesSold: 0,
+                    bottlesBySize: { 5: 0, 13: 0, 20: 0 },
+                    creditAccounts: 0,
+                    creditCustomers: 0
+                },
+                
+                weeklySales: {
+                    labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                    data: [0, 0, 0, 0, 0, 0, 0]
+                },
+                
+                productDistribution: {
+                    labels: ['5 Litros', '13 Litros', '20 Litros'],
+                    data: [0, 0, 0]
+                },
+                
+                recentActivity: [],
+                tanks: [],
 
                 async initDashboard() {
-                    // Configurar Alertify
                     if (typeof alertify !== 'undefined') {
                         alertify.set('notifier', { position: 'top-right' });
                     }
 
-                    // 1. Verificar autenticación
                     const { data: { session } } = await supabase.auth.getSession();
-
                     if (!session) {
                         window.location.href = 'login.html';
                         return;
                     }
 
-                    // 2. Obtener perfil del usuario
                     try {
-                        const { data: profile, error } = await supabase
+                        const { data: profile } = await supabase
                             .from('profiles')
                             .select('full_name, role, branch')
                             .eq('id', session.user.id)
                             .single();
 
-                        if (error) {
-                            console.error('Error al obtener perfil:', error);
-                            this.userName = session.user.email;
-                            this.userRole = 'usuario';
-                            this.userBranch = 'geminis';
-                            this.userInitials = 'US';
-                        } else {
+                        if (profile) {
                             this.userName = profile.full_name;
                             this.userRole = profile.role;
                             this.userBranch = profile.branch;
                             this.userInitials = this.getInitials(profile.full_name);
                         }
 
-                        localStorage.setItem('user_id', session.user.id);
-                        localStorage.setItem('user_name', this.userName);
-                        localStorage.setItem('user_role', this.userRole);
-                        localStorage.setItem('user_branch', this.userBranch);
+                        await this.loadExchangeRate();
+                        await Promise.all([
+                            this.loadTodayStats(),
+                            this.loadWeeklySales(),
+                            this.loadProductDistribution(),
+                            this.loadCreditAccounts(),
+                            this.loadRecentActivity(),
+                            this.loadTanks()
+                        ]);
+
+                        this.$nextTick(() => {
+                            this.initCharts();
+                        });
 
                     } catch (err) {
-                        console.error('Error:', err);
+                        console.error('Error inicializando dashboard:', err);
+                    } finally {
+                        this.loading = false;
                     }
-
-                    // 3. Inicializar gráficos
-                    this.$nextTick(() => {
-                        this.initCharts();
-                    });
                 },
 
-                getInitials(name) {
-                    if (!name) return '??';
-                    return name.split(' ')
-                        .map(n => n[0])
-                        .join('')
-                        .substring(0, 2)
-                        .toUpperCase();
+                async loadExchangeRate() {
+                    try {
+                        const { data, error } = await supabase.rpc('get_active_exchange_rate', {
+                            branch_param: this.userBranch
+                        });
+                        if (!error && data) {
+                            this.exchangeRate = parseFloat(data);
+                        }
+                    } catch (err) {
+                        console.error('Error cargando tasa:', err);
+                    }
+                },
+
+                async loadTodayStats() {
+                    try {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const todayStr = today.toISOString();
+
+                        const yesterday = new Date();
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        yesterday.setHours(0, 0, 0, 0);
+                        const yesterdayStr = yesterday.toISOString();
+
+                        const { data: todaySales } = await supabase
+                            .from('sales')
+                            .select('total, status, payment_method')
+                            .eq('branch', this.userBranch)
+                            .gte('created_at', todayStr);
+
+                        const { data: yesterdaySales } = await supabase
+                            .from('sales')
+                            .select('total')
+                            .eq('branch', this.userBranch)
+                            .gte('created_at', yesterdayStr)
+                            .lt('created_at', todayStr);
+
+                        this.stats.todaySales = todaySales?.length || 0;
+                        this.stats.yesterdaySales = yesterdaySales?.length || 0;
+                        this.stats.todayRevenue = todaySales
+                            ?.filter(s => s.status === 'completed')
+                            .reduce((sum, s) => sum + s.total, 0) || 0;
+
+                        const { data: saleItems } = await supabase
+                            .from('sale_items')
+                            .select(`
+                                quantity,
+                                products!inner(size_liters),
+                                sales!inner(branch, created_at)
+                            `)
+                            .eq('sales.branch', this.userBranch)
+                            .gte('sales.created_at', todayStr);
+
+                        this.stats.totalBottlesSold = saleItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+                        
+                        saleItems?.forEach(item => {
+                            const size = item.products.size_liters;
+                            if (this.stats.bottlesBySize[size] !== undefined) {
+                                this.stats.bottlesBySize[size] += item.quantity;
+                            }
+                        });
+
+                    } catch (err) {
+                        console.error('Error cargando estadísticas de hoy:', err);
+                    }
+                },
+
+                async loadWeeklySales() {
+                    try {
+                        const today = new Date();
+                        const dayOfWeek = today.getDay() || 7;
+                        const monday = new Date(today);
+                        monday.setDate(today.getDate() - dayOfWeek + 1);
+                        monday.setHours(0, 0, 0, 0);
+
+                        const { data: sales } = await supabase
+                            .from('sales')
+                            .select('total, created_at')
+                            .eq('branch', this.userBranch)
+                            .gte('created_at', monday.toISOString())
+                            .eq('status', 'completed');
+
+                        const dailySales = [0, 0, 0, 0, 0, 0, 0];
+                        
+                        sales?.forEach(sale => {
+                            const saleDate = new Date(sale.created_at);
+                            const dayIndex = saleDate.getDay() || 7;
+                            dailySales[dayIndex - 1] += sale.total;
+                        });
+
+                        this.weeklySales.data = dailySales;
+
+                    } catch (err) {
+                        console.error('Error cargando ventas semanales:', err);
+                    }
+                },
+
+                async loadProductDistribution() {
+                    try {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const todayStr = today.toISOString();
+
+                        const { data: items } = await supabase
+                            .from('sale_items')
+                            .select(`
+                                quantity,
+                                products!inner(size_liters),
+                                sales!inner(branch, created_at)
+                            `)
+                            .eq('sales.branch', this.userBranch)
+                            .gte('sales.created_at', todayStr);
+
+                        const distribution = { 5: 0, 13: 0, 20: 0 };
+                        
+                        items?.forEach(item => {
+                            const size = item.products.size_liters;
+                            if (distribution[size] !== undefined) {
+                                distribution[size] += item.quantity;
+                            }
+                        });
+
+                        this.productDistribution.data = [distribution[5], distribution[13], distribution[20]];
+
+                    } catch (err) {
+                        console.error('Error cargando distribución:', err);
+                    }
+                },
+
+                async loadCreditAccounts() {
+                    try {
+                        const { data: creditSales } = await supabase
+                            .from('sales')
+                            .select('total, customer_id')
+                            .eq('branch', this.userBranch)
+                            .eq('payment_method', 'credito')
+                            .eq('status', 'pending');
+
+                        this.stats.creditAccounts = creditSales?.reduce((sum, s) => sum + s.total, 0) || 0;
+                        
+                        const uniqueCustomers = new Set(creditSales?.map(s => s.customer_id));
+                        this.stats.creditCustomers = uniqueCustomers.size;
+
+                    } catch (err) {
+                        console.error('Error cargando cuentas por cobrar:', err);
+                    }
+                },
+
+                async loadRecentActivity() {
+                    try {
+                        const { data: sales } = await supabase
+                            .from('sales')
+                            .select(`
+                                id,
+                                created_at,
+                                total,
+                                customer_name,
+                                sale_items!inner(quantity, products!inner(name))
+                            `)
+                            .eq('branch', this.userBranch)
+                            .order('created_at', { ascending: false })
+                            .limit(5);
+
+                        this.recentActivity = sales?.map(sale => ({
+                            id: sale.id,
+                            type: 'sale',
+                            title: 'Venta completada',
+                            description: `${sale.customer_name || 'Cliente'} - ${sale.sale_items[0]?.quantity} ${sale.sale_items[0]?.products.name}`,
+                            amount: '+$' + sale.total.toFixed(2),
+                            time: this.getTimeAgo(sale.created_at)
+                        })) || [];
+
+                    } catch (err) {
+                        console.error('Error cargando actividad reciente:', err);
+                    }
+                },
+
+                async loadTanks() {
+                    try {
+                        const { data: tanks } = await supabase
+                            .from('tanks')
+                            .select('*')
+                            .eq('branch', this.userBranch)
+                            .order('name');
+
+                        this.tanks = tanks?.map(tank => ({
+                            ...tank,
+                            percentage: Math.round((tank.current_liters / tank.capacity_liters) * 100)
+                        })) || [];
+
+                    } catch (err) {
+                        console.error('Error cargando tanques:', err);
+                    }
                 },
 
                 initCharts() {
-                    // Gráfico de Ventas Semanales
                     const salesCtx = document.getElementById('salesChart');
                     if (salesCtx) {
                         this.salesChart = new Chart(salesCtx, {
                             type: 'line',
                             data: {
-                                labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                                labels: this.weeklySales.labels,
                                 datasets: [{
                                     label: 'Ventas ($)',
-                                    data: [320, 450, 380, 520, 480, 620, 485],
+                                    data: this.weeklySales.data,
                                     borderColor: '#0ea5e9',
                                     backgroundColor: 'rgba(14, 165, 233, 0.1)',
                                     tension: 0.4,
@@ -525,40 +616,25 @@
                                 scales: {
                                     y: {
                                         beginAtZero: true,
-                                        max: 700,
                                         ticks: {
-                                            callback: function (value) { return '$' + value; },
-                                            stepSize: 100
+                                            callback: function (value) { return '$' + value; }
                                         },
-                                        grid: {
-                                            color: 'rgba(0, 0, 0, 0.05)'
-                                        }
+                                        grid: { color: 'rgba(0, 0, 0, 0.05)' }
                                     },
-                                    x: {
-                                        grid: {
-                                            display: false
-                                        }
-                                    }
-                                },
-                                layout: {
-                                    padding: {
-                                        top: 10,
-                                        bottom: 10
-                                    }
+                                    x: { grid: { display: false } }
                                 }
                             }
                         });
                     }
 
-                    // Gráfico de Distribución por Producto - CORREGIDO
                     const productCtx = document.getElementById('productChart');
                     if (productCtx) {
                         this.productChart = new Chart(productCtx, {
                             type: 'doughnut',
                             data: {
-                                labels: ['5 Litros', '10 Litros', '20 Litros'],
+                                labels: this.productDistribution.labels,
                                 datasets: [{
-                                    data: [15, 18, 15],
+                                    data: this.productDistribution.data,
                                     backgroundColor: ['#06b6d4', '#0ea5e9', '#0284c7'],
                                     borderWidth: 0,
                                     cutout: '70%'
@@ -574,21 +650,49 @@
                                             padding: 15,
                                             usePointStyle: true,
                                             pointStyle: 'circle',
-                                            font: {
-                                                size: 11
-                                            }
+                                            font: { size: 11 }
                                         }
-                                    }
-                                },
-                                layout: {
-                                    padding: {
-                                        top: 10,
-                                        bottom: 10
                                     }
                                 }
                             }
                         });
                     }
+                },
+
+                getInitials(name) {
+                    if (!name) return '??';
+                    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                },
+
+                getTimeAgo(dateString) {
+                    const date = new Date(dateString);
+                    const now = new Date();
+                    const diffMs = now - date;
+                    const diffMins = Math.floor(diffMs / 60000);
+                    const diffHours = Math.floor(diffMs / 3600000);
+                    const diffDays = Math.floor(diffMs / 86400000);
+
+                    if (diffMins < 1) return 'Justo ahora';
+                    if (diffMins < 60) return `Hace ${diffMins} min`;
+                    if (diffHours < 24) return `Hace ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
+                    return `Hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
+                },
+
+                getSalesTrendClass() {
+                    if (this.stats.todaySales > this.stats.yesterdaySales) return 'fas fa-arrow-up text-green-600';
+                    if (this.stats.todaySales < this.stats.yesterdaySales) return 'fas fa-arrow-down text-red-600';
+                    return 'fas fa-minus text-gray-600';
+                },
+
+                getSalesTrendText() {
+                    if (this.stats.yesterdaySales === 0) return 'Sin ventas ayer';
+                    const change = ((this.stats.todaySales - this.stats.yesterdaySales) / this.stats.yesterdaySales * 100).toFixed(0);
+                    return `${Math.abs(change)}% vs ayer`;
+                },
+
+                getBottlesBreakdown() {
+                    const { 5: five, 13: thirteen, 20: twenty } = this.stats.bottlesBySize;
+                    return `5L: ${five} | 13L: ${thirteen} | 20L: ${twenty}`;
                 }
             }
         }
