@@ -5,73 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AquaService - Dashboard</title>
-
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
-
-    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
-
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- Alertify.js -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
-
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                }
-            }
-        }
-    </script>
-
     <style>
-        [x-cloak] {
-            display: none !important;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-
-        .gradient-bg {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-        }
-
-        .sidebar-item {
-            transition: all 0.3s;
-        }
-
-        .sidebar-item:hover,
-        .sidebar-item.active {
-            background: rgba(255, 255, 255, 0.2);
-            border-left: 4px solid #fff;
-        }
-
-        .card-hover {
-            transition: all 0.3s ease;
-        }
-
-        .card-hover:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-        }
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
+        .sidebar-item { transition: all 0.3s; }
+        .sidebar-item:hover, .sidebar-item.active { background: rgba(255, 255, 255, 0.2); border-left: 4px solid #fff; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
     </style>
 </head>
 
@@ -80,7 +31,6 @@
     <!-- Sidebar -->
     <aside class="fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 hidden lg:block">
         <div class="p-6">
-            <!-- Logo y Sucursal -->
             <div class="mb-6">
                 <div class="flex items-center space-x-3 mb-3">
                     <i class="fas fa-tint text-3xl"></i>
@@ -89,52 +39,35 @@
                         <p class="text-xs text-blue-200">Sistema de Gestión</p>
                     </div>
                 </div>
-                <!-- Sucursal -->
                 <div class="bg-white bg-opacity-10 rounded-lg px-3 py-2">
                     <p class="text-xs text-blue-200 mb-0.5">Sucursal</p>
                     <p class="font-semibold capitalize text-sm" x-text="userBranch || 'Cargando...'"></p>
                 </div>
             </div>
-
             <nav class="space-y-2">
                 <a href="index.html" class="sidebar-item active flex items-center space-x-3 px-4 py-3 rounded-lg">
-                    <i class="fas fa-home w-5"></i>
-                    <span>Dashboard</span>
+                    <i class="fas fa-home w-5"></i><span>Dashboard</span>
                 </a>
-                <a href="ventas.html"
-                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
-                    <i class="fas fa-shopping-cart w-5"></i>
-                    <span>Ventas</span>
+                <a href="ventas.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                    <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
                 </a>
-                <a href="clientes.html"
-                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
-                    <i class="fas fa-users w-5"></i>
-                    <span>Clientes</span>
+                <a href="clientes.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                    <i class="fas fa-users w-5"></i><span>Clientes</span>
                 </a>
-                <a href="inventario.html"
-                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
-                    <i class="fas fa-boxes w-5"></i>
-                    <span>Inventario</span>
+                <a href="inventario.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                    <i class="fas fa-boxes w-5"></i><span>Inventario</span>
                 </a>
-                <a href="usuarios.html"
-                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
-                    <i class="fas fa-user-cog w-5"></i>
-                    <span>Usuarios</span>
+                <a href="usuarios.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                    <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
                 </a>
-                <a href="reportes.html"
-                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
-                    <i class="fas fa-chart-line w-5"></i>
-                    <span>Reportes</span>
+                <a href="reportes.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                    <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
                 </a>
             </nav>
         </div>
-
-        <!-- Perfil de Usuario -->
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold">
-                    <span x-text="userInitials"></span>
-                </div>
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold" x-text="userInitials"></div>
                 <div>
                     <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
                     <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
@@ -145,51 +78,37 @@
 
     <!-- Main Content -->
     <div class="lg:ml-64 min-h-screen flex flex-col">
-
-        <!-- Header -->
         <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
                 <p class="text-sm text-gray-500">Resumen general del negocio</p>
             </div>
-
             <div class="flex items-center space-x-4">
-                <!-- Tasa de Cambio -->
                 <div class="hidden md:flex items-center bg-blue-50 px-4 py-2 rounded-lg">
                     <i class="fas fa-dollar-sign text-green-600 mr-2"></i>
                     <span class="text-sm text-gray-600">Tasa: </span>
                     <span class="text-sm font-bold text-blue-600 ml-1" x-text="'Bs. ' + exchangeRate.toFixed(2)"></span>
                 </div>
-
-                <!-- Notificaciones -->
                 <button class="relative p-2 text-gray-400 hover:text-gray-600">
                     <i class="fas fa-bell text-xl"></i>
                     <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                 </button>
-
-                <!-- Botón Cerrar Sesión -->
-                <button onclick="logout()"
-                    class="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition shadow-sm">
+                <button onclick="logout()" class="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition shadow-sm">
                     <i class="fas fa-sign-out-alt"></i>
                     <span class="font-medium">Salir</span>
                 </button>
             </div>
         </header>
 
-        <!-- Content -->
         <main class="flex-1 p-6">
-
-            <!-- Loading -->
             <div x-show="loading" class="text-center py-12">
                 <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500"></i>
                 <p class="mt-4 text-gray-600">Cargando dashboard...</p>
             </div>
 
             <div x-show="!loading">
-                <!-- Tarjetas de Estadísticas -->
+                <!-- Stats Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-
-                    <!-- Ventas Hoy -->
                     <div class="bg-white rounded-2xl shadow-sm p-6 card-hover border-l-4 border-blue-500">
                         <div class="flex justify-between items-start">
                             <div>
@@ -206,7 +125,6 @@
                         </div>
                     </div>
 
-                    <!-- Ingresos Hoy -->
                     <div class="bg-white rounded-2xl shadow-sm p-6 card-hover border-l-4 border-green-500">
                         <div class="flex justify-between items-start">
                             <div>
@@ -222,7 +140,6 @@
                         </div>
                     </div>
 
-                    <!-- Botellones Vendidos -->
                     <div class="bg-white rounded-2xl shadow-sm p-6 card-hover border-l-4 border-cyan-500">
                         <div class="flex justify-between items-start">
                             <div>
@@ -236,7 +153,6 @@
                         </div>
                     </div>
 
-                    <!-- Cuentas por Cobrar -->
                     <div class="bg-white rounded-2xl shadow-sm p-6 card-hover border-l-4 border-red-500">
                         <div class="flex justify-between items-start">
                             <div>
@@ -254,18 +170,14 @@
                     </div>
                 </div>
 
-                <!-- Gráficos -->
+                <!-- Charts -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-
-                    <!-- Ventas de la Semana -->
                     <div class="bg-white rounded-2xl shadow-sm p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Ventas de la Semana</h3>
                         <div style="position: relative; height: 200px;">
                             <canvas id="salesChart"></canvas>
                         </div>
                     </div>
-
-                    <!-- Distribución por Producto -->
                     <div class="bg-white rounded-2xl shadow-sm p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Distribución por Producto</h3>
                         <div style="position: relative; height: 200px;">
@@ -274,18 +186,14 @@
                     </div>
                 </div>
 
-                <!-- Actividad Reciente y Tanques -->
+                <!-- Activity & Tanks -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                    <!-- Actividad Reciente -->
                     <div class="bg-white rounded-2xl shadow-sm p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Actividad Reciente</h3>
-                        
                         <div x-show="recentActivity.length === 0" class="text-center py-8 text-gray-400">
                             <i class="fas fa-history text-4xl mb-2"></i>
                             <p>No hay actividad reciente</p>
                         </div>
-
                         <div class="space-y-3">
                             <template x-for="activity in recentActivity" :key="activity.id">
                                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -325,18 +233,15 @@
                         </div>
                     </div>
 
-                    <!-- Tanques de Agua -->
                     <div class="bg-white rounded-2xl shadow-sm p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                             <i class="fas fa-database text-blue-500 mr-2"></i>
                             Tanques de Almacenamiento
                         </h3>
-
                         <div x-show="tanks.length === 0" class="text-center py-8 text-gray-400">
                             <i class="fas fa-database text-4xl mb-2"></i>
                             <p>No hay tanques registrados</p>
                         </div>
-
                         <div class="space-y-4">
                             <template x-for="tank in tanks" :key="tank.id">
                                 <div class="border border-gray-200 rounded-xl p-4">
@@ -384,15 +289,11 @@
             </div>
         </main>
 
-        <!-- Footer -->
         <footer class="bg-white border-t px-6 py-4 text-center text-sm text-gray-500">
             <p>&copy; 2026 AquaService. Todos los derechos reservados.</p>
         </footer>
     </div>
 
-    <!-- ============================================ -->
-    <!-- SCRIPTS PRINCIPALES -->
-    <!-- ============================================ -->
     <script>
         const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
@@ -446,373 +347,355 @@
                 },
                 
                 recentActivity: [],
-                tanks: []
-            }
-        }
+                tanks: [],
 
-        // Extender el objeto con métodos
-        const app = dashboardApp();
-        
-        Object.assign(app, {
-            async initDashboard() {
-                if (typeof alertify !== 'undefined') {
-                    alertify.set('notifier', { position: 'top-right' });
-                }
-
-                const { data: { session } } = await supabase.auth.getSession();
-                if (!session) {
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-                try {
-                    const { data: profile } = await supabase
-                        .from('profiles')
-                        .select('full_name, role, branch')
-                        .eq('id', session.user.id)
-                        .single();
-
-                    if (profile) {
-                        this.userName = profile.full_name;
-                        this.userRole = profile.role;
-                        this.userBranch = profile.branch;
-                        this.userInitials = this.getInitials(profile.full_name);
+                async initDashboard() {
+                    if (typeof alertify !== 'undefined') {
+                        alertify.set('notifier', { position: 'top-right' });
                     }
 
-                    // Cargar tasa de cambio
-                    await this.loadExchangeRate();
-                    
-                    // Cargar todas las estadísticas
-                    await Promise.all([
-                        this.loadTodayStats(),
-                        this.loadWeeklySales(),
-                        this.loadProductDistribution(),
-                        this.loadCreditAccounts(),
-                        this.loadRecentActivity(),
-                        this.loadTanks()
-                    ]);
-
-                    // Inicializar gráficos
-                    this.$nextTick(() => {
-                        this.initCharts();
-                    });
-
-                } catch (err) {
-                    console.error('Error inicializando dashboard:', err);
-                } finally {
-                    this.loading = false;
-                }
-            },
-
-            async loadExchangeRate() {
-                try {
-                    const { data, error } = await supabase.rpc('get_active_exchange_rate', {
-                        branch_param: this.userBranch
-                    });
-
-                    if (!error && data) {
-                        this.exchangeRate = parseFloat(data);
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (!session) {
+                        window.location.href = 'login.html';
+                        return;
                     }
-                } catch (err) {
-                    console.error('Error cargando tasa:', err);
-                }
-            },
 
-            async loadTodayStats() {
-                try {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    const todayStr = today.toISOString();
+                    try {
+                        const { data: profile } = await supabase
+                            .from('profiles')
+                            .select('full_name, role, branch')
+                            .eq('id', session.user.id)
+                            .single();
 
-                    const yesterday = new Date();
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    yesterday.setHours(0, 0, 0, 0);
-                    const yesterdayStr = yesterday.toISOString();
-
-                    // Ventas de hoy
-                    const { data: todaySales } = await supabase
-                        .from('sales')
-                        .select('total, status, payment_method')
-                        .eq('branch', this.userBranch)
-                        .gte('created_at', todayStr);
-
-                    // Ventas de ayer
-                    const { data: yesterdaySales } = await supabase
-                        .from('sales')
-                        .select('total')
-                        .eq('branch', this.userBranch)
-                        .gte('created_at', yesterdayStr)
-                        .lt('created_at', todayStr);
-
-                    this.stats.todaySales = todaySales?.length || 0;
-                    this.stats.yesterdaySales = yesterdaySales?.length || 0;
-                    this.stats.todayRevenue = todaySales
-                        ?.filter(s => s.status === 'completed')
-                        .reduce((sum, s) => sum + s.total, 0) || 0;
-
-                    // Botellones vendidos hoy
-                    const { data: saleItems } = await supabase
-                        .from('sale_items')
-                        .select(`
-                            quantity,
-                            products!inner(size_liters),
-                            sales!inner(branch, created_at)
-                        `)
-                        .eq('sales.branch', this.userBranch)
-                        .gte('sales.created_at', todayStr);
-
-                    this.stats.totalBottlesSold = saleItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-                    
-                    // Por tamaño
-                    saleItems?.forEach(item => {
-                        const size = item.products.size_liters;
-                        if (this.stats.bottlesBySize[size] !== undefined) {
-                            this.stats.bottlesBySize[size] += item.quantity;
+                        if (profile) {
+                            this.userName = profile.full_name;
+                            this.userRole = profile.role;
+                            this.userBranch = profile.branch;
+                            this.userInitials = this.getInitials(profile.full_name);
                         }
-                    });
 
-                } catch (err) {
-                    console.error('Error cargando estadísticas de hoy:', err);
-                }
-            },
+                        await this.loadExchangeRate();
+                        await Promise.all([
+                            this.loadTodayStats(),
+                            this.loadWeeklySales(),
+                            this.loadProductDistribution(),
+                            this.loadCreditAccounts(),
+                            this.loadRecentActivity(),
+                            this.loadTanks()
+                        ]);
 
-            async loadWeeklySales() {
-                try {
-                    const today = new Date();
-                    const dayOfWeek = today.getDay() || 7;
-                    const monday = new Date(today);
-                    monday.setDate(today.getDate() - dayOfWeek + 1);
-                    monday.setHours(0, 0, 0, 0);
+                        this.$nextTick(() => {
+                            this.initCharts();
+                        });
 
-                    const { data: sales } = await supabase
-                        .from('sales')
-                        .select('total, created_at')
-                        .eq('branch', this.userBranch)
-                        .gte('created_at', monday.toISOString())
-                        .eq('status', 'completed');
+                    } catch (err) {
+                        console.error('Error inicializando dashboard:', err);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
 
-                    const dailySales = [0, 0, 0, 0, 0, 0, 0];
-                    
-                    sales?.forEach(sale => {
-                        const saleDate = new Date(sale.created_at);
-                        const dayIndex = saleDate.getDay() || 7;
-                        dailySales[dayIndex - 1] += sale.total;
-                    });
-
-                    this.weeklySales.data = dailySales;
-
-                } catch (err) {
-                    console.error('Error cargando ventas semanales:', err);
-                }
-            },
-
-            async loadProductDistribution() {
-                try {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    const todayStr = today.toISOString();
-
-                    const { data: items } = await supabase
-                        .from('sale_items')
-                        .select(`
-                            quantity,
-                            products!inner(size_liters),
-                            sales!inner(branch, created_at)
-                        `)
-                        .eq('sales.branch', this.userBranch)
-                        .gte('sales.created_at', todayStr);
-
-                    const distribution = { 5: 0, 13: 0, 20: 0 };
-                    
-                    items?.forEach(item => {
-                        const size = item.products.size_liters;
-                        if (distribution[size] !== undefined) {
-                            distribution[size] += item.quantity;
+                async loadExchangeRate() {
+                    try {
+                        const { data, error } = await supabase.rpc('get_active_exchange_rate', {
+                            branch_param: this.userBranch
+                        });
+                        if (!error && data) {
+                            this.exchangeRate = parseFloat(data);
                         }
-                    });
+                    } catch (err) {
+                        console.error('Error cargando tasa:', err);
+                    }
+                },
 
-                    this.productDistribution.data = [distribution[5], distribution[13], distribution[20]];
+                async loadTodayStats() {
+                    try {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const todayStr = today.toISOString();
 
-                } catch (err) {
-                    console.error('Error cargando distribución:', err);
-                }
-            },
+                        const yesterday = new Date();
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        yesterday.setHours(0, 0, 0, 0);
+                        const yesterdayStr = yesterday.toISOString();
 
-            async loadCreditAccounts() {
-                try {
-                    const { data: creditSales } = await supabase
-                        .from('sales')
-                        .select('total, customer_id')
-                        .eq('branch', this.userBranch)
-                        .eq('payment_method', 'credito')
-                        .eq('status', 'pending');
+                        const { data: todaySales } = await supabase
+                            .from('sales')
+                            .select('total, status, payment_method')
+                            .eq('branch', this.userBranch)
+                            .gte('created_at', todayStr);
 
-                    this.stats.creditAccounts = creditSales?.reduce((sum, s) => sum + s.total, 0) || 0;
-                    
-                    const uniqueCustomers = new Set(creditSales?.map(s => s.customer_id));
-                    this.stats.creditCustomers = uniqueCustomers.size;
+                        const { data: yesterdaySales } = await supabase
+                            .from('sales')
+                            .select('total')
+                            .eq('branch', this.userBranch)
+                            .gte('created_at', yesterdayStr)
+                            .lt('created_at', todayStr);
 
-                } catch (err) {
-                    console.error('Error cargando cuentas por cobrar:', err);
-                }
-            },
+                        this.stats.todaySales = todaySales?.length || 0;
+                        this.stats.yesterdaySales = yesterdaySales?.length || 0;
+                        this.stats.todayRevenue = todaySales
+                            ?.filter(s => s.status === 'completed')
+                            .reduce((sum, s) => sum + s.total, 0) || 0;
 
-            async loadRecentActivity() {
-                try {
-                    const { data: sales } = await supabase
-                        .from('sales')
-                        .select(`
-                            id,
-                            created_at,
-                            total,
-                            customer_name,
-                            sale_items!inner(quantity, products!inner(name))
-                        `)
-                        .eq('branch', this.userBranch)
-                        .order('created_at', { ascending: false })
-                        .limit(5);
+                        const { data: saleItems } = await supabase
+                            .from('sale_items')
+                            .select(`
+                                quantity,
+                                products!inner(size_liters),
+                                sales!inner(branch, created_at)
+                            `)
+                            .eq('sales.branch', this.userBranch)
+                            .gte('sales.created_at', todayStr);
 
-                    this.recentActivity = sales?.map(sale => ({
-                        id: sale.id,
-                        type: 'sale',
-                        title: 'Venta completada',
-                        description: `${sale.customer_name || 'Cliente'} - ${sale.sale_items[0]?.quantity} ${sale.sale_items[0]?.products.name}`,
-                        amount: '+$' + sale.total.toFixed(2),
-                        time: this.getTimeAgo(sale.created_at)
-                    })) || [];
-
-                } catch (err) {
-                    console.error('Error cargando actividad reciente:', err);
-                }
-            },
-
-            async loadTanks() {
-                try {
-                    const { data: tanks } = await supabase
-                        .from('tanks')
-                        .select('*')
-                        .eq('branch', this.userBranch)
-                        .order('name');
-
-                    this.tanks = tanks?.map(tank => ({
-                        ...tank,
-                        percentage: Math.round((tank.current_liters / tank.capacity_liters) * 100)
-                    })) || [];
-
-                } catch (err) {
-                    console.error('Error cargando tanques:', err);
-                }
-            },
-
-            initCharts() {
-                // Gráfico de Ventas Semanales
-                const salesCtx = document.getElementById('salesChart');
-                if (salesCtx) {
-                    this.salesChart = new Chart(salesCtx, {
-                        type: 'line',
-                        data: {
-                            labels: this.weeklySales.labels,
-                            datasets: [{
-                                label: 'Ventas ($)',
-                                data: this.weeklySales.data,
-                                borderColor: '#0ea5e9',
-                                backgroundColor: 'rgba(14, 165, 233, 0.1)',
-                                tension: 0.4,
-                                fill: true,
-                                borderWidth: 2,
-                                pointRadius: 3,
-                                pointHoverRadius: 5
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: { legend: { display: false } },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    ticks: {
-                                        callback: function (value) { return '$' + value; }
-                                    },
-                                    grid: { color: 'rgba(0, 0, 0, 0.05)' }
-                                },
-                                x: { grid: { display: false } }
+                        this.stats.totalBottlesSold = saleItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+                        
+                        saleItems?.forEach(item => {
+                            const size = item.products.size_liters;
+                            if (this.stats.bottlesBySize[size] !== undefined) {
+                                this.stats.bottlesBySize[size] += item.quantity;
                             }
-                        }
-                    });
-                }
+                        });
 
-                // Gráfico de Distribución
-                const productCtx = document.getElementById('productChart');
-                if (productCtx) {
-                    this.productChart = new Chart(productCtx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: this.productDistribution.labels,
-                            datasets: [{
-                                data: this.productDistribution.data,
-                                backgroundColor: ['#06b6d4', '#0ea5e9', '#0284c7'],
-                                borderWidth: 0,
-                                cutout: '70%'
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'bottom',
-                                    labels: {
-                                        padding: 15,
-                                        usePointStyle: true,
-                                        pointStyle: 'circle',
-                                        font: { size: 11 }
+                    } catch (err) {
+                        console.error('Error cargando estadísticas de hoy:', err);
+                    }
+                },
+
+                async loadWeeklySales() {
+                    try {
+                        const today = new Date();
+                        const dayOfWeek = today.getDay() || 7;
+                        const monday = new Date(today);
+                        monday.setDate(today.getDate() - dayOfWeek + 1);
+                        monday.setHours(0, 0, 0, 0);
+
+                        const { data: sales } = await supabase
+                            .from('sales')
+                            .select('total, created_at')
+                            .eq('branch', this.userBranch)
+                            .gte('created_at', monday.toISOString())
+                            .eq('status', 'completed');
+
+                        const dailySales = [0, 0, 0, 0, 0, 0, 0];
+                        
+                        sales?.forEach(sale => {
+                            const saleDate = new Date(sale.created_at);
+                            const dayIndex = saleDate.getDay() || 7;
+                            dailySales[dayIndex - 1] += sale.total;
+                        });
+
+                        this.weeklySales.data = dailySales;
+
+                    } catch (err) {
+                        console.error('Error cargando ventas semanales:', err);
+                    }
+                },
+
+                async loadProductDistribution() {
+                    try {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const todayStr = today.toISOString();
+
+                        const { data: items } = await supabase
+                            .from('sale_items')
+                            .select(`
+                                quantity,
+                                products!inner(size_liters),
+                                sales!inner(branch, created_at)
+                            `)
+                            .eq('sales.branch', this.userBranch)
+                            .gte('sales.created_at', todayStr);
+
+                        const distribution = { 5: 0, 13: 0, 20: 0 };
+                        
+                        items?.forEach(item => {
+                            const size = item.products.size_liters;
+                            if (distribution[size] !== undefined) {
+                                distribution[size] += item.quantity;
+                            }
+                        });
+
+                        this.productDistribution.data = [distribution[5], distribution[13], distribution[20]];
+
+                    } catch (err) {
+                        console.error('Error cargando distribución:', err);
+                    }
+                },
+
+                async loadCreditAccounts() {
+                    try {
+                        const { data: creditSales } = await supabase
+                            .from('sales')
+                            .select('total, customer_id')
+                            .eq('branch', this.userBranch)
+                            .eq('payment_method', 'credito')
+                            .eq('status', 'pending');
+
+                        this.stats.creditAccounts = creditSales?.reduce((sum, s) => sum + s.total, 0) || 0;
+                        
+                        const uniqueCustomers = new Set(creditSales?.map(s => s.customer_id));
+                        this.stats.creditCustomers = uniqueCustomers.size;
+
+                    } catch (err) {
+                        console.error('Error cargando cuentas por cobrar:', err);
+                    }
+                },
+
+                async loadRecentActivity() {
+                    try {
+                        const { data: sales } = await supabase
+                            .from('sales')
+                            .select(`
+                                id,
+                                created_at,
+                                total,
+                                customer_name,
+                                sale_items!inner(quantity, products!inner(name))
+                            `)
+                            .eq('branch', this.userBranch)
+                            .order('created_at', { ascending: false })
+                            .limit(5);
+
+                        this.recentActivity = sales?.map(sale => ({
+                            id: sale.id,
+                            type: 'sale',
+                            title: 'Venta completada',
+                            description: `${sale.customer_name || 'Cliente'} - ${sale.sale_items[0]?.quantity} ${sale.sale_items[0]?.products.name}`,
+                            amount: '+$' + sale.total.toFixed(2),
+                            time: this.getTimeAgo(sale.created_at)
+                        })) || [];
+
+                    } catch (err) {
+                        console.error('Error cargando actividad reciente:', err);
+                    }
+                },
+
+                async loadTanks() {
+                    try {
+                        const { data: tanks } = await supabase
+                            .from('tanks')
+                            .select('*')
+                            .eq('branch', this.userBranch)
+                            .order('name');
+
+                        this.tanks = tanks?.map(tank => ({
+                            ...tank,
+                            percentage: Math.round((tank.current_liters / tank.capacity_liters) * 100)
+                        })) || [];
+
+                    } catch (err) {
+                        console.error('Error cargando tanques:', err);
+                    }
+                },
+
+                initCharts() {
+                    const salesCtx = document.getElementById('salesChart');
+                    if (salesCtx) {
+                        this.salesChart = new Chart(salesCtx, {
+                            type: 'line',
+                            data: {
+                                labels: this.weeklySales.labels,
+                                datasets: [{
+                                    label: 'Ventas ($)',
+                                    data: this.weeklySales.data,
+                                    borderColor: '#0ea5e9',
+                                    backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                                    tension: 0.4,
+                                    fill: true,
+                                    borderWidth: 2,
+                                    pointRadius: 3,
+                                    pointHoverRadius: 5
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            callback: function (value) { return '$' + value; }
+                                        },
+                                        grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                                    },
+                                    x: { grid: { display: false } }
+                                }
+                            }
+                        });
+                    }
+
+                    const productCtx = document.getElementById('productChart');
+                    if (productCtx) {
+                        this.productChart = new Chart(productCtx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: this.productDistribution.labels,
+                                datasets: [{
+                                    data: this.productDistribution.data,
+                                    backgroundColor: ['#06b6d4', '#0ea5e9', '#0284c7'],
+                                    borderWidth: 0,
+                                    cutout: '70%'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            padding: 15,
+                                            usePointStyle: true,
+                                            pointStyle: 'circle',
+                                            font: { size: 11 }
+                                        }
                                     }
                                 }
                             }
-                        }
-                    });
+                        });
+                    }
+                },
+
+                getInitials(name) {
+                    if (!name) return '??';
+                    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                },
+
+                getTimeAgo(dateString) {
+                    const date = new Date(dateString);
+                    const now = new Date();
+                    const diffMs = now - date;
+                    const diffMins = Math.floor(diffMs / 60000);
+                    const diffHours = Math.floor(diffMs / 3600000);
+                    const diffDays = Math.floor(diffMs / 86400000);
+
+                    if (diffMins < 1) return 'Justo ahora';
+                    if (diffMins < 60) return `Hace ${diffMins} min`;
+                    if (diffHours < 24) return `Hace ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
+                    return `Hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
+                },
+
+                getSalesTrendClass() {
+                    if (this.stats.todaySales > this.stats.yesterdaySales) return 'fas fa-arrow-up text-green-600';
+                    if (this.stats.todaySales < this.stats.yesterdaySales) return 'fas fa-arrow-down text-red-600';
+                    return 'fas fa-minus text-gray-600';
+                },
+
+                getSalesTrendText() {
+                    if (this.stats.yesterdaySales === 0) return 'Sin ventas ayer';
+                    const change = ((this.stats.todaySales - this.stats.yesterdaySales) / this.stats.yesterdaySales * 100).toFixed(0);
+                    return `${Math.abs(change)}% vs ayer`;
+                },
+
+                getBottlesBreakdown() {
+                    const { 5: five, 13: thirteen, 20: twenty } = this.stats.bottlesBySize;
+                    return `5L: ${five} | 13L: ${thirteen} | 20L: ${twenty}`;
                 }
-            },
-
-            getInitials(name) {
-                if (!name) return '??';
-                return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-            },
-
-            getTimeAgo(dateString) {
-                const date = new Date(dateString);
-                const now = new Date();
-                const diffMs = now - date;
-                const diffMins = Math.floor(diffMs / 60000);
-                const diffHours = Math.floor(diffMs / 3600000);
-                const diffDays = Math.floor(diffMs / 86400000);
-
-                if (diffMins < 1) return 'Justo ahora';
-                if (diffMins < 60) return `Hace ${diffMins} min`;
-                if (diffHours < 24) return `Hace ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
-                return `Hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
-            },
-
-            getSalesTrendClass() {
-                if (this.stats.todaySales > this.stats.yesterdaySales) return 'fas fa-arrow-up text-green-600';
-                if (this.stats.todaySales < this.stats.yesterdaySales) return 'fas fa-arrow-down text-red-600';
-                return 'fas fa-minus text-gray-600';
-            },
-
-            getSalesTrendText() {
-                if (this.stats.yesterdaySales === 0) return 'Sin ventas ayer';
-                const change = ((this.stats.todaySales - this.stats.yesterdaySales) / this.stats.yesterdaySales * 100).toFixed(0);
-                return `${Math.abs(change)}% vs ayer`;
-            },
-
-            getBottlesBreakdown() {
-                const { 5: five, 13: thirteen, 20: twenty } = this.stats.bottlesBySize;
-                return `5L: ${five} | 13L: ${thirteen} | 20L: ${twenty}`;
             }
-        });
-
-        return app;
+        }
     </script>
 </body>
 
