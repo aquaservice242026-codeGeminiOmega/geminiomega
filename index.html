@@ -38,6 +38,15 @@
             z-index: 50;
         }
 
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
         /* Menú móvil */
         .sidebar-mobile {
             transform: translateX(-100%);
@@ -79,8 +88,12 @@
 
 <body class="bg-gray-50" x-data="dashboardApp()" x-init="initDashboard()">
 
+    <!-- Overlay para móvil -->
+    <div class="sidebar-overlay" :class="{ 'show': mobileMenuOpen }" @click="mobileMenuOpen = false"></div>
+
     <!-- Sidebar -->
-    <aside class="fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 hidden lg:block">
+    <aside class="sidebar-mobile fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 lg:block"
+        :class="{ 'open': mobileMenuOpen }">
         <div class="p-6">
             <div class="mb-6">
                 <div class="flex items-center space-x-3 mb-3">
@@ -96,27 +109,32 @@
                 </div>
             </div>
             <nav class="space-y-2">
-                <a href="index.html" class="sidebar-item active flex items-center space-x-3 px-4 py-3 rounded-lg">
+                <a href="index.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition bg-white bg-opacity-20">
                     <i class="fas fa-home w-5"></i><span>Dashboard</span>
                 </a>
-                <a href="ventas.html"
-                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                <a href="ventas.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
                     <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
                 </a>
-                <a href="clientes.html"
-                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                <a href="cuentas-cobrar.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
+                    <i class="fas fa-file-invoice-dollar w-5"></i><span>Cuentas por Cobrar</span>
+                </a>
+                <a href="clientes.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
                     <i class="fas fa-users w-5"></i><span>Clientes</span>
                 </a>
-                <a href="inventario.html"
-                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                <a href="inventario.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
                     <i class="fas fa-boxes w-5"></i><span>Inventario</span>
                 </a>
-                <a href="usuarios.html"
-                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                <a href="usuarios.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
                     <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
                 </a>
-                <a href="reportes.html"
-                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                <a href="reportes.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
                     <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
                 </a>
             </nav>
@@ -136,9 +154,17 @@
     <!-- Main Content -->
     <div class="lg:ml-64 min-h-screen flex flex-col">
         <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
-                <p class="text-sm text-gray-500">Resumen general del negocio</p>
+            <div class="flex items-center space-x-4">
+                <!-- Botón Menú Móvil -->
+                <button @click="mobileMenuOpen = !mobileMenuOpen"
+                    class="menu-toggle lg:hidden text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
+                    <p class="text-sm text-gray-500">Resumen general del negocio</p>
+                </div>
             </div>
             <div class="flex items-center space-x-4">
                 <div class="hidden md:flex items-center bg-blue-50 px-4 py-2 rounded-lg">
@@ -373,6 +399,10 @@
 
         function dashboardApp() {
             return {
+                // Variables del menú responsive
+                mobileMenuOpen: false,
+                currentPage: 'dashboard',
+
                 loading: true,
                 userName: '',
                 userRole: '',
