@@ -13,18 +13,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        [x-cloak] {
-            display: none !important;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-
-        .gradient-bg {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-        }
-
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -57,27 +48,22 @@
             </div>
 
             <nav class="space-y-2">
-                <a href="index.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="index.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-home w-5"></i><span>Dashboard</span>
                 </a>
                 <a href="ventas.html" class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
                     <i class="fas fa-shopping-cart w-5"></i><span class="font-medium">Ventas</span>
                 </a>
-                <a href="clientes.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="clientes.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-users w-5"></i><span>Clientes</span>
                 </a>
-                <a href="inventario.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="inventario.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-boxes w-5"></i><span>Inventario</span>
                 </a>
-                <a href="usuarios.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="usuarios.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
                 </a>
-                <a href="reportes.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="reportes.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
                 </a>
             </nav>
@@ -85,8 +71,7 @@
 
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
-                    x-text="userInitials"></div>
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold" x-text="userInitials"></div>
                 <div>
                     <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
                     <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
@@ -103,7 +88,6 @@
                 <h2 class="text-2xl font-bold text-gray-800">Punto de Venta</h2>
                 <p class="text-sm text-gray-500">Venta de agua potabilizada - Stock basado en tanques</p>
             </div>
-
             <div class="flex items-center space-x-4">
                 <div class="bg-blue-50 px-4 py-2 rounded-lg flex items-center space-x-2">
                     <span class="text-sm text-gray-600">Tasa USD:</span>
@@ -134,7 +118,7 @@
                 <div class="lg:col-span-2 space-y-4">
                     <div class="bg-white rounded-2xl shadow-sm p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Productos Disponibles</h3>
-
+                        
                         <!-- Empty State -->
                         <div x-show="products.length === 0" class="text-center py-8 text-gray-400">
                             <i class="fas fa-box-open text-6xl mb-4"></i>
@@ -384,8 +368,7 @@
             </div>
 
             <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3">
-                <button @click="closeCustomerModal()"
-                    class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
+                <button @click="closeCustomerModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
                 <button @click="saveCustomer()" :disabled="savingCustomer"
                     class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50">
                     <i class="fas fa-save mr-2" x-show="!savingCustomer"></i>
@@ -496,32 +479,26 @@
                         console.error('Error obteniendo perfil:', err);
                     }
 
-                    // Cargar tasa primero (con persistencia)
                     await this.loadExchangeRate();
-
-                    // Luego cargar productos y clientes
                     await this.loadProducts();
                     await this.loadCustomers();
                 },
 
                 async loadExchangeRate() {
                     try {
-                        // 1. Intentar obtener de localStorage con fecha
                         const savedData = localStorage.getItem('exchangeRate_' + this.userBranch);
                         if (savedData) {
                             const parsed = JSON.parse(savedData);
                             const savedDate = new Date(parsed.date);
                             const today = new Date();
-
-                            // Si es la misma fecha, usar la tasa guardada
+                            
                             if (savedDate.toDateString() === today.toDateString()) {
                                 this.exchangeRate = parsed.rate;
-                                console.log('Tasa cargada de localStorage:', this.exchangeRate, '- Fecha:', parsed.date);
+                                console.log('Tasa cargada de localStorage:', this.exchangeRate);
                                 return;
                             }
                         }
 
-                        // 2. Si no hay o es de otra fecha, obtener de BD
                         const { data, error } = await supabase.rpc('get_active_exchange_rate', {
                             branch_param: this.userBranch
                         });
@@ -530,21 +507,15 @@
 
                         if (data) {
                             this.exchangeRate = parseFloat(data);
-                            console.log('Tasa cargada de BD:', this.exchangeRate);
-
-                            // Guardar en localStorage con fecha
                             localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({
                                 rate: this.exchangeRate,
                                 date: new Date().toISOString()
                             }));
                         } else {
-                            // Valor por defecto
                             this.exchangeRate = 38.50;
-                            console.log('Usando tasa por defecto:', this.exchangeRate);
                         }
                     } catch (err) {
                         console.error('Error cargando tasa:', err);
-                        // Fallback a localStorage o valor por defecto
                         const savedData = localStorage.getItem('exchangeRate_' + this.userBranch);
                         if (savedData) {
                             this.exchangeRate = JSON.parse(savedData).rate;
@@ -556,7 +527,6 @@
 
                 async updateExchangeRate() {
                     try {
-                        // Actualizar en BD
                         const { error } = await supabase
                             .from('exchange_rates')
                             .update({ is_active: false })
@@ -574,16 +544,14 @@
 
                         if (insertError) throw insertError;
 
-                        // Guardar en localStorage con fecha
                         localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({
                             rate: this.exchangeRate,
                             date: new Date().toISOString()
                         }));
 
-                        notify('Tasa de cambio actualizada y guardada');
+                        notify('Tasa de cambio actualizada');
                     } catch (err) {
                         console.error('Error actualizando tasa:', err);
-                        // Guardar solo en localStorage
                         localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({
                             rate: this.exchangeRate,
                             date: new Date().toISOString()
@@ -595,56 +563,34 @@
                 async loadProducts() {
                     this.loading = true;
                     try {
-                        console.log('=== Cargando productos para:', this.userBranch);
-
-                        // Obtener inventario virtual basado en tanques
                         const { data: virtualInventory, error: virtualError } = await supabase
                             .rpc('calculate_virtual_inventory', {
                                 branch_param: this.userBranch
                             });
 
-                        if (virtualError) {
-                            console.error('Error RPC:', virtualError);
-                            throw virtualError;
-                        }
-
-                        console.log('Inventario virtual recibido:', virtualInventory);
+                        if (virtualError) throw virtualError;
 
                         if (!virtualInventory || virtualInventory.length === 0) {
-                            console.warn('No hay inventario virtual disponible');
                             this.products = [];
                             return;
                         }
 
-                        // Filtrar solo botellones con stock > 0
                         const bottlesOnly = virtualInventory.filter(item => {
-                            const hasStock = item.virtual_stock > 0;
-                            const isBottle = item.size_liters !== null && item.size_liters > 0;
-                            return hasStock && isBottle;
+                            return item.virtual_stock > 0 && item.size_liters !== null && item.size_liters > 0;
                         });
 
-                        console.log('Botellones disponibles:', bottlesOnly);
-
-                        // Mapear productos - USAR size_liters COMO ID (ya que es único)
-                        this.products = bottlesOnly.map(item => {
-                            const product = {
-                                id: 'size_' + item.size_liters,  // ID único basado en tamaño
-                                product_id: item.product_id,     // Guardar el ID real por si acaso
-                                name: item.product_name,
-                                size_liters: item.size_liters,
-                                price: parseFloat(item.price) || 0,
-                                stock: parseInt(item.virtual_stock) || 0
-                            };
-                            console.log('Producto:', product);
-                            return product;
-                        });
-
-                        console.log('Productos finales cargados:', this.products);
+                        this.products = bottlesOnly.map(item => ({
+                            id: 'size_' + item.size_liters,
+                            product_id: item.product_id,
+                            name: item.product_name,
+                            size_liters: item.size_liters,
+                            price: parseFloat(item.price) || 0,
+                            stock: parseInt(item.virtual_stock) || 0
+                        }));
 
                         if (this.products.length === 0) {
                             notify('No hay botellones disponibles. Verifique el nivel de los tanques.', 'warning');
                         }
-
                     } catch (err) {
                         console.error('Error cargando productos:', err);
                         notify('Error al cargar productos: ' + err.message, 'error');
@@ -665,7 +611,6 @@
 
                         if (error) throw error;
                         this.customers = data || [];
-                        console.log('Clientes cargados:', this.customers.length);
                     } catch (err) {
                         console.error('Error cargando clientes:', err);
                     }
@@ -678,7 +623,7 @@
 
                 addProduct(product) {
                     if (product.stock <= 0) {
-                        notify('Producto sin stock disponible', 'error');
+                        notify('Producto sin stock', 'error');
                         return;
                     }
 
@@ -863,10 +808,7 @@
                             .select()
                             .single();
 
-                        if (saleError) {
-                            console.error('Error creando venta:', saleError);
-                            throw saleError;
-                        }
+                        if (saleError) throw saleError;
 
                         // 2. Crear items
                         const saleItems = this.cart.map(item => ({
@@ -883,7 +825,7 @@
 
                         if (itemsError) throw itemsError;
 
-                        // 3. Descontar del tanque
+                        // 3. Descontar del tanque usando la función
                         for (const item of this.cart) {
                             const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
                                 branch_param: this.userBranch,
@@ -902,7 +844,7 @@
                             }
                         }
 
-                        notify('¡Venta procesada exitosamente!');
+                        notify('¡Venta procesada exitosamente! Agua descontada del tanque.');
 
                         this.cart = [];
                         this.deliveryAddress = '';
