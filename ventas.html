@@ -119,14 +119,12 @@
                     <div class="bg-white rounded-2xl shadow-sm p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Productos Disponibles</h3>
                         
-                        <!-- Empty State -->
                         <div x-show="products.length === 0" class="text-center py-8 text-gray-400">
                             <i class="fas fa-box-open text-6xl mb-4"></i>
                             <p class="text-lg mb-2">No hay productos disponibles</p>
                             <p class="text-sm">Verifique el nivel de los tanques en el módulo de Inventario</p>
                         </div>
 
-                        <!-- Products Grid -->
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <template x-for="product in products" :key="product.id">
                                 <button @click="addProduct(product)"
@@ -155,8 +153,7 @@
                                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                     <div class="flex-1">
                                         <h4 class="font-medium text-gray-800" x-text="item.name"></h4>
-                                        <p class="text-sm text-blue-600" x-text="'$' + item.price.toFixed(2) + ' c/u'">
-                                        </p>
+                                        <p class="text-sm text-blue-600" x-text="'$' + item.price.toFixed(2) + ' c/u'"></p>
                                     </div>
                                     <div class="flex items-center space-x-2">
                                         <button @click="updateQuantity(index, -1)"
@@ -308,12 +305,21 @@
                             </p>
                         </div>
 
-                        <button @click="processSale()" :disabled="cart.length === 0 || processing"
-                            class="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-xl font-semibold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-                            <i class="fas fa-circle-notch fa-spin mr-2" x-show="processing"></i>
-                            <i class="fas fa-check-circle mr-2" x-show="!processing"></i>
-                            <span x-text="processing ? 'Procesando...' : 'Procesar Venta'"></span>
-                        </button>
+                        <!-- Action Buttons -->
+                        <div class="flex space-x-2">
+                            <button @click="processSale()" :disabled="cart.length === 0 || processing || paymentMethod === 'credito'"
+                                class="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-xl font-semibold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                                <i class="fas fa-check-circle mr-2" x-show="!processing && paymentMethod !== 'credito'"></i>
+                                <i class="fas fa-circle-notch fa-spin mr-2" x-show="processing"></i>
+                                <span x-text="processing ? 'Procesando...' : 'Procesar Venta'"></span>
+                            </button>
+                            
+                            <button @click="openCreditModal()" :disabled="cart.length === 0 || processing"
+                                class="px-6 py-3 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                                <i class="fas fa-hand-holding-usd mr-2"></i>
+                                Crédito
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -379,6 +385,152 @@
         </div>
     </div>
 
+    <!-- Modal Venta a Crédito -->
+    <div x-show="showCreditModal" x-cloak class="modal-overlay" @click.self="closeCreditModal()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto" @click.stop>
+            <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+                <h3 class="text-xl font-bold text-gray-800">
+                    <i class="fas fa-hand-holding-usd text-blue-600 mr-2"></i>
+                    Venta a Crédito
+                </h3>
+                <button @click="closeCreditModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <!-- Información del Cliente -->
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-gray-800 mb-3">
+                        <i class="fas fa-user mr-2 text-blue-600"></i>
+                        Información del Cliente
+                    </h4>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Cliente *</label>
+                            <div class="flex space-x-2">
+                                <select x-model="creditForm.customer_id" @change="loadCustomerData()"
+                                    class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Seleccionar cliente...</option>
+                                    <template x-for="customer in customers" :key="customer.id">
+                                        <option :value="customer.id" x-text="customer.full_name"></option>
+                                    </template>
+                                </select>
+                                <button @click="openCustomerModal()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+                            <input type="text" x-model="creditForm.customer_phone" readonly
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Cédula/ID</label>
+                            <input type="text" x-model="creditForm.customer_id_card"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                placeholder="V-12345678">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumen de la Venta -->
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-gray-800 mb-3">
+                        <i class="fas fa-shopping-cart mr-2 text-green-600"></i>
+                        Resumen de la Venta
+                    </h4>
+                    
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Total Venta:</span>
+                            <span class="font-bold text-lg" x-text="'$' + totalUSD.toFixed(2)"></span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Pago Inicial:</span>
+                            <span class="font-semibold" x-text="'$' + creditForm.initial_payment.toFixed(2)"></span>
+                        </div>
+                        <div class="border-t border-green-200 pt-2 flex justify-between">
+                            <span class="text-gray-800 font-semibold">Monto a Financiar:</span>
+                            <span class="font-bold text-xl text-blue-600" x-text="'$' + (totalUSD - creditForm.initial_payment).toFixed(2)"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Términos del Crédito -->
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-gray-800 mb-3">
+                        <i class="fas fa-calendar-alt mr-2 text-yellow-600"></i>
+                        Términos del Crédito
+                    </h4>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Límite de Pago *</label>
+                            <input type="date" x-model="creditForm.payment_date"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <div class="col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Términos/Condiciones</label>
+                            <textarea x-model="creditForm.payment_terms" rows="2"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                placeholder="Ej: Pago a 30 días, 3 cuotas semanales, etc."></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Pago Inicial ($)</label>
+                            <input type="number" x-model.number="creditForm.initial_payment" step="0.01" min="0"
+                                @input="calculateCreditAmount()"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Método de Pago Inicial</label>
+                            <select x-model="creditForm.initial_payment_method"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="efectivo">Efectivo</option>
+                                <option value="transferencia">Transferencia</option>
+                                <option value="pago_movil">Pago Móvil</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notas -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Notas Adicionales</label>
+                    <textarea x-model="creditForm.notes" rows="3"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="Observaciones sobre el crédito, garantías, referencias, etc."></textarea>
+                </div>
+
+                <!-- Alerta -->
+                <div x-show="creditForm.initial_payment < totalUSD" class="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <p class="text-sm text-red-800">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        Se creará una cuenta por cobrar por 
+                        <span class="font-bold" x-text="'$' + (totalUSD - creditForm.initial_payment).toFixed(2)"></span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3 sticky bottom-0">
+                <button @click="closeCreditModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
+                <button @click="processCreditSale()" :disabled="processing || !canProcessCredit()"
+                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-save mr-2" x-show="!processing"></i>
+                    <i class="fas fa-circle-notch fa-spin mr-2" x-show="processing"></i>
+                    <span x-text="processing ? 'Procesando...' : 'Crear Venta a Crédito'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Alertify -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
@@ -435,6 +587,19 @@
                     email: '',
                     address: '',
                     recommended_by: ''
+                },
+
+                // Credit Modal
+                showCreditModal: false,
+                creditForm: {
+                    customer_id: '',
+                    customer_phone: '',
+                    customer_id_card: '',
+                    payment_date: '',
+                    payment_terms: '',
+                    initial_payment: 0,
+                    initial_payment_method: 'efectivo',
+                    notes: ''
                 },
 
                 get subtotal() {
@@ -563,21 +728,33 @@
                 async loadProducts() {
                     this.loading = true;
                     try {
+                        console.log('=== Cargando productos para:', this.userBranch);
+                        
                         const { data: virtualInventory, error: virtualError } = await supabase
                             .rpc('calculate_virtual_inventory', {
                                 branch_param: this.userBranch
                             });
 
-                        if (virtualError) throw virtualError;
+                        if (virtualError) {
+                            console.error('Error RPC:', virtualError);
+                            throw virtualError;
+                        }
+
+                        console.log('Inventario virtual recibido:', virtualInventory);
 
                         if (!virtualInventory || virtualInventory.length === 0) {
+                            console.warn('No hay inventario virtual disponible');
                             this.products = [];
                             return;
                         }
 
                         const bottlesOnly = virtualInventory.filter(item => {
-                            return item.virtual_stock > 0 && item.size_liters !== null && item.size_liters > 0;
+                            const hasStock = item.virtual_stock > 0;
+                            const isBottle = item.size_liters !== null && item.size_liters > 0;
+                            return hasStock && isBottle;
                         });
+
+                        console.log('Botellones disponibles:', bottlesOnly);
 
                         this.products = bottlesOnly.map(item => ({
                             id: 'size_' + item.size_liters,
@@ -588,9 +765,12 @@
                             stock: parseInt(item.virtual_stock) || 0
                         }));
 
+                        console.log('Productos finales cargados:', this.products);
+
                         if (this.products.length === 0) {
                             notify('No hay botellones disponibles. Verifique el nivel de los tanques.', 'warning');
                         }
+
                     } catch (err) {
                         console.error('Error cargando productos:', err);
                         notify('Error al cargar productos: ' + err.message, 'error');
@@ -611,6 +791,7 @@
 
                         if (error) throw error;
                         this.customers = data || [];
+                        console.log('Clientes cargados:', this.customers.length);
                     } catch (err) {
                         console.error('Error cargando clientes:', err);
                     }
@@ -727,35 +908,230 @@
                     }
                 },
 
+                // Credit Modal Functions
+                openCreditModal() {
+                    if (this.cart.length === 0) {
+                        notify('El carrito está vacío', 'error');
+                        return;
+                    }
+                    
+                    const defaultDate = new Date();
+                    defaultDate.setDate(defaultDate.getDate() + 30);
+                    this.creditForm.payment_date = defaultDate.toISOString().split('T')[0];
+                    
+                    this.showCreditModal = true;
+                },
+
+                closeCreditModal() {
+                    this.showCreditModal = false;
+                    this.resetCreditForm();
+                },
+
+                resetCreditForm() {
+                    this.creditForm = {
+                        customer_id: '',
+                        customer_phone: '',
+                        customer_id_card: '',
+                        payment_date: '',
+                        payment_terms: '',
+                        initial_payment: 0,
+                        initial_payment_method: 'efectivo',
+                        notes: ''
+                    };
+                },
+
+                loadCustomerData() {
+                    const customer = this.customers.find(c => c.id === this.creditForm.customer_id);
+                    if (customer) {
+                        this.creditForm.customer_phone = customer.phone || '';
+                    }
+                },
+
+                calculateCreditAmount() {
+                    // Calculado automáticamente con x-text
+                },
+
+                canProcessCredit() {
+                    if (!this.creditForm.customer_id) return false;
+                    if (!this.creditForm.payment_date) return false;
+                    if (this.creditForm.initial_payment > this.totalUSD) return false;
+                    return true;
+                },
+
+                async processCreditSale() {
+                    if (!this.canProcessCredit()) {
+                        notify('Complete todos los campos obligatorios', 'error');
+                        return;
+                    }
+
+                    const customer = this.customers.find(c => c.id === this.creditForm.customer_id);
+                    const creditAmount = this.totalUSD - this.creditForm.initial_payment;
+
+                    if (!confirm(`Confirmar Venta a Crédito\n\nCliente: ${customer?.full_name}\nTotal: $${this.totalUSD.toFixed(2)}\nPago Inicial: $${this.creditForm.initial_payment.toFixed(2)}\nMonto a Financiar: $${creditAmount.toFixed(2)}`)) {
+                        return;
+                    }
+
+                    this.processing = true;
+
+                    try {
+                        const { data: { session } } = await supabase.auth.getSession();
+
+                        // 1. Crear venta
+                        const { data: sale, error: saleError } = await supabase
+                            .from('sales')
+                            .insert({
+                                branch: this.userBranch,
+                                customer_id: this.creditForm.customer_id,
+                                customer_name: customer?.full_name,
+                                subtotal: this.subtotal,
+                                tax: 0,
+                                total: this.totalUSD,
+                                payment_method: 'credito',
+                                status: creditAmount > 0 ? 'pending' : 'completed',
+                                notes: `Crédito - Pago inicial: $${this.creditForm.initial_payment.toFixed(2)}\n${this.creditForm.notes || ''}`,
+                                created_by: session.user.id
+                            })
+                            .select()
+                            .single();
+
+                        if (saleError) throw saleError;
+
+                        // 2. Obtener product_ids reales
+                        const { data: productsFromDB } = await supabase
+                            .from('products')
+                            .select('id, name, size_liters')
+                            .eq('is_active', true);
+
+                        const sizeToProductId = {};
+                        productsFromDB.forEach(p => {
+                            if (p.size_liters) {
+                                sizeToProductId[p.size_liters] = p.id;
+                            }
+                        });
+
+                        // 3. Crear items
+                        const saleItems = this.cart.map(item => {
+                            const realProductId = sizeToProductId[item.size_liters];
+                            return {
+                                sale_id: sale.id,
+                                product_id: realProductId,
+                                quantity: item.quantity,
+                                unit_price: item.price,
+                                total: item.price * item.quantity
+                            };
+                        });
+
+                        const { error: itemsError } = await supabase
+                            .from('sale_items')
+                            .insert(saleItems);
+
+                        if (itemsError) throw itemsError;
+
+                        // 4. Descontar del tanque
+                        for (const item of this.cart) {
+                            const realProductId = sizeToProductId[item.size_liters];
+                            
+                            if (!realProductId) continue;
+
+                            const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
+                                branch_param: this.userBranch,
+                                product_id_param: realProductId,
+                                quantity_param: item.quantity,
+                                user_id_param: session.user.id
+                            });
+
+                            if (tankError) throw tankError;
+                            if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
+                        }
+
+                        // 5. Crear cuenta por cobrar
+                        if (creditAmount > 0) {
+                            const { error: creditError } = await supabase
+                                .from('credit_accounts')
+                                .insert({
+                                    sale_id: sale.id,
+                                    customer_id: this.creditForm.customer_id,
+                                    customer_name: customer?.full_name,
+                                    customer_phone: customer?.phone,
+                                    customer_id_card: this.creditForm.customer_id_card,
+                                    total_amount: this.totalUSD,
+                                    paid_amount: this.creditForm.initial_payment,
+                                    remaining_amount: creditAmount,
+                                    payment_date: this.creditForm.payment_date,
+                                    payment_terms: this.creditForm.payment_terms,
+                                    notes: this.creditForm.notes,
+                                    status: this.creditForm.initial_payment > 0 ? 'partial' : 'pending',
+                                    created_by: session.user.id
+                                });
+
+                            if (creditError) throw creditError;
+
+                            // 6. Registrar pago inicial
+                            if (this.creditForm.initial_payment > 0) {
+                                // Obtener el ID de la cuenta creada
+                                const { data: creditAccount } = await supabase
+                                    .from('credit_accounts')
+                                    .select('id')
+                                    .eq('sale_id', sale.id)
+                                    .single();
+
+                                if (creditAccount) {
+                                    await supabase
+                                        .from('credit_payments')
+                                        .insert({
+                                            credit_account_id: creditAccount.id,
+                                            amount: this.creditForm.initial_payment,
+                                            payment_method: this.creditForm.initial_payment_method,
+                                            notes: 'Pago inicial',
+                                            created_by: session.user.id
+                                        });
+                                }
+                            }
+                        }
+
+                        notify('¡Venta a crédito procesada exitosamente!');
+                        
+                        this.cart = [];
+                        this.closeCreditModal();
+                        await this.loadProducts();
+
+                    } catch (err) {
+                        console.error('Error procesando venta a crédito:', err);
+                        notify('Error: ' + err.message, 'error');
+                    } finally {
+                        this.processing = false;
+                    }
+                },
+
                 async processSale() {
                     if (this.cart.length === 0) {
                         notify('El carrito está vacío', 'error');
                         return;
                     }
-                
+
                     if (this.deliveryType === 'delivery' && !this.deliveryAddress) {
                         notify('Debe ingresar la dirección de entrega', 'error');
                         return;
                     }
-                
+
                     if (['pago_movil', 'transferencia'].includes(this.paymentMethod) && !this.paymentReference) {
                         notify('Debe ingresar la referencia de pago', 'error');
                         return;
                     }
-                
+
                     if (this.paymentMethod === 'efectivo_bs' && this.amountReceivedBs < this.totalBs) {
                         notify('El monto recibido es insuficiente', 'error');
                         return;
                     }
-                
+
                     if (this.paymentMethod === 'efectivo_divisas' && this.amountReceivedUsd < this.totalUSD) {
                         notify('El monto recibido es insuficiente', 'error');
                         return;
                     }
-                
+
                     const customer = this.customers.find(c => c.id === this.selectedCustomer);
                     const customerName = customer?.full_name || 'Cliente no registrado';
-                
+
                     const methodNames = {
                         'efectivo_bs': 'Efectivo Bs',
                         'efectivo_divisas': 'Efectivo Divisas',
@@ -764,16 +1140,16 @@
                         'punto_venta': 'Punto de Venta',
                         'credito': 'Crédito'
                     };
-                
+
                     if (!confirm(`Confirmar venta para "${customerName}"\nMétodo: ${methodNames[this.paymentMethod]}\nTotal: $${this.totalUSD.toFixed(2)} (Bs. ${this.totalBs.toFixed(2)})?`)) {
                         return;
                     }
-                
+
                     this.processing = true;
-                
+
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
-                
+
                         let notes = [];
                         if (this.deliveryType === 'delivery') {
                             notes.push(`Delivery: ${this.deliveryAddress}`);
@@ -789,33 +1165,8 @@
                             notes.push(`Recibido USD: $${this.amountReceivedUsd.toFixed(2)}`);
                             notes.push(`Cambio USD: $${(this.amountReceivedUsd - this.totalUSD).toFixed(2)}`);
                         }
-                
-                        // 1. Obtener los product_id REALES desde la base de datos
-                        // (porque calculate_virtual_inventory no los retorna correctamente)
-                        console.log('Buscando product_id reales...');
-                        
-                        const { data: productsFromDB, error: productsError } = await supabase
-                            .from('products')
-                            .select('id, name, size_liters')
-                            .eq('is_active', true);
-                
-                        if (productsError) {
-                            throw new Error('Error obteniendo productos: ' + productsError.message);
-                        }
-                
-                        console.log('Productos de BD:', productsFromDB);
-                
-                        // Crear un mapa de size_liters -> product_id
-                        const sizeToProductId = {};
-                        productsFromDB.forEach(p => {
-                            if (p.size_liters) {
-                                sizeToProductId[p.size_liters] = p.id;
-                            }
-                        });
-                
-                        console.log('Mapa size -> id:', sizeToProductId);
-                
-                        // 2. Crear venta
+
+                        // 1. Crear venta
                         const { data: sale, error: saleError } = await supabase
                             .from('sales')
                             .insert({
@@ -832,70 +1183,71 @@
                             })
                             .select()
                             .single();
-                
+
                         if (saleError) throw saleError;
-                
-                        // 3. Crear items con product_id reales
+
+                        // 2. Obtener product_ids reales
+                        const { data: productsFromDB } = await supabase
+                            .from('products')
+                            .select('id, name, size_liters')
+                            .eq('is_active', true);
+
+                        const sizeToProductId = {};
+                        productsFromDB.forEach(p => {
+                            if (p.size_liters) {
+                                sizeToProductId[p.size_liters] = p.id;
+                            }
+                        });
+
+                        // 3. Crear items
                         const saleItems = this.cart.map(item => {
                             const realProductId = sizeToProductId[item.size_liters];
-                            console.log(`Item: ${item.name}, size: ${item.size_liters}, real_id: ${realProductId}`);
-                            
                             return {
                                 sale_id: sale.id,
-                                product_id: realProductId,  // Usar el ID real
+                                product_id: realProductId,
                                 quantity: item.quantity,
                                 unit_price: item.price,
                                 total: item.price * item.quantity
                             };
                         });
-                
+
                         const { error: itemsError } = await supabase
                             .from('sale_items')
                             .insert(saleItems);
-                
+
                         if (itemsError) throw itemsError;
-                
-                        // 4. Descontar del tanque usando los product_id reales
+
+                        // 4. Descontar del tanque
                         for (const item of this.cart) {
                             const realProductId = sizeToProductId[item.size_liters];
                             
                             if (!realProductId) {
-                                console.warn(`No se encontró product_id para ${item.name} (size: ${item.size_liters})`);
+                                console.warn(`No se encontró product_id para ${item.name}`);
                                 continue;
                             }
-                
-                            console.log(`Descontando del tanque: product_id=${realProductId}, quantity=${item.quantity}`);
-                
+
                             const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
                                 branch_param: this.userBranch,
-                                product_id_param: realProductId,  // Usar el ID real
+                                product_id_param: realProductId,
                                 quantity_param: item.quantity,
                                 user_id_param: session.user.id
                             });
-                
-                            if (tankError) {
-                                console.error('Error descontando del tanque:', tankError);
-                                throw new Error(`Error procesando venta: ${tankError.message}`);
-                            }
-                
-                            if (!tankResult || !tankResult.success) {
-                                throw new Error(`Agua insuficiente: ${tankResult?.error || 'Error desconocido'}`);
-                            }
-                
-                            console.log('Tanque actualizado:', tankResult);
+
+                            if (tankError) throw tankError;
+                            if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
                         }
-                
-                        notify('¡Venta procesada exitosamente! Agua descontada del tanque.');
-                
+
+                        notify('¡Venta procesada exitosamente!');
+
                         this.cart = [];
                         this.deliveryAddress = '';
                         this.selectedCustomer = '';
                         this.paymentReference = '';
                         this.amountReceivedBs = 0;
                         this.amountReceivedUsd = 0;
-                
+
                         await this.loadProducts();
-                
+
                     } catch (err) {
                         console.error('Error completo:', err);
                         notify('Error: ' + err.message, 'error');
