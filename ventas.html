@@ -540,37 +540,44 @@
                 async loadProducts() {
                     this.loading = true;
                     try {
-                        // Cargar inventario virtual basado en tanques
+                        // Obtener inventario virtual basado en tanques
                         const { data: virtualInventory, error: virtualError } = await supabase
                             .rpc('calculate_virtual_inventory', {
                                 branch_param: this.userBranch
                             });
 
-                        if (virtualError) throw virtualError;
+                        if (virtualError) {
+                            console.error('Error calculando inventario:', virtualError);
+                            throw virtualError;
+                        }
 
-                        // Cargar precios
-                        const { data: prices, error: pricesError } = await supabase
-                            .from('product_prices')
-                            .select('product_id, price_usd')
-                            .eq('branch', this.userBranch);
+                        console.log('Inventario virtual recibido:', virtualInventory);
 
-                        if (pricesError) throw pricesError;
-
-                        // Combinar inventario virtual con precios
-                        this.products = (virtualInventory || []).map(item => {
-                            const price = prices?.find(p => p.product_id === item.product_id);
-                            return {
-                                id: item.product_id,
-                                name: item.product_name,
-                                size_liters: item.size_liters,
-                                price: parseFloat(price?.price_usd || 0),
-                                stock: item.virtual_stock
-                            };
+                        // Filtrar solo botellones (excluir tapas si tienen stock 0)
+                        const bottlesOnly = (virtualInventory || []).filter(item => {
+                            // Incluir si es botellón (size_liters no es null) y tiene stock
+                            return item.size_liters !== null && item.virtual_stock > 0;
                         });
+
+                        // Mapear productos para el carrito
+                        this.products = bottlesOnly.map(item => ({
+                            id: item.product_id || item.id,
+                            name: item.product_name,
+                            size_liters: item.size_liters,
+                            price: parseFloat(item.price) || 0,
+                            stock: item.virtual_stock || 0
+                        }));
+
+                        console.log('Productos cargados:', this.products);
+
+                        if (this.products.length === 0) {
+                            notify('No hay productos disponibles. Verifique el nivel de los tanques.', 'error');
+                        }
 
                     } catch (err) {
                         console.error('Error cargando productos:', err);
                         notify('Error al cargar productos: ' + err.message, 'error');
+                        this.products = [];
                     } finally {
                         this.loading = false;
                     }
