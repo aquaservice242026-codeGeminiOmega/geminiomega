@@ -38,13 +38,54 @@
             justify-content: center;
             z-index: 50;
         }
+
+        /* Menú móvil */
+        .sidebar-mobile {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar-mobile.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 39;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        /* Mostrar sidebar en pantallas grandes */
+        @media (min-width: 1024px) {
+            .sidebar-mobile {
+                transform: translateX(0) !important;
+            }
+
+            .sidebar-overlay {
+                display: none !important;
+            }
+
+            .menu-toggle {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 
 <body class="bg-gray-50" x-data="cuentasApp()" x-init="initCuentas()">
 
+    <!-- Overlay para móvil -->
+    <div class="sidebar-overlay" :class="{ 'show': mobileMenuOpen }" @click="mobileMenuOpen = false"></div>
+
     <!-- Sidebar -->
-    <aside class="fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 hidden lg:block">
+    <aside class="sidebar-mobile fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 lg:block"
+        :class="{ 'open': mobileMenuOpen }">
         <div class="p-6">
             <div class="mb-6">
                 <div class="flex items-center space-x-3 mb-3">
@@ -61,31 +102,31 @@
             </div>
 
             <nav class="space-y-2">
-                <a href="index.html"
+                <a href="index.html" @click="mobileMenuOpen = false"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-home w-5"></i><span>Dashboard</span>
                 </a>
-                <a href="ventas.html"
+                <a href="ventas.html" @click="mobileMenuOpen = false"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
                 </a>
-                <a href="clientes.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-users w-5"></i><span>Clientes</span>
-                </a>
-                <a href="inventario.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-boxes w-5"></i><span>Inventario</span>
-                </a>
-                <a href="cuentas-cobrar.html"
+                <a href="cuentas-cobrar.html" @click="mobileMenuOpen = false"
                     class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
                     <i class="fas fa-file-invoice-dollar w-5"></i><span class="font-medium">Cuentas por Cobrar</span>
                 </a>
-                <a href="usuarios.html"
+                <a href="clientes.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-users w-5"></i><span>Clientes</span>
+                </a>
+                <a href="inventario.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-boxes w-5"></i><span>Inventario</span>
+                </a>
+                <a href="usuarios.html" @click="mobileMenuOpen = false"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
                 </a>
-                <a href="reportes.html"
+                <a href="reportes.html" @click="mobileMenuOpen = false"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
                 </a>
@@ -108,9 +149,17 @@
     <div class="lg:ml-64 min-h-screen">
         <!-- Header -->
         <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800">Cuentas por Cobrar</h2>
-                <p class="text-sm text-gray-500">Gestión de créditos y pagos pendientes</p>
+            <div class="flex items-center space-x-4">
+                <!-- Botón Menú Móvil -->
+                <button @click="mobileMenuOpen = !mobileMenuOpen"
+                    class="menu-toggle lg:hidden text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Cuentas por Cobrar</h2>
+                    <p class="text-sm text-gray-500">Gestión de créditos y pagos pendientes</p>
+                </div>
             </div>
             <div class="flex items-center space-x-4">
                 <button @click="loadCuentas()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
@@ -521,6 +570,10 @@
 
         function cuentasApp() {
             return {
+                // Variables del menú responsive
+                mobileMenuOpen: false,
+                currentPage: 'cuentas',
+
                 loading: true,
                 processing: false,
                 cuentas: [],

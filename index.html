@@ -16,13 +16,64 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        [x-cloak] { display: none !important; }
-        body { font-family: 'Inter', sans-serif; }
-        .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
-        .sidebar-item { transition: all 0.3s; }
-        .sidebar-item:hover, .sidebar-item.active { background: rgba(255, 255, 255, 0.2); border-left: 4px solid #fff; }
-        .card-hover { transition: all 0.3s ease; }
-        .card-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        /* Menú móvil */
+        .sidebar-mobile {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar-mobile.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 39;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        /* Mostrar sidebar en pantallas grandes */
+        @media (min-width: 1024px) {
+            .sidebar-mobile {
+                transform: translateX(0) !important;
+            }
+
+            .sidebar-overlay {
+                display: none !important;
+            }
+
+            .menu-toggle {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 
@@ -48,26 +99,32 @@
                 <a href="index.html" class="sidebar-item active flex items-center space-x-3 px-4 py-3 rounded-lg">
                     <i class="fas fa-home w-5"></i><span>Dashboard</span>
                 </a>
-                <a href="ventas.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                <a href="ventas.html"
+                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
                     <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
                 </a>
-                <a href="clientes.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                <a href="clientes.html"
+                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
                     <i class="fas fa-users w-5"></i><span>Clientes</span>
                 </a>
-                <a href="inventario.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                <a href="inventario.html"
+                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
                     <i class="fas fa-boxes w-5"></i><span>Inventario</span>
                 </a>
-                <a href="usuarios.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                <a href="usuarios.html"
+                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
                     <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
                 </a>
-                <a href="reportes.html" class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
+                <a href="reportes.html"
+                    class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10">
                     <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
                 </a>
             </nav>
         </div>
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold" x-text="userInitials"></div>
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
+                    x-text="userInitials"></div>
                 <div>
                     <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
                     <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
@@ -93,7 +150,8 @@
                     <i class="fas fa-bell text-xl"></i>
                     <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                 </button>
-                <button onclick="logout()" class="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition shadow-sm">
+                <button onclick="logout()"
+                    class="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition shadow-sm">
                     <i class="fas fa-sign-out-alt"></i>
                     <span class="font-medium">Salir</span>
                 </button>
@@ -115,7 +173,7 @@
                                 <p class="text-sm text-gray-600 mb-1">Ventas Hoy</p>
                                 <p class="text-3xl font-bold text-gray-900" x-text="stats.todaySales"></p>
                                 <p class="text-xs text-gray-500 mt-2" x-show="stats.yesterdaySales > 0">
-                                    <i :class="getSalesTrendClass()"></i> 
+                                    <i :class="getSalesTrendClass()"></i>
                                     <span x-text="getSalesTrendText()"></span>
                                 </p>
                             </div>
@@ -129,7 +187,8 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm text-gray-600 mb-1">Ingresos Hoy</p>
-                                <p class="text-3xl font-bold text-gray-900" x-text="'$' + stats.todayRevenue.toFixed(2)"></p>
+                                <p class="text-3xl font-bold text-gray-900"
+                                    x-text="'$' + stats.todayRevenue.toFixed(2)"></p>
                                 <p class="text-xs text-gray-500 mt-2">
                                     <span x-text="'Bs. ' + (stats.todayRevenue * exchangeRate).toFixed(2)"></span>
                                 </p>
@@ -157,9 +216,10 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm text-gray-600 mb-1">Cuentas por Cobrar</p>
-                                <p class="text-3xl font-bold text-gray-900" x-text="'$' + stats.creditAccounts.toFixed(2)"></p>
+                                <p class="text-3xl font-bold text-gray-900"
+                                    x-text="'$' + stats.creditAccounts.toFixed(2)"></p>
                                 <p class="text-xs text-red-600 mt-2">
-                                    <i class="fas fa-exclamation-circle"></i> 
+                                    <i class="fas fa-exclamation-circle"></i>
                                     <span x-text="stats.creditCustomers + ' clientes'"></span>
                                 </p>
                             </div>
@@ -198,8 +258,7 @@
                             <template x-for="activity in recentActivity" :key="activity.id">
                                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                     <div class="flex items-center space-x-3">
-                                        <div class="w-10 h-10 rounded-full flex items-center justify-center"
-                                            :class="{
+                                        <div class="w-10 h-10 rounded-full flex items-center justify-center" :class="{
                                                 'bg-green-100': activity.type === 'sale',
                                                 'bg-blue-100': activity.type === 'delivery',
                                                 'bg-yellow-100': activity.type === 'low_stock',
@@ -218,14 +277,12 @@
                                         </div>
                                     </div>
                                     <div class="text-right">
-                                        <p class="font-semibold text-sm" 
-                                            :class="{
+                                        <p class="font-semibold text-sm" :class="{
                                                 'text-green-600': activity.type === 'sale',
                                                 'text-blue-600': activity.type === 'delivery',
                                                 'text-yellow-600': activity.type === 'low_stock',
                                                 'text-purple-600': activity.type === 'new_customer'
-                                            }"
-                                            x-text="activity.amount || activity.status"></p>
+                                            }" x-text="activity.amount || activity.status"></p>
                                         <p class="text-xs text-gray-500" x-text="activity.time"></p>
                                     </div>
                                 </div>
@@ -248,36 +305,35 @@
                                     <div class="flex justify-between items-start mb-3">
                                         <div>
                                             <h4 class="font-semibold text-gray-800" x-text="tank.name"></h4>
-                                            <p class="text-sm text-gray-500" x-text="'Capacidad: ' + tank.capacity_liters.toLocaleString() + 'L'"></p>
+                                            <p class="text-sm text-gray-500"
+                                                x-text="'Capacidad: ' + tank.capacity_liters.toLocaleString() + 'L'">
+                                            </p>
                                         </div>
-                                        <span class="px-3 py-1 rounded-full text-xs font-semibold"
-                                            :class="{
+                                        <span class="px-3 py-1 rounded-full text-xs font-semibold" :class="{
                                                 'bg-green-100 text-green-800': tank.percentage > 70,
                                                 'bg-yellow-100 text-yellow-800': tank.percentage > 40 && tank.percentage <= 70,
                                                 'bg-red-100 text-red-800': tank.percentage <= 40
-                                            }"
-                                            x-text="tank.percentage + '%'"></span>
+                                            }" x-text="tank.percentage + '%'"></span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
-                                        <div class="h-3 rounded-full transition-all duration-500"
-                                            :class="{
+                                        <div class="h-3 rounded-full transition-all duration-500" :class="{
                                                 'bg-gradient-to-r from-blue-400 to-blue-600': tank.percentage > 70,
                                                 'bg-gradient-to-r from-yellow-400 to-yellow-600': tank.percentage > 40 && tank.percentage <= 70,
                                                 'bg-gradient-to-r from-red-400 to-red-600': tank.percentage <= 40
-                                            }"
-                                            :style="'width: ' + tank.percentage + '%'"></div>
+                                            }" :style="'width: ' + tank.percentage + '%'"></div>
                                     </div>
                                     <div class="flex justify-between text-sm">
-                                        <span class="text-gray-600" x-text="tank.current_liters.toLocaleString() + 'L disponibles'"></span>
-                                        <span class="font-semibold"
-                                            :class="{
+                                        <span class="text-gray-600"
+                                            x-text="tank.current_liters.toLocaleString() + 'L disponibles'"></span>
+                                        <span class="font-semibold" :class="{
                                                 'text-blue-600': tank.percentage > 70,
                                                 'text-yellow-600': tank.percentage > 40 && tank.percentage <= 70,
                                                 'text-red-600': tank.percentage <= 40
                                             }"
                                             x-text="(tank.capacity_liters - tank.current_liters).toLocaleString() + 'L usados'"></span>
                                     </div>
-                                    <div x-show="tank.current_liters < tank.min_level" class="mt-2 text-xs text-red-600">
+                                    <div x-show="tank.current_liters < tank.min_level"
+                                        class="mt-2 text-xs text-red-600">
                                         <i class="fas fa-exclamation-triangle mr-1"></i>
                                         Nivel bajo - Mínimo: <span x-text="tank.min_level + 'L'"></span>
                                     </div>
@@ -325,7 +381,7 @@
                 exchangeRate: 38.50,
                 salesChart: null,
                 productChart: null,
-                
+
                 stats: {
                     todaySales: 0,
                     yesterdaySales: 0,
@@ -335,17 +391,17 @@
                     creditAccounts: 0,
                     creditCustomers: 0
                 },
-                
+
                 weeklySales: {
                     labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
                     data: [0, 0, 0, 0, 0, 0, 0]
                 },
-                
+
                 productDistribution: {
                     labels: ['5 Litros', '13 Litros', '20 Litros'],
                     data: [0, 0, 0]
                 },
-                
+
                 recentActivity: [],
                 tanks: [],
 
@@ -449,7 +505,7 @@
                             .gte('sales.created_at', todayStr);
 
                         this.stats.totalBottlesSold = saleItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-                        
+
                         saleItems?.forEach(item => {
                             const size = item.products.size_liters;
                             if (this.stats.bottlesBySize[size] !== undefined) {
@@ -478,7 +534,7 @@
                             .eq('status', 'completed');
 
                         const dailySales = [0, 0, 0, 0, 0, 0, 0];
-                        
+
                         sales?.forEach(sale => {
                             const saleDate = new Date(sale.created_at);
                             const dayIndex = saleDate.getDay() || 7;
@@ -509,7 +565,7 @@
                             .gte('sales.created_at', todayStr);
 
                         const distribution = { 5: 0, 13: 0, 20: 0 };
-                        
+
                         items?.forEach(item => {
                             const size = item.products.size_liters;
                             if (distribution[size] !== undefined) {
@@ -534,7 +590,7 @@
                             .eq('status', 'pending');
 
                         this.stats.creditAccounts = creditSales?.reduce((sum, s) => sum + s.total, 0) || 0;
-                        
+
                         const uniqueCustomers = new Set(creditSales?.map(s => s.customer_id));
                         this.stats.creditCustomers = uniqueCustomers.size;
 

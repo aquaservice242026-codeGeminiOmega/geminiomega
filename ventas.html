@@ -13,9 +13,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        [x-cloak] { display: none !important; }
-        body { font-family: 'Inter', sans-serif; }
-        .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+        }
+
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -24,6 +33,43 @@
             align-items: center;
             justify-content: center;
             z-index: 50;
+        }
+
+        /* Menú móvil */
+        .sidebar-mobile {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar-mobile.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 39;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        /* Mostrar sidebar en pantallas grandes */
+        @media (min-width: 1024px) {
+            .sidebar-mobile {
+                transform: translateX(0) !important;
+            }
+
+            .sidebar-overlay {
+                display: none !important;
+            }
+
+            .menu-toggle {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -48,22 +94,27 @@
             </div>
 
             <nav class="space-y-2">
-                <a href="index.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="index.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-home w-5"></i><span>Dashboard</span>
                 </a>
                 <a href="ventas.html" class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
                     <i class="fas fa-shopping-cart w-5"></i><span class="font-medium">Ventas</span>
                 </a>
-                <a href="clientes.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="clientes.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-users w-5"></i><span>Clientes</span>
                 </a>
-                <a href="inventario.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="inventario.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-boxes w-5"></i><span>Inventario</span>
                 </a>
-                <a href="usuarios.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="usuarios.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
                 </a>
-                <a href="reportes.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="reportes.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
                 </a>
             </nav>
@@ -71,7 +122,8 @@
 
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold" x-text="userInitials"></div>
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
+                    x-text="userInitials"></div>
                 <div>
                     <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
                     <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
@@ -118,7 +170,7 @@
                 <div class="lg:col-span-2 space-y-4">
                     <div class="bg-white rounded-2xl shadow-sm p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Productos Disponibles</h3>
-                        
+
                         <div x-show="products.length === 0" class="text-center py-8 text-gray-400">
                             <i class="fas fa-box-open text-6xl mb-4"></i>
                             <p class="text-lg mb-2">No hay productos disponibles</p>
@@ -153,7 +205,8 @@
                                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                     <div class="flex-1">
                                         <h4 class="font-medium text-gray-800" x-text="item.name"></h4>
-                                        <p class="text-sm text-blue-600" x-text="'$' + item.price.toFixed(2) + ' c/u'"></p>
+                                        <p class="text-sm text-blue-600" x-text="'$' + item.price.toFixed(2) + ' c/u'">
+                                        </p>
                                     </div>
                                     <div class="flex items-center space-x-2">
                                         <button @click="updateQuantity(index, -1)"
@@ -307,13 +360,15 @@
 
                         <!-- Action Buttons -->
                         <div class="flex space-x-2">
-                            <button @click="processSale()" :disabled="cart.length === 0 || processing || paymentMethod === 'credito'"
+                            <button @click="processSale()"
+                                :disabled="cart.length === 0 || processing || paymentMethod === 'credito'"
                                 class="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-xl font-semibold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-                                <i class="fas fa-check-circle mr-2" x-show="!processing && paymentMethod !== 'credito'"></i>
+                                <i class="fas fa-check-circle mr-2"
+                                    x-show="!processing && paymentMethod !== 'credito'"></i>
                                 <i class="fas fa-circle-notch fa-spin mr-2" x-show="processing"></i>
                                 <span x-text="processing ? 'Procesando...' : 'Procesar Venta'"></span>
                             </button>
-                            
+
                             <button @click="openCreditModal()" :disabled="cart.length === 0 || processing"
                                 class="px-6 py-3 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
                                 <i class="fas fa-hand-holding-usd mr-2"></i>
@@ -374,7 +429,8 @@
             </div>
 
             <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3">
-                <button @click="closeCustomerModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
+                <button @click="closeCustomerModal()"
+                    class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
                 <button @click="saveCustomer()" :disabled="savingCustomer"
                     class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50">
                     <i class="fas fa-save mr-2" x-show="!savingCustomer"></i>
@@ -405,7 +461,7 @@
                         <i class="fas fa-user mr-2 text-blue-600"></i>
                         Información del Cliente
                     </h4>
-                    
+
                     <div class="grid grid-cols-2 gap-4">
                         <div class="col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Cliente *</label>
@@ -417,7 +473,8 @@
                                         <option :value="customer.id" x-text="customer.full_name"></option>
                                     </template>
                                 </select>
-                                <button @click="openCustomerModal()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+                                <button @click="openCustomerModal()"
+                                    class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
@@ -444,7 +501,7 @@
                         <i class="fas fa-shopping-cart mr-2 text-green-600"></i>
                         Resumen de la Venta
                     </h4>
-                    
+
                     <div class="space-y-2">
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600">Total Venta:</span>
@@ -456,7 +513,8 @@
                         </div>
                         <div class="border-t border-green-200 pt-2 flex justify-between">
                             <span class="text-gray-800 font-semibold">Monto a Financiar:</span>
-                            <span class="font-bold text-xl text-blue-600" x-text="'$' + (totalUSD - creditForm.initial_payment).toFixed(2)"></span>
+                            <span class="font-bold text-xl text-blue-600"
+                                x-text="'$' + (totalUSD - creditForm.initial_payment).toFixed(2)"></span>
                         </div>
                     </div>
                 </div>
@@ -467,7 +525,7 @@
                         <i class="fas fa-calendar-alt mr-2 text-yellow-600"></i>
                         Términos del Crédito
                     </h4>
-                    
+
                     <div class="grid grid-cols-2 gap-4">
                         <div class="col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Límite de Pago *</label>
@@ -510,17 +568,20 @@
                 </div>
 
                 <!-- Alerta -->
-                <div x-show="creditForm.initial_payment < totalUSD" class="bg-red-50 border border-red-200 rounded-lg p-3">
+                <div x-show="creditForm.initial_payment < totalUSD"
+                    class="bg-red-50 border border-red-200 rounded-lg p-3">
                     <p class="text-sm text-red-800">
                         <i class="fas fa-exclamation-triangle mr-2"></i>
-                        Se creará una cuenta por cobrar por 
-                        <span class="font-bold" x-text="'$' + (totalUSD - creditForm.initial_payment).toFixed(2)"></span>
+                        Se creará una cuenta por cobrar por
+                        <span class="font-bold"
+                            x-text="'$' + (totalUSD - creditForm.initial_payment).toFixed(2)"></span>
                     </p>
                 </div>
             </div>
 
             <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3 sticky bottom-0">
-                <button @click="closeCreditModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
+                <button @click="closeCreditModal()"
+                    class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
                 <button @click="processCreditSale()" :disabled="processing || !canProcessCredit()"
                     class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
                     <i class="fas fa-save mr-2" x-show="!processing"></i>
@@ -656,7 +717,7 @@
                             const parsed = JSON.parse(savedData);
                             const savedDate = new Date(parsed.date);
                             const today = new Date();
-                            
+
                             if (savedDate.toDateString() === today.toDateString()) {
                                 this.exchangeRate = parsed.rate;
                                 console.log('Tasa cargada de localStorage:', this.exchangeRate);
@@ -729,7 +790,7 @@
                     this.loading = true;
                     try {
                         console.log('=== Cargando productos para:', this.userBranch);
-                        
+
                         const { data: virtualInventory, error: virtualError } = await supabase
                             .rpc('calculate_virtual_inventory', {
                                 branch_param: this.userBranch
@@ -914,11 +975,11 @@
                         notify('El carrito está vacío', 'error');
                         return;
                     }
-                    
+
                     const defaultDate = new Date();
                     defaultDate.setDate(defaultDate.getDate() + 30);
                     this.creditForm.payment_date = defaultDate.toISOString().split('T')[0];
-                    
+
                     this.showCreditModal = true;
                 },
 
@@ -1030,7 +1091,7 @@
                         // 4. Descontar del tanque
                         for (const item of this.cart) {
                             const realProductId = sizeToProductId[item.size_liters];
-                            
+
                             if (!realProductId) continue;
 
                             const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
@@ -1090,7 +1151,7 @@
                         }
 
                         notify('¡Venta a crédito procesada exitosamente!');
-                        
+
                         this.cart = [];
                         this.closeCreditModal();
                         await this.loadProducts();
@@ -1220,7 +1281,7 @@
                         // 4. Descontar del tanque
                         for (const item of this.cart) {
                             const realProductId = sizeToProductId[item.size_liters];
-                            
+
                             if (!realProductId) {
                                 console.warn(`No se encontró product_id para ${item.name}`);
                                 continue;
