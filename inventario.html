@@ -24,16 +24,6 @@
         .gradient-bg {
             background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
         }
-
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-        }
     </style>
 </head>
 
@@ -102,18 +92,12 @@
         <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">Inventario</h2>
-                <p class="text-sm text-gray-500">Control de stock y tanques - <span class="capitalize font-semibold"
-                        x-text="userBranch"></span></p>
+                <p class="text-sm text-gray-500">Control basado en capacidad de tanques - <span
+                        class="capitalize font-semibold" x-text="userBranch"></span></p>
             </div>
-            <div class="flex items-center space-x-4">
-                <button @click="openAddStockModal()"
-                    class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-                    <i class="fas fa-plus mr-2"></i>Agregar Stock
-                </button>
-                <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
-                    <i class="fas fa-sign-out-alt mr-2"></i>Salir
-                </button>
-            </div>
+            <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                <i class="fas fa-sign-out-alt mr-2"></i>Salir
+            </button>
         </header>
 
         <!-- Content -->
@@ -125,9 +109,23 @@
             </div>
 
             <div x-show="!loading">
-                <!-- Inventory Cards -->
+                <!-- Info Box -->
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
+                        <div>
+                            <h4 class="font-semibold text-blue-900">Inventario Virtual</h4>
+                            <p class="text-sm text-blue-700 mt-1">
+                                El inventario se calcula automáticamente basado en el agua disponible en los tanques,
+                                distribuida: 70% para 20L, 20% para 5L, 10% para 13L.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Virtual Inventory Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <template x-for="item in inventoryItems" :key="item.id">
+                    <template x-for="item in virtualInventory" :key="item.size_liters">
                         <div class="bg-white rounded-2xl shadow-sm p-6 border-t-4" :class="{
                                 'border-cyan-500': item.size_liters === 5,
                                 'border-blue-500': item.size_liters === 13,
@@ -143,26 +141,26 @@
                                     <i :class="item.product_type === 'cap' ? 'fas fa-circle text-purple-600 text-3xl' : 'fas fa-tint text-3xl'"
                                         :style="{color: item.size_liters === 5 ? '#0891b2' : item.size_liters === 13 ? '#3b82f6' : item.size_liters === 20 ? '#1d4ed8' : '#9333ea'}"></i>
                                 </div>
-                                <span class="px-3 py-1 rounded-full text-xs font-semibold"
-                                    :class="item.quantity > item.min_stock ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                                    x-text="item.quantity > item.min_stock ? 'Disponible' : 'Stock Bajo'"></span>
+                                <span
+                                    class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">Disponible</span>
                             </div>
-                            <h3 class="text-lg font-semibold text-gray-800" x-text="item.name"></h3>
-                            <p class="text-4xl font-bold text-gray-900 mt-2" x-text="item.quantity"></p>
-                            <p class="text-sm text-gray-500 mt-1">unidades en stock</p>
+                            <h3 class="text-lg font-semibold text-gray-800" x-text="item.product_name"></h3>
+                            <p class="text-4xl font-bold text-gray-900 mt-2" x-text="item.virtual_stock"></p>
+                            <p class="text-sm text-gray-500 mt-1">botellones disponibles</p>
                             <div class="mt-4 pt-4 border-t">
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-600">Precio:</span>
-                                    <span class="font-semibold" x-text="'$' + item.price.toFixed(2)"></span>
+                                    <span class="font-semibold" x-text="'$' + parseFloat(item.price).toFixed(2)"></span>
                                 </div>
                                 <div class="flex justify-between text-sm mt-1">
                                     <span class="text-gray-600">Valor total:</span>
                                     <span class="font-semibold text-green-600"
-                                        x-text="'$' + (item.price * item.quantity).toFixed(2)"></span>
+                                        x-text="'$' + parseFloat(item.total_value).toFixed(2)"></span>
                                 </div>
                                 <div class="flex justify-between text-sm mt-1">
-                                    <span class="text-gray-600">Stock mínimo:</span>
-                                    <span class="font-semibold" x-text="item.min_stock"></span>
+                                    <span class="text-gray-600">Agua asignada:</span>
+                                    <span class="font-semibold text-blue-600"
+                                        x-text="((item.virtual_stock * item.size_liters) || 0).toLocaleString() + 'L'"></span>
                                 </div>
                             </div>
                         </div>
@@ -224,123 +222,49 @@
                     </div>
                 </div>
 
-                <!-- Stock Movements -->
-                <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                    <div class="p-6 border-b border-gray-200 flex justify-between items-center">
-                        <h3 class="text-lg font-semibold text-gray-800">Movimientos Recientes</h3>
-                        <button @click="loadMovements()" class="text-blue-500 hover:text-blue-700 text-sm">
-                            <i class="fas fa-sync-alt mr-1"></i>Actualizar
-                        </button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cantidad
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Motivo
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                <template x-for="movement in movements" :key="movement.id">
-                                    <tr>
-                                        <td class="px-6 py-4 text-sm text-gray-900"
-                                            x-text="formatDate(movement.created_at)"></td>
-                                        <td class="px-6 py-4 text-sm text-gray-900" x-text="movement.product_name"></td>
-                                        <td class="px-6 py-4">
-                                            <span class="px-2 py-1 rounded text-xs"
-                                                :class="movement.movement_type === 'entrada' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                                                x-text="movement.movement_type === 'entrada' ? 'Entrada' : 'Salida'"></span>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm font-semibold"
-                                            :class="movement.movement_type === 'entrada' ? 'text-green-600' : 'text-red-600'"
-                                            x-text="(movement.movement_type === 'entrada' ? '+' : '-') + movement.quantity">
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-gray-500" x-text="movement.reason"></td>
-                                    </tr>
-                                </template>
+                <!-- Distribution Info -->
+                <div class="bg-white rounded-2xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Distribución del Agua</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-blue-50 rounded-xl p-4 border-2 border-blue-200">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-semibold text-blue-900">20 Litros</h4>
+                                <span class="text-2xl font-bold text-blue-600">70%</span>
+                            </div>
+                            <p class="text-sm text-blue-700">
+                                <span x-text="Math.round(totalWater * 0.70).toLocaleString()"></span>L disponibles
+                            </p>
+                            <p class="text-2xl font-bold text-blue-900 mt-2"
+                                x-text="Math.round((totalWater * 0.70) / 20) + ' botellones'"></p>
+                        </div>
 
-                                <tr x-show="movements.length === 0">
-                                    <td colspan="5" class="px-6 py-8 text-center text-gray-400">
-                                        <i class="fas fa-history text-4xl mb-2"></i>
-                                        <p>No hay movimientos registrados</p>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="bg-cyan-50 rounded-xl p-4 border-2 border-cyan-200">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-semibold text-cyan-900">5 Litros</h4>
+                                <span class="text-2xl font-bold text-cyan-600">20%</span>
+                            </div>
+                            <p class="text-sm text-cyan-700">
+                                <span x-text="Math.round(totalWater * 0.20).toLocaleString()"></span>L disponibles
+                            </p>
+                            <p class="text-2xl font-bold text-cyan-900 mt-2"
+                                x-text="Math.round((totalWater * 0.20) / 5) + ' botellones'"></p>
+                        </div>
+
+                        <div class="bg-indigo-50 rounded-xl p-4 border-2 border-indigo-200">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-semibold text-indigo-900">13 Litros</h4>
+                                <span class="text-2xl font-bold text-indigo-600">10%</span>
+                            </div>
+                            <p class="text-sm text-indigo-700">
+                                <span x-text="Math.round(totalWater * 0.10).toLocaleString()"></span>L disponibles
+                            </p>
+                            <p class="text-2xl font-bold text-indigo-900 mt-2"
+                                x-text="Math.round((totalWater * 0.10) / 13) + ' botellones'"></p>
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
-    </div>
-
-    <!-- Modal Agregar Stock -->
-    <div x-show="showAddStockModal" x-cloak class="modal-overlay" @click.self="closeAddStockModal()">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4" @click.stop>
-            <div class="px-6 py-4 border-b flex justify-between items-center">
-                <h3 class="text-xl font-bold text-gray-800">Agregar Stock</h3>
-                <button @click="closeAddStockModal()" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-
-            <div class="p-6 space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Producto *</label>
-                    <select x-model="addStockForm.product_id"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        <option value="">Seleccionar producto...</option>
-                        <template x-for="item in inventoryItems" :key="item.id">
-                            <option :value="item.id" x-text="item.name + ' (Stock actual: ' + item.quantity + ')'">
-                            </option>
-                        </template>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Cantidad a Agregar *</label>
-                    <input type="number" x-model.number="addStockForm.quantity" min="1"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        placeholder="Ej: 50">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Motivo</label>
-                    <select x-model="addStockForm.reason"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        <option value="Recarga de inventario">Recarga de inventario</option>
-                        <option value="Devolución de cliente">Devolución de cliente</option>
-                        <option value="Ajuste de inventario">Ajuste de inventario</option>
-                        <option value="Otro">Otro</option>
-                    </select>
-                </div>
-
-                <div x-show="addStockForm.reason === 'Otro'">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Especificar motivo</label>
-                    <input type="text" x-model="addStockForm.custom_reason"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        placeholder="Ingrese el motivo">
-                </div>
-            </div>
-
-            <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3">
-                <button @click="closeAddStockModal()"
-                    class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
-                <button @click="addStock()" :disabled="saving"
-                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50">
-                    <i class="fas fa-save mr-2" x-show="!saving"></i>
-                    <i class="fas fa-circle-notch fa-spin mr-2" x-show="saving"></i>
-                    <span x-text="saving ? 'Guardando...' : 'Agregar Stock'"></span>
-                </button>
-            </div>
-        </div>
     </div>
 
     <!-- Alertify -->
@@ -372,25 +296,15 @@
         function inventarioApp() {
             return {
                 loading: true,
-                saving: false,
-                inventoryItems: [],
+                virtualInventory: [],
                 tanks: [],
-                movements: [],
+                totalWater: 0,
 
                 // User info
                 userName: '',
                 userRole: '',
                 userBranch: '',
                 userInitials: '??',
-
-                // Modal
-                showAddStockModal: false,
-                addStockForm: {
-                    product_id: '',
-                    quantity: 0,
-                    reason: 'Recarga de inventario',
-                    custom_reason: ''
-                },
 
                 async initInventario() {
                     if (typeof alertify !== 'undefined') {
@@ -423,45 +337,23 @@
                     }
 
                     // Cargar datos
-                    await this.loadInventory();
+                    await this.loadVirtualInventory();
                     await this.loadTanks();
-                    await this.loadMovements();
                 },
 
-                async loadInventory() {
+                async loadVirtualInventory() {
                     this.loading = true;
                     try {
                         const { data, error } = await supabase
-                            .from('inventory')
-                            .select(`
-                                id,
-                                quantity,
-                                min_stock,
-                                products!inner(
-                                    id,
-                                    name,
-                                    size_liters,
-                                    product_type,
-                                    product_prices!inner(price_usd)
-                                )
-                            `)
-                            .eq('branch', this.userBranch)
-                            .eq('products.product_prices.branch', this.userBranch);
+                            .rpc('calculate_virtual_inventory', {
+                                branch_param: this.userBranch
+                            });
 
                         if (error) throw error;
-
-                        this.inventoryItems = data.map(item => ({
-                            id: item.products.id,
-                            name: item.products.name,
-                            size_liters: item.products.size_liters,
-                            product_type: item.products.product_type,
-                            quantity: item.quantity,
-                            min_stock: item.min_stock,
-                            price: parseFloat(item.products.product_prices[0].price_usd)
-                        }));
+                        this.virtualInventory = data || [];
 
                     } catch (err) {
-                        console.error('Error cargando inventario:', err);
+                        console.error('Error cargando inventario virtual:', err);
                         notify('Error al cargar inventario: ' + err.message, 'error');
                     } finally {
                         this.loading = false;
@@ -479,119 +371,17 @@
                         if (error) throw error;
                         this.tanks = data || [];
 
+                        // Calcular total de agua
+                        this.totalWater = this.tanks.reduce((sum, tank) => sum + tank.current_liters, 0);
+
                     } catch (err) {
                         console.error('Error cargando tanques:', err);
-                    }
-                },
-
-                async loadMovements() {
-                    try {
-                        // Obtener movimientos de ventas recientes
-                        const { data: salesData, error: salesError } = await supabase
-                            .from('sale_items')
-                            .select(`
-                                id,
-                                quantity,
-                                created_at,
-                                sales!inner(branch, customer_name, created_at),
-                                products!inner(name)
-                            `)
-                            .eq('sales.branch', this.userBranch)
-                            .order('created_at', { ascending: false })
-                            .limit(10);
-
-                        if (salesError) throw salesError;
-
-                        this.movements = (salesData || []).map(item => ({
-                            id: 'sale_' + item.id,
-                            created_at: item.created_at,
-                            product_name: item.products.name,
-                            movement_type: 'salida',
-                            quantity: item.quantity,
-                            reason: 'Venta - ' + (item.sales.customer_name || 'Cliente no registrado')
-                        }));
-
-                    } catch (err) {
-                        console.error('Error cargando movimientos:', err);
                     }
                 },
 
                 getInitials(name) {
                     if (!name) return '??';
                     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-                },
-
-                formatDate(dateString) {
-                    if (!dateString) return 'N/A';
-                    const date = new Date(dateString);
-                    return date.toLocaleString('es-ES', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                },
-
-                openAddStockModal() {
-                    this.addStockForm = {
-                        product_id: '',
-                        quantity: 0,
-                        reason: 'Recarga de inventario',
-                        custom_reason: ''
-                    };
-                    this.showAddStockModal = true;
-                },
-
-                closeAddStockModal() {
-                    this.showAddStockModal = false;
-                },
-
-                async addStock() {
-                    if (!this.addStockForm.product_id) {
-                        notify('Debe seleccionar un producto', 'error');
-                        return;
-                    }
-
-                    if (!this.addStockForm.quantity || this.addStockForm.quantity <= 0) {
-                        notify('La cantidad debe ser mayor a 0', 'error');
-                        return;
-                    }
-
-                    this.saving = true;
-
-                    try {
-                        const reason = this.addStockForm.reason === 'Otro'
-                            ? this.addStockForm.custom_reason
-                            : this.addStockForm.reason;
-
-                        // Actualizar inventario
-                        const { error: invError } = await supabase
-                            .from('inventory')
-                            .update({
-                                quantity: supabase.rpc('increment_inventory', {
-                                    product_id_param: this.addStockForm.product_id,
-                                    branch_param: this.userBranch,
-                                    quantity_to_increment: this.addStockForm.quantity
-                                })
-                            })
-                            .eq('product_id', this.addStockForm.product_id)
-                            .eq('branch', this.userBranch);
-
-                        if (invError) throw invError;
-
-                        notify(`Stock agregado: +${this.addStockForm.quantity} unidades`);
-                        this.closeAddStockModal();
-
-                        // Recargar datos
-                        await this.loadInventory();
-
-                    } catch (err) {
-                        console.error('Error agregando stock:', err);
-                        notify('Error al agregar stock: ' + err.message, 'error');
-                    } finally {
-                        this.saving = false;
-                    }
                 }
             }
         }
