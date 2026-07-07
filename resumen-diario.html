@@ -655,118 +655,192 @@
                 async generatePDF() {
                     try {
                         const { jsPDF } = window.jspdf;
-                        const doc = new jsPDF();
+                        // Crear PDF en orientación vertical (portrait) tamaño carta
+                        const doc = new jsPDF({
+                            orientation: 'portrait',
+                            unit: 'mm',
+                            format: 'letter'
+                        });
                         
-                        // Header
-                        doc.setFontSize(20);
-                        doc.text('AQUASERVICE', 105, 15, { align: 'center' });
-                        doc.setFontSize(12);
-                        doc.text('Sistema de Gestión de Agua', 105, 22, { align: 'center' });
+                        const pageWidth = doc.internal.pageSize.getWidth();
+                        const margin = 10;
+                        let yPos = 10;
+                
+                        // Header compacto
                         doc.setFontSize(16);
-                        doc.text('RESUMEN DE VENTA DIARIO', 105, 32, { align: 'center' });
+                        doc.setFont(undefined, 'bold');
+                        doc.text('AQUASERVICE', pageWidth / 2, yPos, { align: 'center' });
                         
-                        doc.setFontSize(10);
-                        doc.text(`Fecha: ${this.formatDate(this.selectedDate)}`, 105, 40, { align: 'center' });
-                        doc.text(`Sucursal: ${this.selectedBranch || 'Todas'}`, 105, 45, { align: 'center' });
-
-                        let yPos = 55;
-
-                        // Función para agregar sección de botellones
+                        doc.setFontSize(9);
+                        doc.setFont(undefined, 'normal');
+                        doc.text('Sistema de Gestión de Agua', pageWidth / 2, yPos + 4, { align: 'center' });
+                        
+                        doc.setFontSize(12);
+                        doc.setFont(undefined, 'bold');
+                        doc.text('RESUMEN DE VENTA DIARIO', pageWidth / 2, yPos + 9, { align: 'center' });
+                        
+                        doc.setFontSize(8);
+                        doc.setFont(undefined, 'normal');
+                        doc.text(`Fecha: ${this.formatDate(this.selectedDate)}`, pageWidth / 2, yPos + 14, { align: 'center' });
+                        doc.text(`Sucursal: ${this.selectedBranch || 'Todas'}`, pageWidth / 2, yPos + 18, { align: 'center' });
+                
+                        yPos = 25;
+                
+                        // Función compacta para agregar sección de botellones
                         const addBottleSection = (title, price, data, startY) => {
-                            doc.setFontSize(12);
+                            doc.setFontSize(9);
                             doc.setFont(undefined, 'bold');
-                            doc.text(`${title} - $${price.toFixed(2)} c/u`, 14, startY);
+                            doc.text(title + ` - $${price.toFixed(2)} c/u`, margin, startY);
                             
-                            doc.setFontSize(10);
+                            doc.setFontSize(7);
                             doc.setFont(undefined, 'normal');
-                            doc.text(`Cantidad vendida: ${data.total} unidades`, 14, startY + 7);
+                            doc.text(`Cantidad: ${data.total} unidades`, margin, startY + 4);
                             
                             const tableData = [
-                                ['Pago Móvil:', `${data.pago_movil} unidades`, `$${(data.pago_movil * price).toFixed(2)}`],
-                                ['Punto:', `${data.punto_venta} unidades`, `$${(data.punto_venta * price).toFixed(2)}`],
-                                ['Efectivo:', `${(data.efectivo_divisas + data.efectivo_bs)} unidades`, `$${((data.efectivo_divisas + data.efectivo_bs) * price).toFixed(2)}`],
-                                ['Subtotal:', `${data.total} unidades`, `$${(data.total * price).toFixed(2)}`]
+                                ['Pago Móvil:', `${data.pago_movil} unid.`, `$${(data.pago_movil * price).toFixed(2)}`],
+                                ['Punto:', `${data.punto_venta} unid.`, `$${(data.punto_venta * price).toFixed(2)}`],
+                                ['Efectivo:', `${(data.efectivo_divisas + data.efectivo_bs)} unid.`, `$${((data.efectivo_divisas + data.efectivo_bs) * price).toFixed(2)}`],
+                                ['Subtotal:', `${data.total} unid.`, `$${(data.total * price).toFixed(2)}`]
                             ];
-
+                
                             doc.autoTable({
-                                startY: startY + 10,
+                                startY: startY + 6,
                                 body: tableData,
                                 theme: 'plain',
+                                tableWidth: pageWidth - (margin * 2),
                                 columnStyles: {
-                                    0: { fontStyle: 'bold' },
-                                    2: { fontStyle: 'bold', halign: 'right' }
+                                    0: { fontStyle: 'bold', cellWidth: 35 },
+                                    1: { cellWidth: 50 },
+                                    2: { fontStyle: 'bold', halign: 'right', cellWidth: 35 }
                                 },
-                                margin: { left: 14, right: 14 }
+                                margin: { left: margin, right: margin },
+                                cellPadding: 1
                             });
-
-                            return doc.lastAutoTable.finalY + 10;
+                
+                            return doc.lastAutoTable.finalY + 2;
                         };
-
-                        // Agregar secciones
-                        yPos = addBottleSection('BOTELLONES DE 20 LITROS', 1.50, this.summary.bottles20, yPos);
-                        yPos = addBottleSection('BOTELLONES DE 13 LITROS', 1.00, this.summary.bottles13, yPos);
-                        yPos = addBottleSection('BOTELLAS DE 5 LITROS', 0.50, this.summary.bottles5, yPos);
-
-                        // Resumen general
-                        doc.setFontSize(14);
+                
+                        // Agregar secciones (más compactas)
+                        yPos = addBottleSection('BOTELLONES 20L', 1.50, this.summary.bottles20, yPos);
+                        yPos = addBottleSection('BOTELLONES 13L', 1.00, this.summary.bottles13, yPos);
+                        yPos = addBottleSection('BOTELLAS 5L', 0.50, this.summary.bottles5, yPos);
+                
+                        // Resumen general compacto
+                        doc.setFontSize(10);
                         doc.setFont(undefined, 'bold');
-                        doc.text('RESUMEN GENERAL', 105, yPos, { align: 'center' });
-                        yPos += 8;
-
+                        doc.text('RESUMEN GENERAL', pageWidth / 2, yPos, { align: 'center' });
+                        yPos += 4;
+                
                         const generalData = [
                             ['Total Unidades:', this.summary.totalUnits.toString()],
                             ['Total Ventas:', `$${this.summary.totalRevenue.toFixed(2)}`],
                             ['Pendiente (Créditos):', `$${this.summary.pending.toFixed(2)}`],
-                            ['Cobrado:', `$${(this.summary.totalRevenue - this.summary.pending).toFixed(2)}`]
+                            ['COBRADO:', `$${(this.summary.totalRevenue - this.summary.pending).toFixed(2)}`]
                         ];
-
+                
                         doc.autoTable({
                             startY: yPos,
                             body: generalData,
                             theme: 'striped',
+                            tableWidth: pageWidth - (margin * 2),
                             columnStyles: {
-                                0: { fontStyle: 'bold' },
-                                1: { halign: 'right', fontStyle: 'bold' }
+                                0: { fontStyle: 'bold', cellWidth: 70 },
+                                1: { halign: 'right', fontStyle: 'bold', cellWidth: 50 }
                             },
-                            margin: { left: 14, right: 14 }
+                            margin: { left: margin, right: margin },
+                            cellPadding: 2
                         });
-
-                        yPos = doc.lastAutoTable.finalY + 10;
-
-                        // Comparativo
-                        doc.setFontSize(12);
+                
+                        yPos = doc.lastAutoTable.finalY + 3;
+                
+                        // Resumen por método de pago
+                        doc.setFontSize(9);
                         doc.setFont(undefined, 'bold');
-                        doc.text('COMPARATIVO VS DÍA ANTERIOR', 14, yPos);
-                        yPos += 7;
-
-                        doc.setFontSize(10);
+                        doc.text('RESUMEN POR MÉTODO DE PAGO', margin, yPos);
+                        yPos += 3;
+                
+                        const paymentData = [
+                            ['Pago Móvil:', `$${this.summary.byMethod.pago_movil.toFixed(2)}`],
+                            ['Punto:', `$${this.summary.byMethod.punto_venta.toFixed(2)}`],
+                            ['Efectivo:', `$${(this.summary.byMethod.efectivo_divisas + this.summary.byMethod.efectivo_bs).toFixed(2)}`],
+                            ['TOTAL:', `$${this.summary.totalRevenue.toFixed(2)}`]
+                        ];
+                
+                        doc.autoTable({
+                            startY: yPos,
+                            body: paymentData,
+                            theme: 'plain',
+                            tableWidth: pageWidth - (margin * 2),
+                            columnStyles: {
+                                0: { cellWidth: 90 },
+                                1: { halign: 'right', fontStyle: 'bold', cellWidth: 30 }
+                            },
+                            margin: { left: margin, right: margin },
+                            cellPadding: 1.5
+                        });
+                
+                        yPos = doc.lastAutoTable.finalY + 3;
+                
+                        // Comparativo
+                        doc.setFontSize(9);
+                        doc.setFont(undefined, 'bold');
+                        doc.text('COMPARATIVO VS DÍA ANTERIOR', margin, yPos);
+                        yPos += 3;
+                
+                        doc.setFontSize(7);
                         doc.setFont(undefined, 'normal');
                         const comparisonData = [
-                            ['Ventas Ayer:', `$${this.comparison.yesterdayRevenue.toFixed(2)}`, `${this.comparison.yesterdaySales} unidades`],
-                            ['Ventas Hoy:', `$${this.summary.totalRevenue.toFixed(2)}`, `${this.summary.totalUnits} unidades`],
-                            ['Crecimiento:', `${this.comparison.growth >= 0 ? '+' : ''}${this.comparison.growth.toFixed(1)}%`, this.comparison.growth >= 0 ? '↑' : '↓']
+                            ['Ventas Ayer:', `$${this.comparison.yesterdayRevenue.toFixed(2)}`, `${this.comparison.yesterdaySales} unid.`],
+                            ['Ventas Hoy:', `$${this.summary.totalRevenue.toFixed(2)}`, `${this.summary.totalUnits} unid.`],
+                            ['Crecimiento:', `${this.comparison.growth >= 0 ? '+' : ''}${this.comparison.growth.toFixed(1)}%`, 
+                             this.comparison.growth >= 0 ? '↑ Alcista' : '↓ Bajista']
                         ];
-
+                
                         doc.autoTable({
                             startY: yPos,
                             body: comparisonData,
                             theme: 'plain',
-                            margin: { left: 14, right: 14 }
+                            tableWidth: pageWidth - (margin * 2),
+                            columnStyles: {
+                                0: { cellWidth: 40 },
+                                1: { halign: 'right', cellWidth: 40 },
+                                2: { halign: 'right', cellWidth: 40 }
+                            },
+                            margin: { left: margin, right: margin },
+                            cellPadding: 1
                         });
-
+                
+                        yPos = doc.lastAutoTable.finalY + 5;
+                
+                        // Producto más vendido
+                        doc.setFontSize(9);
+                        doc.setFont(undefined, 'bold');
+                        doc.text('PRODUCTO MÁS VENDIDO', margin, yPos);
+                        yPos += 3;
+                        
+                        doc.setFontSize(7);
+                        doc.setFont(undefined, 'normal');
+                        doc.text(`${this.summary.topProduct.name} - ${this.summary.topProduct.units} unidades (${this.summary.topProduct.percentage.toFixed(1)}%)`, margin, yPos);
+                
                         // Firmas
-                        const finalY = doc.lastAutoTable.finalY + 30;
-                        doc.line(14, finalY, 90, finalY);
-                        doc.text('Firma Vendedor', 52, finalY + 5, { align: 'center' });
-                        doc.text(this.userName, 52, finalY + 10, { align: 'center' });
-
-                        doc.line(124, finalY, 200, finalY);
-                        doc.text('Firma Administrador', 162, finalY + 5, { align: 'center' });
-
+                        const finalY = 250;
+                        doc.setFontSize(8);
+                        doc.setFont(undefined, 'normal');
+                        doc.line(margin, finalY, pageWidth / 2 - 5, finalY);
+                        doc.text('Firma Vendedor', pageWidth / 4, finalY + 4, { align: 'center' });
+                        doc.text(this.userName, pageWidth / 4, finalY + 8, { align: 'center' });
+                
+                        doc.line(pageWidth / 2 + 5, finalY, pageWidth - margin, finalY);
+                        doc.text('Firma Administrador', (pageWidth * 3) / 4, finalY + 4, { align: 'center' });
+                
+                        // Footer
+                        doc.setFontSize(6);
+                        doc.text(`Generado: ${new Date().toLocaleString('es-VE')}`, pageWidth / 2, 285, { align: 'center' });
+                
                         // Guardar
-                        doc.save(`resumen_diario_${this.selectedDate}.pdf`);
+                        doc.save(`resumen_diario_${this.selectedDate.replace(/-/g, '')}.pdf`);
                         notify('PDF generado exitosamente');
-
+                
                     } catch (err) {
                         console.error('Error generando PDF:', err);
                         notify('Error al generar PDF', 'error');
