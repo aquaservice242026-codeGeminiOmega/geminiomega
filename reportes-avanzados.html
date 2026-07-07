@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaService - Reportes Avanzados</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Librerías para exportar -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+        }
+
+        .sidebar-mobile {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar-mobile.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 39;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        @media (min-width: 1024px) {
+            .sidebar-mobile {
+                transform: translateX(0) !important;
+            }
+
+            .sidebar-overlay {
+                display: none !important;
+            }
+
+            .menu-toggle {
+                display: none !important;
+            }
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .tab-active {
+            background-color: #0ea5e9;
+            color: white;
+        }
+
+        .tab-inactive {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        .tab-inactive:hover {
+            background-color: #e5e7eb;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50" x-data="reportesApp()" x-init="initReportes()">
+
+    <!-- Overlay para móvil -->
+    <div class="sidebar-overlay" :class="{ 'show': mobileMenuOpen }" @click="mobileMenuOpen = false"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar-mobile fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 lg:block"
+        :class="{ 'open': mobileMenuOpen }">
+        <div class="p-6">
+            <div class="mb-6">
+                <div class="flex items-center space-x-3 mb-3">
+                    <i class="fas fa-tint text-3xl"></i>
+                    <div>
+                        <h1 class="text-xl font-bold">AquaService</h1>
+                        <p class="text-xs text-blue-200">Sistema de Gestión</p>
+                    </div>
+                </div>
+                <div class="bg-white bg-opacity-10 rounded-lg px-3 py-2">
+                    <p class="text-xs text-blue-200 mb-0.5">Sucursal</p>
+                    <p class="font-semibold capitalize text-sm" x-text="userBranch || 'Cargando...'"></p>
+                </div>
+            </div>
+
+            <nav class="space-y-2">
+                <a href="index.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-home w-5"></i><span>Dashboard</span>
+                </a>
+                <a href="ventas.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
+                </a>
+                <a href="cuentas-cobrar.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-file-invoice-dollar w-5"></i><span>Cuentas por Cobrar</span>
+                </a>
+                <a href="clientes.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-users w-5"></i><span>Clientes</span>
+                </a>
+                <a href="inventario.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-boxes w-5"></i><span>Inventario</span>
+                </a>
+                <a href="usuarios.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
+                </a>
+                <a href="reportes.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
+                </a>
+                <a href="reportes-avanzados.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
+                    <i class="fas fa-chart-bar w-5"></i><span class="font-medium">Reportes Avanzados</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
+                    x-text="userInitials"></div>
+                <div>
+                    <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
+                    <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="lg:ml-64 min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b px-6 py-4">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                <div class="flex items-center space-x-4">
+                    <button @click="mobileMenuOpen = !mobileMenuOpen"
+                        class="menu-toggle lg:hidden text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Reportes Avanzados</h2>
+                        <p class="text-sm text-gray-500">Análisis detallado de ventas y métricas</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Salir
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Filters -->
+        <div class="bg-white shadow-sm border-b px-6 py-4">
+            <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-3 md:space-y-0">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
+                    <input type="date" x-model="filters.startDate" @change="loadAllReports()"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
+                    <input type="date" x-model="filters.endDate" @change="loadAllReports()"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sucursal</label>
+                    <select x-model="filters.branch" @change="loadAllReports()"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="">Todas</option>
+                        <option value="geminis">Geminis</option>
+                        <option value="omega">Omega</option>
+                    </select>
+                </div>
+                <button @click="loadAllReports()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
+                    <i class="fas fa-sync-alt mr-2"></i>Actualizar
+                </button>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <main class="p-6">
+            <!-- Loading -->
+            <div x-show="loading" class="text-center py-12">
+                <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500"></i>
+                <p class="mt-4 text-gray-600">Generando reportes...</p>
+            </div>
+
+            <div x-show="!loading">
+                <!-- Tabs -->
+                <div class="bg-white rounded-2xl shadow-sm mb-6">
+                    <div class="flex overflow-x-auto border-b">
+                        <button @click="activeTab = 'ventas'"
+                            :class="activeTab === 'ventas' ? 'tab-active' : 'tab-inactive'"
+                            class="px-6 py-4 font-medium whitespace-nowrap transition">
+                            <i class="fas fa-chart-line mr-2"></i>Ventas por Período
+                        </button>
+                        <button @click="activeTab = 'productos'"
+                            :class="activeTab === 'productos' ? 'tab-active' : 'tab-inactive'"
+                            class="px-6 py-4 font-medium whitespace-nowrap transition">
+                            <i class="fas fa-box mr-2"></i>Productos Más Vendidos
+                        </button>
+                        <button @click="activeTab = 'sucursales'"
+                            :class="activeTab === 'sucursales' ? 'tab-active' : 'tab-inactive'"
+                            class="px-6 py-4 font-medium whitespace-nowrap transition">
+                            <i class="fas fa-building mr-2"></i>Ventas por Sucursal
+                        </button>
+                        <button @click="activeTab = 'pagos'"
+                            :class="activeTab === 'pagos' ? 'tab-active' : 'tab-inactive'"
+                            class="px-6 py-4 font-medium whitespace-nowrap transition">
+                            <i class="fas fa-credit-card mr-2"></i>Métodos de Pago
+                        </button>
+                        <button @click="activeTab = 'creditos'"
+                            :class="activeTab === 'creditos' ? 'tab-active' : 'tab-inactive'"
+                            class="px-6 py-4 font-medium whitespace-nowrap transition">
+                            <i class="fas fa-file-invoice-dollar mr-2"></i>Cuentas por Cobrar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Reporte 1: Ventas por Período -->
+                <div x-show="activeTab === 'ventas'" class="space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800">Ventas por Período</h3>
+                            <div class="flex space-x-2">
+                                <button @click="exportToPDF('ventas')"
+                                    class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 text-sm">
+                                    <i class="fas fa-file-pdf mr-2"></i>PDF
+                                </button>
+                                <button @click="exportToExcel('ventas')"
+                                    class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 text-sm">
+                                    <i class="fas fa-file-excel mr-2"></i>Excel
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Stats -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-600">Total Ventas</p>
+                                <p class="text-2xl font-bold text-blue-600" x-text="reports.ventas.totalSales"></p>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-600">Ingresos Totales</p>
+                                <p class="text-2xl font-bold text-green-600"
+                                    x-text="'$' + reports.ventas.totalRevenue.toFixed(2)"></p>
+                            </div>
+                            <div class="bg-purple-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-600">Ticket Promedio</p>
+                                <p class="text-2xl font-bold text-purple-600"
+                                    x-text="'$' + reports.ventas.avgTicket.toFixed(2)"></p>
+                            </div>
+                            <div class="bg-orange-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-600">Días Analizados</p>
+                                <p class="text-2xl font-bold text-orange-600" x-text="reports.ventas.daysCount"></p>
+                            </div>
+                        </div>
+
+                        <!-- Chart -->
+                        <div class="chart-container">
+                            <canvas id="ventasChart"></canvas>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="mt-6 overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left">Fecha</th>
+                                        <th class="px-4 py-3 text-left">Ventas</th>
+                                        <th class="px-4 py-3 text-left">Ingresos</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y">
+                                    <template x-for="day in reports.ventas.dailyData" :key="day.date">
+                                        <tr>
+                                            <td class="px-4 py-3" x-text="day.date"></td>
+                                            <td class="px-4 py-3" x-text="day.count"></td>
+                                            <td class="px-4 py-3 font-semibold" x-text="'$' + day.revenue.toFixed(2)">
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reporte 2: Productos Más Vendidos -->
+                <div x-show="activeTab === 'productos'" class="space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800">Productos Más Vendidos</h3>
+                            <div class="flex space-x-2">
+                                <button @click="exportToPDF('productos')"
+                                    class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 text-sm">
+                                    <i class="fas fa-file-pdf mr-2"></i>PDF
+                                </button>
+                                <button @click="exportToExcel('productos')"
+                                    class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 text-sm">
+                                    <i class="fas fa-file-excel mr-2"></i>Excel
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Stats -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div class="bg-cyan-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-600">Total Unidades</p>
+                                <p class="text-2xl font-bold text-cyan-600" x-text="reports.productos.totalUnits"></p>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-600">Producto #1</p>
+                                <p class="text-lg font-bold text-blue-600"
+                                    x-text="reports.productos.topProduct?.name || 'N/A'"></p>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-600">Unidades #1</p>
+                                <p class="text-2xl font-bold text-green-600"
+                                    x-text="reports.productos.topProduct?.quantity || 0"></p>
+                            </div>
+                        </div>
+
+                        <!-- Chart -->
+                        <div class="chart-container">
+                            <canvas id="productosChart"></canvas>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="mt-6 overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left">Producto</th>
+                                        <th class="px-4 py-3 text-left">Unidades</th>
+                                        <th class="px-4 py-3 text-left">Ingresos</th>
+                                        <th class="px-4 py-3 text-left">% del Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y">
+                                    <template x-for="product in reports.productos.data" :key="product.name">
+                                        <tr>
+                                            <td class="px-4 py-3 font-medium" x-text="product.name"></td>
+                                            <td class="px-4 py-3" x-text="product.quantity"></td>
+                                            <td class="px-4 py-3 font-semibold"
+                                                x-text="'$' + product.revenue.toFixed(2)"></td>
+                                            <td class="px-4 py-3" x-text="product.percentage.toFixed(1) + '%'"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reporte 3: Ventas por Sucursal -->
+                <div x-show="activeTab === 'sucursales'" class="space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800">Ventas por Sucursal</h3>
+                            <div class="flex space-x-2">
+                                <button @click="exportToPDF('sucursales')"
+                                    class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 text-sm">
+                                    <i class="fas fa-file-pdf mr-2"></i>PDF
+                                </button>
+                                <button @click="exportToExcel('sucursales')"
+                                    class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 text-sm">
+                                    <i class="fas fa-file-excel mr-2"></i>Excel
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Stats -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-600">Total Sucursales</p>
+                                <p class="text-2xl font-bold text-blue-600" x-text="reports.sucursales.totalBranches">
+                                </p>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-600">Ingresos Totales</p>
+                                <p class="text-2xl font-bold text-green-600"
+                                    x-text="'$' + reports.sucursales.totalRevenue.toFixed(2)"></p>
+                            </div>
+                        </div>
+
+                        <!-- Chart -->
+                        <div class="chart-container">
+                            <canvas id="sucursalesChart"></canvas>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="mt-6 overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left">Sucursal</th>
+                                        <th class="px-4 py-3 text-left">Ventas</th>
+                                        <th class="px-4 py-3 text-left">Ingresos</th>
+                                        <th class="px-4 py-3 text-left">% del Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y">
+                                    <template x-for="branch in reports.sucursales.data" :key="branch.name">
+                                        <tr>
+                                            <td class="px-4 py-3 font-medium capitalize" x-text="branch.name"></td>
+                                            <td class="px-4 py-3" x-text="branch.count"></td>
+                                            <td class="px-4 py-3 font-semibold"
+                                                x-text="'$' + branch.revenue.toFixed(2)"></td>
+                                            <td class="px-4 py-3" x-text="branch.percentage.toFixed(1) + '%'"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reporte 4: Métodos de Pago -->
+                <div x-show="activeTab === 'pagos'" class="space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800">Métodos de Pago</h3>
+                            <div class="flex space-x-2">
+                                <button @click="exportToPDF('pagos')"
+                                    class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 text-sm">
+                                    <i class="fas fa-file-pdf mr-2"></i>PDF
+                                </button>
+                                <button @click="exportToExcel('pagos')"
+                                    class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 text-sm">
+                                    <i class="fas fa-file-excel mr-2"></i>Excel
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Stats -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div class="bg-purple-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-600">Métodos Utilizados</p>
+                                <p class="text-2xl font-bold text-purple-600" x-text="reports.pagos.totalMethods"></p>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-600">Método Más Usado</p>
+                                <p class="text-lg font-bold text-blue-600 capitalize"
+                                    x-text="reports.pagos.topMethod?.name || 'N/A'"></p>
+                            </div>
+                        </div>
+
+                        <!-- Chart -->
+                        <div class="chart-container">
+                            <canvas id="pagosChart"></canvas>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="mt-6 overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left">Método</th>
+                                        <th class="px-4 py-3 text-left">Transacciones</th>
+                                        <th class="px-4 py-3 text-left">Monto</th>
+                                        <th class="px-4 py-3 text-left">% del Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y">
+                                    <template x-for="method in reports.pagos.data" :key="method.name">
+                                        <tr>
+                                            <td class="px-4 py-3 font-medium capitalize" x-text="method.name"></td>
+                                            <td class="px-4 py-3" x-text="method.count"></td>
+                                            <td class="px-4 py-3 font-semibold" x-text="'$' + method.amount.toFixed(2)">
+                                            </td>
+                                            <td class="px-4 py-3" x-text="method.percentage.toFixed(1) + '%'"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reporte 5: Cuentas por Cobrar -->
+                <div x-show="activeTab === 'creditos'" class="space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800">Cuentas por Cobrar</h3>
+                            <div class="flex space-x-2">
+                                <button @click="exportToPDF('creditos')"
+                                    class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 text-sm">
+                                    <i class="fas fa-file-pdf mr-2"></i>PDF
+                                </button>
+                                <button @click="exportToExcel('creditos')"
+                                    class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 text-sm">
+                                    <i class="fas fa-file-excel mr-2"></i>Excel
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Stats -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div class="bg-red-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-600">Total por Cobrar</p>
+                                <p class="text-2xl font-bold text-red-600"
+                                    x-text="'$' + reports.creditos.totalPending.toFixed(2)"></p>
+                            </div>
+                            <div class="bg-yellow-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-600">Cuentas Vencidas</p>
+                                <p class="text-2xl font-bold text-yellow-600" x-text="reports.creditos.overdueCount">
+                                </p>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-600">Cuentas Activas</p>
+                                <p class="text-2xl font-bold text-blue-600" x-text="reports.creditos.activeCount"></p>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-600">Cuentas Canceladas</p>
+                                <p class="text-2xl font-bold text-green-600" x-text="reports.creditos.paidCount"></p>
+                            </div>
+                        </div>
+
+                        <!-- Chart -->
+                        <div class="chart-container">
+                            <canvas id="creditosChart"></canvas>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="mt-6 overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left">Cliente</th>
+                                        <th class="px-4 py-3 text-left">Total</th>
+                                        <th class="px-4 py-3 text-left">Pagado</th>
+                                        <th class="px-4 py-3 text-left">Pendiente</th>
+                                        <th class="px-4 py-3 text-left">Fecha Límite</th>
+                                        <th class="px-4 py-3 text-left">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y">
+                                    <template x-for="account in reports.creditos.data" :key="account.id">
+                                        <tr>
+                                            <td class="px-4 py-3 font-medium" x-text="account.customer_name"></td>
+                                            <td class="px-4 py-3" x-text="'$' + account.total_amount.toFixed(2)"></td>
+                                            <td class="px-4 py-3 text-green-600"
+                                                x-text="'$' + account.paid_amount.toFixed(2)"></td>
+                                            <td class="px-4 py-3 text-red-600 font-semibold"
+                                                x-text="'$' + account.remaining_amount.toFixed(2)"></td>
+                                            <td class="px-4 py-3" x-text="formatDate(account.payment_date)"></td>
+                                            <td class="px-4 py-3">
+                                                <span class="px-2 py-1 rounded-full text-xs font-semibold" :class="{
+                                                        'bg-red-100 text-red-800': account.status === 'pending' || isOverdue(account),
+                                                        'bg-yellow-100 text-yellow-800': account.status === 'partial',
+                                                        'bg-green-100 text-green-800': account.status === 'paid'
+                                                    }" x-text="getStatusText(account)"></span>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function logout() {
+            await supabase.auth.signOut();
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        function notify(message, type = 'success') {
+            if (typeof alertify !== 'undefined') {
+                if (type === 'success') alertify.success(message);
+                else if (type === 'error') alertify.error(message);
+                else alertify.message(message);
+            } else {
+                alert(message);
+            }
+        }
+
+        function reportesApp() {
+            return {
+                mobileMenuOpen: false,
+                currentPage: 'reportes-avanzados',
+                loading: true,
+                activeTab: 'ventas',
+                userName: '',
+                userRole: '',
+                userBranch: '',
+                userInitials: '??',
+
+                filters: {
+                    startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    endDate: new Date().toISOString().split('T')[0],
+                    branch: ''
+                },
+
+                reports: {
+                    ventas: {
+                        totalSales: 0,
+                        totalRevenue: 0,
+                        avgTicket: 0,
+                        daysCount: 0,
+                        dailyData: []
+                    },
+                    productos: {
+                        totalUnits: 0,
+                        topProduct: null,
+                        data: []
+                    },
+                    sucursales: {
+                        totalBranches: 0,
+                        totalRevenue: 0,
+                        data: []
+                    },
+                    pagos: {
+                        totalMethods: 0,
+                        topMethod: null,
+                        data: []
+                    },
+                    creditos: {
+                        totalPending: 0,
+                        overdueCount: 0,
+                        activeCount: 0,
+                        paidCount: 0,
+                        data: []
+                    }
+                },
+
+                charts: {},
+
+                async initReportes() {
+                    if (typeof alertify !== 'undefined') {
+                        alertify.set('notifier', { position: 'top-right' });
+                    }
+
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (!session) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
+                    try {
+                        const { data: profile } = await supabase
+                            .from('profiles')
+                            .select('full_name, role, branch')
+                            .eq('id', session.user.id)
+                            .single();
+
+                        if (profile) {
+                            this.userName = profile.full_name;
+                            this.userRole = profile.role;
+                            this.userBranch = profile.branch;
+                            this.userInitials = this.getInitials(profile.full_name);
+                            this.filters.branch = profile.branch;
+                        }
+
+                        await this.loadAllReports();
+
+                    } catch (err) {
+                        console.error('Error inicializando:', err);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async loadAllReports() {
+                    this.loading = true;
+                    try {
+                        await Promise.all([
+                            this.loadVentasReport(),
+                            this.loadProductosReport(),
+                            this.loadSucursalesReport(),
+                            this.loadPagosReport(),
+                            this.loadCreditosReport()
+                        ]);
+
+                        this.$nextTick(() => {
+                            this.updateCharts();
+                        });
+
+                    } catch (err) {
+                        console.error('Error cargando reportes:', err);
+                        notify('Error al cargar reportes', 'error');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async loadVentasReport() {
+                    const { data: sales, error } = await supabase
+                        .from('sales')
+                        .select('id, total, created_at, branch')
+                        .eq('status', 'completed')
+                        .gte('created_at', this.filters.startDate)
+                        .lte('created_at', this.filters.endDate + 'T23:59:59')
+                        .order('created_at', { ascending: true });
+
+                    if (error) throw error;
+
+                    const filteredSales = this.filters.branch
+                        ? sales.filter(s => s.branch === this.filters.branch)
+                        : sales;
+
+                    const dailyData = {};
+                    filteredSales.forEach(sale => {
+                        const date = new Date(sale.created_at).toLocaleDateString('es-ES');
+                        if (!dailyData[date]) {
+                            dailyData[date] = { date, count: 0, revenue: 0 };
+                        }
+                        dailyData[date].count++;
+                        dailyData[date].revenue += sale.total;
+                    });
+
+                    const dailyArray = Object.values(dailyData);
+                    const totalRevenue = dailyArray.reduce((sum, d) => sum + d.revenue, 0);
+                    const totalSales = dailyArray.reduce((sum, d) => sum + d.count, 0);
+
+                    this.reports.ventas = {
+                        totalSales,
+                        totalRevenue,
+                        avgTicket: totalSales > 0 ? totalRevenue / totalSales : 0,
+                        daysCount: dailyArray.length,
+                        dailyData: dailyArray
+                    };
+                },
+
+                async loadProductosReport() {
+                    const { data: items, error } = await supabase
+                        .from('sale_items')
+                        .select(`
+                            quantity,
+                            unit_price,
+                            products!inner(name, size_liters),
+                            sales!inner(branch, created_at, status)
+                        `)
+                        .eq('sales.status', 'completed')
+                        .gte('sales.created_at', this.filters.startDate)
+                        .lte('sales.created_at', this.filters.endDate + 'T23:59:59');
+
+                    if (error) throw error;
+
+                    const filteredItems = this.filters.branch
+                        ? items.filter(i => i.sales.branch === this.filters.branch)
+                        : items;
+
+                    const productStats = {};
+                    filteredItems.forEach(item => {
+                        const name = item.products.name;
+                        if (!productStats[name]) {
+                            productStats[name] = { name, quantity: 0, revenue: 0 };
+                        }
+                        productStats[name].quantity += item.quantity;
+                        productStats[name].revenue += item.quantity * item.unit_price;
+                    });
+
+                    const productArray = Object.values(productStats).sort((a, b) => b.quantity - a.quantity);
+                    const totalUnits = productArray.reduce((sum, p) => sum + p.quantity, 0);
+
+                    productArray.forEach(p => {
+                        p.percentage = totalUnits > 0 ? (p.quantity / totalUnits) * 100 : 0;
+                    });
+
+                    this.reports.productos = {
+                        totalUnits,
+                        topProduct: productArray[0] || null,
+                        data: productArray
+                    };
+                },
+
+                async loadSucursalesReport() {
+                    const { data: sales, error } = await supabase
+                        .from('sales')
+                        .select('total, branch, created_at, status')
+                        .eq('status', 'completed')
+                        .gte('created_at', this.filters.startDate)
+                        .lte('created_at', this.filters.endDate + 'T23:59:59');
+
+                    if (error) throw error;
+
+                    const branchStats = {};
+                    sales.forEach(sale => {
+                        const branch = sale.branch;
+                        if (!branchStats[branch]) {
+                            branchStats[branch] = { name: branch, count: 0, revenue: 0 };
+                        }
+                        branchStats[branch].count++;
+                        branchStats[branch].revenue += sale.total;
+                    });
+
+                    const branchArray = Object.values(branchStats);
+                    const totalRevenue = branchArray.reduce((sum, b) => sum + b.revenue, 0);
+
+                    branchArray.forEach(b => {
+                        b.percentage = totalRevenue > 0 ? (b.revenue / totalRevenue) * 100 : 0;
+                    });
+
+                    this.reports.sucursales = {
+                        totalBranches: branchArray.length,
+                        totalRevenue,
+                        data: branchArray
+                    };
+                },
+
+                async loadPagosReport() {
+                    const { data: sales, error } = await supabase
+                        .from('sales')
+                        .select('total, payment_method, created_at, status')
+                        .eq('status', 'completed')
+                        .gte('created_at', this.filters.startDate)
+                        .lte('created_at', this.filters.endDate + 'T23:59:59');
+
+                    if (error) throw error;
+
+                    const filteredSales = this.filters.branch
+                        ? sales.filter(s => s.branch === this.filters.branch)
+                        : sales;
+
+                    const methodStats = {};
+                    filteredSales.forEach(sale => {
+                        const method = sale.payment_method;
+                        if (!methodStats[method]) {
+                            methodStats[method] = { name: method, count: 0, amount: 0 };
+                        }
+                        methodStats[method].count++;
+                        methodStats[method].amount += sale.total;
+                    });
+
+                    const methodArray = Object.values(methodStats).sort((a, b) => b.amount - a.amount);
+                    const totalAmount = methodArray.reduce((sum, m) => sum + m.amount, 0);
+
+                    methodArray.forEach(m => {
+                        m.percentage = totalAmount > 0 ? (m.amount / totalAmount) * 100 : 0;
+                    });
+
+                    this.reports.pagos = {
+                        totalMethods: methodArray.length,
+                        topMethod: methodArray[0] || null,
+                        data: methodArray
+                    };
+                },
+
+                async loadCreditosReport() {
+                    const { data: accounts, error } = await supabase
+                        .from('credit_accounts')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+
+                    if (error) throw error;
+
+                    const filteredAccounts = this.filters.branch
+                        ? accounts.filter(a => a.branch === this.filters.branch)
+                        : accounts;
+
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    const totalPending = filteredAccounts
+                        .filter(a => a.status !== 'paid')
+                        .reduce((sum, a) => sum + a.remaining_amount, 0);
+
+                    const overdueCount = filteredAccounts.filter(a => {
+                        const paymentDate = new Date(a.payment_date);
+                        return a.status !== 'paid' && paymentDate < today;
+                    }).length;
+
+                    const activeCount = filteredAccounts.filter(a => a.status !== 'paid').length;
+                    const paidCount = filteredAccounts.filter(a => a.status === 'paid').length;
+
+                    this.reports.creditos = {
+                        totalPending,
+                        overdueCount,
+                        activeCount,
+                        paidCount,
+                        data: filteredAccounts
+                    };
+                },
+
+                updateCharts() {
+                    this.destroyCharts();
+                    this.createVentasChart();
+                    this.createProductosChart();
+                    this.createSucursalesChart();
+                    this.createPagosChart();
+                    this.createCreditosChart();
+                },
+
+                destroyCharts() {
+                    Object.values(this.charts).forEach(chart => {
+                        if (chart) chart.destroy();
+                    });
+                    this.charts = {};
+                },
+
+                createVentasChart() {
+                    const ctx = document.getElementById('ventasChart');
+                    if (!ctx) return;
+
+                    this.charts.ventas = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: this.reports.ventas.dailyData.map(d => d.date),
+                            datasets: [{
+                                label: 'Ingresos ($)',
+                                data: this.reports.ventas.dailyData.map(d => d.revenue),
+                                borderColor: '#0ea5e9',
+                                backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                },
+
+                createProductosChart() {
+                    const ctx = document.getElementById('productosChart');
+                    if (!ctx) return;
+
+                    this.charts.productos = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: this.reports.productos.data.map(p => p.name),
+                            datasets: [{
+                                label: 'Unidades Vendidas',
+                                data: this.reports.productos.data.map(p => p.quantity),
+                                backgroundColor: ['#06b6d4', '#0ea5e9', '#0284c7']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                },
+
+                createSucursalesChart() {
+                    const ctx = document.getElementById('sucursalesChart');
+                    if (!ctx) return;
+
+                    this.charts.sucursales = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: this.reports.sucursales.data.map(b => b.name),
+                            datasets: [{
+                                data: this.reports.sucursales.data.map(b => b.revenue),
+                                backgroundColor: ['#0ea5e9', '#06b6d4']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                },
+
+                createPagosChart() {
+                    const ctx = document.getElementById('pagosChart');
+                    if (!ctx) return;
+
+                    this.charts.pagos = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: this.reports.pagos.data.map(m => m.name),
+                            datasets: [{
+                                data: this.reports.pagos.data.map(m => m.amount),
+                                backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                },
+
+                createCreditosChart() {
+                    const ctx = document.getElementById('creditosChart');
+                    if (!ctx) return;
+
+                    this.charts.creditos = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Pendiente', 'Parcial', 'Cancelado'],
+                            datasets: [{
+                                label: 'Cuentas',
+                                data: [
+                                    this.reports.creditos.data.filter(a => a.status === 'pending').length,
+                                    this.reports.creditos.data.filter(a => a.status === 'partial').length,
+                                    this.reports.creditos.data.filter(a => a.status === 'paid').length
+                                ],
+                                backgroundColor: ['#ef4444', '#f59e0b', '#10b981']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                },
+
+                // Exportar a PDF
+                async exportToPDF(reportType) {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+
+                    doc.setFontSize(18);
+                    doc.text('AquaService - Reporte', 14, 20);
+
+                    doc.setFontSize(12);
+                    doc.text(`Generado: ${new Date().toLocaleString('es-ES')}`, 14, 30);
+                    doc.text(`Período: ${this.filters.startDate} a ${this.filters.endDate}`, 14, 38);
+
+                    let yPos = 50;
+
+                    if (reportType === 'ventas') {
+                        doc.text('Reporte de Ventas por Período', 14, yPos);
+                        yPos += 10;
+
+                        const tableData = this.reports.ventas.dailyData.map(d => [d.date, d.count, '$' + d.revenue.toFixed(2)]);
+
+                        doc.autoTable({
+                            startY: yPos,
+                            head: [['Fecha', 'Ventas', 'Ingresos']],
+                            body: tableData,
+                            theme: 'striped'
+                        });
+                    } else if (reportType === 'productos') {
+                        doc.text('Reporte de Productos Más Vendidos', 14, yPos);
+                        yPos += 10;
+
+                        const tableData = this.reports.productos.data.map(p => [p.name, p.quantity, '$' + p.revenue.toFixed(2), p.percentage.toFixed(1) + '%']);
+
+                        doc.autoTable({
+                            startY: yPos,
+                            head: [['Producto', 'Unidades', 'Ingresos', '% Total']],
+                            body: tableData,
+                            theme: 'striped'
+                        });
+                    } else if (reportType === 'sucursales') {
+                        doc.text('Reporte de Ventas por Sucursal', 14, yPos);
+                        yPos += 10;
+
+                        const tableData = this.reports.sucursales.data.map(b => [b.name, b.count, '$' + b.revenue.toFixed(2), b.percentage.toFixed(1) + '%']);
+
+                        doc.autoTable({
+                            startY: yPos,
+                            head: [['Sucursal', 'Ventas', 'Ingresos', '% Total']],
+                            body: tableData,
+                            theme: 'striped'
+                        });
+                    } else if (reportType === 'pagos') {
+                        doc.text('Reporte de Métodos de Pago', 14, yPos);
+                        yPos += 10;
+
+                        const tableData = this.reports.pagos.data.map(m => [m.name, m.count, '$' + m.amount.toFixed(2), m.percentage.toFixed(1) + '%']);
+
+                        doc.autoTable({
+                            startY: yPos,
+                            head: [['Método', 'Transacciones', 'Monto', '% Total']],
+                            body: tableData,
+                            theme: 'striped'
+                        });
+                    } else if (reportType === 'creditos') {
+                        doc.text('Reporte de Cuentas por Cobrar', 14, yPos);
+                        yPos += 10;
+
+                        const tableData = this.reports.creditos.data.map(a => [
+                            a.customer_name,
+                            '$' + a.total_amount.toFixed(2),
+                            '$' + a.paid_amount.toFixed(2),
+                            '$' + a.remaining_amount.toFixed(2),
+                            this.formatDate(a.payment_date),
+                            this.getStatusText(a)
+                        ]);
+
+                        doc.autoTable({
+                            startY: yPos,
+                            head: [['Cliente', 'Total', 'Pagado', 'Pendiente', 'Fecha Límite', 'Estado']],
+                            body: tableData,
+                            theme: 'striped'
+                        });
+                    }
+
+                    doc.save(`reporte_${reportType}_${Date.now()}.pdf`);
+                    notify('PDF exportado exitosamente');
+                },
+
+                // Exportar a Excel
+                async exportToExcel(reportType) {
+                    let data = [];
+                    let filename = '';
+
+                    if (reportType === 'ventas') {
+                        data = this.reports.ventas.dailyData.map(d => ({
+                            'Fecha': d.date,
+                            'Ventas': d.count,
+                            'Ingresos': d.revenue
+                        }));
+                        filename = 'ventas_por_periodo';
+                    } else if (reportType === 'productos') {
+                        data = this.reports.productos.data.map(p => ({
+                            'Producto': p.name,
+                            'Unidades': p.quantity,
+                            'Ingresos': p.revenue,
+                            '% del Total': p.percentage
+                        }));
+                        filename = 'productos_mas_vendidos';
+                    } else if (reportType === 'sucursales') {
+                        data = this.reports.sucursales.data.map(b => ({
+                            'Sucursal': b.name,
+                            'Ventas': b.count,
+                            'Ingresos': b.revenue,
+                            '% del Total': b.percentage
+                        }));
+                        filename = 'ventas_por_sucursal';
+                    } else if (reportType === 'pagos') {
+                        data = this.reports.pagos.data.map(m => ({
+                            'Método': m.name,
+                            'Transacciones': m.count,
+                            'Monto': m.amount,
+                            '% del Total': m.percentage
+                        }));
+                        filename = 'metodos_de_pago';
+                    } else if (reportType === 'creditos') {
+                        data = this.reports.creditos.data.map(a => ({
+                            'Cliente': a.customer_name,
+                            'Total': a.total_amount,
+                            'Pagado': a.paid_amount,
+                            'Pendiente': a.remaining_amount,
+                            'Fecha Límite': a.payment_date,
+                            'Estado': this.getStatusText(a)
+                        }));
+                        filename = 'cuentas_por_cobrar';
+                    }
+
+                    const ws = XLSX.utils.json_to_sheet(data);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, 'Reporte');
+                    XLSX.writeFile(wb, `${filename}_${Date.now()}.xlsx`);
+
+                    notify('Excel exportado exitosamente');
+                },
+
+                formatDate(dateString) {
+                    if (!dateString) return 'N/A';
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
+                },
+
+                getInitials(name) {
+                    if (!name) return '??';
+                    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                },
+
+                isOverdue(account) {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const paymentDate = new Date(account.payment_date);
+                    return account.status !== 'paid' && paymentDate < today;
+                },
+
+                getStatusText(account) {
+                    if (this.isOverdue(account)) return 'Vencido';
+                    if (account.status === 'pending') return 'Pendiente';
+                    if (account.status === 'partial') return 'Parcial';
+                    if (account.status === 'paid') return 'Cancelado';
+                    return account.status;
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
