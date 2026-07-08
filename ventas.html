@@ -9,6 +9,11 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
 
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <!-- Toastify JS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
@@ -27,74 +32,59 @@
             background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
         }
 
+        /* ============================================ */
+        /* TOASTIFY CUSTOM STYLES - MODERN DESIGN */
+        /* ============================================ */
+        .toastify {
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 500 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
+            padding: 14px 20px !important;
+            min-width: 280px;
+            font-size: 14px !important;
+            color: white !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        .toastify-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        }
+
+        .toastify-error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+        }
+
+        .toastify-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+        }
+
+        .toastify-info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+        }
+
         /* Animaciones */
         @keyframes slideUp {
-            from {
-                transform: translateY(100%);
-            }
-
-            to {
-                transform: translateY(0);
-            }
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         @keyframes bounce-in {
-            0% {
-                transform: scale(0.3);
-                opacity: 0;
-            }
-
-            50% {
-                transform: scale(1.05);
-            }
-
-            70% {
-                transform: scale(0.9);
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
         }
 
-        @keyframes toast-in {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .animate-slide-up {
-            animation: slideUp 0.3s ease-out;
-        }
-
-        .animate-fade-in {
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .animate-bounce-in {
-            animation: bounce-in 0.4s ease-out;
-        }
-
-        .animate-toast {
-            animation: toast-in 0.3s ease-out;
-        }
+        .animate-slide-up { animation: slideUp 0.3s ease-out; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+        .animate-bounce-in { animation: bounce-in 0.4s ease-out; }
 
         /* Producto cards */
         .product-card {
@@ -102,9 +92,7 @@
             touch-action: manipulation;
         }
 
-        .product-card:active {
-            transform: scale(0.95);
-        }
+        .product-card:active { transform: scale(0.95); }
 
         .product-card:hover {
             transform: translateY(-2px);
@@ -119,31 +107,9 @@
         }
 
         /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-
-        /* Toast container */
-        .toast-container {
-            position: fixed;
-            top: 80px;
-            right: 16px;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-width: 320px;
-        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
         /* Carrito drawer (móvil) */
         .cart-drawer {
@@ -160,9 +126,7 @@
             overflow-y: auto;
         }
 
-        .cart-drawer.open {
-            transform: translateY(0);
-        }
+        .cart-drawer.open { transform: translateY(0); }
 
         /* Cart overlay */
         .cart-overlay {
@@ -175,31 +139,17 @@
             transition: opacity 0.3s;
         }
 
-        .cart-overlay.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .cart-overlay.show { opacity: 1; pointer-events: auto; }
 
         /* Total bar sticky (móvil) */
-        .total-bar {
-            position: sticky;
-            bottom: 0;
-            z-index: 30;
-        }
+        .total-bar { position: sticky; bottom: 0; z-index: 30; }
 
         /* Quick add buttons */
-        .quick-add-btn {
-            transition: all 0.15s;
-        }
-
-        .quick-add-btn:active {
-            transform: scale(0.9);
-        }
+        .quick-add-btn { transition: all 0.15s; }
+        .quick-add-btn:active { transform: scale(0.9); }
 
         /* Badge stock bajo */
-        .low-stock {
-            position: relative;
-        }
+        .low-stock { position: relative; }
 
         .low-stock::after {
             content: 'Stock Bajo';
@@ -215,68 +165,27 @@
         }
 
         /* Sucursal badge */
-        .branch-badge-geminis {
-            background: linear-gradient(135deg, #06b6d4, #0891b2);
-        }
-
-        .branch-badge-omega {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-        }
+        .branch-badge-geminis { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .branch-badge-omega { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
 
         /* Total Bs clickable */
-        .total-bs-clickable {
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+        .total-bs-clickable { cursor: pointer; transition: all 0.2s; }
 
         .total-bs-clickable:hover {
             background-color: rgba(34, 197, 94, 0.1);
             transform: scale(1.02);
         }
 
-        .total-bs-clickable:active {
-            transform: scale(0.98);
-        }
+        .total-bs-clickable:active { transform: scale(0.98); }
 
         /* Compact mode */
-        .compact-mode .product-card {
-            padding: 12px;
-        }
-
-        .compact-mode .product-card .fa-tint {
-            font-size: 1.5rem !important;
-        }
-
-        .compact-mode .product-card p.font-bold {
-            font-size: 0.9rem !important;
-        }
+        .compact-mode .product-card { padding: 12px; }
+        .compact-mode .product-card .fa-tint { font-size: 1.5rem !important; }
+        .compact-mode .product-card p.font-bold { font-size: 0.9rem !important; }
     </style>
 </head>
 
 <body class="bg-gray-50" x-data="ventasApp()" x-init="initVentas()">
-
-    <!-- Toast Notifications -->
-    <div class="toast-container">
-        <template x-for="toast in toasts" :key="toast.id">
-            <div class="animate-toast bg-white rounded-lg shadow-lg p-3 flex items-center space-x-3 border-l-4" :class="{
-                    'border-green-500': toast.type === 'success',
-                    'border-red-500': toast.type === 'error',
-                    'border-yellow-500': toast.type === 'warning',
-                    'border-blue-500': toast.type === 'info'
-                }">
-                <i class="fas text-lg" :class="{
-                        'fa-check-circle text-green-500': toast.type === 'success',
-                        'fa-exclamation-circle text-red-500': toast.type === 'error',
-                        'fa-exclamation-triangle text-yellow-500': toast.type === 'warning',
-                        'fa-info-circle text-blue-500': toast.type === 'info'
-                    }"></i>
-                <p class="text-sm flex-1" x-text="toast.message"></p>
-                <button @click="removeToast(toast.id)" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        </template>
-    </div>
 
     <!-- Sidebar (Desktop) -->
     <aside class="hidden lg:block fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40">
@@ -1094,6 +1003,44 @@
             window.location.href = 'login.html';
         }
 
+        // ============================================
+        // SISTEMA DE NOTIFICACIONES TOASTIFY
+        // ============================================
+        function showToast(message, type = 'success') {
+            const gradients = {
+                success: 'linear-gradient(to right, #10b981, #059669)',
+                error: 'linear-gradient(to right, #ef4444, #dc2626)',
+                warning: 'linear-gradient(to right, #f59e0b, #d97706)',
+                info: 'linear-gradient(to right, #3b82f6, #2563eb)'
+            };
+
+            const icons = {
+                success: '✓',
+                error: '✗',
+                warning: '⚠',
+                info: 'ℹ'
+            };
+
+            Toastify({
+                text: `${icons[type]} ${message}`,
+                duration: 3000,
+                close: true,
+                gravity: 'top',
+                position: 'right',
+                stopOnFocus: true,
+                style: {
+                    background: gradients[type],
+                    borderRadius: '12px',
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: '500',
+                    fontSize: '14px',
+                    padding: '14px 20px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
+                    minWidth: '280px'
+                }
+            }).showToast();
+        }
+
         // Función para redondear a 2 decimales
         function round2(num) {
             return Math.round(num * 100) / 100;
@@ -1103,7 +1050,7 @@
             return {
                 loading: true, processing: false, cartOpen: false, showCustomerModal: false, showCreditModal: false,
                 savingCustomer: false, compactMode: false,
-                productSearch: '', toasts: [], toastId: 0,
+                productSearch: '',
                 cart: [], products: [], customers: [], deliveryType: 'pickup', deliveryAddress: '',
                 selectedCustomer: '', paymentMethod: 'efectivo_bs', paymentReference: '',
                 amountReceivedBs: 0, amountReceivedUsd: 0, exchangeRate: 38.50, deliveryCost: 1.00,
@@ -1132,9 +1079,6 @@
                 },
 
                 get cartItemCount() { return this.cart.reduce((sum, item) => sum + item.quantity, 0); },
-
-                showToast(message, type = 'success') { const id = ++this.toastId; this.toasts.push({ id, message, type }); setTimeout(() => this.removeToast(id), 2000); },
-                removeToast(id) { this.toasts = this.toasts.filter(t => t.id !== id); },
 
                 async initVentas() {
                     const { data: { session } } = await supabase.auth.getSession();
@@ -1168,8 +1112,8 @@
                         await supabase.from('exchange_rates').update({ is_active: false }).eq('is_active', true);
                         await supabase.from('exchange_rates').insert({ rate: this.exchangeRate, branch: this.userBranch, is_active: true });
                         localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({ rate: this.exchangeRate, date: new Date().toISOString() }));
-                        this.showToast('Tasa actualizada');
-                    } catch (err) { localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({ rate: this.exchangeRate, date: new Date().toISOString() })); this.showToast('Tasa guardada localmente', 'warning'); }
+                        showToast('Tasa actualizada', 'success');
+                    } catch (err) { localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({ rate: this.exchangeRate, date: new Date().toISOString() })); showToast('Tasa guardada localmente', 'warning'); }
                 },
 
                 async loadProducts() {
@@ -1180,7 +1124,7 @@
                         if (!virtualInventory || virtualInventory.length === 0) { this.products = []; return; }
                         const bottlesOnly = virtualInventory.filter(item => item.virtual_stock > 0 && item.size_liters !== null && item.size_liters > 0);
                         this.products = bottlesOnly.map(item => ({ id: 'size_' + item.size_liters, product_id: item.product_id, name: item.product_name, size_liters: item.size_liters, product_type: item.product_type, price: round2(parseFloat(item.price) || 0), stock: parseInt(item.virtual_stock) || 0 }));
-                    } catch (err) { console.error('Error cargando productos:', err); this.showToast('Error al cargar productos', 'error'); this.products = []; }
+                    } catch (err) { console.error('Error cargando productos:', err); showToast('Error al cargar productos', 'error'); this.products = []; }
                     finally { this.loading = false; }
                 },
 
@@ -1192,37 +1136,37 @@
                 getInitials(name) { if (!name) return '??'; return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(); },
 
                 addProduct(product) {
-                    if (product.stock <= 0) { this.showToast('Producto sin stock', 'error'); return; }
+                    if (product.stock <= 0) { showToast('Producto sin stock', 'error'); return; }
                     const existingItem = this.cart.find(item => item.id === product.id);
-                    if (existingItem) { if (existingItem.quantity < product.stock) { existingItem.quantity++; this.showToast('Cantidad actualizada'); } else { this.showToast('Stock insuficiente', 'error'); } }
-                    else { this.cart.push({ id: product.id, product_id: product.product_id, name: product.name, size_liters: product.size_liters, price: product.price, stock: product.stock, quantity: 1 }); this.showToast('Producto agregado'); }
+                    if (existingItem) { if (existingItem.quantity < product.stock) { existingItem.quantity++; showToast('Cantidad actualizada', 'info'); } else { showToast('Stock insuficiente', 'error'); } }
+                    else { this.cart.push({ id: product.id, product_id: product.product_id, name: product.name, size_liters: product.size_liters, price: product.price, stock: product.stock, quantity: 1 }); showToast('Producto agregado', 'success'); }
                 },
 
                 quickAdd(product, quantity) {
-                    if (product.stock < quantity) { this.showToast(`Stock insuficiente para +${quantity}`, 'error'); return; }
+                    if (product.stock < quantity) { showToast(`Stock insuficiente para +${quantity}`, 'error'); return; }
                     const existingItem = this.cart.find(item => item.id === product.id);
-                    if (existingItem) { if (existingItem.quantity + quantity <= product.stock) { existingItem.quantity += quantity; this.showToast(`+${quantity} ${product.name}`); } else { this.showToast('Stock insuficiente', 'error'); } }
-                    else { this.cart.push({ id: product.id, product_id: product.product_id, name: product.name, size_liters: product.size_liters, price: product.price, stock: product.stock, quantity: quantity }); this.showToast(`+${quantity} ${product.name}`); }
+                    if (existingItem) { if (existingItem.quantity + quantity <= product.stock) { existingItem.quantity += quantity; showToast(`+${quantity} ${product.name}`, 'success'); } else { showToast('Stock insuficiente', 'error'); } }
+                    else { this.cart.push({ id: product.id, product_id: product.product_id, name: product.name, size_liters: product.size_liters, price: product.price, stock: product.stock, quantity: quantity }); showToast(`+${quantity} ${product.name}`, 'success'); }
                 },
 
                 updateQuantity(index, change) {
                     const item = this.cart[index]; const newQuantity = item.quantity + change;
-                    if (newQuantity > 0 && newQuantity <= item.stock) { item.quantity = newQuantity; } else if (newQuantity <= 0) { this.removeFromCart(index); } else { this.showToast('Stock insuficiente', 'error'); }
+                    if (newQuantity > 0 && newQuantity <= item.stock) { item.quantity = newQuantity; } else if (newQuantity <= 0) { this.removeFromCart(index); } else { showToast('Stock insuficiente', 'error'); }
                 },
 
-                removeFromCart(index) { this.cart.splice(index, 1); this.showToast('Producto eliminado', 'warning'); },
-                clearCart() { if (this.cart.length > 0) { if (confirm('¿Limpiar carrito?')) { this.cart = []; this.showToast('Carrito limpiado'); } } },
+                removeFromCart(index) { this.cart.splice(index, 1); showToast('Producto eliminado', 'warning'); },
+                clearCart() { if (this.cart.length > 0) { if (confirm('¿Limpiar carrito?')) { this.cart = []; showToast('Carrito limpiado', 'info'); } } },
                 openCart() { this.cartOpen = true; }, closeCart() { this.cartOpen = false; },
 
                 copyTotalToReceived() {
                     if (this.paymentMethod === 'efectivo_bs') {
                         this.amountReceivedBs = this.totalBs;
-                        this.showToast('Monto copiado a recibido', 'info');
+                        showToast('Monto copiado a recibido', 'info');
                     } else if (this.paymentMethod === 'efectivo_divisas') {
                         this.amountReceivedUsd = this.totalUSD;
-                        this.showToast('Monto copiado a recibido', 'info');
+                        showToast('Monto copiado a recibido', 'info');
                     } else {
-                        this.showToast('Selecciona efectivo para usar esta función', 'warning');
+                        showToast('Selecciona efectivo para usar esta función', 'warning');
                     }
                 },
 
@@ -1230,15 +1174,15 @@
                 closeCustomerModal() { this.showCustomerModal = false; },
 
                 async saveCustomer() {
-                    if (!this.newCustomer.full_name) { this.showToast('El nombre es obligatorio', 'error'); return; }
+                    if (!this.newCustomer.full_name) { showToast('El nombre es obligatorio', 'error'); return; }
                     this.savingCustomer = true;
-                    try { const { data, error } = await supabase.from('customers').insert({ full_name: this.newCustomer.full_name, phone: this.newCustomer.phone, email: this.newCustomer.email, address: this.newCustomer.address, recommended_by: this.newCustomer.recommended_by, branch: this.userBranch }).select().single(); if (error) throw error; this.showToast('Cliente creado'); this.customers.push(data); this.selectedCustomer = data.id; this.closeCustomerModal(); }
-                    catch (err) { console.error('Error creando cliente:', err); this.showToast('Error al crear cliente', 'error'); }
+                    try { const { data, error } = await supabase.from('customers').insert({ full_name: this.newCustomer.full_name, phone: this.newCustomer.phone, email: this.newCustomer.email, address: this.newCustomer.address, recommended_by: this.newCustomer.recommended_by, branch: this.userBranch }).select().single(); if (error) throw error; showToast('Cliente creado', 'success'); this.customers.push(data); this.selectedCustomer = data.id; this.closeCustomerModal(); }
+                    catch (err) { console.error('Error creando cliente:', err); showToast('Error al crear cliente', 'error'); }
                     finally { this.savingCustomer = false; }
                 },
 
                 openCreditModal() {
-                    if (this.cart.length === 0) { this.showToast('El carrito está vacío', 'error'); return; }
+                    if (this.cart.length === 0) { showToast('El carrito está vacío', 'error'); return; }
                     const defaultDate = new Date();
                     defaultDate.setDate(defaultDate.getDate() + 30);
                     this.creditForm.payment_date = defaultDate.toISOString().split('T')[0];
@@ -1249,17 +1193,16 @@
                 canProcessCredit() { if (!this.creditForm.customer_id) return false; if (!this.creditForm.payment_date) return false; if (this.creditForm.initial_payment > this.totalUSD) return false; return true; },
 
                 async processSale() {
-                    if (this.cart.length === 0) { this.showToast('El carrito está vacío', 'error'); return; }
-                    if (this.deliveryType === 'delivery' && !this.deliveryAddress) { this.showToast('Debe ingresar la dirección', 'error'); return; }
-                    if (['pago_movil', 'transferencia'].includes(this.paymentMethod) && !this.paymentReference) { this.showToast('Debe ingresar la referencia', 'error'); return; }
+                    if (this.cart.length === 0) { showToast('El carrito está vacío', 'error'); return; }
+                    if (this.deliveryType === 'delivery' && !this.deliveryAddress) { showToast('Debe ingresar la dirección', 'error'); return; }
+                    if (['pago_movil', 'transferencia'].includes(this.paymentMethod) && !this.paymentReference) { showToast('Debe ingresar la referencia', 'error'); return; }
 
-                    // Validación con redondeo
                     if (this.paymentMethod === 'efectivo_bs' && round2(this.amountReceivedBs) < this.totalBs) {
-                        this.showToast('Monto recibido insuficiente', 'error');
+                        showToast('Monto recibido insuficiente', 'error');
                         return;
                     }
                     if (this.paymentMethod === 'efectivo_divisas' && round2(this.amountReceivedUsd) < this.totalUSD) {
-                        this.showToast('Monto recibido insuficiente', 'error');
+                        showToast('Monto recibido insuficiente', 'error');
                         return;
                     }
 
@@ -1322,7 +1265,7 @@
                             if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
                         }
 
-                        this.showToast('¡Venta procesada exitosamente!');
+                        showToast('¡Venta procesada exitosamente!', 'success');
                         this.cart = [];
                         this.deliveryAddress = '';
                         this.selectedCustomer = '';
@@ -1333,14 +1276,14 @@
                         await this.loadProducts();
                     } catch (err) {
                         console.error('Error:', err);
-                        this.showToast('Error: ' + err.message, 'error');
+                        showToast('Error: ' + err.message, 'error');
                     } finally {
                         this.processing = false;
                     }
                 },
 
                 async quickSale() {
-                    if (this.cart.length === 0) { this.showToast('El carrito está vacío', 'error'); return; }
+                    if (this.cart.length === 0) { showToast('El carrito está vacío', 'error'); return; }
                     this.paymentMethod = 'efectivo_bs';
                     this.amountReceivedBs = this.totalBs;
                     this.selectedCustomer = '';
@@ -1348,7 +1291,7 @@
                 },
 
                 async processCreditSale() {
-                    if (!this.canProcessCredit()) { this.showToast('Complete los campos obligatorios', 'error'); return; }
+                    if (!this.canProcessCredit()) { showToast('Complete los campos obligatorios', 'error'); return; }
                     const customer = this.customers.find(c => c.id === this.creditForm.customer_id);
                     const creditAmount = round2(this.totalUSD - this.creditForm.initial_payment);
                     if (!confirm(`Venta a Crédito\nCliente: ${customer?.full_name}\nTotal: $${this.totalUSD.toFixed(2)}\nA financiar: $${creditAmount.toFixed(2)}`)) { return; }
@@ -1426,14 +1369,14 @@
                             }
                         }
 
-                        this.showToast('¡Venta a crédito procesada!');
+                        showToast('¡Venta a crédito procesada!', 'success');
                         this.cart = [];
                         this.closeCreditModal();
                         this.closeCart();
                         await this.loadProducts();
                     } catch (err) {
                         console.error('Error:', err);
-                        this.showToast('Error: ' + err.message, 'error');
+                        showToast('Error: ' + err.message, 'error');
                     } finally {
                         this.processing = false;
                     }
