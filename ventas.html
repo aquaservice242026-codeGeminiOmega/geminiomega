@@ -3,339 +3,344 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AquaService - Ventas</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
+    <<<<<<< HEAD <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>AquaService - Ventas</title>
+        =======
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Servicios Agua Potable - Ventas</title>
+        >>>>>>> 43ed82c32200ae393b71088330376f1b33343b41
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+            rel="stylesheet">
 
-    <style>
-        [x-cloak] {
-            display: none !important;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .gradient-bg {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-        }
-
-        /* Dark mode */
-        .dark body {
-            background-color: #1a1a1a;
-            color: #e5e7eb;
-        }
-
-        .dark .bg-white {
-            background-color: #2d2d2d;
-            color: #e5e7eb;
-        }
-
-        .dark .text-gray-800 {
-            color: #e5e7eb;
-        }
-
-        .dark .text-gray-900 {
-            color: #f3f4f6;
-        }
-
-        .dark .text-gray-700 {
-            color: #d1d5db;
-        }
-
-        .dark .text-gray-600 {
-            color: #9ca3af;
-        }
-
-        .dark .text-gray-500 {
-            color: #6b7280;
-        }
-
-        .dark .border-gray-200 {
-            border-color: #404040;
-        }
-
-        .dark .border-gray-300 {
-            border-color: #525252;
-        }
-
-        .dark .bg-gray-50 {
-            background-color: #262626;
-        }
-
-        .dark input,
-        .dark select,
-        .dark textarea {
-            background-color: #1f1f1f;
-            color: #e5e7eb;
-            border-color: #404040;
-        }
-
-        /* Animaciones */
-        @keyframes slideUp {
-            from {
-                transform: translateY(100%);
+        <style>
+            [x-cloak] {
+                display: none !important;
             }
 
-            to {
+            body {
+                font-family: 'Inter', sans-serif;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            .gradient-bg {
+                background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+            }
+
+            /* Dark mode */
+            .dark body {
+                background-color: #1a1a1a;
+                color: #e5e7eb;
+            }
+
+            .dark .bg-white {
+                background-color: #2d2d2d;
+                color: #e5e7eb;
+            }
+
+            .dark .text-gray-800 {
+                color: #e5e7eb;
+            }
+
+            .dark .text-gray-900 {
+                color: #f3f4f6;
+            }
+
+            .dark .text-gray-700 {
+                color: #d1d5db;
+            }
+
+            .dark .text-gray-600 {
+                color: #9ca3af;
+            }
+
+            .dark .text-gray-500 {
+                color: #6b7280;
+            }
+
+            .dark .border-gray-200 {
+                border-color: #404040;
+            }
+
+            .dark .border-gray-300 {
+                border-color: #525252;
+            }
+
+            .dark .bg-gray-50 {
+                background-color: #262626;
+            }
+
+            .dark input,
+            .dark select,
+            .dark textarea {
+                background-color: #1f1f1f;
+                color: #e5e7eb;
+                border-color: #404040;
+            }
+
+            /* Animaciones */
+            @keyframes slideUp {
+                from {
+                    transform: translateY(100%);
+                }
+
+                to {
+                    transform: translateY(0);
+                }
+            }
+
+            @keyframes slideDown {
+                from {
+                    transform: translateY(0);
+                }
+
+                to {
+                    transform: translateY(100%);
+                }
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                }
+
+                to {
+                    opacity: 1;
+                }
+            }
+
+            @keyframes pulse-green {
+
+                0%,
+                100% {
+                    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+                }
+
+                50% {
+                    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+                }
+            }
+
+            @keyframes bounce-in {
+                0% {
+                    transform: scale(0.3);
+                    opacity: 0;
+                }
+
+                50% {
+                    transform: scale(1.05);
+                }
+
+                70% {
+                    transform: scale(0.9);
+                }
+
+                100% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes toast-in {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+
+            .animate-slide-up {
+                animation: slideUp 0.3s ease-out;
+            }
+
+            .animate-slide-down {
+                animation: slideDown 0.3s ease-out;
+            }
+
+            .animate-fade-in {
+                animation: fadeIn 0.3s ease-out;
+            }
+
+            .animate-pulse-green {
+                animation: pulse-green 2s infinite;
+            }
+
+            .animate-bounce-in {
+                animation: bounce-in 0.4s ease-out;
+            }
+
+            .animate-toast {
+                animation: toast-in 0.3s ease-out;
+            }
+
+            /* Producto cards */
+            .product-card {
+                transition: all 0.2s ease;
+                touch-action: manipulation;
+            }
+
+            .product-card:active {
+                transform: scale(0.95);
+            }
+
+            .product-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            }
+
+            /* Botones táctiles */
+            .touch-btn {
+                min-height: 44px;
+                min-width: 44px;
+                touch-action: manipulation;
+            }
+
+            /* Scrollbar */
+            ::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+
+            ::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 3px;
+            }
+
+            /* Toast container */
+            .toast-container {
+                position: fixed;
+                top: 80px;
+                right: 16px;
+                z-index: 100;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                max-width: 320px;
+            }
+
+            /* Carrito drawer */
+            .cart-drawer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                max-height: 85vh;
+                background: white;
+                border-radius: 24px 24px 0 0;
+                z-index: 40;
+                transform: translateY(100%);
+                transition: transform 0.3s ease;
+                overflow-y: auto;
+            }
+
+            .cart-drawer.open {
                 transform: translateY(0);
             }
-        }
 
-        @keyframes slideDown {
-            from {
-                transform: translateY(0);
+            .dark .cart-drawer {
+                background: #2d2d2d;
             }
 
-            to {
-                transform: translateY(100%);
-            }
-        }
-
-        @keyframes fadeIn {
-            from {
+            /* Cart overlay */
+            .cart-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 39;
                 opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s;
             }
 
-            to {
+            .cart-overlay.show {
                 opacity: 1;
-            }
-        }
-
-        @keyframes pulse-green {
-
-            0%,
-            100% {
-                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+                pointer-events: auto;
             }
 
-            50% {
-                box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
-            }
-        }
-
-        @keyframes bounce-in {
-            0% {
-                transform: scale(0.3);
-                opacity: 0;
+            /* Total bar sticky */
+            .total-bar {
+                position: sticky;
+                bottom: 0;
+                z-index: 30;
             }
 
-            50% {
-                transform: scale(1.05);
+            /* Quick add buttons */
+            .quick-add-btn {
+                transition: all 0.15s;
             }
 
-            70% {
+            .quick-add-btn:active {
                 transform: scale(0.9);
             }
 
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        @keyframes toast-in {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
+            /* Badge stock bajo */
+            .low-stock {
+                position: relative;
             }
 
-            to {
-                transform: translateX(0);
-                opacity: 1;
+            .low-stock::after {
+                content: 'Stock Bajo';
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                background: #ef4444;
+                color: white;
+                font-size: 10px;
+                padding: 2px 6px;
+                border-radius: 8px;
+                font-weight: 600;
             }
-        }
 
-        .animate-slide-up {
-            animation: slideUp 0.3s ease-out;
-        }
+            /* Sucursal badge */
+            .branch-badge-geminis {
+                background: linear-gradient(135deg, #06b6d4, #0891b2);
+            }
 
-        .animate-slide-down {
-            animation: slideDown 0.3s ease-out;
-        }
+            .branch-badge-omega {
+                background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            }
 
-        .animate-fade-in {
-            animation: fadeIn 0.3s ease-out;
-        }
+            /* Total Bs clickable */
+            .total-bs-clickable {
+                cursor: pointer;
+                transition: all 0.2s;
+            }
 
-        .animate-pulse-green {
-            animation: pulse-green 2s infinite;
-        }
+            .total-bs-clickable:hover {
+                background-color: rgba(34, 197, 94, 0.1);
+                transform: scale(1.02);
+            }
 
-        .animate-bounce-in {
-            animation: bounce-in 0.4s ease-out;
-        }
+            .total-bs-clickable:active {
+                transform: scale(0.98);
+            }
 
-        .animate-toast {
-            animation: toast-in 0.3s ease-out;
-        }
+            /* Compact mode */
+            .compact-mode .product-card {
+                padding: 12px;
+            }
 
-        /* Producto cards */
-        .product-card {
-            transition: all 0.2s ease;
-            touch-action: manipulation;
-        }
+            .compact-mode .product-card .fa-tint {
+                font-size: 1.5rem !important;
+            }
 
-        .product-card:active {
-            transform: scale(0.95);
-        }
-
-        .product-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Botones táctiles */
-        .touch-btn {
-            min-height: 44px;
-            min-width: 44px;
-            touch-action: manipulation;
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-
-        /* Toast container */
-        .toast-container {
-            position: fixed;
-            top: 80px;
-            right: 16px;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-width: 320px;
-        }
-
-        /* Carrito drawer */
-        .cart-drawer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            max-height: 85vh;
-            background: white;
-            border-radius: 24px 24px 0 0;
-            z-index: 40;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
-            overflow-y: auto;
-        }
-
-        .cart-drawer.open {
-            transform: translateY(0);
-        }
-
-        .dark .cart-drawer {
-            background: #2d2d2d;
-        }
-
-        /* Cart overlay */
-        .cart-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 39;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-
-        .cart-overlay.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        /* Total bar sticky */
-        .total-bar {
-            position: sticky;
-            bottom: 0;
-            z-index: 30;
-        }
-
-        /* Quick add buttons */
-        .quick-add-btn {
-            transition: all 0.15s;
-        }
-
-        .quick-add-btn:active {
-            transform: scale(0.9);
-        }
-
-        /* Badge stock bajo */
-        .low-stock {
-            position: relative;
-        }
-
-        .low-stock::after {
-            content: 'Stock Bajo';
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: #ef4444;
-            color: white;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-weight: 600;
-        }
-
-        /* Sucursal badge */
-        .branch-badge-geminis {
-            background: linear-gradient(135deg, #06b6d4, #0891b2);
-        }
-
-        .branch-badge-omega {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-        }
-
-        /* Total Bs clickable */
-        .total-bs-clickable {
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .total-bs-clickable:hover {
-            background-color: rgba(34, 197, 94, 0.1);
-            transform: scale(1.02);
-        }
-
-        .total-bs-clickable:active {
-            transform: scale(0.98);
-        }
-
-        /* Compact mode */
-        .compact-mode .product-card {
-            padding: 12px;
-        }
-
-        .compact-mode .product-card .fa-tint {
-            font-size: 1.5rem !important;
-        }
-
-        .compact-mode .product-card p.font-bold {
-            font-size: 0.9rem !important;
-        }
-    </style>
+            .compact-mode .product-card p.font-bold {
+                font-size: 0.9rem !important;
+            }
+        </style>
 </head>
 
 <body class="bg-gray-50" x-data="ventasApp()" x-init="initVentas()" :class="{ 'dark': darkMode }">
@@ -374,41 +379,103 @@
                 <div class="flex items-center space-x-2">
                     <i class="fas fa-tint text-cyan-500 text-xl"></i>
                     <div>
-                        <h1 class="text-base font-bold text-gray-800 dark:text-gray-100 leading-tight">Punto de Venta
-                        </h1>
-                        <span
-                            class="inline-block px-2 py-0.5 rounded text-[10px] font-bold text-white branch-badge-geminis capitalize"
-                            x-text="userBranch || '...'"></span>
+                        <<<<<<< HEAD <h1 class="text-base font-bold text-gray-800 dark:text-gray-100 leading-tight">
+                            Punto de Venta
+                            </h1>
+                            <span
+                                class="inline-block px-2 py-0.5 rounded text-[10px] font-bold text-white branch-badge-geminis capitalize"
+                                x-text="userBranch || '...'"></span>
+                            =======
+                            <h1 class="text-xl font-bold">Servicios Agua Potable</h1>
+                            <p class="text-xs text-blue-200">Sistema de Gestión</p>
+                            >>>>>>> 43ed82c32200ae393b71088330376f1b33343b41
                     </div>
                 </div>
             </div>
 
-            <div class="flex items-center space-x-2">
+            <<<<<<< HEAD <div class="flex items-center space-x-2">
                 <!-- Tasa USD -->
                 <div class="bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-lg flex items-center space-x-1">
                     <span class="text-[10px] text-gray-600 dark:text-gray-300">USD:</span>
-                    <input type="number" x-model="exchangeRate" step="0.01"
-                        class="w-14 px-1 py-0.5 text-xs font-bold text-blue-600 dark:text-blue-400 bg-transparent border-none focus:outline-none text-right"
-                        @change="updateExchangeRate()">
-                    <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
+                    =======
+                    <nav class="space-y-2">
+                        <a href="index.html"
+                            class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                            <i class="fas fa-home w-5"></i><span>Dashboard</span>
+                        </a>
+                        <a href="ventas.html"
+                            class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
+                            <i class="fas fa-shopping-cart w-5"></i><span class="font-medium">Ventas</span>
+                        </a>
+                        <a href="clientes.html"
+                            class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                            <i class="fas fa-users w-5"></i><span>Clientes</span>
+                        </a>
+                        <a href="inventario.html"
+                            class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                            <i class="fas fa-boxes w-5"></i><span>Inventario</span>
+                        </a>
+                        <a href="usuarios.html"
+                            class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                            <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
+                        </a>
+                        <a href="reportes.html"
+                            class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                            <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
+                        </a>
+                        <a href="resumen-diario.html" @click="mobileMenuOpen = false"
+                            class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                            <i class="fas fa-file-alt w-5"></i><span>Resumen Diario</span>
+                        </a>
+                    </nav>
                 </div>
 
-                <!-- Dark mode toggle -->
-                <button @click="toggleDarkMode()"
-                    class="touch-btn text-gray-600 dark:text-yellow-400 hover:text-gray-800 p-1">
-                    <i class="fas" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
-                </button>
+                <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
+                            x-text="userInitials"></div>
+                        <div>
+                            <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
+                            <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
+                        </div>
+                    </div>
+                </div>
+                </aside>
 
-                <!-- Compact mode toggle -->
-                <button @click="compactMode = !compactMode"
-                    class="touch-btn text-gray-600 dark:text-gray-300 hover:text-gray-800 p-1 lg:hidden"
-                    title="Vista compacta">
-                    <i class="fas" :class="compactMode ? 'fa-expand' : 'fa-compress'"></i>
-                </button>
-            </div>
-        </div>
+                <!-- Main Content -->
+                <div class="lg:ml-64 min-h-screen">
+                    <!-- Header -->
+                    <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Punto de Venta</h2>
+                            <p class="text-sm text-gray-500">Venta de agua potabilizada - Stock basado en tanques</p>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="bg-blue-50 px-4 py-2 rounded-lg flex items-center space-x-2">
+                                <span class="text-sm text-gray-600">Tasa USD:</span>
+                                >>>>>>> 43ed82c32200ae393b71088330376f1b33343b41
+                                <input type="number" x-model="exchangeRate" step="0.01"
+                                    class="w-14 px-1 py-0.5 text-xs font-bold text-blue-600 dark:text-blue-400 bg-transparent border-none focus:outline-none text-right"
+                                    @change="updateExchangeRate()">
+                                <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+
+                            <!-- Dark mode toggle -->
+                            <button @click="toggleDarkMode()"
+                                class="touch-btn text-gray-600 dark:text-yellow-400 hover:text-gray-800 p-1">
+                                <i class="fas" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+                            </button>
+
+                            <!-- Compact mode toggle -->
+                            <button @click="compactMode = !compactMode"
+                                class="touch-btn text-gray-600 dark:text-gray-300 hover:text-gray-800 p-1 lg:hidden"
+                                title="Vista compacta">
+                                <i class="fas" :class="compactMode ? 'fa-expand' : 'fa-compress'"></i>
+                            </button>
+                        </div>
+                </div>
     </header>
 
     <!-- Main Content -->
