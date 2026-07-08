@@ -4,297 +4,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AquaService - Iniciar Sesión</title>
+    <title>Servicios Agua Potable - Iniciar Sesión</title>
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+
+    <!-- Alertify.js - CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
 
-    <!-- Toastify CSS -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <!-- Toastify JS -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <!-- Alertify.js - JS (después de todo lo demás) -->
+    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
 
     <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 50%, #0891b2 100%);
-            min-height: 100vh;
         }
 
-        .login-card {
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.95);
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #9ca3af;
-        }
-
-        .btn-primary {
+        .gradient-bg {
             background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-            transition: all 0.3s ease;
         }
 
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #0284c7 0%, #0891b2 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.4);
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
         }
 
-        .btn-primary:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
+        /* Menú móvil */
+        .sidebar-mobile {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
         }
 
-        /* Toastify custom styles */
-        .toastify {
-            font-family: 'Inter', sans-serif;
-            font-weight: 500;
-            border-radius: 12px !important;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
-            padding: 14px 20px !important;
-            min-width: 280px;
+        .sidebar-mobile.open {
+            transform: translateX(0);
         }
 
-        .toastify-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 39;
         }
 
-        .toastify-error {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+        .sidebar-overlay.show {
+            display: block;
         }
 
-        .toastify-warning {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-        }
-
-        .toastify-info {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-        }
-
-        .water-drop {
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0);
+        /* Mostrar sidebar en pantallas grandes */
+        @media (min-width: 1024px) {
+            .sidebar-mobile {
+                transform: translateX(0) !important;
             }
 
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
+            .sidebar-overlay {
+                display: none !important;
             }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
+            .menu-toggle {
+                display: none !important;
             }
         }
     </style>
 </head>
 
-<body class="flex items-center justify-center p-4">
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
 
-    <!-- Toast Container -->
-    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
+    <!-- Contenedor Principal -->
+    <div class="w-full max-w-md" x-data="loginApp()" x-init="initApp()">
 
-    <div class="w-full max-w-md fade-in">
-        <!-- Logo -->
+        <!-- Logo y Título -->
         <div class="text-center mb-8">
-            <div class="water-drop inline-block mb-4">
-                <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg">
-                    <i class="fas fa-tint text-4xl text-cyan-500"></i>
-                </div>
+            <div
+                class="inline-flex items-center justify-center w-20 h-20 rounded-full gradient-bg text-white shadow-lg mb-4">
+                <i class="fas fa-tint text-4xl"></i>
             </div>
-            <h1 class="text-3xl font-bold text-white mb-2">AquaService</h1>
-            <p class="text-blue-100">Sistema de Gestión de Agua Potabilizada</p>
+            <h1 class="text-3xl font-bold text-gray-800">Servicios Agua Potable</h1>
+            <p class="text-gray-500 mt-2">Sistema de Gestión de Agua Potabilizada</p>
         </div>
 
-        <!-- Login Card -->
-        <div class="login-card rounded-2xl shadow-2xl p-8">
-            <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">Iniciar Sesión</h2>
+        <!-- Tarjeta de Login -->
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Iniciar Sesión</h2>
 
-            <form @submit.prevent="login" x-data="loginApp()">
+            <form @submit.prevent="handleLogin">
                 <!-- Email -->
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Correo Electrónico</label>
                     <div class="relative">
-                        <i class="fas fa-envelope input-icon"></i>
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <i class="fas fa-envelope"></i>
+                        </span>
                         <input type="email" x-model="email" required
-                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition"
-                            placeholder="usuario@aquaservice.com" autocomplete="email">
+                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                            placeholder="admin@aquaservice.com">
                     </div>
                 </div>
 
-                <!-- Password -->
+                <!-- Contraseña -->
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
                     <div class="relative">
-                        <i class="fas fa-lock input-icon"></i>
-                        <input :type="showPassword ? 'text' : 'password'" x-model="password" required
-                            class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition"
-                            placeholder="••••••••" autocomplete="current-password">
-                        <button type="button" @click="showPassword = !showPassword"
-                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                            <i class="fas" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
-                        </button>
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        <input type="password" x-model="password" required
+                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                            placeholder="••••••••">
                     </div>
                 </div>
 
-                <!-- Submit Button -->
+                <!-- Botón de Login -->
                 <button type="submit" :disabled="loading"
-                    class="btn-primary w-full text-white font-semibold py-3 rounded-lg flex items-center justify-center space-x-2">
-                    <i class="fas fa-circle-notch fa-spin" x-show="loading"></i>
-                    <i class="fas fa-sign-in-alt" x-show="!loading"></i>
-                    <span x-text="loading ? 'Ingresando...' : 'Ingresar'"></span>
+                    class="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+                    <i x-show="loading" class="fas fa-circle-notch fa-spin mr-2"></i>
+                    <span x-text="loading ? 'Ingresando...' : 'Iniciar Sesión'"></span>
                 </button>
             </form>
 
-            <!-- Footer -->
-            <div class="mt-6 text-center">
-                <p class="text-xs text-gray-500">
-                    <i class="fas fa-shield-alt mr-1"></i>
-                    Conexión segura con Supabase
-                </p>
+            <!-- Mensaje de Error -->
+            <div x-show="errorMessage" x-transition
+                class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm text-center" x-cloak>
+                <i class="fas fa-exclamation-circle mr-1"></i>
+                <span x-text="errorMessage"></span>
             </div>
         </div>
 
-        <!-- Copyright -->
-        <div class="text-center mt-6">
-            <p class="text-sm text-blue-100">
-                &copy; 2026 AquaService. Todos los derechos reservados.
-            </p>
-        </div>
+        <!-- Footer -->
+        <p class="text-center text-gray-400 text-sm mt-6">
+            &copy; 2026 AquaService. Todos los derechos reservados.
+        </p>
     </div>
 
     <script>
+        // ============================================
+        // CONFIGURACIÓN DE SUPABASE
+        // ============================================
         const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // ============================================
-        // SISTEMA DE NOTIFICACIONES TOASTIFY
-        // ============================================
-        function showToast(message, type = 'success') {
-            const gradients = {
-                success: 'linear-gradient(to right, #10b981, #059669)',
-                error: 'linear-gradient(to right, #ef4444, #dc2626)',
-                warning: 'linear-gradient(to right, #f59e0b, #d97706)',
-                info: 'linear-gradient(to right, #3b82f6, #2563eb)'
-            };
-
-            const icons = {
-                success: '✓',
-                error: '✗',
-                warning: '⚠',
-                info: 'ℹ'
-            };
-
-            Toastify({
-                text: `${icons[type]} ${message}`,
-                duration: 3000,
-                close: true,
-                gravity: 'top',
-                position: 'right',
-                stopOnFocus: true,
-                style: {
-                    background: gradients[type],
-                    borderRadius: '12px',
-                    fontFamily: 'Inter, sans-serif',
-                    fontWeight: '500',
-                    fontSize: '14px',
-                    padding: '14px 20px',
-                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
-                    minWidth: '280px'
-                },
-                onClick: function () { }
-            }).showToast();
+        let supabase;
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('✅ Supabase inicializado');
+        } catch (error) {
+            console.error('❌ Error Supabase:', error);
         }
 
-        // ============================================
-        // APLICACIÓN LOGIN
-        // ============================================
         function loginApp() {
             return {
                 email: '',
                 password: '',
-                showPassword: false,
                 loading: false,
+                errorMessage: '',
 
-                async login() {
-                    if (!this.email || !this.password) {
-                        showToast('Por favor complete todos los campos', 'warning');
-                        return;
+                initApp() {
+                    // Verificar Alertify
+                    if (typeof alertify === 'undefined') {
+                        console.warn('⚠️ Alertify no cargó, usando alert() nativo');
+                        this.useNativeAlerts = true;
+                    } else {
+                        alertify.set('notifier', { position: 'top-right' });
+                        this.useNativeAlerts = false;
                     }
 
+                    this.checkSession();
+                },
+
+                async checkSession() {
+                    try {
+                        const { data: { session } } = await supabase.auth.getSession();
+                        if (session) {
+                            window.location.href = 'index.html';
+                        }
+                    } catch (error) {
+                        console.error('Error sesión:', error);
+                    }
+                },
+
+                showSuccess(message) {
+                    if (this.useNativeAlerts) {
+                        alert('✓ ' + message);
+                    } else {
+                        alertify.success(message);
+                    }
+                },
+
+                showError(message) {
+                    if (this.useNativeAlerts) {
+                        alert('✗ ' + message);
+                    } else {
+                        alertify.error(message);
+                    }
+                },
+
+                async handleLogin() {
                     this.loading = true;
+                    this.errorMessage = '';
 
                     try {
                         const { data, error } = await supabase.auth.signInWithPassword({
-                            email: this.email,
-                            password: this.password
+                            email: this.email.trim(),
+                            password: this.password,
                         });
 
-                        if (error) {
-                            // Mensajes personalizados según el error
-                            if (error.message.includes('Invalid login credentials')) {
-                                showToast('Credenciales incorrectas', 'error');
-                            } else if (error.message.includes('Email not confirmed')) {
-                                showToast('Email no confirmado', 'warning');
-                            } else if (error.message.includes('Too many requests')) {
-                                showToast('Demasiados intentos. Espere un momento', 'error');
-                            } else {
-                                showToast(error.message, 'error');
+                        if (error) throw error;
+
+                        if (data.user) {
+                            const { data: profile, error: profileError } = await supabase
+                                .from('profiles')
+                                .select('is_active, role, branch')
+                                .eq('id', data.user.id)
+                                .single();
+
+                            if (profileError) throw profileError;
+
+                            if (!profile.is_active) {
+                                await supabase.auth.signOut();
+                                throw new Error('Cuenta desactivada. Contacta al administrador.');
                             }
-                            return;
-                        }
 
-                        // Login exitoso
-                        showToast('¡Bienvenido al sistema!', 'success');
-
-                        // Guardar información del usuario
-                        const { data: profile } = await supabase
-                            .from('profiles')
-                            .select('full_name, role, branch')
-                            .eq('id', data.user.id)
-                            .single();
-
-                        if (profile) {
                             localStorage.setItem('user_id', data.user.id);
-                            localStorage.setItem('user_name', profile.full_name);
                             localStorage.setItem('user_role', profile.role);
                             localStorage.setItem('user_branch', profile.branch);
+
+                            this.showSuccess('¡Bienvenido al sistema!');
+
+                            setTimeout(() => {
+                                window.location.href = 'index.html';
+                            }, 1000);
                         }
 
-                        // Redirigir al dashboard después de 1 segundo
-                        setTimeout(() => {
-                            window.location.href = 'index.html';
-                        }, 1000);
-
                     } catch (err) {
-                        console.error('Error:', err);
-                        showToast('Error de conexión', 'error');
+                        console.error('Error login:', err);
+                        this.errorMessage = err.message || 'Error al iniciar sesión';
+                        this.showError(this.errorMessage);
                     } finally {
                         this.loading = false;
                     }
