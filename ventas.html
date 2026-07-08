@@ -78,6 +78,59 @@
             border-color: #404040;
         }
 
+        /* Forzar modo claro en desktop */
+        @media (min-width: 1024px) {
+            body.dark {
+                background-color: #f9fafb !important;
+                color: #111827 !important;
+            }
+
+            body.dark .bg-white {
+                background-color: white !important;
+                color: #111827 !important;
+            }
+
+            body.dark .text-gray-800 {
+                color: #1f2937 !important;
+            }
+
+            body.dark .text-gray-900 {
+                color: #111827 !important;
+            }
+
+            body.dark .text-gray-700 {
+                color: #374151 !important;
+            }
+
+            body.dark .text-gray-600 {
+                color: #4b5563 !important;
+            }
+
+            body.dark .text-gray-500 {
+                color: #6b7280 !important;
+            }
+
+            body.dark .border-gray-200 {
+                border-color: #e5e7eb !important;
+            }
+
+            body.dark .border-gray-300 {
+                border-color: #d1d5db !important;
+            }
+
+            body.dark .bg-gray-50 {
+                background-color: #f9fafb !important;
+            }
+
+            body.dark input,
+            body.dark select,
+            body.dark textarea {
+                background-color: white !important;
+                color: #111827 !important;
+                border-color: #d1d5db !important;
+            }
+        }
+
         /* Animaciones */
         @keyframes slideUp {
             from {
@@ -308,7 +361,8 @@
     </style>
 </head>
 
-<body class="bg-gray-50" x-data="ventasApp()" x-init="initVentas()" :class="{ 'dark': darkMode }">
+<body class="bg-gray-50" x-data="ventasApp()" x-init="initVentas()"
+    :class="{ 'dark': darkMode && window.innerWidth < 1024 }">
 
     <!-- Toast Notifications -->
     <div class="toast-container">
@@ -440,7 +494,6 @@
                 </div>
 
                 <div class="flex items-center space-x-2">
-                    <!-- Tasa USD -->
                     <div class="bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-lg flex items-center space-x-1">
                         <span class="text-[10px] text-gray-600 dark:text-gray-300">USD:</span>
                         <input type="number" x-model="exchangeRate" step="0.01"
@@ -451,13 +504,11 @@
                         </button>
                     </div>
 
-                    <!-- Dark mode toggle -->
                     <button @click="toggleDarkMode()"
                         class="touch-btn text-gray-600 dark:text-yellow-400 hover:text-gray-800 p-1">
                         <i class="fas" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
                     </button>
 
-                    <!-- Compact mode toggle -->
                     <button @click="compactMode = !compactMode"
                         class="touch-btn text-gray-600 dark:text-gray-300 hover:text-gray-800 p-1"
                         title="Vista compacta">
@@ -500,7 +551,6 @@
                         <p class="text-sm">No hay productos disponibles</p>
                     </div>
 
-                    <!-- Grid: 2 columnas en móvil, 3 en desktop -->
                     <div class="grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-4">
                         <template x-for="product in filteredProducts" :key="product.id">
                             <button @click="addProduct(product)"
@@ -513,7 +563,6 @@
                                     'opacity-50': product.stock === 0
                                 }">
 
-                                <!-- Stock badge -->
                                 <div
                                     class="absolute top-2 right-2 bg-white/20 backdrop-blur px-1.5 py-0.5 rounded text-[10px] font-bold">
                                     <span x-text="product.stock"></span>
@@ -526,7 +575,6 @@
                                         x-text="'$' + product.price.toFixed(2)"></p>
                                 </div>
 
-                                <!-- Quick add buttons (solo desktop) -->
                                 <div class="hidden lg:flex justify-center space-x-1 mt-4 pt-4 border-t border-white/20"
                                     @click.stop>
                                     <button @click="quickAdd(product, 1)"
@@ -629,7 +677,6 @@
                     <p class="text-sm">Carrito vacío</p>
                 </div>
 
-                <!-- Totals -->
                 <div class="border-t dark:border-gray-700 pt-4 space-y-2">
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-600 dark:text-gray-400">Subtotal:</span>
@@ -652,7 +699,6 @@
                     </div>
                 </div>
 
-                <!-- Customer -->
                 <div class="mt-4">
                     <div class="flex items-center justify-between mb-2">
                         <label class="text-xs font-semibold text-gray-700 dark:text-gray-300">Cliente</label>
@@ -670,7 +716,6 @@
                     </select>
                 </div>
 
-                <!-- Payment Method -->
                 <div class="mt-4">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2 block">Método de
                         Pago</label>
@@ -685,7 +730,6 @@
                     </select>
                 </div>
 
-                <!-- Payment Reference -->
                 <div x-show="['pago_movil', 'transferencia'].includes(paymentMethod)"
                     class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Referencia</label>
@@ -693,25 +737,38 @@
                         class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700">
                 </div>
 
-                <!-- Cash BS -->
                 <div x-show="paymentMethod === 'efectivo_bs'"
                     class="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Monto Recibido
                         (Bs.)</label>
-                    <input type="number" x-model.number="amountReceivedBs" step="0.01"
-                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700">
+                    <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0"
+                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+                        @input="formatTwoDecimals('amountReceivedBs')" placeholder="0.00">
+                    <div x-show="amountReceivedBs > 0" class="mt-2 text-xs space-y-1">
+                        <p class="text-gray-600 dark:text-gray-400">En USD: <span class="font-bold"
+                                x-text="'$' + (amountReceivedBs / exchangeRate).toFixed(2)"></span></p>
+                        <p x-show="amountReceivedBs >= totalBs" class="text-green-600 font-semibold">Cambio: Bs. <span
+                                x-text="(amountReceivedBs - totalBs).toFixed(2)"></span></p>
+                        <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs. <span
+                                x-text="(totalBs - amountReceivedBs).toFixed(2)"></span></p>
+                    </div>
                 </div>
 
-                <!-- Cash USD -->
                 <div x-show="paymentMethod === 'efectivo_divisas'"
                     class="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Monto Recibido
                         (USD)</label>
-                    <input type="number" x-model.number="amountReceivedUsd" step="0.01"
-                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700">
+                    <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0"
+                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+                        @input="formatTwoDecimals('amountReceivedUsd')" placeholder="0.00">
+                    <div x-show="amountReceivedUsd > 0" class="mt-2 text-xs space-y-1">
+                        <p x-show="amountReceivedUsd >= totalUSD" class="text-green-600 font-semibold">Cambio: $<span
+                                x-text="(amountReceivedUsd - totalUSD).toFixed(2)"></span></p>
+                        <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta: $<span
+                                x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
+                    </div>
                 </div>
 
-                <!-- Credit Warning -->
                 <div x-show="paymentMethod === 'credito'" class="mt-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                     <p class="text-xs text-red-600 dark:text-red-400">
                         <i class="fas fa-exclamation-circle mr-1"></i>
@@ -719,7 +776,6 @@
                     </p>
                 </div>
 
-                <!-- Action Buttons -->
                 <div class="grid grid-cols-2 gap-2 mt-6">
                     <button @click="processSale()"
                         :disabled="cart.length === 0 || processing || paymentMethod === 'credito'"
@@ -736,7 +792,6 @@
                     </button>
                 </div>
 
-                <!-- Quick Sale Button -->
                 <button @click="quickSale()" :disabled="cart.length === 0 || processing"
                     class="w-full mt-2 bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2 text-sm">
                     <i class="fas fa-bolt"></i>
@@ -762,7 +817,6 @@
             </div>
         </div>
 
-        <!-- Cart items count -->
         <div class="flex items-center justify-between text-xs">
             <span class="text-gray-500 dark:text-gray-400">
                 <span x-text="cartItemCount"></span> items en carrito
@@ -848,7 +902,6 @@
             </template>
         </div>
 
-        <!-- Totals in Cart (móvil) -->
         <div class="border-t dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800">
             <div class="space-y-2 mb-3">
                 <div class="flex justify-between text-sm">
@@ -872,7 +925,6 @@
                 </div>
             </div>
 
-            <!-- Delivery Toggle (mobile) -->
             <div class="mb-3">
                 <p class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Tipo de Entrega</p>
                 <div class="flex space-x-2">
@@ -893,7 +945,6 @@
                 </div>
             </div>
 
-            <!-- Customer (móvil) -->
             <div class="mb-3">
                 <div class="flex items-center justify-between mb-2">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300">Cliente</label>
@@ -911,7 +962,6 @@
                 </select>
             </div>
 
-            <!-- Payment Method (móvil) -->
             <div class="mb-3">
                 <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2 block">Método de Pago</label>
                 <select x-model="paymentMethod"
@@ -925,7 +975,6 @@
                 </select>
             </div>
 
-            <!-- Payment Reference (móvil) -->
             <div x-show="['pago_movil', 'transferencia'].includes(paymentMethod)"
                 class="mb-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
                 <label class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Referencia</label>
@@ -933,24 +982,37 @@
                     class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700">
             </div>
 
-            <!-- Cash BS (móvil) -->
             <div x-show="paymentMethod === 'efectivo_bs'" class="mb-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                 <label class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Monto Recibido
                     (Bs.)</label>
-                <input type="number" x-model.number="amountReceivedBs" step="0.01"
-                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700">
+                <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0"
+                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+                    @input="formatTwoDecimals('amountReceivedBs')" placeholder="0.00">
+                <div x-show="amountReceivedBs > 0" class="mt-2 text-xs space-y-1">
+                    <p class="text-gray-600 dark:text-gray-400">En USD: <span class="font-bold"
+                            x-text="'$' + (amountReceivedBs / exchangeRate).toFixed(2)"></span></p>
+                    <p x-show="amountReceivedBs >= totalBs" class="text-green-600 font-semibold">Cambio: Bs. <span
+                            x-text="(amountReceivedBs - totalBs).toFixed(2)"></span></p>
+                    <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs. <span
+                            x-text="(totalBs - amountReceivedBs).toFixed(2)"></span></p>
+                </div>
             </div>
 
-            <!-- Cash USD (móvil) -->
             <div x-show="paymentMethod === 'efectivo_divisas'"
                 class="mb-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                 <label class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Monto Recibido
                     (USD)</label>
-                <input type="number" x-model.number="amountReceivedUsd" step="0.01"
-                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700">
+                <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0"
+                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+                    @input="formatTwoDecimals('amountReceivedUsd')" placeholder="0.00">
+                <div x-show="amountReceivedUsd > 0" class="mt-2 text-xs space-y-1">
+                    <p x-show="amountReceivedUsd >= totalUSD" class="text-green-600 font-semibold">Cambio: $<span
+                            x-text="(amountReceivedUsd - totalUSD).toFixed(2)"></span></p>
+                    <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta: $<span
+                            x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
+                </div>
             </div>
 
-            <!-- Credit Warning (móvil) -->
             <div x-show="paymentMethod === 'credito'" class="mb-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                 <p class="text-xs text-red-600 dark:text-red-400">
                     <i class="fas fa-exclamation-circle mr-1"></i>
@@ -958,7 +1020,6 @@
                 </p>
             </div>
 
-            <!-- Action Buttons (móvil) -->
             <div class="grid grid-cols-2 gap-2 mt-4">
                 <button @click="processSale()"
                     :disabled="cart.length === 0 || processing || paymentMethod === 'credito'"
@@ -975,7 +1036,6 @@
                 </button>
             </div>
 
-            <!-- Quick Sale Button (móvil) -->
             <button @click="quickSale()" :disabled="cart.length === 0 || processing"
                 class="w-full mt-2 bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2 text-sm">
                 <i class="fas fa-bolt"></i>
@@ -984,7 +1044,6 @@
         </div>
     </div>
 
-    <!-- Modales (Crear Cliente y Crédito) - Los mismos para ambas vistas -->
     <!-- Modal Crear Cliente -->
     <div x-show="showCustomerModal" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
         @click.self="closeCustomerModal()">
@@ -1144,7 +1203,8 @@
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pago Inicial
                                 ($)</label>
                             <input type="number" x-model.number="creditForm.initial_payment" step="0.01" min="0"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700">
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+                                @input="formatTwoDecimals('creditForm.initial_payment')">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Método Pago
@@ -1186,10 +1246,38 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        async function logout() {
+            await supabase.auth.signOut();
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        // Función para formatear fecha en hora de Caracas
+        function formatDateCaracas(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return new Intl.DateTimeFormat('es-VE', {
+                timeZone: 'America/Caracas',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            }).format(date);
+        }
+
+        // Función para obtener fecha actual en Caracas
+        function getCurrentDateCaracas() {
+            const now = new Date();
+            const caracasTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Caracas' }));
+            return caracasTime;
+        }
+
         function ventasApp() {
             return {
                 loading: true, processing: false, cartOpen: false, showCustomerModal: false, showCreditModal: false,
-                savingCustomer: false, darkMode: localStorage.getItem('darkMode') === 'true', compactMode: false,
+                savingCustomer: false, darkMode: false, compactMode: false,
                 productSearch: '', toasts: [], toastId: 0,
                 cart: [], products: [], customers: [], deliveryType: 'pickup', deliveryAddress: '',
                 selectedCustomer: '', paymentMethod: 'efectivo_bs', paymentReference: '',
@@ -1211,7 +1299,22 @@
                 showToast(message, type = 'success') { const id = ++this.toastId; this.toasts.push({ id, message, type }); setTimeout(() => this.removeToast(id), 2000); },
                 removeToast(id) { this.toasts = this.toasts.filter(t => t.id !== id); },
 
+                // Formatear a 2 decimales
+                formatTwoDecimals(field) {
+                    const value = parseFloat(this[field]);
+                    if (!isNaN(value)) {
+                        this[field] = Math.round(value * 100) / 100;
+                    }
+                },
+
                 async initVentas() {
+                    // Forzar modo claro en desktop
+                    if (window.innerWidth >= 1024) {
+                        this.darkMode = false;
+                    } else {
+                        this.darkMode = localStorage.getItem('darkMode') === 'true';
+                    }
+
                     const { data: { session } } = await supabase.auth.getSession();
                     if (!session) { window.location.href = 'login.html'; return; }
                     try {
@@ -1227,7 +1330,11 @@
                 },
 
                 goBack() { window.location.href = 'index.html'; },
-                toggleDarkMode() { this.darkMode = !this.darkMode; localStorage.setItem('darkMode', this.darkMode); },
+                toggleDarkMode() {
+                    if (window.innerWidth >= 1024) return;
+                    this.darkMode = !this.darkMode;
+                    localStorage.setItem('darkMode', this.darkMode);
+                },
 
                 async loadExchangeRate() {
                     try {
@@ -1291,8 +1398,8 @@
                 openCart() { this.cartOpen = true; }, closeCart() { this.cartOpen = false; },
 
                 copyTotalToReceived() {
-                    if (this.paymentMethod === 'efectivo_bs') { this.amountReceivedBs = this.totalBs; this.showToast('Monto copiado a recibido', 'info'); }
-                    else if (this.paymentMethod === 'efectivo_divisas') { this.amountReceivedUsd = this.totalUSD; this.showToast('Monto copiado a recibido', 'info'); }
+                    if (this.paymentMethod === 'efectivo_bs') { this.amountReceivedBs = Math.round(this.totalBs * 100) / 100; this.showToast('Monto copiado a recibido', 'info'); }
+                    else if (this.paymentMethod === 'efectivo_divisas') { this.amountReceivedUsd = Math.round(this.totalUSD * 100) / 100; this.showToast('Monto copiado a recibido', 'info'); }
                     else { this.showToast('Selecciona efectivo para usar esta función', 'warning'); }
                 },
 
@@ -1307,7 +1414,13 @@
                     finally { this.savingCustomer = false; }
                 },
 
-                openCreditModal() { if (this.cart.length === 0) { this.showToast('El carrito está vacío', 'error'); return; } const defaultDate = new Date(); defaultDate.setDate(defaultDate.getDate() + 30); this.creditForm.payment_date = defaultDate.toISOString().split('T')[0]; this.showCreditModal = true; },
+                openCreditModal() {
+                    if (this.cart.length === 0) { this.showToast('El carrito está vacío', 'error'); return; }
+                    const defaultDate = getCurrentDateCaracas();
+                    defaultDate.setDate(defaultDate.getDate() + 30);
+                    this.creditForm.payment_date = defaultDate.toISOString().split('T')[0];
+                    this.showCreditModal = true;
+                },
                 closeCreditModal() { this.showCreditModal = false; this.creditForm = { customer_id: '', customer_phone: '', customer_id_card: '', payment_date: '', payment_terms: '', initial_payment: 0, initial_payment_method: 'efectivo', notes: '' }; },
                 loadCustomerData() { const customer = this.customers.find(c => c.id === this.creditForm.customer_id); if (customer) { this.creditForm.customer_phone = customer.phone || ''; } },
                 canProcessCredit() { if (!this.creditForm.customer_id) return false; if (!this.creditForm.payment_date) return false; if (this.creditForm.initial_payment > this.totalUSD) return false; return true; },
@@ -1319,11 +1432,12 @@
                     if (this.paymentMethod === 'efectivo_bs' && this.amountReceivedBs < this.totalBs) { this.showToast('Monto recibido insuficiente', 'error'); return; }
                     if (this.paymentMethod === 'efectivo_divisas' && this.amountReceivedUsd < this.totalUSD) { this.showToast('Monto recibido insuficiente', 'error'); return; }
                     const customer = this.customers.find(c => c.id === this.selectedCustomer); const customerName = customer?.full_name || 'Cliente no registrado';
-                    if (!confirm(`Confirmar venta\nCliente: ${customerName}\nTotal: $${this.totalUSD.toFixed(2)}`)) { return; }
+                    if (!confirm(`Confirmar venta\nCliente: ${customerName}\nTotal: $${this.totalUSD.toFixed(2)}\nFecha: ${formatDateCaracas(new Date())}`)) { return; }
                     this.processing = true;
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
                         let notes = [];
+                        notes.push(`Fecha/Hora: ${formatDateCaracas(new Date())}`);
                         if (this.deliveryType === 'delivery') notes.push(`Delivery: ${this.deliveryAddress}`);
                         if (this.paymentReference) notes.push(`Ref: ${this.paymentReference}`);
                         if (this.paymentMethod === 'efectivo_bs' && this.amountReceivedBs > 0) { notes.push(`Recibido Bs: ${this.amountReceivedBs.toFixed(2)}`); notes.push(`Cambio Bs: ${(this.amountReceivedBs - this.totalBs).toFixed(2)}`); }
@@ -1340,23 +1454,23 @@
                     finally { this.processing = false; }
                 },
 
-                async quickSale() { if (this.cart.length === 0) { this.showToast('El carrito está vacío', 'error'); return; } this.paymentMethod = 'efectivo_bs'; this.amountReceivedBs = this.totalBs; this.selectedCustomer = ''; await this.processSale(); },
+                async quickSale() { if (this.cart.length === 0) { this.showToast('El carrito está vacío', 'error'); return; } this.paymentMethod = 'efectivo_bs'; this.amountReceivedBs = Math.round(this.totalBs * 100) / 100; this.selectedCustomer = ''; await this.processSale(); },
 
                 async processCreditSale() {
                     if (!this.canProcessCredit()) { this.showToast('Complete los campos obligatorios', 'error'); return; }
                     const customer = this.customers.find(c => c.id === this.creditForm.customer_id); const creditAmount = this.totalUSD - this.creditForm.initial_payment;
-                    if (!confirm(`Venta a Crédito\nCliente: ${customer?.full_name}\nTotal: $${this.totalUSD.toFixed(2)}\nA financiar: $${creditAmount.toFixed(2)}`)) { return; }
+                    if (!confirm(`Venta a Crédito\nCliente: ${customer?.full_name}\nTotal: $${this.totalUSD.toFixed(2)}\nA financiar: $${creditAmount.toFixed(2)}\nFecha: ${formatDateCaracas(new Date())}`)) { return; }
                     this.processing = true;
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
-                        const { data: sale, error: saleError } = await supabase.from('sales').insert({ branch: this.userBranch, customer_id: this.creditForm.customer_id, customer_name: customer?.full_name, subtotal: this.subtotal, tax: 0, total: this.totalUSD, payment_method: 'credito', status: creditAmount > 0 ? 'pending' : 'completed', notes: `Crédito - Pago inicial: $${this.creditForm.initial_payment.toFixed(2)}\n${this.creditForm.notes || ''}`, created_by: session.user.id }).select().single();
+                        const { data: sale, error: saleError } = await supabase.from('sales').insert({ branch: this.userBranch, customer_id: this.creditForm.customer_id, customer_name: customer?.full_name, subtotal: this.subtotal, tax: 0, total: this.totalUSD, payment_method: 'credito', status: creditAmount > 0 ? 'pending' : 'completed', notes: `Crédito - Fecha: ${formatDateCaracas(new Date())}\nPago inicial: $${this.creditForm.initial_payment.toFixed(2)}\n${this.creditForm.notes || ''}`, created_by: session.user.id }).select().single();
                         if (saleError) throw saleError;
                         const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters').eq('is_active', true);
                         const sizeToProductId = {}; productsFromDB.forEach(p => { if (p.size_liters) sizeToProductId[p.size_liters] = p.id; });
                         const saleItems = this.cart.map(item => ({ sale_id: sale.id, product_id: sizeToProductId[item.size_liters], quantity: item.quantity, unit_price: item.price, total: item.price * item.quantity }));
                         const { error: itemsError } = await supabase.from('sale_items').insert(saleItems); if (itemsError) throw itemsError;
                         for (const item of this.cart) { const realProductId = sizeToProductId[item.size_liters]; if (!realProductId) continue; const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', { branch_param: this.userBranch, product_id_param: realProductId, quantity_param: item.quantity, user_id_param: session.user.id }); if (tankError) throw tankError; }
-                        if (creditAmount > 0) { await supabase.from('credit_accounts').insert({ sale_id: sale.id, customer_id: this.creditForm.customer_id, customer_name: customer?.full_name, customer_phone: customer?.phone, customer_id_card: this.creditForm.customer_id_card, total_amount: this.totalUSD, paid_amount: this.creditForm.initial_payment, remaining_amount: creditAmount, payment_date: this.creditForm.payment_date, payment_terms: this.creditForm.payment_terms, notes: this.creditForm.notes, status: this.creditForm.initial_payment > 0 ? 'partial' : 'pending', created_by: session.user.id }); if (this.creditForm.initial_payment > 0) { const { data: creditAccount } = await supabase.from('credit_accounts').select('id').eq('sale_id', sale.id).single(); if (creditAccount) { await supabase.from('credit_payments').insert({ credit_account_id: creditAccount.id, amount: this.creditForm.initial_payment, payment_method: this.creditForm.initial_payment_method, notes: 'Pago inicial', created_by: session.user.id }); } } }
+                        if (creditAmount > 0) { await supabase.from('credit_accounts').insert({ sale_id: sale.id, customer_id: this.creditForm.customer_id, customer_name: customer?.full_name, customer_phone: customer?.phone, customer_id_card: this.creditForm.customer_id_card, total_amount: this.totalUSD, paid_amount: this.creditForm.initial_payment, remaining_amount: creditAmount, payment_date: this.creditForm.payment_date, payment_terms: this.creditForm.payment_terms, notes: this.creditForm.notes, status: this.creditForm.initial_payment > 0 ? 'partial' : 'pending', created_by: session.user.id }); if (this.creditForm.initial_payment > 0) { const { data: creditAccount } = await supabase.from('credit_accounts').select('id').eq('sale_id', sale.id).single(); if (creditAccount) { await supabase.from('credit_payments').insert({ credit_account_id: creditAccount.id, amount: this.creditForm.initial_payment, payment_method: this.creditForm.initial_payment_method, notes: 'Pago inicial - ' + formatDateCaracas(new Date()), created_by: session.user.id }); } } }
                         this.showToast('¡Venta a crédito procesada!'); this.cart = []; this.closeCreditModal(); this.closeCart(); await this.loadProducts();
                     } catch (err) { console.error('Error:', err); this.showToast('Error: ' + err.message, 'error'); }
                     finally { this.processing = false; }
