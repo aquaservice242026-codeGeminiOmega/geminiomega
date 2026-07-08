@@ -1402,19 +1402,25 @@
                             if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
                         }
 
-                        // Success notification with SweetAlert2
                         Swal.fire({
                             icon: 'success',
                             title: '¡Venta Exitosa!',
                             html: `
                                 <div class="text-center space-y-2">
                                     <p class="text-gray-600">La venta ha sido procesada correctamente</p>
-                                    <div class="mt-3 p-3 bg-green-50 rounded-lg">
-                                        <p class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</p>
+                                    <div class="mt-3 space-y-2">
+                                        <div class="p-3 bg-green-50 rounded-lg border border-green-200">
+                                            <p class="text-xs text-gray-500">Total USD</p>
+                                            <p class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</p>
+                                        </div>
+                                        <div class="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                            <p class="text-xs text-gray-500">Total Bs.</p>
+                                            <p class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</p>
+                                        </div>
                                     </div>
                                 </div>
                             `,
-                            timer: 2000,
+                            timer: 2500,
                             showConfirmButton: false
                         });
 
