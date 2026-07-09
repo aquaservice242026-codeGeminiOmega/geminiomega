@@ -328,9 +328,12 @@
                 <div class="flex items-center space-x-4">
                     <div class="bg-blue-50 px-4 py-2 rounded-lg flex items-center space-x-2">
                         <span class="text-sm text-gray-600">Tasa USD:</span>
-                        <input type="number" x-model="exchangeRate" step="0.01"
-                            class="w-24 px-2 py-1 text-sm font-bold text-blue-600 bg-transparent border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-center"
-                            @change="updateExchangeRate()">
+                        <input type="number" 
+                               x-model.number="exchangeRate" 
+                               step="0.01"
+                               @input="exchangeRate = parseFloat($event.target.value) || 700.22"
+                               class="w-24 px-2 py-1 text-sm font-bold text-blue-600 bg-transparent border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-center"
+                               @change="updateExchangeRate()">
                         <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
                             <i class="fas fa-sync-alt"></i>
                         </button>
@@ -362,9 +365,12 @@
                 <div class="flex items-center space-x-2">
                     <div class="bg-blue-50 px-2 py-1 rounded-lg flex items-center space-x-1">
                         <span class="text-[10px] text-gray-600">USD:</span>
-                        <input type="number" x-model="exchangeRate" step="0.01"
-                            class="w-14 px-1 py-0.5 text-xs font-bold text-blue-600 bg-transparent border-none focus:outline-none text-right"
-                            @change="updateExchangeRate()">
+                        <input type="number" 
+                               x-model.number="exchangeRate" 
+                               step="0.01"
+                               @input="exchangeRate = parseFloat($event.target.value) || 700.22"
+                               class="w-14 px-1 py-0.5 text-xs font-bold text-blue-600 bg-transparent border-none focus:outline-none text-right"
+                               @change="updateExchangeRate()">
                         <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
                             <i class="fas fa-sync-alt"></i>
                         </button>
@@ -834,7 +840,7 @@
                 warning: 'linear-gradient(to right, #f59e0b, #d97706)',
                 info: 'linear-gradient(to right, #3b82f6, #2563eb)'
             };
-            const icons = { success: '✓', error: '✗', warning: '⚠', info: '' };
+            const icons = { success: '✓', error: '✗', warning: '⚠', info: 'ℹ' };
 
             Toastify({
                 text: `${icons[type]} ${message}`,
@@ -885,13 +891,17 @@
 
                 get subtotal() { return round2(this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)); },
                 get totalUSD() { let total = this.subtotal; if (this.deliveryType === 'delivery') total += this.deliveryCost; return round2(total); },
-                get totalBs() { return round2(this.totalUSD * parseFloat(this.exchangeRate || 700.22)); },
+                get totalBs() { 
+                    const rate = parseFloat(this.exchangeRate) || 700.22;
+                    return round2(this.totalUSD * rate); 
+                },
                 get cartItemCount() { return this.cart.reduce((sum, item) => sum + item.quantity, 0); },
 
                 get totalPaid() {
+                    const rate = parseFloat(this.exchangeRate) || 700.22;
                     return this.payments.reduce((sum, p) => {
                         if (p.method === 'efectivo_bs') {
-                            return sum + (p.amountBs / parseFloat(this.exchangeRate || 700.22));
+                            return sum + (p.amountBs / rate);
                         }
                         return sum + p.amountUsd;
                     }, 0);
@@ -914,9 +924,10 @@
                 removePayment(index) { this.payments.splice(index, 1); },
 
                 calculateUsdFromBs(index) {
+                    const rate = parseFloat(this.exchangeRate) || 700.22;
                     const payment = this.payments[index];
                     if (payment.method === 'efectivo_bs' && payment.amountBs > 0) {
-                        payment.amountUsd = round2(payment.amountBs / parseFloat(this.exchangeRate || 700.22));
+                        payment.amountUsd = round2(payment.amountBs / rate);
                     }
                 },
 
@@ -1165,12 +1176,24 @@
                 canProcessCredit() { if (!this.creditForm.customer_id) return false; if (!this.creditForm.payment_date) return false; if (this.creditForm.initial_payment > this.totalUSD) return false; return true; },
 
                 async processSale() {
-                    // VALIDAR QUE EXCHANGE RATE SEA NÚMERO
-                    if (typeof this.exchangeRate !== 'number' || isNaN(this.exchangeRate)) {
-                        console.error('❌ exchangeRate no es número:', this.exchangeRate, typeof this.exchangeRate);
-                        this.exchangeRate = 700.22;
+                    // VALIDACIÓN MEJORADA - Forzar conversión a número
+                    const rate = parseFloat(this.exchangeRate);
+                    if (isNaN(rate) || rate <= 0) {
+                        console.error('❌ exchangeRate inválido:', this.exchangeRate, typeof this.exchangeRate);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Tasa Inválida',
+                            text: 'La tasa de cambio no es válida. Actualice la tasa antes de continuar.',
+                            confirmButtonText: 'Actualizar Tasa'
+                        }).then(() => {
+                            this.showRateUpdateModal(this.lastExchangeRate, this.lastRateDate);
+                        });
+                        return;
                     }
-
+                    
+                    // Asegurar que siempre sea número
+                    this.exchangeRate = rate;
+                    
                     console.log('🔴 processSale llamado desde:', window.innerWidth < 1024 ? 'MÓVIL' : 'DESKTOP');
                     console.log('🔴 Cart length:', this.cart.length);
                     console.log('🔴 Processing:', this.processing);
@@ -1235,8 +1258,9 @@
                         cancelButtonText: '<i class="fas fa-times"></i> Cancelar',
                         reverseButtons: true,
                         customClass: {
-                            popup: 'rounded-2xl',
-                            title: 'text-2xl font-bold text-gray-800'
+                            popup: 'rounded-2xl w-11/12 max-w-md',
+                            title: 'text-2xl font-bold text-gray-800',
+                            htmlContainer: 'text-sm'
                         },
                         html: `
                             <div class="space-y-4 text-left max-w-md mx-auto">
