@@ -14,30 +14,19 @@
     <!-- Toastify JS -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-    <!-- SweetAlert2 CSS -->
+    <!-- SweetAlert2 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        [x-cloak] {
-            display: none !important;
-        }
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .gradient-bg {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-        }
-
-        /* Toastify Custom Styles */
+        /* Toastify */
         .toastify {
             font-family: 'Inter', sans-serif !important;
             font-weight: 500 !important;
@@ -47,59 +36,25 @@
             min-width: 280px;
             font-size: 14px !important;
             color: white !important;
-            display: flex !important;
-            align-items: center !important;
         }
+        .toastify-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; }
+        .toastify-error { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important; }
+        .toastify-warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important; }
+        .toastify-info { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
 
-        .toastify-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-        }
-
-        .toastify-error {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
-        }
-
-        .toastify-warning {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-        }
-
-        .toastify-info {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-        }
-
-        /* SweetAlert2 Custom Styles */
+        /* SweetAlert2 */
         .swal2-popup {
             font-family: 'Inter', sans-serif !important;
             border-radius: 16px !important;
-            padding: 2rem !important;
-            z-index: 99999 !important;
         }
-
-        .swal2-container {
-            z-index: 99998 !important;
-        }
-
-        .swal2-title {
-            font-size: 1.5rem !important;
-            font-weight: 700 !important;
-            color: #1f2937 !important;
-        }
-
-        .swal2-html-container {
-            font-size: 0.95rem !important;
-            color: #4b5563 !important;
-        }
-
+        .swal2-title { font-size: 1.5rem !important; font-weight: 700 !important; }
         .swal2-confirm {
             background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%) !important;
             border: none !important;
             border-radius: 12px !important;
             padding: 0.75rem 2rem !important;
             font-weight: 600 !important;
-            font-size: 1rem !important;
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3) !important;
         }
-
         .swal2-cancel {
             background: #f3f4f6 !important;
             color: #4b5563 !important;
@@ -109,185 +64,46 @@
             font-weight: 600 !important;
         }
 
-        /* Fix para modales en móviles */
-        @media (max-width: 1024px) {
-            .swal2-container {
-                z-index: 999999 !important;
-            }
-            
-            .swal2-popup {
-                z-index: 1000000 !important;
-                width: 90% !important;
-                max-width: 400px !important;
-                margin: auto !important;
-                padding: 1.5rem !important;
-            }
-            
-            .cart-overlay.show {
-                z-index: 38 !important;
-            }
-            
-            .cart-drawer.open {
-                z-index: 39 !important;
-            }
-        }
-        
-        /* Asegurar que los modales sean visibles */
-        .swal2-show {
-            display: flex !important;
-            opacity: 1 !important;
-            visibility: visible !important;
-        }
-
         /* Animaciones */
         @keyframes bounce-in {
-            0% {
-                transform: scale(0.3);
-                opacity: 0;
-            }
-
-            50% {
-                transform: scale(1.05);
-            }
-
-            70% {
-                transform: scale(0.9);
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
         }
+        .animate-bounce-in { animation: bounce-in 0.4s ease-out; }
 
-        .animate-bounce-in {
-            animation: bounce-in 0.4s ease-out;
-        }
+        .product-card { transition: all 0.2s ease; touch-action: manipulation; }
+        .product-card:active { transform: scale(0.95); }
+        .product-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+        .touch-btn { min-height: 44px; min-width: 44px; touch-action: manipulation; }
 
-        /* Producto cards */
-        .product-card {
-            transition: all 0.2s ease;
-            touch-action: manipulation;
-        }
-
-        .product-card:active {
-            transform: scale(0.95);
-        }
-
-        .product-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-
-        .touch-btn {
-            min-height: 44px;
-            min-width: 44px;
-            touch-action: manipulation;
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
         .cart-drawer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            max-height: 85vh;
-            background: white;
-            border-radius: 24px 24px 0 0;
-            z-index: 40;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
-            overflow-y: auto;
+            position: fixed; bottom: 0; left: 0; right: 0; max-height: 85vh;
+            background: white; border-radius: 24px 24px 0 0; z-index: 40;
+            transform: translateY(100%); transition: transform 0.3s ease; overflow-y: auto;
         }
-
-        .cart-drawer.open {
-            transform: translateY(0);
-        }
-
+        .cart-drawer.open { transform: translateY(0); }
         .cart-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 39;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 39;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
         }
+        .cart-overlay.show { opacity: 1; pointer-events: auto; }
+        .total-bar { position: sticky; bottom: 0; z-index: 30; }
 
-        .cart-overlay.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .total-bar {
-            position: sticky;
-            bottom: 0;
-            z-index: 30;
-        }
-
-        .quick-add-btn {
-            transition: all 0.15s;
-        }
-
-        .quick-add-btn:active {
-            transform: scale(0.9);
-        }
-
-        .low-stock {
-            position: relative;
-        }
-
+        .low-stock { position: relative; }
         .low-stock::after {
-            content: 'Stock Bajo';
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: #ef4444;
-            color: white;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-weight: 600;
+            content: 'Stock Bajo'; position: absolute; top: 8px; right: 8px;
+            background: #ef4444; color: white; font-size: 10px;
+            padding: 2px 6px; border-radius: 8px; font-weight: 600;
         }
-
-        .branch-badge-geminis {
-            background: linear-gradient(135deg, #06b6d4, #0891b2);
-        }
-
-        .total-bs-clickable {
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .total-bs-clickable:hover {
-            background-color: rgba(34, 197, 94, 0.1);
-            transform: scale(1.02);
-        }
-
-        .compact-mode .product-card {
-            padding: 12px;
-        }
-
-        .compact-mode .product-card .fa-tint {
-            font-size: 1.5rem !important;
-        }
-
-        .compact-mode .product-card p.font-bold {
-            font-size: 0.9rem !important;
-        }
+        .branch-badge-geminis { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .total-bs-clickable { cursor: pointer; transition: all 0.2s; }
+        .total-bs-clickable:hover { background-color: rgba(34, 197, 94, 0.1); }
     </style>
 </head>
 
@@ -310,39 +126,29 @@
                 </div>
             </div>
             <nav class="space-y-2">
-                <a href="index.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="index.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-home w-5"></i><span>Dashboard</span>
                 </a>
                 <a href="ventas.html" class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
                     <i class="fas fa-shopping-cart w-5"></i><span class="font-medium">Ventas</span>
                 </a>
-                <a href="cuentas-cobrar.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="cuentas-cobrar.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-file-invoice-dollar w-5"></i><span>Cuentas por Cobrar</span>
                 </a>
-                <a href="clientes.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="clientes.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-users w-5"></i><span>Clientes</span>
                 </a>
-                <a href="inventario.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="inventario.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-boxes w-5"></i><span>Inventario</span>
                 </a>
-                <a href="usuarios.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
-                </a>
-                <a href="reportes.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="reportes.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
                 </a>
             </nav>
         </div>
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
-                    x-text="userInitials"></div>
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold" x-text="userInitials"></div>
                 <div>
                     <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
                     <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
@@ -358,17 +164,14 @@
             <div class="flex justify-between items-center">
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800">Punto de Venta</h2>
-                    <p class="text-sm text-gray-500">Venta de agua potabilizada - Stock basado en tanques</p>
+                    <p class="text-sm text-gray-500">Venta de agua potabilizada</p>
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="bg-blue-50 px-4 py-2 rounded-lg flex items-center space-x-2">
                         <span class="text-sm text-gray-600">Tasa USD:</span>
-                        <input type="number" 
-                               x-model.number="exchangeRate" 
-                               step="0.01"
-                               @input="exchangeRate = parseFloat($event.target.value) || 700.22"
-                               class="w-24 px-2 py-1 text-sm font-bold text-blue-600 bg-transparent border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-center"
-                               @change="updateExchangeRate()">
+                        <input type="number" x-model.number="exchangeRate" step="0.01"
+                            class="w-24 px-2 py-1 text-sm font-bold text-blue-600 bg-transparent border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-center"
+                            @change="updateExchangeRate()">
                         <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
                             <i class="fas fa-sync-alt"></i>
                         </button>
@@ -384,58 +187,40 @@
         <header class="lg:hidden bg-white shadow-sm border-b sticky top-0 z-20">
             <div class="px-3 py-2 flex items-center justify-between">
                 <div class="flex items-center space-x-2">
-                    <button @click="goBack()" class="touch-btn text-gray-600 hover:text-gray-800">
+                    <button @click="goBack()" class="touch-btn text-gray-600">
                         <i class="fas fa-arrow-left text-xl"></i>
                     </button>
                     <div class="flex items-center space-x-2">
                         <i class="fas fa-tint text-cyan-500 text-xl"></i>
                         <div>
                             <h1 class="text-base font-bold text-gray-800 leading-tight">Punto de Venta</h1>
-                            <span
-                                class="inline-block px-2 py-0.5 rounded text-[10px] font-bold text-white branch-badge-geminis capitalize"
-                                x-text="userBranch || '...'"></span>
+                            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold text-white branch-badge-geminis capitalize" x-text="userBranch || '...'"></span>
                         </div>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2">
                     <div class="bg-blue-50 px-2 py-1 rounded-lg flex items-center space-x-1">
                         <span class="text-[10px] text-gray-600">USD:</span>
-                        <input type="number" 
-                               x-model.number="exchangeRate" 
-                               step="0.01"
-                               @input="exchangeRate = parseFloat($event.target.value) || 700.22"
-                               class="w-14 px-1 py-0.5 text-xs font-bold text-blue-600 bg-transparent border-none focus:outline-none text-right"
-                               @change="updateExchangeRate()">
-                        <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
+                        <input type="number" x-model.number="exchangeRate" step="0.01"
+                            class="w-14 px-1 py-0.5 text-xs font-bold text-blue-600 bg-transparent border-none focus:outline-none text-right"
+                            @change="updateExchangeRate()">
+                        <button @click="loadExchangeRate()" class="text-blue-600 text-xs">
                             <i class="fas fa-sync-alt"></i>
                         </button>
                     </div>
-                    <button @click="compactMode = !compactMode" class="touch-btn text-gray-600 hover:text-gray-800 p-1"
-                        title="Vista compacta">
-                        <i class="fas" :class="compactMode ? 'fa-expand' : 'fa-compress'"></i>
-                    </button>
                 </div>
             </div>
         </header>
 
         <div class="flex">
             <!-- Content Área Principal -->
-            <main class="flex-1 p-3 lg:p-6" :class="{ 'compact-mode': compactMode }">
-                <!-- Search Bar (solo móvil) -->
-                <div class="lg:hidden px-3 py-2 bg-white border-b sticky top-[57px] z-10 mb-3">
+            <main class="flex-1 p-3 lg:p-6">
+                <!-- Search Bar -->
+                <div class="mb-4">
                     <div class="relative">
                         <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                         <input type="text" x-model="productSearch" placeholder="Buscar producto..."
-                            class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
-                    </div>
-                </div>
-
-                <!-- Search Bar (Desktop) -->
-                <div class="hidden lg:block mb-6">
-                    <div class="relative">
-                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                        <input type="text" x-model="productSearch" placeholder="Buscar producto..."
-                            class="w-full pl-10 pr-4 py-3 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
+                            class="w-full pl-10 pr-4 py-3 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
                     </div>
                 </div>
 
@@ -458,59 +243,19 @@
                                     'bg-gradient-to-br from-cyan-400 to-cyan-600': product.size_liters === 5,
                                     'bg-gradient-to-br from-blue-400 to-blue-600': product.size_liters === 13,
                                     'bg-gradient-to-br from-indigo-500 to-indigo-700': product.size_liters === 20,
-                                    'bg-gradient-to-br from-purple-400 to-purple-600': product.product_type === 'cap',
                                     'low-stock': product.stock <= 10 && product.stock > 0,
                                     'opacity-50': product.stock === 0
                                 }">
-                                <div
-                                    class="absolute top-2 right-2 bg-white/20 backdrop-blur px-1.5 py-0.5 rounded text-[10px] font-bold">
+                                <div class="absolute top-2 right-2 bg-white/20 backdrop-blur px-1.5 py-0.5 rounded text-[10px] font-bold">
                                     <span x-text="product.stock"></span>
                                 </div>
                                 <div class="flex flex-col items-center text-center space-y-1">
                                     <i class="fas fa-tint text-2xl lg:text-4xl mb-1"></i>
                                     <p class="font-bold text-sm lg:text-lg leading-tight" x-text="product.name"></p>
-                                    <p class="text-xs lg:text-sm opacity-90 font-semibold"
-                                        x-text="'$' + product.price.toFixed(2)"></p>
-                                </div>
-                                <div class="hidden lg:flex justify-center space-x-1 mt-4 pt-4 border-t border-white/20"
-                                    @click.stop>
-                                    <button @click="quickAdd(product, 1)"
-                                        class="quick-add-btn bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded touch-btn"
-                                        :disabled="product.stock < 1">+1</button>
-                                    <button @click="quickAdd(product, 5)"
-                                        class="quick-add-btn bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded touch-btn"
-                                        :disabled="product.stock < 5">+5</button>
-                                    <button @click="quickAdd(product, 10)"
-                                        class="quick-add-btn bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded touch-btn"
-                                        :disabled="product.stock < 10">+10</button>
+                                    <p class="text-xs lg:text-sm opacity-90 font-semibold" x-text="'$' + product.price.toFixed(2)"></p>
                                 </div>
                             </button>
                         </template>
-                    </div>
-                </div>
-
-                <!-- Delivery Toggle (Desktop) -->
-                <div class="hidden lg:block mt-6">
-                    <div class="bg-white rounded-xl p-4 shadow-sm">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-sm font-semibold text-gray-700">Tipo de Entrega</h3>
-                            <div class="flex space-x-2">
-                                <button @click="deliveryType = 'pickup'"
-                                    :class="deliveryType === 'pickup' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
-                                    class="px-4 py-2 rounded-lg text-sm font-medium transition touch-btn">
-                                    <i class="fas fa-store mr-1"></i>Retiro
-                                </button>
-                                <button @click="deliveryType = 'delivery'"
-                                    :class="deliveryType === 'delivery' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
-                                    class="px-4 py-2 rounded-lg text-sm font-medium transition touch-btn">
-                                    <i class="fas fa-truck mr-1"></i>Delivery
-                                </button>
-                            </div>
-                        </div>
-                        <div x-show="deliveryType === 'delivery'" class="mt-3">
-                            <textarea x-model="deliveryAddress" placeholder="Dirección de entrega..."
-                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"></textarea>
-                        </div>
                     </div>
                 </div>
             </main>
@@ -520,9 +265,7 @@
                 <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
                     <i class="fas fa-shopping-cart text-cyan-500 mr-2"></i>
                     Carrito
-                    <span x-show="cartItemCount > 0"
-                        class="ml-2 bg-cyan-500 text-white rounded-full px-2 py-0.5 text-xs font-bold"
-                        x-text="cartItemCount"></span>
+                    <span x-show="cartItemCount > 0" class="ml-2 bg-cyan-500 text-white rounded-full px-2 py-0.5 text-xs font-bold" x-text="cartItemCount"></span>
                 </h3>
 
                 <div class="space-y-3 mb-4">
@@ -533,30 +276,23 @@
                                     <h4 class="font-semibold text-gray-800 text-sm" x-text="item.name"></h4>
                                     <p class="text-xs text-gray-500" x-text="'$' + item.price.toFixed(2) + ' c/u'"></p>
                                 </div>
-                                <button @click="removeFromCart(index)"
-                                    class="text-red-500 hover:text-red-700 touch-btn p-2">
+                                <button @click="removeFromCart(index)" class="text-red-500 hover:text-red-700 touch-btn p-2">
                                     <i class="fas fa-trash text-sm"></i>
                                 </button>
                             </div>
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-2">
-                                    <button @click="updateQuantity(index, -1)"
-                                        class="touch-btn w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">
+                                    <button @click="updateQuantity(index, -1)" class="touch-btn w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">
                                         <i class="fas fa-minus text-xs"></i>
                                     </button>
-                                    <span class="font-bold text-lg w-8 text-center text-gray-800"
-                                        x-text="item.quantity"></span>
-                                    <button @click="updateQuantity(index, 1)"
-                                        class="touch-btn w-8 h-8 bg-cyan-500 text-white rounded-full flex items-center justify-center hover:bg-cyan-600">
+                                    <span class="font-bold text-lg w-8 text-center text-gray-800" x-text="item.quantity"></span>
+                                    <button @click="updateQuantity(index, 1)" class="touch-btn w-8 h-8 bg-cyan-500 text-white rounded-full flex items-center justify-center hover:bg-cyan-600">
                                         <i class="fas fa-plus text-xs"></i>
                                     </button>
-                                    <button @click="updateQuantity(index, 5)"
-                                        class="touch-btn px-2 h-8 bg-blue-500 text-white rounded text-xs font-bold hover:bg-blue-600">+5</button>
                                 </div>
                                 <div class="text-right">
                                     <p class="text-xs text-gray-500">Subtotal</p>
-                                    <p class="font-bold text-cyan-600"
-                                        x-text="'$' + (item.price * item.quantity).toFixed(2)"></p>
+                                    <p class="font-bold text-cyan-600" x-text="'$' + (item.price * item.quantity).toFixed(2)"></p>
                                 </div>
                             </div>
                         </div>
@@ -573,117 +309,59 @@
                         <span class="text-gray-600">Subtotal:</span>
                         <span class="font-medium" x-text="'$' + subtotal.toFixed(2)"></span>
                     </div>
-                    <div x-show="deliveryType === 'delivery'" class="flex justify-between text-sm">
-                        <span class="text-gray-600">Delivery:</span>
-                        <span class="font-medium">$1.00</span>
-                    </div>
                     <div class="flex justify-between text-lg font-bold border-t pt-2">
                         <span class="text-gray-800">Total USD:</span>
                         <span class="text-cyan-600" x-text="'$' + totalUSD.toFixed(2)"></span>
                     </div>
-                    <div @click="copyTotalToReceived()"
-                        class="total-bs-clickable flex justify-between text-sm bg-green-50 p-2 rounded-lg cursor-pointer">
-                        <span class="text-gray-600">Total Bs. <i class="fas fa-hand-pointer text-xs"></i></span>
-                        <span class="font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></span>
+                    <div class="flex justify-between text-lg font-bold">
+                        <span class="text-gray-800">Total Bs.:</span>
+                        <span class="text-blue-600" x-text="'Bs. ' + totalBs.toFixed(2)"></span>
                     </div>
                 </div>
 
-                <div class="mt-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="text-xs font-semibold text-gray-700">Cliente</label>
-                        <button @click="openCustomerModal()"
-                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-medium touch-btn">
-                            <i class="fas fa-user-plus mr-1"></i>Nuevo
-                        </button>
+                <div class="mt-4 space-y-3">
+                    <div>
+                        <label class="text-xs font-semibold text-gray-700 mb-1 block">Cliente</label>
+                        <select x-model="selectedCustomer" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                            <option value="">Cliente no registrado</option>
+                            <template x-for="customer in customers" :key="customer.id">
+                                <option :value="customer.id" x-text="customer.full_name"></option>
+                            </template>
+                        </select>
                     </div>
-                    <select x-model="selectedCustomer"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
-                        <option value="">Cliente no registrado</option>
-                        <template x-for="customer in customers" :key="customer.id">
-                            <option :value="customer.id" x-text="customer.full_name"></option>
-                        </template>
-                    </select>
-                </div>
 
-                <div class="mt-4">
-                    <label class="text-xs font-semibold text-gray-700 mb-2 block">Método de Pago</label>
-                    <select x-model="paymentMethod"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
-                        <option value="efectivo_bs">Efectivo Bs</option>
-                        <option value="efectivo_divisas">Efectivo Divisas</option>
-                        <option value="pago_movil">Pago Móvil</option>
-                        <option value="transferencia">Transferencia</option>
-                        <option value="punto_venta">Punto de Venta</option>
-                        <option value="credito">Crédito</option>
-                    </select>
-                </div>
+                    <div>
+                        <label class="text-xs font-semibold text-gray-700 mb-1 block">Método de Pago</label>
+                        <select x-model="paymentMethod" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                            <option value="efectivo_bs">Efectivo Bs</option>
+                            <option value="efectivo_divisas">Efectivo Divisas</option>
+                            <option value="pago_movil">Pago Móvil</option>
+                            <option value="transferencia">Transferencia</option>
+                            <option value="punto_venta">Punto de Venta</option>
+                        </select>
+                    </div>
 
-                <div x-show="['pago_movil', 'transferencia'].includes(paymentMethod)"
-                    class="mt-4 p-3 bg-yellow-50 rounded-lg">
-                    <label class="text-xs font-medium text-gray-700 mb-1 block">Referencia</label>
-                    <input type="text" x-model="paymentReference" placeholder="Últimos 4 dígitos"
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
-                </div>
+                    <div x-show="['pago_movil', 'transferencia'].includes(paymentMethod)">
+                        <label class="text-xs font-medium text-gray-700 mb-1 block">Referencia</label>
+                        <input type="text" x-model="paymentReference" placeholder="Últimos 4 dígitos" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+                    </div>
 
-                <div x-show="paymentMethod === 'efectivo_bs'" class="mt-4 p-3 bg-green-50 rounded-lg">
-                    <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (Bs.)</label>
-                    <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0"
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
-                    <div x-show="amountReceivedBs > 0" class="mt-2 text-xs space-y-1">
-                        <p class="text-gray-600">En USD: <span class="font-bold"
-                                x-text="'$' + (amountReceivedBs / exchangeRate).toFixed(2)"></span></p>
-                        <p x-show="amountReceivedBs >= totalBs" class="text-green-600 font-semibold">Cambio: Bs. <span
-                                x-text="(amountReceivedBs - totalBs).toFixed(2)"></span></p>
-                        <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs. <span
-                                x-text="(totalBs - amountReceivedBs).toFixed(2)"></span></p>
+                    <div x-show="paymentMethod === 'efectivo_bs'">
+                        <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (Bs.)</label>
+                        <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
+                    </div>
+
+                    <div x-show="paymentMethod === 'efectivo_divisas'">
+                        <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (USD)</label>
+                        <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
                     </div>
                 </div>
 
-                <div x-show="paymentMethod === 'efectivo_divisas'" class="mt-4 p-3 bg-green-50 rounded-lg">
-                    <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (USD)</label>
-                    <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0"
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
-                    <div x-show="amountReceivedUsd > 0" class="mt-2 text-xs space-y-1">
-                        <p x-show="amountReceivedUsd >= totalUSD" class="text-green-600 font-semibold">Cambio: $<span
-                                x-text="(amountReceivedUsd - totalUSD).toFixed(2)"></span></p>
-                        <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta: $<span
-                                x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
-                    </div>
-                </div>
-
-                <div x-show="paymentMethod === 'credito'" class="mt-4 p-3 bg-red-50 rounded-lg">
-                    <p class="text-xs text-red-600">
-                        <i class="fas fa-exclamation-circle mr-1"></i>
-                        Se registrará como cuenta por cobrar
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2 mt-6">
-                    <button @click="processSale()"
-                        :disabled="cart.length === 0 || processing || paymentMethod === 'credito'"
-                        class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-xl font-semibold touch-btn disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2">
-                        <i class="fas fa-circle-notch fa-spin" x-show="processing"></i>
-                        <i class="fas fa-check-circle" x-show="!processing"></i>
-                        <span x-text="processing ? 'Procesando...' : 'Cobrar'"></span>
-                    </button>
-
-                    <button @click="openCreditModal()" :disabled="cart.length === 0 || processing"
-                        class="bg-gradient-to-r from-green-500 to-emerald-500 text-white py-3 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2">
-                        <i class="fas fa-hand-holding-usd"></i>
-                        <span>Crédito</span>
-                    </button>
-                </div>
-
-                <button @click="openPaymentModal()"
-                    class="w-full mt-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 rounded-xl font-semibold touch-btn flex items-center justify-center space-x-2 text-sm">
-                    <i class="fas fa-wallet"></i>
-                    <span>Pagos Múltiples</span>
-                </button>
-
-                <button @click="quickSale()" :disabled="cart.length === 0 || processing"
-                    class="w-full mt-2 bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2 text-sm">
-                    <i class="fas fa-bolt"></i>
-                    <span>Venta Rápida (Contado sin cliente)</span>
+                <button @click="processSale()" :disabled="cart.length === 0 || processing"
+                    class="w-full mt-6 bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-xl font-semibold touch-btn disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2">
+                    <i class="fas fa-circle-notch fa-spin" x-show="processing"></i>
+                    <i class="fas fa-check-circle" x-show="!processing"></i>
+                    <span x-text="processing ? 'Procesando...' : 'Cobrar'"></span>
                 </button>
             </aside>
         </div>
@@ -696,20 +374,17 @@
                 <p class="text-xs text-gray-500">Total USD</p>
                 <p class="text-2xl font-bold text-gray-900" x-text="'$' + totalUSD.toFixed(2)"></p>
             </div>
-            <div @click="copyTotalToReceived()" class="total-bs-clickable bg-green-50 px-3 py-2 rounded-lg text-right">
-                <p class="text-[10px] text-gray-500">Total Bs. <i class="fas fa-hand-pointer text-xs"></i></p>
+            <div class="bg-green-50 px-3 py-2 rounded-lg text-right">
+                <p class="text-[10px] text-gray-500">Total Bs.</p>
                 <p class="text-lg font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></p>
             </div>
         </div>
         <div class="flex items-center justify-between text-xs">
             <span class="text-gray-500"><span x-text="cartItemCount"></span> items en carrito</span>
-            <button @click="openCart()"
-                class="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg font-semibold touch-btn flex items-center space-x-2">
+            <button @click="openCart()" class="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg font-semibold touch-btn flex items-center space-x-2">
                 <i class="fas fa-shopping-cart"></i>
                 <span>Ver Carrito</span>
-                <span x-show="cartItemCount > 0"
-                    class="bg-white text-cyan-600 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold"
-                    x-text="cartItemCount"></span>
+                <span x-show="cartItemCount > 0" class="bg-white text-cyan-600 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold" x-text="cartItemCount"></span>
             </button>
         </div>
     </div>
@@ -717,9 +392,9 @@
     <!-- Cart Drawer (solo móvil) -->
     <div class="lg:hidden cart-overlay" :class="{ 'show': cartOpen }" @click="closeCart()"></div>
     <div class="lg:hidden cart-drawer" :class="{ 'open': cartOpen }">
-        <div class="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
+        <div class="sticky top-0 bg-white border-b p-4 flex justify-between items-center rounded-t-3xl">
             <h3 class="text-lg font-bold">Carrito</h3>
-            <button @click="closeCart()" class="text-gray-400"><i class="fas fa-times"></i></button>
+            <button @click="closeCart()" class="text-gray-400"><i class="fas fa-times text-xl"></i></button>
         </div>
         <div class="p-4 space-y-3 max-h-[50vh] overflow-y-auto">
             <template x-for="(item, index) in cart" :key="index">
@@ -744,7 +419,11 @@
                 <span>Total:</span>
                 <span class="text-cyan-600" x-text="'$' + totalUSD.toFixed(2)"></span>
             </div>
-            <div class="space-y-3">
+            <div class="flex justify-between text-sm mb-3 text-blue-600 font-semibold">
+                <span>Bs.:</span>
+                <span x-text="'Bs. ' + totalBs.toFixed(2)"></span>
+            </div>
+            <div class="space-y-3 mb-3">
                 <div>
                     <label class="text-xs font-semibold text-gray-700 mb-1 block">Método de Pago</label>
                     <select x-model="paymentMethod" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
@@ -752,6 +431,7 @@
                         <option value="efectivo_divisas">Efectivo Divisas</option>
                         <option value="pago_movil">Pago Móvil</option>
                         <option value="transferencia">Transferencia</option>
+                        <option value="punto_venta">Punto de Venta</option>
                     </select>
                 </div>
                 <div x-show="paymentMethod === 'efectivo_bs'">
@@ -762,151 +442,12 @@
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (USD)</label>
                     <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg" placeholder="0.00">
                 </div>
-                <button @click.prevent.stop="processSale()" 
-                        @touchstart.prevent.stop="processSale()"
-                        :disabled="cart.length === 0 || processing" 
-                        class="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-xl font-semibold disabled:opacity-50">
-                    <i class="fas fa-check-circle mr-2" x-show="!processing"></i>
-                    <span x-text="processing ? 'Procesando...' : 'Cobrar'"></span>
-                </button>
             </div>
-        </div>
-    </div>
-
-    <!-- Modal Pagos Múltiples -->
-    <div x-show="showPaymentModal" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-        @click.self="showPaymentModal = false">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-bounce-in"
-            @click.stop>
-            <!-- Header -->
-            <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white">
-                <h3 class="text-xl font-bold text-gray-800">
-                    <i class="fas fa-wallet text-blue-500 mr-2"></i>Registrar Pagos
-                </h3>
-                <button @click="showPaymentModal = false" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-
-            <!-- Content -->
-            <div class="p-6 space-y-4">
-                <!-- Total de la Venta -->
-                <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-200">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-600">Total Venta:</p>
-                            <p class="text-2xl font-bold text-blue-600">$<span x-text="totalUSD.toFixed(2)"></span></p>
-                            <p class="text-xs text-gray-500">Bs. <span
-                                    x-text="(totalUSD * exchangeRate).toFixed(2)"></span></p>
-                        </div>
-                        <i class="fas fa-shopping-cart text-4xl text-blue-200"></i>
-                    </div>
-                </div>
-
-                <!-- Lista de Pagos -->
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center">
-                        <h4 class="font-semibold text-gray-800">Pagos (<span x-text="payments.length"></span>)</h4>
-                        <button @click="addPayment()"
-                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-medium">
-                            <i class="fas fa-plus mr-1"></i>Agregar Pago
-                        </button>
-                    </div>
-
-                    <div x-show="payments.length === 0" class="text-center py-8 text-gray-400 bg-gray-50 rounded-lg">
-                        <i class="fas fa-receipt text-3xl mb-2"></i>
-                        <p class="text-sm">No hay pagos registrados</p>
-                        <p class="text-xs mt-1">Haz clic en "Agregar Pago" para comenzar</p>
-                    </div>
-
-                    <template x-for="(payment, index) in payments" :key="index">
-                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-200 relative">
-                            <button @click="removePayment(index)"
-                                class="absolute top-2 right-2 text-red-500 hover:text-red-700">
-                                <i class="fas fa-trash"></i>
-                            </button>
-
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="col-span-2">
-                                    <label class="block text-xs font-medium text-gray-700 mb-1">Método de Pago <span
-                                            x-text="index + 1"></span></label>
-                                    <select x-model="payment.method"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                                        <option value="efectivo_divisas">Efectivo Divisas</option>
-                                        <option value="efectivo_bs">Efectivo Bolívares</option>
-                                        <option value="pago_movil">Pago Móvil</option>
-                                        <option value="transferencia">Transferencia</option>
-                                        <option value="punto_venta">Punto de Venta</option>
-                                    </select>
-                                </div>
-
-                                <div x-show="payment.method !== 'efectivo_bs'">
-                                    <label class="block text-xs font-medium text-gray-700 mb-1">Monto (USD)</label>
-                                    <input type="number" x-model.number="payment.amountUsd" step="0.01" min="0.01"
-                                        :max="totalUSD"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                                </div>
-
-                                <div x-show="payment.method === 'efectivo_bs'">
-                                    <label class="block text-xs font-medium text-gray-700 mb-1">Monto (Bs.)</label>
-                                    <input type="number" x-model.number="payment.amountBs" step="0.01" min="0.01"
-                                        @input="calculateUsdFromBs(index)"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                                    <p class="text-xs text-gray-500 mt-1">Equivale: $<span
-                                            x-text="(payment.amountBs / exchangeRate).toFixed(2)"></span></p>
-                                </div>
-
-                                <div x-show="['pago_movil', 'transferencia', 'punto_venta'].includes(payment.method)"
-                                    class="col-span-2">
-                                    <label class="block text-xs font-medium text-gray-700 mb-1">Referencia</label>
-                                    <input type="text" x-model="payment.reference" placeholder="Últimos 4 dígitos"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                                </div>
-
-                                <div class="col-span-2">
-                                    <label class="block text-xs font-medium text-gray-700 mb-1">Notas (opcional)</label>
-                                    <input type="text" x-model="payment.notes" placeholder="Notas adicionales"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-
-                <!-- Resumen -->
-                <div class="bg-gray-100 rounded-xl p-4 space-y-2">
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">Total Venta:</span>
-                        <span class="font-bold">$<span x-text="totalUSD.toFixed(2)"></span></span>
-                    </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">Total Pagado:</span>
-                        <span class="font-bold text-green-600">$<span x-text="totalPaid.toFixed(2)"></span></span>
-                    </div>
-                    <div class="border-t border-gray-300 pt-2 flex justify-between">
-                        <span class="font-semibold">Restante:</span>
-                        <span class="font-bold text-xl"
-                            :class="Math.abs(remaining) < 0.02 ? 'text-green-600' : 'text-red-600'">
-                            $<span x-text="remaining.toFixed(2)"></span>
-                        </span>
-                    </div>
-                    <div x-show="canProcessSale()" class="text-center text-green-600 text-sm">
-                        <i class="fas fa-check-circle mr-1"></i>Pago completo ✓
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footer -->
-            <div class="px-6 py-4 border-t bg-gray-50 flex justify-end space-x-3 sticky bottom-0">
-                <button @click="showPaymentModal = false"
-                    class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
-                <button @click="processSale()" :disabled="!canProcessSale() || processing"
-                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <i class="fas fa-check-circle mr-2" x-show="!processing"></i>
-                    <i class="fas fa-circle-notch fa-spin mr-2" x-show="processing"></i>
-                    <span x-text="processing ? 'Procesando...' : 'Procesar Venta'"></span>
-                </button>
-            </div>
+            <button @click="processSale()" :disabled="cart.length === 0 || processing"
+                class="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-xl font-semibold disabled:opacity-50">
+                <i class="fas fa-check-circle mr-2" x-show="!processing"></i>
+                <span x-text="processing ? 'Procesando...' : 'Cobrar'"></span>
+            </button>
         </div>
     </div>
 
@@ -954,241 +495,62 @@
 
         function ventasApp() {
             return {
-                loading: true, processing: false, cartOpen: false, showCustomerModal: false, showCreditModal: false,
-                showPaymentModal: false, savingCustomer: false, compactMode: false,
+                loading: true, processing: false, cartOpen: false,
                 productSearch: '',
-                cart: [], products: [], customers: [], deliveryType: 'pickup', deliveryAddress: '',
+                cart: [], products: [], customers: [],
                 selectedCustomer: '', paymentMethod: 'efectivo_bs', paymentReference: '',
-                amountReceivedBs: 0, amountReceivedUsd: 0, exchangeRate: 700.22, deliveryCost: 1.00,
+                amountReceivedBs: 0, amountReceivedUsd: 0, exchangeRate: 700.22,
                 userName: '', userRole: '', userBranch: '', userInitials: '??',
-                payments: [],
-                // Control de tasa de cambio
-                lastExchangeRate: 700.22,
-                lastRateDate: null,
-                rateUpdateRequired: false,
-                // Toggle para pagos múltiples (OFF por defecto)
-                useMultiplePayments: false,
-                newCustomer: { full_name: '', phone: '', email: '', address: '', recommended_by: '' },
-                creditForm: { customer_id: '', customer_phone: '', customer_id_card: '', payment_date: '', payment_terms: '', initial_payment: 0, initial_payment_method: 'efectivo', notes: '' },
-
-                // Detección mejorada de móviles
-                isMobile() {
-                    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                           window.innerWidth < 1024;
-                },
 
                 get filteredProducts() {
                     if (!this.productSearch) return this.products;
                     const search = this.productSearch.toLowerCase();
-                    return this.products.filter(p => p.name.toLowerCase().includes(search) || (p.size_liters && p.size_liters.toString().includes(search)));
+                    return this.products.filter(p => p.name.toLowerCase().includes(search));
                 },
 
                 get subtotal() { return round2(this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)); },
-                get totalUSD() { let total = this.subtotal; if (this.deliveryType === 'delivery') total += this.deliveryCost; return round2(total); },
-                get totalBs() { 
-                    const rate = parseFloat(this.exchangeRate) || 700.22;
-                    return round2(this.totalUSD * rate); 
-                },
+                get totalUSD() { return round2(this.subtotal); },
+                get totalBs() { return round2(this.totalUSD * parseFloat(this.exchangeRate || 700.22)); },
                 get cartItemCount() { return this.cart.reduce((sum, item) => sum + item.quantity, 0); },
-
-                get totalPaid() {
-                    const rate = parseFloat(this.exchangeRate) || 700.22;
-                    return this.payments.reduce((sum, p) => {
-                        if (p.method === 'efectivo_bs') {
-                            return sum + (p.amountBs / rate);
-                        }
-                        return sum + p.amountUsd;
-                    }, 0);
-                },
-
-                get remaining() { return round2(this.totalUSD - this.totalPaid); },
-
-                canProcessSale() { return this.payments.length > 0 && Math.abs(this.remaining) < 0.02; },
-
-                addPayment() {
-                    this.payments.push({
-                        method: 'efectivo_divisas',
-                        amountUsd: 0,
-                        amountBs: 0,
-                        reference: '',
-                        notes: ''
-                    });
-                },
-
-                removePayment(index) { this.payments.splice(index, 1); },
-
-                calculateUsdFromBs(index) {
-                    const rate = parseFloat(this.exchangeRate) || 700.22;
-                    const payment = this.payments[index];
-                    if (payment.method === 'efectivo_bs' && payment.amountBs > 0) {
-                        payment.amountUsd = round2(payment.amountBs / rate);
-                    }
-                },
 
                 async initVentas() {
                     const { data: { session } } = await supabase.auth.getSession();
                     if (!session) { window.location.href = 'login.html'; return; }
                     try {
                         const { data: profile } = await supabase.from('profiles').select('full_name, role, branch').eq('id', session.user.id).single();
-                        if (profile) { this.userName = profile.full_name; this.userRole = profile.role; this.userBranch = profile.branch; this.userInitials = this.getInitials(profile.full_name); }
+                        if (profile) { 
+                            this.userName = profile.full_name; 
+                            this.userRole = profile.role; 
+                            this.userBranch = profile.branch; 
+                            this.userInitials = this.getInitials(profile.full_name); 
+                        }
                     } catch (err) { console.error('Error obteniendo perfil:', err); }
 
                     await this.loadExchangeRate();
-                    await this.checkExchangeRate();
-
-                    await this.loadProducts(); await this.loadCustomers();
-                    document.addEventListener('keydown', (e) => {
-                        if (e.key === 'Escape') { this.closeCart(); this.closeCustomerModal(); this.closeCreditModal(); this.showPaymentModal = false; }
-                        if (e.key === 'F4' && !e.ctrlKey) { e.preventDefault(); if (this.cart.length > 0 && this.paymentMethod !== 'credito') this.processSale(); }
-                        if (e.key === 'F8') { e.preventDefault(); this.clearCart(); }
-                    });
+                    await this.loadProducts(); 
+                    await this.loadCustomers();
                 },
-
-                async checkExchangeRate() {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-
-                    const savedData = localStorage.getItem('exchangeRate_' + this.userBranch);
-                    let needsUpdate = false;
-                    let previousRate = null;
-                    let previousDate = null;
-
-                    if (savedData) {
-                        const parsed = JSON.parse(savedData);
-                        previousRate = parseFloat(parsed.rate) || 700.22;
-                        previousDate = new Date(parsed.date);
-                        previousDate.setHours(0, 0, 0, 0);
-
-                        if (previousDate < today) needsUpdate = true;
-                        this.lastExchangeRate = previousRate;
-                        this.lastRateDate = previousDate;
-                    } else {
-                        needsUpdate = true;
-                    }
-
-                    if (needsUpdate) {
-                        this.rateUpdateRequired = true;
-                        await this.showRateUpdateModal(previousRate, previousDate);
-                    }
-                },
-
-                async showRateUpdateModal(previousRate, previousDate) {
-                    const { value: newRate } = await Swal.fire({
-                        title: '⚠️ Actualización de Tasa Requerida',
-                        html: `
-                            <div class="text-center space-y-4">
-                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                                    <p class="text-sm text-gray-600 mb-2">
-                                        <i class="fas fa-info-circle text-yellow-600 mr-2"></i>
-                                        La tasa de cambio necesita ser actualizada
-                                    </p>
-                                    ${previousRate ? `
-                                        <p class="text-xs text-gray-500">
-                                            Última tasa registrada:<br>
-                                            <span class="font-bold text-lg text-blue-600">Bs. ${previousRate.toFixed(2)}</span><br>
-                                            <span class="text-xs">(${previousDate.toLocaleDateString('es-VE')})</span>
-                                        </p>
-                                    ` : ''}
-                                </div>
-                                <div class="bg-blue-50 rounded-lg p-3">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Nueva Tasa USD/Bs:</label>
-                                    <input type="number" id="newRateInput" step="0.01" min="700.22" 
-                                        class="w-full px-4 py-3 text-lg font-bold text-center border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                        placeholder="700.22"
-                                        value="${previousRate && previousRate > 700.22 ? parseFloat(previousRate).toFixed(2) : '700.22'}">
-                                </div>
-                                <p class="text-xs text-red-600 font-semibold">
-                                    <i class="fas fa-exclamation-triangle mr-1"></i>
-                                    Las ventas están bloqueadas hasta actualizar la tasa
-                                </p>
-                            </div>
-                        `,
-                        showCancelButton: false,
-                        confirmButtonText: 'Actualizar Tasa y Continuar',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        preConfirm: () => {
-                            const rate = parseFloat(document.getElementById('newRateInput').value);
-                            if (!rate || rate <= 0) {
-                                Swal.showValidationMessage('Ingrese una tasa válida mayor a 0');
-                                return false;
-                            }
-                            if (rate < 700.22) {
-                                Swal.showValidationMessage('La tasa mínima es Bs. 700.22');
-                                return false;
-                            }
-                            if (previousRate && rate <= previousRate) {
-                                Swal.showValidationMessage(`La tasa debe ser mayor a Bs. ${previousRate.toFixed(2)} (tasa anterior)`);
-                                return false;
-                            }
-                            return rate;
-                        }
-                    });
-
-                    if (newRate) {
-                        this.exchangeRate = parseFloat(newRate);
-                        await this.updateExchangeRateInDB(newRate);
-                        this.rateUpdateRequired = false;
-
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Tasa Actualizada',
-                            text: `Nueva tasa: Bs. ${newRate.toFixed(2)}`,
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                    }
-                },
-
-                async updateExchangeRateInDB(rate) {
-                    try {
-                        await supabase.from('exchange_rates').update({ is_active: false }).eq('is_active', true);
-                        await supabase.from('exchange_rates').insert({ rate: rate, branch: this.userBranch, is_active: true });
-                        localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({ rate: rate, date: new Date().toISOString() }));
-                    } catch (err) {
-                        console.error('Error actualizando tasa:', err);
-                        localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({ rate: rate, date: new Date().toISOString() }));
-                    }
-                },
-
-                goBack() { window.location.href = 'index.html'; },
 
                 async loadExchangeRate() {
                     try {
                         const savedData = localStorage.getItem('exchangeRate_' + this.userBranch);
-                        console.log('🔵 localStorage para', this.userBranch, ':', savedData);
-                        
                         if (savedData) {
                             const parsed = JSON.parse(savedData);
-                            console.log('🔵 Fecha guardada:', new Date(parsed.date));
-                            console.log('🔵 Fecha hoy:', new Date());
-                            console.log('🔵 Mismo día:', new Date(parsed.date).toDateString() === new Date().toDateString());
-                            
                             if (new Date(parsed.date).toDateString() === new Date().toDateString()) {
                                 this.exchangeRate = parseFloat(parsed.rate) || 700.22;
-                                console.log('✅ Tasa cargada de localStorage:', this.exchangeRate);
                                 return;
                             }
                         }
-                        
                         const { data, error } = await supabase.rpc('get_active_exchange_rate', { branch_param: this.userBranch });
-                        console.log('🔵 Datos de BD:', data, 'Error:', error);
-                        
                         if (!error && data) {
-                            const rate = parseFloat(data);
-                            this.exchangeRate = rate >= 700.22 ? rate : 700.22;
-                            console.log('✅ Tasa cargada de BD:', this.exchangeRate);
-                            
+                            this.exchangeRate = parseFloat(data) || 700.22;
                             localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({
                                 rate: this.exchangeRate,
                                 date: new Date().toISOString()
                             }));
-                        } else {
-                            this.exchangeRate = 700.22;
-                            console.log('⚠️ Usando tasa por defecto: 700.22');
                         }
                     } catch (err) {
-                        console.error('❌ Error cargando tasa:', err);
+                        console.error('Error cargando tasa:', err);
                         this.exchangeRate = 700.22;
                     }
                 },
@@ -1196,12 +558,18 @@
                 async updateExchangeRate() {
                     try {
                         await supabase.from('exchange_rates').update({ is_active: false }).eq('is_active', true);
-                        await supabase.from('exchange_rates').insert({ rate: this.exchangeRate, branch: this.userBranch, is_active: true });
-                        localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({ rate: this.exchangeRate, date: new Date().toISOString() }));
+                        await supabase.from('exchange_rates').insert({ 
+                            rate: this.exchangeRate, 
+                            branch: this.userBranch, 
+                            is_active: true 
+                        });
+                        localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({ 
+                            rate: this.exchangeRate, 
+                            date: new Date().toISOString() 
+                        }));
                         showToast('Tasa actualizada', 'success');
                     } catch (err) {
-                        localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({ rate: this.exchangeRate, date: new Date().toISOString() }));
-                        showToast('Tasa guardada localmente', 'warning');
+                        showToast('Error al actualizar tasa', 'error');
                     }
                 },
 
@@ -1212,246 +580,131 @@
                         if (error) throw error;
                         if (!virtualInventory || virtualInventory.length === 0) { this.products = []; return; }
                         const bottlesOnly = virtualInventory.filter(item => item.virtual_stock > 0 && item.size_liters !== null && item.size_liters > 0);
-                        this.products = bottlesOnly.map(item => ({ id: 'size_' + item.size_liters, product_id: item.product_id, name: item.product_name, size_liters: item.size_liters, product_type: item.product_type, price: round2(parseFloat(item.price) || 0), stock: parseInt(item.virtual_stock) || 0 }));
-                    } catch (err) { console.error('Error cargando productos:', err); showToast('Error al cargar productos', 'error'); this.products = []; }
+                        this.products = bottlesOnly.map(item => ({ 
+                            id: 'size_' + item.size_liters, 
+                            product_id: item.product_id, 
+                            name: item.product_name, 
+                            size_liters: item.size_liters, 
+                            price: round2(parseFloat(item.price) || 0), 
+                            stock: parseInt(item.virtual_stock) || 0 
+                        }));
+                    } catch (err) { 
+                        console.error('Error cargando productos:', err); 
+                        showToast('Error al cargar productos', 'error'); 
+                        this.products = []; 
+                    }
                     finally { this.loading = false; }
                 },
 
                 async loadCustomers() {
-                    try { const { data, error } = await supabase.from('customers').select('*').eq('branch', this.userBranch).eq('is_active', true).order('full_name'); if (error) throw error; this.customers = data || []; }
+                    try { 
+                        const { data, error } = await supabase.from('customers').select('*').eq('branch', this.userBranch).eq('is_active', true).order('full_name'); 
+                        if (error) throw error; 
+                        this.customers = data || []; 
+                    }
                     catch (err) { console.error('Error cargando clientes:', err); }
                 },
 
-                getInitials(name) { if (!name) return '??'; return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(); },
+                getInitials(name) { 
+                    if (!name) return '??'; 
+                    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(); 
+                },
 
                 addProduct(product) {
                     if (product.stock <= 0) { showToast('Producto sin stock', 'error'); return; }
                     const existingItem = this.cart.find(item => item.id === product.id);
-                    if (existingItem) { if (existingItem.quantity < product.stock) { existingItem.quantity++; showToast('Cantidad actualizada', 'info'); } else { showToast('Stock insuficiente', 'error'); } }
-                    else { this.cart.push({ id: product.id, product_id: product.product_id, name: product.name, size_liters: product.size_liters, price: product.price, stock: product.stock, quantity: 1 }); showToast('Producto agregado', 'success'); }
-                },
-
-                quickAdd(product, quantity) {
-                    if (product.stock < quantity) { showToast(`Stock insuficiente para +${quantity}`, 'error'); return; }
-                    const existingItem = this.cart.find(item => item.id === product.id);
-                    if (existingItem) { if (existingItem.quantity + quantity <= product.stock) { existingItem.quantity += quantity; showToast(`+${quantity} ${product.name}`, 'success'); } else { showToast('Stock insuficiente', 'error'); } }
-                    else { this.cart.push({ id: product.id, product_id: product.product_id, name: product.name, size_liters: product.size_liters, price: product.price, stock: product.stock, quantity: quantity }); showToast(`+${quantity} ${product.name}`, 'success'); }
+                    if (existingItem) { 
+                        if (existingItem.quantity < product.stock) { 
+                            existingItem.quantity++; 
+                            showToast('Cantidad actualizada', 'info'); 
+                        } else { 
+                            showToast('Stock insuficiente', 'error'); 
+                        } 
+                    }
+                    else { 
+                        this.cart.push({ 
+                            id: product.id, 
+                            product_id: product.product_id, 
+                            name: product.name, 
+                            size_liters: product.size_liters, 
+                            price: product.price, 
+                            stock: product.stock, 
+                            quantity: 1 
+                        }); 
+                        showToast('Producto agregado', 'success'); 
+                    }
                 },
 
                 updateQuantity(index, change) {
-                    const item = this.cart[index]; const newQuantity = item.quantity + change;
-                    if (newQuantity > 0 && newQuantity <= item.stock) { item.quantity = newQuantity; } else if (newQuantity <= 0) { this.removeFromCart(index); } else { showToast('Stock insuficiente', 'error'); }
-                },
-
-                removeFromCart(index) { this.cart.splice(index, 1); showToast('Producto eliminado', 'warning'); },
-                clearCart() { if (this.cart.length > 0) { if (confirm('¿Limpiar carrito?')) { this.cart = []; showToast('Carrito limpiado', 'info'); } } },
-                openCart() { this.cartOpen = true; }, 
-                closeCart() { 
-                    this.cartOpen = false;
-                    document.body.style.overflow = '';
-                },
-
-                copyTotalToReceived() {
-                    if (this.paymentMethod === 'efectivo_bs') { this.amountReceivedBs = this.totalBs; showToast('Monto copiado a recibido', 'info'); }
-                    else if (this.paymentMethod === 'efectivo_divisas') { this.amountReceivedUsd = this.totalUSD; showToast('Monto copiado a recibido', 'info'); }
-                    else { showToast('Selecciona efectivo para usar esta función', 'warning'); }
-                },
-
-                openPaymentModal() {
-                    if (this.cart.length === 0) { showToast('El carrito está vacío', 'error'); return; }
-                    if (this.payments.length === 0) {
-                        this.payments.push({
-                            method: this.paymentMethod,
-                            amountUsd: this.paymentMethod === 'efectivo_bs' ? 0 : this.totalUSD,
-                            amountBs: this.paymentMethod === 'efectivo_bs' ? this.totalBs : 0,
-                            reference: this.paymentReference,
-                            notes: ''
-                        });
+                    const item = this.cart[index]; 
+                    const newQuantity = item.quantity + change;
+                    if (newQuantity > 0 && newQuantity <= item.stock) { 
+                        item.quantity = newQuantity; 
+                    } else if (newQuantity <= 0) { 
+                        this.removeFromCart(index); 
+                    } else { 
+                        showToast('Stock insuficiente', 'error'); 
                     }
-                    this.showPaymentModal = true;
                 },
 
-                openCustomerModal() { this.newCustomer = { full_name: '', phone: '', email: '', address: '', recommended_by: '' }; this.showCustomerModal = true; },
-                closeCustomerModal() { this.showCustomerModal = false; },
-
-                async saveCustomer() {
-                    if (!this.newCustomer.full_name) { showToast('El nombre es obligatorio', 'error'); return; }
-                    this.savingCustomer = true;
-                    try { const { data, error } = await supabase.from('customers').insert({ full_name: this.newCustomer.full_name, phone: this.newCustomer.phone, email: this.newCustomer.email, address: this.newCustomer.address, recommended_by: this.newCustomer.recommended_by, branch: this.userBranch }).select().single(); if (error) throw error; showToast('Cliente creado', 'success'); this.customers.push(data); this.selectedCustomer = data.id; this.closeCustomerModal(); }
-                    catch (err) { console.error('Error creando cliente:', err); showToast('Error al crear cliente', 'error'); }
-                    finally { this.savingCustomer = false; }
+                removeFromCart(index) { 
+                    this.cart.splice(index, 1); 
+                    showToast('Producto eliminado', 'warning'); 
                 },
 
-                openCreditModal() { if (this.cart.length === 0) { showToast('El carrito está vacío', 'error'); return; } const defaultDate = new Date(); defaultDate.setDate(defaultDate.getDate() + 30); this.creditForm.payment_date = defaultDate.toISOString().split('T')[0]; this.showCreditModal = true; },
-                closeCreditModal() { this.showCreditModal = false; this.creditForm = { customer_id: '', customer_phone: '', customer_id_card: '', payment_date: '', payment_terms: '', initial_payment: 0, initial_payment_method: 'efectivo', notes: '' }; },
-                loadCustomerData() { const customer = this.customers.find(c => c.id === this.creditForm.customer_id); if (customer) { this.creditForm.customer_phone = customer.phone || ''; } },
-                canProcessCredit() { if (!this.creditForm.customer_id) return false; if (!this.creditForm.payment_date) return false; if (this.creditForm.initial_payment > this.totalUSD) return false; return true; },
+                openCart() { this.cartOpen = true; }, 
+                closeCart() { this.cartOpen = false; },
+                goBack() { window.location.href = 'index.html'; },
 
                 async processSale() {
-                    console.log('📱 Móvil detectado:', this.isMobile());
-                    console.log('📱 User Agent:', navigator.userAgent);
-                    console.log(' Touch support:', 'ontouchstart' in window);
-                    console.log(' Window width:', window.innerWidth);
-                    
-                    // Cerrar carrito SIEMPRE antes de cualquier modal
-                    if (this.cartOpen) {
-                        console.log('🔴 Cerrando carrito antes de procesar...');
-                        this.cartOpen = false;
-                        
-                        // Esperar a que la animación termine
-                        await new Promise(resolve => setTimeout(resolve, 400));
-                    }
-                    
-                    // Forzar cierre del overlay del carrito
-                    const cartOverlay = document.querySelector('.cart-overlay');
-                    if (cartOverlay) {
-                        cartOverlay.classList.remove('show');
-                        cartOverlay.style.opacity = '0';
-                        cartOverlay.style.pointerEvents = 'none';
-                    }
-                    
-                    // VALIDACIÓN MEJORADA - Forzar conversión a número
-                    const rate = parseFloat(this.exchangeRate);
-                    if (isNaN(rate) || rate <= 0) {
-                        console.error('❌ exchangeRate inválido:', this.exchangeRate, typeof this.exchangeRate);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Tasa Inválida',
-                            text: 'La tasa de cambio no es válida. Actualice la tasa antes de continuar.',
-                            confirmButtonText: 'Actualizar Tasa'
-                        }).then(() => {
-                            this.showRateUpdateModal(this.lastExchangeRate, this.lastRateDate);
-                        });
-                        return;
-                    }
-                    
-                    // Asegurar que siempre sea número
-                    this.exchangeRate = rate;
-                    
-                    console.log('🔴 processSale llamado desde:', this.isMobile() ? 'MÓVIL' : 'DESKTOP');
-                    console.log(' Cart length:', this.cart.length);
-                    console.log(' Processing:', this.processing);
-                    console.log(' useMultiplePayments:', this.useMultiplePayments);
-                    console.log(' exchangeRate:', this.exchangeRate, typeof this.exchangeRate);
-
-                    // VERIFICAR TASA ANTES DE VENDER
-                    if (this.rateUpdateRequired) {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Tasa Desactualizada',
-                            text: 'Debe actualizar la tasa de cambio antes de procesar ventas',
-                            confirmButtonText: 'Actualizar Tasa'
-                        }).then(() => {
-                            this.showRateUpdateModal(this.lastExchangeRate, this.lastRateDate);
-                        });
-                        return;
-                    }
-
+                    // Validaciones básicas
                     if (this.cart.length === 0) {
-                        Swal.fire({ 
-                            icon: 'warning', 
-                            title: 'Carrito Vacío', 
-                            text: 'Agrega productos al carrito', 
-                            confirmButtonText: 'Entendido',
-                            customClass: {
-                                popup: 'rounded-2xl'
-                            }
-                        });
-                        return;
-                    }
-
-                    if (this.deliveryType === 'delivery' && !this.deliveryAddress) {
-                        Swal.fire({ icon: 'warning', title: 'Dirección Requerida', text: 'Debe ingresar la dirección de entrega', confirmButtonText: 'Entendido' });
+                        showToast('El carrito está vacío', 'error');
                         return;
                     }
 
                     if (['pago_movil', 'transferencia'].includes(this.paymentMethod) && !this.paymentReference) {
-                        Swal.fire({ icon: 'warning', title: 'Referencia Requerida', text: 'Debe ingresar la referencia del pago', confirmButtonText: 'Entendido' });
+                        showToast('Debe ingresar la referencia', 'error');
                         return;
                     }
 
-                    // Verificar si es pago múltiple
-                    if (this.useMultiplePayments) {
-                        this.openPaymentModal();
-                        return;
-                    }
-
-                    // PAGO ÚNICO - Validar monto recibido
                     if (this.paymentMethod === 'efectivo_bs' && this.amountReceivedBs < this.totalBs) {
-                        Swal.fire({ icon: 'warning', title: 'Monto Insuficiente', text: 'El monto recibido es menor al total', confirmButtonText: 'OK' });
+                        showToast('Monto recibido insuficiente', 'error');
                         return;
                     }
                     if (this.paymentMethod === 'efectivo_divisas' && this.amountReceivedUsd < this.totalUSD) {
-                        Swal.fire({ icon: 'warning', title: 'Monto Insuficiente', text: 'El monto recibido es menor al total', confirmButtonText: 'OK' });
+                        showToast('Monto recibido insuficiente', 'error');
                         return;
                     }
 
                     const customer = this.customers.find(c => c.id === this.selectedCustomer);
                     const customerName = customer?.full_name || 'Cliente no registrado';
 
+                    // Modal de confirmación simple
                     const confirmed = await Swal.fire({
-                        title: '<strong>Confirmar Venta</strong>',
-                        icon: 'question',
-                        iconHtml: '?',
-                        showCancelButton: true,
-                        confirmButtonColor: '#06b6d4',
-                        cancelButtonColor: '#9ca3af',
-                        confirmButtonText: '<i class="fas fa-check-circle"></i> Procesar Venta',
-                        cancelButtonText: '<i class="fas fa-times"></i> Cancelar',
-                        reverseButtons: true,
-                        customClass: {
-                            popup: 'rounded-2xl',
-                            title: 'text-xl font-bold',
-                            htmlContainer: 'text-sm'
-                        },
+                        title: 'Confirmar Venta',
                         html: `
-                            <div class="space-y-3 text-left">
-                                <div class="flex items-center space-x-2 text-gray-700 bg-gray-50 p-2 rounded">
-                                    <i class="fas fa-user text-blue-500 text-sm"></i>
-                                    <div>
-                                        <p class="text-xs text-gray-500">Cliente</p>
-                                        <p class="font-semibold text-sm">${customerName}</p>
+                            <div class="text-left space-y-3">
+                                <p><strong>Cliente:</strong> ${customerName}</p>
+                                <p><strong>Productos:</strong> ${this.cartItemCount} items</p>
+                                <p><strong>Método:</strong> ${this.paymentMethod.replace('_', ' ').toUpperCase()}</p>
+                                <div class="bg-green-50 border border-green-200 rounded-lg p-3 mt-3">
+                                    <div class="flex justify-between">
+                                        <span>Total USD:</span>
+                                        <span class="font-bold text-green-600">$${this.totalUSD.toFixed(2)}</span>
                                     </div>
-                                </div>
-
-                                <div class="flex items-center space-x-2 text-gray-700 bg-gray-50 p-2 rounded">
-                                    <i class="fas fa-shopping-cart text-cyan-500 text-sm"></i>
-                                    <div>
-                                        <p class="text-xs text-gray-500">Productos</p>
-                                        <p class="font-semibold text-sm">${this.cartItemCount} items</p>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center space-x-2 text-gray-700 bg-gray-50 p-2 rounded">
-                                    <i class="fas fa-credit-card text-purple-500 text-sm"></i>
-                                    <div>
-                                        <p class="text-xs text-gray-500">Método</p>
-                                        <p class="font-semibold text-sm">${this.paymentMethod.replace('_', ' ').toUpperCase()}</p>
-                                    </div>
-                                </div>
-
-                                <div class="space-y-2 mt-3">
-                                    <div class="bg-green-50 border border-green-200 rounded-lg p-3">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-gray-700 font-semibold text-sm">Total USD:</span>
-                                            <span class="text-xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-gray-700 font-semibold text-sm">Total Bs.:</span>
-                                            <span class="text-xl font-bold text-blue-600">Bs. ${(this.totalUSD * parseFloat(this.exchangeRate)).toFixed(2)}</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="text-center text-xs text-gray-500">
-                                        <i class="fas fa-exchange-alt mr-1"></i>
-                                        Tasa: Bs. ${parseFloat(this.exchangeRate).toFixed(2)} por USD
+                                    <div class="flex justify-between">
+                                        <span>Total Bs.:</span>
+                                        <span class="font-bold text-blue-600">Bs. ${(this.totalUSD * parseFloat(this.exchangeRate)).toFixed(2)}</span>
                                     </div>
                                 </div>
                             </div>
-                        `
+                        `,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Procesar Venta',
+                        cancelButtonText: 'Cancelar',
+                        reverseButtons: true
                     });
 
                     if (!confirmed.isConfirmed) return;
@@ -1461,6 +714,7 @@
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
 
+                        // Insertar venta
                         const { data: sale, error: saleError } = await supabase
                             .from('sales')
                             .insert({
@@ -1482,10 +736,12 @@
 
                         if (saleError) throw saleError;
 
+                        // Obtener productos
                         const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters').eq('is_active', true);
                         const sizeToProductId = {};
                         productsFromDB.forEach(p => { if (p.size_liters) sizeToProductId[p.size_liters] = p.id; });
 
+                        // Insertar items
                         const saleItems = this.cart.map(item => ({
                             sale_id: sale.id,
                             product_id: sizeToProductId[item.size_liters],
@@ -1497,6 +753,7 @@
                         const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
                         if (itemsError) throw itemsError;
 
+                        // Descontar inventario
                         for (const item of this.cart) {
                             const realProductId = sizeToProductId[item.size_liters];
                             if (!realProductId) continue;
@@ -1507,50 +764,36 @@
                                 user_id_param: session.user.id
                             });
                             if (tankError) throw tankError;
-                            if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
                         }
 
+                        // Modal de éxito
                         await Swal.fire({
                             icon: 'success',
-                            iconHtml: '✓',
-                            title: '<strong>¡Venta Exitosa!</strong>',
-                            text: 'Venta procesada correctamente',
+                            title: '¡Venta Exitosa!',
                             html: `
-                                <div class="space-y-3 w-full max-w-xs mx-auto">
-                                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4">
-                                        <p class="text-xs text-gray-500 mb-2 text-center">Total</p>
-                                        <div class="space-y-2">
-                                            <div class="flex justify-between items-center">
-                                                <span class="text-sm text-gray-600">USD:</span>
-                                                <span class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</span>
-                                            </div>
-                                            <div class="border-t border-green-200 pt-2 flex justify-between items-center">
-                                                <span class="text-sm text-gray-600">Bs.:</span>
-                                                <span class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * parseFloat(this.exchangeRate)).toFixed(2)}</span>
-                                            </div>
+                                <div class="space-y-2">
+                                    <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                                        <div class="flex justify-between">
+                                            <span>USD:</span>
+                                            <span class="font-bold text-green-600">$${this.totalUSD.toFixed(2)}</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Bs.:</span>
+                                            <span class="font-bold text-blue-600">Bs. ${(this.totalUSD * parseFloat(this.exchangeRate)).toFixed(2)}</span>
                                         </div>
                                     </div>
-                                    <p class="text-sm text-green-600 flex items-center justify-center">
-                                        <i class="fas fa-check-circle mr-1"></i> 
-                                        Inventario actualizado
-                                    </p>
                                 </div>
                             `,
-                            timer: 3000,
-                            showConfirmButton: false,
-                            customClass: {
-                                popup: 'rounded-2xl'
-                            }
+                            timer: 2500,
+                            showConfirmButton: false
                         });
 
+                        // Limpiar
                         this.cart = [];
-                        this.payments = [];
-                        this.deliveryAddress = '';
                         this.selectedCustomer = '';
                         this.paymentReference = '';
                         this.amountReceivedBs = 0;
                         this.amountReceivedUsd = 0;
-                        this.showPaymentModal = false; // Cerrar modal de pagos múltiples
                         this.closeCart();
                         await this.loadProducts();
 
@@ -1560,111 +803,8 @@
                             icon: 'error',
                             title: 'Error al Procesar Venta',
                             text: err.message,
-                            confirmButtonText: 'Entendido',
-                            customClass: {
-                                popup: 'rounded-2xl'
-                            }
+                            confirmButtonText: 'Entendido'
                         });
-                    } finally {
-                        this.processing = false;
-                    }
-                },
-
-                async quickSale() {
-                    if (this.cart.length === 0) { showToast('El carrito está vacío', 'error'); return; }
-                    this.paymentMethod = 'efectivo_bs';
-                    this.amountReceivedBs = this.totalBs;
-                    this.selectedCustomer = '';
-                    await this.processSale();
-                },
-
-                async processCreditSale() {
-                    if (!this.canProcessCredit()) { showToast('Complete los campos obligatorios', 'error'); return; }
-                    const customer = this.customers.find(c => c.id === this.creditForm.customer_id);
-                    const creditAmount = round2(this.totalUSD - this.creditForm.initial_payment);
-                    if (!confirm(`Venta a Crédito\nCliente: ${customer?.full_name}\nTotal: $${this.totalUSD.toFixed(2)}\nA financiar: $${creditAmount.toFixed(2)}`)) { return; }
-
-                    this.processing = true;
-                    try {
-                        const { data: { session } } = await supabase.auth.getSession();
-                        const { data: sale, error: saleError } = await supabase.from('sales').insert({
-                            branch: this.userBranch,
-                            customer_id: this.creditForm.customer_id,
-                            customer_name: customer?.full_name,
-                            subtotal: this.subtotal,
-                            tax: 0,
-                            total: this.totalUSD,
-                            payment_method: 'credito',
-                            status: creditAmount > 0 ? 'pending' : 'completed',
-                            notes: `Crédito - Pago inicial: $${round2(this.creditForm.initial_payment).toFixed(2)}\n${this.creditForm.notes || ''}`,
-                            created_by: session.user.id
-                        }).select().single();
-
-                        if (saleError) throw saleError;
-                        const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters').eq('is_active', true);
-                        const sizeToProductId = {};
-                        productsFromDB.forEach(p => { if (p.size_liters) sizeToProductId[p.size_liters] = p.id; });
-                        const saleItems = this.cart.map(item => ({
-                            sale_id: sale.id,
-                            product_id: sizeToProductId[item.size_liters],
-                            quantity: item.quantity,
-                            unit_price: item.price,
-                            total: round2(item.price * item.quantity)
-                        }));
-                        const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
-                        if (itemsError) throw itemsError;
-
-                        for (const item of this.cart) {
-                            const realProductId = sizeToProductId[item.size_liters];
-                            if (!realProductId) continue;
-                            const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
-                                branch_param: this.userBranch,
-                                product_id_param: realProductId,
-                                quantity_param: item.quantity,
-                                user_id_param: session.user.id
-                            });
-                            if (tankError) throw tankError;
-                        }
-
-                        if (creditAmount > 0) {
-                            await supabase.from('credit_accounts').insert({
-                                sale_id: sale.id,
-                                customer_id: this.creditForm.customer_id,
-                                customer_name: customer?.full_name,
-                                customer_phone: customer?.phone,
-                                customer_id_card: this.creditForm.customer_id_card,
-                                total_amount: this.totalUSD,
-                                paid_amount: round2(this.creditForm.initial_payment),
-                                remaining_amount: creditAmount,
-                                payment_date: this.creditForm.payment_date,
-                                payment_terms: this.creditForm.payment_terms,
-                                notes: this.creditForm.notes,
-                                status: this.creditForm.initial_payment > 0 ? 'partial' : 'pending',
-                                created_by: session.user.id
-                            });
-
-                            if (this.creditForm.initial_payment > 0) {
-                                const { data: creditAccount } = await supabase.from('credit_accounts').select('id').eq('sale_id', sale.id).single();
-                                if (creditAccount) {
-                                    await supabase.from('credit_payments').insert({
-                                        credit_account_id: creditAccount.id,
-                                        amount: round2(this.creditForm.initial_payment),
-                                        payment_method: this.creditForm.initial_payment_method,
-                                        notes: 'Pago inicial',
-                                        created_by: session.user.id
-                                    });
-                                }
-                            }
-                        }
-
-                        showToast('¡Venta a crédito procesada!', 'success');
-                        this.cart = [];
-                        this.closeCreditModal();
-                        this.closeCart();
-                        await this.loadProducts();
-                    } catch (err) {
-                        console.error('Error:', err);
-                        showToast('Error: ' + err.message, 'error');
                     } finally {
                         this.processing = false;
                     }
