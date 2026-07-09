@@ -1010,17 +1010,53 @@
                         return;
                     }
 
-                    if (this.cart.length === 0) { Swal.fire({ icon: 'warning', title: 'Carrito Vacío', text: 'Agrega productos al carrito', confirmButtonText: 'Entendido' }); return; }
-                    if (this.deliveryType === 'delivery' && !this.deliveryAddress) { Swal.fire({ icon: 'warning', title: 'Dirección Requerida', text: 'Debe ingresar la dirección de entrega', confirmButtonText: 'Entendido' }); return; }
-                    if (['pago_movil', 'transferencia'].includes(this.paymentMethod) && !this.paymentReference) { Swal.fire({ icon: 'warning', title: 'Referencia Requerida', text: 'Debe ingresar la referencia del pago', confirmButtonText: 'Entendido' }); return; }
+                    if (this.cart.length === 0) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Carrito Vacío',
+                            text: 'Agrega productos al carrito',
+                            confirmButtonText: 'Entendido'
+                        });
+                        return;
+                    }
+
+                    if (this.deliveryType === 'delivery' && !this.deliveryAddress) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Dirección Requerida',
+                            text: 'Debe ingresar la dirección de entrega',
+                            confirmButtonText: 'Entendido'
+                        });
+                        return;
+                    }
+
+                    if (['pago_movil', 'transferencia'].includes(this.paymentMethod) && !this.paymentReference) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Referencia Requerida',
+                            text: 'Debe ingresar la referencia del pago',
+                            confirmButtonText: 'Entendido'
+                        });
+                        return;
+                    }
 
                     // Validar monto recibido para efectivo
                     if (this.paymentMethod === 'efectivo_bs' && this.amountReceivedBs < this.totalBs) {
-                        Swal.fire({ icon: 'warning', title: 'Monto Insuficiente', text: 'El monto recibido es menor al total', confirmButtonText: 'OK' });
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Monto Insuficiente',
+                            text: 'El monto recibido es menor al total',
+                            confirmButtonText: 'OK'
+                        });
                         return;
                     }
                     if (this.paymentMethod === 'efectivo_divisas' && this.amountReceivedUsd < this.totalUSD) {
-                        Swal.fire({ icon: 'warning', title: 'Monto Insuficiente', text: 'El monto recibido es menor al total', confirmButtonText: 'OK' });
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Monto Insuficiente',
+                            text: 'El monto recibido es menor al total',
+                            confirmButtonText: 'OK'
+                        });
                         return;
                     }
 
@@ -1028,43 +1064,74 @@
                     const customerName = customer?.full_name || 'Cliente no registrado';
 
                     const confirmed = await Swal.fire({
-                        title: 'Confirmar Venta',
-                        html: `
-                            <div class="text-left space-y-3">
-                                <div class="flex items-center space-x-2 text-gray-700">
-                                    <i class="fas fa-user text-blue-500"></i>
-                                    <span><strong>Cliente:</strong> ${customerName}</span>
-                                </div>
-                                <div class="flex items-center space-x-2 text-gray-700">
-                                    <i class="fas fa-shopping-cart text-blue-500"></i>
-                                    <span><strong>Productos:</strong> ${this.cartItemCount} items</span>
-                                </div>
-                                <div class="mt-4 space-y-2">
-                                    <div class="p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-gray-700 font-semibold">Total USD:</span>
-                                            <span class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</span>
-                                        </div>
-                                    </div>
-                                    <div class="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-gray-700 font-semibold">Total Bs.:</span>
-                                            <span class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</span>
-                                        </div>
-                                    </div>
-                                    <div class="text-center text-xs text-gray-500">
-                                        <i class="fas fa-exchange-alt mr-1"></i>
-                                        Tasa: Bs. ${this.exchangeRate.toFixed(2)} por USD
-                                    </div>
-                                </div>
-                            </div>
-                        `,
+                        title: '<strong>Confirmar Venta</strong>',
                         icon: 'question',
+                        iconHtml: '?',
                         showCancelButton: true,
-                        confirmButtonText: 'Procesar Venta',
-                        cancelButtonText: 'Cancelar',
+                        confirmButtonColor: '#06b6d4',
+                        cancelButtonColor: '#9ca3af',
+                        confirmButtonText: '<i class="fas fa-check-circle"></i> Procesar Venta',
+                        cancelButtonText: '<i class="fas fa-times"></i> Cancelar',
                         reverseButtons: true,
-                        focusCancel: true
+                        customClass: {
+                            popup: 'rounded-2xl',
+                            title: 'text-2xl font-bold text-gray-800'
+                        },
+                        html: `
+            <div class="space-y-4 text-left max-w-md mx-auto">
+                <!-- Información del Cliente -->
+                <div class="flex items-center space-x-2 text-gray-700 bg-gray-50 p-3 rounded-lg">
+                    <i class="fas fa-user text-blue-500"></i>
+                    <div>
+                        <p class="text-xs text-gray-500">Cliente</p>
+                        <p class="font-semibold">${customerName}</p>
+                    </div>
+                </div>
+
+                <!-- Productos -->
+                <div class="flex items-center space-x-2 text-gray-700 bg-gray-50 p-3 rounded-lg">
+                    <i class="fas fa-shopping-cart text-cyan-500"></i>
+                    <div>
+                        <p class="text-xs text-gray-500">Productos</p>
+                        <p class="font-semibold">${this.cartItemCount} items</p>
+                    </div>
+                </div>
+
+                <!-- Método de Pago -->
+                <div class="flex items-center space-x-2 text-gray-700 bg-gray-50 p-3 rounded-lg">
+                    <i class="fas fa-credit-card text-purple-500"></i>
+                    <div>
+                        <p class="text-xs text-gray-500">Método</p>
+                        <p class="font-semibold">${this.paymentMethod.replace('_', ' ').toUpperCase()}</p>
+                    </div>
+                </div>
+
+                <!-- Totales -->
+                <div class="space-y-2 mt-4">
+                    <!-- Total USD -->
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700 font-semibold">Total USD:</span>
+                            <span class="text-3xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</span>
+                        </div>
+                    </div>
+
+                    <!-- Total Bs -->
+                    <div class="bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700 font-semibold">Total Bs.:</span>
+                            <span class="text-3xl font-bold text-blue-600">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</span>
+                        </div>
+                    </div>
+
+                    <!-- Tasa de Cambio -->
+                    <div class="text-center text-sm text-gray-500 bg-gray-50 rounded-lg p-2">
+                        <i class="fas fa-exchange-alt mr-1"></i>
+                        Tasa: Bs. ${this.exchangeRate.toFixed(2)} por USD
+                    </div>
+                </div>
+            </div>
+        `
                     });
 
                     if (!confirmed.isConfirmed) return;
@@ -1085,7 +1152,9 @@
                                 total: this.totalUSD,
                                 payment_method: this.paymentMethod,
                                 status: 'completed',
-                                notes: this.paymentMethod === 'efectivo_bs' ? `Recibido Bs: ${this.amountReceivedBs.toFixed(2)}` : `Recibido USD: $${this.amountReceivedUsd.toFixed(2)}`,
+                                notes: this.paymentMethod === 'efectivo_bs'
+                                    ? `Recibido Bs: ${this.amountReceivedBs.toFixed(2)} | Tasa: ${this.exchangeRate.toFixed(2)}`
+                                    : `Recibido USD: $${this.amountReceivedUsd.toFixed(2)}`,
                                 created_by: session.user.id
                             })
                             .select()
@@ -1121,22 +1190,31 @@
                             if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
                         }
 
+                        // Éxito
                         await Swal.fire({
                             icon: 'success',
-                            title: '¡Venta Exitosa!',
+                            title: '<strong>¡Venta Exitosa!</strong>',
                             html: `
-                                <div class="text-center space-y-3">
-                                    <p class="text-gray-600">Venta procesada correctamente</p>
-                                    <div class="space-y-2">
-                                        <div class="p-3 bg-green-50 rounded-lg">
-                                            <p class="text-xs text-gray-500">Total</p>
-                                            <p class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            `,
-                            timer: 2500,
-                            showConfirmButton: false
+                <div class="text-center space-y-3">
+                    <p class="text-gray-600">Venta procesada correctamente</p>
+                    <div class="space-y-2">
+                        <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4">
+                            <p class="text-xs text-gray-500 mb-1">Total</p>
+                            <p class="text-3xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</p>
+                            <p class="text-sm text-gray-600 mt-1">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-500">
+                        <i class="fas fa-check-circle text-green-500"></i> 
+                        Inventario actualizado
+                    </p>
+                </div>
+            `,
+                            timer: 3000,
+                            showConfirmButton: false,
+                            customClass: {
+                                popup: 'rounded-2xl'
+                            }
                         });
 
                         this.cart = [];
@@ -1150,7 +1228,15 @@
 
                     } catch (err) {
                         console.error('Error:', err);
-                        Swal.fire({ icon: 'error', title: 'Error al Procesar Venta', text: err.message, confirmButtonText: 'Entendido' });
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error al Procesar Venta',
+                            text: err.message,
+                            confirmButtonText: 'Entendido',
+                            customClass: {
+                                popup: 'rounded-2xl'
+                            }
+                        });
                     } finally {
                         this.processing = false;
                     }
