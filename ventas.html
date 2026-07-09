@@ -123,25 +123,56 @@
 
         /* Animaciones */
         @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
+            from {
+                transform: translateY(100%);
+            }
+
+            to {
+                transform: translateY(0);
+            }
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         @keyframes bounce-in {
-            0% { transform: scale(0.3); opacity: 0; }
-            50% { transform: scale(1.05); }
-            70% { transform: scale(0.9); }
-            100% { transform: scale(1); opacity: 1; }
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            70% {
+                transform: scale(0.9);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
-        .animate-slide-up { animation: slideUp 0.3s ease-out; }
-        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
-        .animate-bounce-in { animation: bounce-in 0.4s ease-out; }
+        .animate-slide-up {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .animate-bounce-in {
+            animation: bounce-in 0.4s ease-out;
+        }
 
         /* Producto cards */
         .product-card {
@@ -149,7 +180,9 @@
             touch-action: manipulation;
         }
 
-        .product-card:active { transform: scale(0.95); }
+        .product-card:active {
+            transform: scale(0.95);
+        }
 
         .product-card:hover {
             transform: translateY(-2px);
@@ -164,9 +197,19 @@
         }
 
         /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
 
         /* Carrito drawer (móvil) */
         .cart-drawer {
@@ -183,7 +226,9 @@
             overflow-y: auto;
         }
 
-        .cart-drawer.open { transform: translateY(0); }
+        .cart-drawer.open {
+            transform: translateY(0);
+        }
 
         /* Cart overlay */
         .cart-overlay {
@@ -196,17 +241,31 @@
             transition: opacity 0.3s;
         }
 
-        .cart-overlay.show { opacity: 1; pointer-events: auto; }
+        .cart-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
 
         /* Total bar sticky (móvil) */
-        .total-bar { position: sticky; bottom: 0; z-index: 30; }
+        .total-bar {
+            position: sticky;
+            bottom: 0;
+            z-index: 30;
+        }
 
         /* Quick add buttons */
-        .quick-add-btn { transition: all 0.15s; }
-        .quick-add-btn:active { transform: scale(0.9); }
+        .quick-add-btn {
+            transition: all 0.15s;
+        }
+
+        .quick-add-btn:active {
+            transform: scale(0.9);
+        }
 
         /* Badge stock bajo */
-        .low-stock { position: relative; }
+        .low-stock {
+            position: relative;
+        }
 
         .low-stock::after {
             content: 'Stock Bajo';
@@ -222,23 +281,41 @@
         }
 
         /* Sucursal badge */
-        .branch-badge-geminis { background: linear-gradient(135deg, #06b6d4, #0891b2); }
-        .branch-badge-omega { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .branch-badge-geminis {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+        }
+
+        .branch-badge-omega {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        }
 
         /* Total Bs clickable */
-        .total-bs-clickable { cursor: pointer; transition: all 0.2s; }
+        .total-bs-clickable {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
 
         .total-bs-clickable:hover {
             background-color: rgba(34, 197, 94, 0.1);
             transform: scale(1.02);
         }
 
-        .total-bs-clickable:active { transform: scale(0.98); }
+        .total-bs-clickable:active {
+            transform: scale(0.98);
+        }
 
         /* Compact mode */
-        .compact-mode .product-card { padding: 12px; }
-        .compact-mode .product-card .fa-tint { font-size: 1.5rem !important; }
-        .compact-mode .product-card p.font-bold { font-size: 0.9rem !important; }
+        .compact-mode .product-card {
+            padding: 12px;
+        }
+
+        .compact-mode .product-card .fa-tint {
+            font-size: 1.5rem !important;
+        }
+
+        .compact-mode .product-card p.font-bold {
+            font-size: 0.9rem !important;
+        }
     </style>
 </head>
 
@@ -1133,7 +1210,7 @@
                 productSearch: '',
                 cart: [], products: [], customers: [], deliveryType: 'pickup', deliveryAddress: '',
                 selectedCustomer: '', paymentMethod: 'efectivo_bs', paymentReference: '',
-                amountReceivedBs: 0, amountReceivedUsd: 0, exchangeRate: 38.50, deliveryCost: 1.00,
+                amountReceivedBs: 0, amountReceivedUsd: 0, exchangeRate: 700.22, deliveryCost: 1.00,
                 userName: '', userRole: '', userBranch: '', userInitials: '??',
                 newCustomer: { full_name: '', phone: '', email: '', address: '', recommended_by: '' },
                 creditForm: { customer_id: '', customer_phone: '', customer_id_card: '', payment_date: '', payment_terms: '', initial_payment: 0, initial_payment_method: 'efectivo', notes: '' },
@@ -1183,7 +1260,7 @@
                         if (savedData) { const parsed = JSON.parse(savedData); if (new Date(parsed.date).toDateString() === new Date().toDateString()) { this.exchangeRate = parsed.rate; return; } }
                         const { data, error } = await supabase.rpc('get_active_exchange_rate', { branch_param: this.userBranch });
                         if (!error && data) { this.exchangeRate = parseFloat(data); localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({ rate: this.exchangeRate, date: new Date().toISOString() })); }
-                        else { this.exchangeRate = 38.50; }
+                        else { this.exchangeRate = 700.22; }
                     } catch (err) { console.error('Error cargando tasa:', err); }
                 },
 
