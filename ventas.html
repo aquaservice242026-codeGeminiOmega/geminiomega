@@ -393,7 +393,7 @@
                 <div class="flex items-center space-x-4">
                     <div class="bg-blue-50 px-4 py-2 rounded-lg flex items-center space-x-2">
                         <span class="text-sm text-gray-600">Tasa USD:</span>
-                        <input type="number" x-model="exchangeRate" step="0.01"
+                        <input type="number" x-model.number="exchangeRate" step="0.01"
                             class="w-24 px-2 py-1 text-sm font-bold text-blue-600 bg-transparent border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-center"
                             @change="updateExchangeRate()">
                         <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
@@ -428,7 +428,7 @@
                 <div class="flex items-center space-x-2">
                     <div class="bg-blue-50 px-2 py-1 rounded-lg flex items-center space-x-1">
                         <span class="text-[10px] text-gray-600">USD:</span>
-                        <input type="number" x-model="exchangeRate" step="0.01"
+                        <input type="number" x-model.number="exchangeRate" step="0.01"
                             class="w-14 px-1 py-0.5 text-xs font-bold text-blue-600 bg-transparent border-none focus:outline-none text-right"
                             @change="updateExchangeRate()">
                         <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
@@ -1203,6 +1203,18 @@
             return Math.round(num * 100) / 100;
         }
 
+        // ============================================
+        // FUNCIÓN AUXILIAR: Validar y convertir tasa
+        // ============================================
+        function ensureValidRate(rate) {
+            const parsed = parseFloat(rate);
+            if (isNaN(parsed) || parsed <= 0) {
+                console.warn('⚠️ Tasa inválida detectada, usando valor por defecto 700.22');
+                return 700.22;
+            }
+            return parsed;
+        }
+
         function ventasApp() {
             return {
                 loading: true, processing: false, cartOpen: false, showCustomerModal: false, showCreditModal: false,
@@ -1232,7 +1244,7 @@
                 },
 
                 get totalBs() {
-                    return round2(this.totalUSD * this.exchangeRate);
+                    return round2(this.totalUSD * ensureValidRate(this.exchangeRate));
                 },
 
                 get cartItemCount() { return this.cart.reduce((sum, item) => sum + item.quantity, 0); },
@@ -1244,7 +1256,10 @@
                         const { data: profile } = await supabase.from('profiles').select('full_name, role, branch').eq('id', session.user.id).single();
                         if (profile) { this.userName = profile.full_name; this.userRole = profile.role; this.userBranch = profile.branch; this.userInitials = this.getInitials(profile.full_name); }
                     } catch (err) { console.error('Error obteniendo perfil:', err); }
-                    await this.loadExchangeRate(); await this.loadProducts(); await this.loadCustomers();
+
+                    // SIEMPRE cargar tasa desde Supabase (sin cache)
+                    await this.loadExchangeRate();
+                    await this.loadProducts(); await this.loadCustomers();
                     document.addEventListener('keydown', (e) => {
                         if (e.key === 'Escape') { this.closeCart(); this.closeCustomerModal(); this.closeCreditModal(); }
                         if (e.key === 'F4' && !e.ctrlKey) { e.preventDefault(); if (this.cart.length > 0 && this.paymentMethod !== 'credito') this.processSale(); }
@@ -1254,23 +1269,41 @@
 
                 goBack() { window.location.href = 'index.html'; },
 
+                // ============================================
+                // CARGA DE TASA: SIEMPRE desde Supabase
+                // ============================================
                 async loadExchangeRate() {
                     try {
-                        const savedData = localStorage.getItem('exchangeRate_' + this.userBranch);
-                        if (savedData) { const parsed = JSON.parse(savedData); if (new Date(parsed.date).toDateString() === new Date().toDateString()) { this.exchangeRate = parsed.rate; return; } }
+                        console.log('🔄 Consultando tasa de Supabase para sucursal:', this.userBranch);
+
                         const { data, error } = await supabase.rpc('get_active_exchange_rate', { branch_param: this.userBranch });
-                        if (!error && data) { this.exchangeRate = parseFloat(data); localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({ rate: this.exchangeRate, date: new Date().toISOString() })); }
-                        else { this.exchangeRate = 700.22; }
-                    } catch (err) { console.error('Error cargando tasa:', err); }
+
+                        if (!error && data) {
+                            const rate = ensureValidRate(data);
+                            this.exchangeRate = rate;
+                            console.log('✅ Tasa cargada desde Supabase:', this.exchangeRate);
+                        } else {
+                            console.warn('⚠️ No se encontró tasa en BD, usando 700.22');
+                            this.exchangeRate = 700.22;
+                        }
+                    } catch (err) {
+                        console.error('❌ Error cargando tasa:', err);
+                        this.exchangeRate = 700.22;
+                    }
                 },
 
                 async updateExchangeRate() {
                     try {
+                        const validRate = ensureValidRate(this.exchangeRate);
+                        this.exchangeRate = validRate;
+
                         await supabase.from('exchange_rates').update({ is_active: false }).eq('is_active', true);
-                        await supabase.from('exchange_rates').insert({ rate: this.exchangeRate, branch: this.userBranch, is_active: true });
-                        localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({ rate: this.exchangeRate, date: new Date().toISOString() }));
-                        showToast('Tasa actualizada', 'success');
-                    } catch (err) { localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({ rate: this.exchangeRate, date: new Date().toISOString() })); showToast('Tasa guardada localmente', 'warning'); }
+                        await supabase.from('exchange_rates').insert({ rate: validRate, branch: this.userBranch, is_active: true });
+                        showToast('Tasa actualizada en Supabase', 'success');
+                    } catch (err) {
+                        console.error('Error actualizando tasa:', err);
+                        showToast('Error al actualizar tasa', 'error');
+                    }
                 },
 
                 async loadProducts() {
@@ -1365,6 +1398,9 @@
                 canProcessCredit() { if (!this.creditForm.customer_id) return false; if (!this.creditForm.payment_date) return false; if (this.creditForm.initial_payment > this.totalUSD) return false; return true; },
 
                 async processSale() {
+                    // Validar tasa antes de procesar
+                    this.exchangeRate = ensureValidRate(this.exchangeRate);
+
                     if (this.cart.length === 0) { showToast('El carrito está vacío', 'error'); return; }
                     if (this.deliveryType === 'delivery' && !this.deliveryAddress) { showToast('Debe ingresar la dirección', 'error'); return; }
                     if (['pago_movil', 'transferencia'].includes(this.paymentMethod) && !this.paymentReference) { showToast('Debe ingresar la referencia', 'error'); return; }
@@ -1531,6 +1567,9 @@
                 },
 
                 async processCreditSale() {
+                    // Validar tasa antes de procesar
+                    this.exchangeRate = ensureValidRate(this.exchangeRate);
+
                     if (!this.canProcessCredit()) { showToast('Complete los campos obligatorios', 'error'); return; }
                     const customer = this.customers.find(c => c.id === this.creditForm.customer_id);
                     const creditAmount = round2(this.totalUSD - this.creditForm.initial_payment);
