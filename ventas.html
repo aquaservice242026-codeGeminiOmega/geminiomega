@@ -1062,25 +1062,39 @@
                 async loadExchangeRate() {
                     try {
                         const savedData = localStorage.getItem('exchangeRate_' + this.userBranch);
+                        console.log(' localStorage para', this.userBranch, ':', savedData);
+                        
                         if (savedData) {
                             const parsed = JSON.parse(savedData);
+                            console.log('🔵 Fecha guardada:', new Date(parsed.date));
+                            console.log('🔵 Fecha hoy:', new Date());
+                            console.log(' Mismo día:', new Date(parsed.date).toDateString() === new Date().toDateString());
+                            
                             if (new Date(parsed.date).toDateString() === new Date().toDateString()) {
                                 this.exchangeRate = parseFloat(parsed.rate) || 700.22;
+                                console.log('✅ Tasa cargada de localStorage:', this.exchangeRate);
                                 return;
                             }
                         }
+                        
                         const { data, error } = await supabase.rpc('get_active_exchange_rate', { branch_param: this.userBranch });
+                        console.log('🔵 Datos de BD:', data, 'Error:', error);
+                        
                         if (!error && data) {
-                            this.exchangeRate = parseFloat(data) || 700.22;
+                            const rate = parseFloat(data);
+                            this.exchangeRate = rate >= 700.22 ? rate : 700.22;
+                            console.log('✅ Tasa cargada de BD:', this.exchangeRate);
+                            
                             localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({
                                 rate: this.exchangeRate,
                                 date: new Date().toISOString()
                             }));
                         } else {
                             this.exchangeRate = 700.22;
+                            console.log('⚠️ Usando tasa por defecto: 700.22');
                         }
                     } catch (err) {
-                        console.error('Error cargando tasa:', err);
+                        console.error('❌ Error cargando tasa:', err);
                         this.exchangeRate = 700.22;
                     }
                 },
@@ -1176,6 +1190,11 @@
                 canProcessCredit() { if (!this.creditForm.customer_id) return false; if (!this.creditForm.payment_date) return false; if (this.creditForm.initial_payment > this.totalUSD) return false; return true; },
 
                 async processSale() {
+
+                    console.log('📱 Móvil detectado:', window.innerWidth < 1024);
+                    console.log('📱 User Agent:', navigator.userAgent);
+                    console.log('📱 Touch support:', 'ontouchstart' in window);
+                    
                     // VALIDACIÓN MEJORADA - Forzar conversión a número
                     const rate = parseFloat(this.exchangeRate);
                     if (isNaN(rate) || rate <= 0) {
@@ -1190,6 +1209,9 @@
                         });
                         return;
                     }
+
+                    // Forzar actualización del DOM en móviles
+                    await new Promise(resolve => setTimeout(resolve, 100));
                     
                     // Asegurar que siempre sea número
                     this.exchangeRate = rate;
