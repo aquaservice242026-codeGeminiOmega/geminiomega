@@ -117,8 +117,8 @@
             
             .swal2-popup {
                 z-index: 1000000 !important;
-                max-width: 95% !important;
-                width: auto !important;
+                width: 100% !important;
+                max-width: 500px !important;
                 margin: 10px !important;
             }
             
@@ -1399,8 +1399,8 @@
                         cancelButtonText: '<i class="fas fa-times"></i> Cancelar',
                         reverseButtons: true,
                         customClass: {
-                            popup: 'rounded-2xl w-11/12 max-w-md',
-                            title: 'text-2xl font-bold text-gray-800',
+                            popup: 'rounded-2xl',
+                            title: 'text-xl font-bold',
                             htmlContainer: 'text-sm'
                         },
                         html: `
@@ -1538,7 +1538,7 @@
                             timer: 3000,
                             showConfirmButton: false,
                             customClass: {
-                                popup: 'rounded-2xl w-11/12 max-w-sm'
+                                popup: 'rounded-2xl'
                             }
                         });
 
