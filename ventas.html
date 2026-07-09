@@ -109,27 +109,26 @@
             font-weight: 600 !important;
         }
 
-        /* Fix crítico para modales en móviles */
-        @media (max-width: 1024px) {
-            .swal2-container {
-                z-index: 999999 !important;
+            @media (max-width: 1024px) {
+                .swal2-container {
+                    z-index: 999999 !important;
+                }
+                
+                .swal2-popup {
+                    z-index: 1000000 !important;
+                    width: 100% !important;
+                    max-width: 500px !important;
+                    margin: 10px !important;
+                }
+                
+                .cart-overlay.show {
+                    z-index: 38 !important;
+                }
+                
+                .cart-drawer.open {
+                    z-index: 39 !important;
+                }
             }
-            
-            .swal2-popup {
-                z-index: 1000000 !important;
-                width: 100% !important;
-                max-width: 500px !important;
-                margin: 10px !important;
-            }
-            
-            .cart-overlay.show {
-                z-index: 38 !important;
-            }
-            
-            .cart-drawer.open {
-                z-index: 39 !important;
-            }
-        }
 
         /* Asegurar que los modales sean visibles */
         .swal2-show {
