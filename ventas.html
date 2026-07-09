@@ -20,22 +20,12 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        [x-cloak] {
-            display: none !important;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .gradient-bg {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-        }
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
 
         /* Toastify Custom Styles */
         .toastify {
@@ -50,41 +40,21 @@
             display: flex !important;
             align-items: center !important;
         }
-
-        .toastify-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-        }
-
-        .toastify-error {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
-        }
-
-        .toastify-warning {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-        }
-
-        .toastify-info {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-        }
+        .toastify-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; }
+        .toastify-error { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important; }
+        .toastify-warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important; }
+        .toastify-info { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
 
         /* SweetAlert2 Custom Styles */
         .swal2-popup {
             font-family: 'Inter', sans-serif !important;
             border-radius: 16px !important;
             padding: 2rem !important;
+            z-index: 99999 !important;
         }
-
-        .swal2-title {
-            font-size: 1.5rem !important;
-            font-weight: 700 !important;
-            color: #1f2937 !important;
-        }
-
-        .swal2-html-container {
-            font-size: 0.95rem !important;
-            color: #4b5563 !important;
-        }
-
+        .swal2-container { z-index: 99998 !important; }
+        .swal2-title { font-size: 1.5rem !important; font-weight: 700 !important; color: #1f2937 !important; }
+        .swal2-html-container { font-size: 0.95rem !important; color: #4b5563 !important; }
         .swal2-confirm {
             background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%) !important;
             border: none !important;
@@ -94,7 +64,6 @@
             font-size: 1rem !important;
             box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3) !important;
         }
-
         .swal2-cancel {
             background: #f3f4f6 !important;
             color: #4b5563 !important;
@@ -106,153 +75,49 @@
 
         /* Animaciones */
         @keyframes bounce-in {
-            0% {
-                transform: scale(0.3);
-                opacity: 0;
-            }
-
-            50% {
-                transform: scale(1.05);
-            }
-
-            70% {
-                transform: scale(0.9);
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
         }
-
-        .animate-bounce-in {
-            animation: bounce-in 0.4s ease-out;
-        }
+        .animate-bounce-in { animation: bounce-in 0.4s ease-out; }
 
         /* Producto cards */
-        .product-card {
-            transition: all 0.2s ease;
-            touch-action: manipulation;
-        }
-
-        .product-card:active {
-            transform: scale(0.95);
-        }
-
-        .product-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-
-        .touch-btn {
-            min-height: 44px;
-            min-width: 44px;
-            touch-action: manipulation;
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
+        .product-card { transition: all 0.2s ease; touch-action: manipulation; }
+        .product-card:active { transform: scale(0.95); }
+        .product-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+        .touch-btn { min-height: 44px; min-width: 44px; touch-action: manipulation; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
         .cart-drawer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            max-height: 85vh;
-            background: white;
-            border-radius: 24px 24px 0 0;
-            z-index: 40;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
-            overflow-y: auto;
+            position: fixed; bottom: 0; left: 0; right: 0; max-height: 85vh;
+            background: white; border-radius: 24px 24px 0 0; z-index: 40;
+            transform: translateY(100%); transition: transform 0.3s ease; overflow-y: auto;
         }
-
-        .cart-drawer.open {
-            transform: translateY(0);
-        }
-
+        .cart-drawer.open { transform: translateY(0); }
         .cart-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 39;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 39;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
         }
+        .cart-overlay.show { opacity: 1; pointer-events: auto; }
+        .total-bar { position: sticky; bottom: 0; z-index: 30; }
+        .quick-add-btn { transition: all 0.15s; }
+        .quick-add-btn:active { transform: scale(0.9); }
 
-        .cart-overlay.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .total-bar {
-            position: sticky;
-            bottom: 0;
-            z-index: 30;
-        }
-
-        .quick-add-btn {
-            transition: all 0.15s;
-        }
-
-        .quick-add-btn:active {
-            transform: scale(0.9);
-        }
-
-        .low-stock {
-            position: relative;
-        }
-
+        .low-stock { position: relative; }
         .low-stock::after {
-            content: 'Stock Bajo';
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: #ef4444;
-            color: white;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-weight: 600;
+            content: 'Stock Bajo'; position: absolute; top: 8px; right: 8px;
+            background: #ef4444; color: white; font-size: 10px;
+            padding: 2px 6px; border-radius: 8px; font-weight: 600;
         }
-
-        .branch-badge-geminis {
-            background: linear-gradient(135deg, #06b6d4, #0891b2);
-        }
-
-        .total-bs-clickable {
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .total-bs-clickable:hover {
-            background-color: rgba(34, 197, 94, 0.1);
-            transform: scale(1.02);
-        }
-
-        .compact-mode .product-card {
-            padding: 12px;
-        }
-
-        .compact-mode .product-card .fa-tint {
-            font-size: 1.5rem !important;
-        }
-
-        .compact-mode .product-card p.font-bold {
-            font-size: 0.9rem !important;
-        }
+        .branch-badge-geminis { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .total-bs-clickable { cursor: pointer; transition: all 0.2s; }
+        .total-bs-clickable:hover { background-color: rgba(34, 197, 94, 0.1); transform: scale(1.02); }
+        .compact-mode .product-card { padding: 12px; }
+        .compact-mode .product-card .fa-tint { font-size: 1.5rem !important; }
+        .compact-mode .product-card p.font-bold { font-size: 0.9rem !important; }
     </style>
 </head>
 
@@ -275,39 +140,32 @@
                 </div>
             </div>
             <nav class="space-y-2">
-                <a href="index.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="index.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-home w-5"></i><span>Dashboard</span>
                 </a>
                 <a href="ventas.html" class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
                     <i class="fas fa-shopping-cart w-5"></i><span class="font-medium">Ventas</span>
                 </a>
-                <a href="cuentas-cobrar.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="cuentas-cobrar.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-file-invoice-dollar w-5"></i><span>Cuentas por Cobrar</span>
                 </a>
-                <a href="clientes.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="clientes.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-users w-5"></i><span>Clientes</span>
                 </a>
-                <a href="inventario.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="inventario.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-boxes w-5"></i><span>Inventario</span>
                 </a>
-                <a href="usuarios.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="usuarios.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
                 </a>
-                <a href="reportes.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="reportes.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
                 </a>
             </nav>
         </div>
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
-                    x-text="userInitials"></div>
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold" x-text="userInitials"></div>
                 <div>
                     <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
                     <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
@@ -328,12 +186,10 @@
                 <div class="flex items-center space-x-4">
                     <div class="bg-blue-50 px-4 py-2 rounded-lg flex items-center space-x-2">
                         <span class="text-sm text-gray-600">Tasa USD:</span>
-                        <input type="number" 
-                               x-model.number="exchangeRate" 
-                               step="0.01"
-                               @input="exchangeRate = parseFloat($event.target.value) || 700.22"
-                               class="w-24 px-2 py-1 text-sm font-bold text-blue-600 bg-transparent border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-center"
-                               @change="updateExchangeRate()">
+                        <input type="number" x-model.number="exchangeRate" step="0.01"
+                            @input="exchangeRate = parseFloat($event.target.value) || 700.22"
+                            class="w-24 px-2 py-1 text-sm font-bold text-blue-600 bg-transparent border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-center"
+                            @change="updateExchangeRate()">
                         <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
                             <i class="fas fa-sync-alt"></i>
                         </button>
@@ -356,8 +212,7 @@
                         <i class="fas fa-tint text-cyan-500 text-xl"></i>
                         <div>
                             <h1 class="text-base font-bold text-gray-800 leading-tight">Punto de Venta</h1>
-                            <span
-                                class="inline-block px-2 py-0.5 rounded text-[10px] font-bold text-white branch-badge-geminis capitalize"
+                            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold text-white branch-badge-geminis capitalize"
                                 x-text="userBranch || '...'"></span>
                         </div>
                     </div>
@@ -365,18 +220,15 @@
                 <div class="flex items-center space-x-2">
                     <div class="bg-blue-50 px-2 py-1 rounded-lg flex items-center space-x-1">
                         <span class="text-[10px] text-gray-600">USD:</span>
-                        <input type="number" 
-                               x-model.number="exchangeRate" 
-                               step="0.01"
-                               @input="exchangeRate = parseFloat($event.target.value) || 700.22"
-                               class="w-14 px-1 py-0.5 text-xs font-bold text-blue-600 bg-transparent border-none focus:outline-none text-right"
-                               @change="updateExchangeRate()">
+                        <input type="number" x-model.number="exchangeRate" step="0.01"
+                            @input="exchangeRate = parseFloat($event.target.value) || 700.22"
+                            class="w-14 px-1 py-0.5 text-xs font-bold text-blue-600 bg-transparent border-none focus:outline-none text-right"
+                            @change="updateExchangeRate()">
                         <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
                             <i class="fas fa-sync-alt"></i>
                         </button>
                     </div>
-                    <button @click="compactMode = !compactMode" class="touch-btn text-gray-600 hover:text-gray-800 p-1"
-                        title="Vista compacta">
+                    <button @click="compactMode = !compactMode" class="touch-btn text-gray-600 hover:text-gray-800 p-1" title="Vista compacta">
                         <i class="fas" :class="compactMode ? 'fa-expand' : 'fa-compress'"></i>
                     </button>
                 </div>
@@ -427,27 +279,18 @@
                                     'low-stock': product.stock <= 10 && product.stock > 0,
                                     'opacity-50': product.stock === 0
                                 }">
-                                <div
-                                    class="absolute top-2 right-2 bg-white/20 backdrop-blur px-1.5 py-0.5 rounded text-[10px] font-bold">
+                                <div class="absolute top-2 right-2 bg-white/20 backdrop-blur px-1.5 py-0.5 rounded text-[10px] font-bold">
                                     <span x-text="product.stock"></span>
                                 </div>
                                 <div class="flex flex-col items-center text-center space-y-1">
                                     <i class="fas fa-tint text-2xl lg:text-4xl mb-1"></i>
                                     <p class="font-bold text-sm lg:text-lg leading-tight" x-text="product.name"></p>
-                                    <p class="text-xs lg:text-sm opacity-90 font-semibold"
-                                        x-text="'$' + product.price.toFixed(2)"></p>
+                                    <p class="text-xs lg:text-sm opacity-90 font-semibold" x-text="'$' + product.price.toFixed(2)"></p>
                                 </div>
-                                <div class="hidden lg:flex justify-center space-x-1 mt-4 pt-4 border-t border-white/20"
-                                    @click.stop>
-                                    <button @click="quickAdd(product, 1)"
-                                        class="quick-add-btn bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded touch-btn"
-                                        :disabled="product.stock < 1">+1</button>
-                                    <button @click="quickAdd(product, 5)"
-                                        class="quick-add-btn bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded touch-btn"
-                                        :disabled="product.stock < 5">+5</button>
-                                    <button @click="quickAdd(product, 10)"
-                                        class="quick-add-btn bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded touch-btn"
-                                        :disabled="product.stock < 10">+10</button>
+                                <div class="hidden lg:flex justify-center space-x-1 mt-4 pt-4 border-t border-white/20" @click.stop>
+                                    <button @click="quickAdd(product, 1)" class="quick-add-btn bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded touch-btn" :disabled="product.stock < 1">+1</button>
+                                    <button @click="quickAdd(product, 5)" class="quick-add-btn bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded touch-btn" :disabled="product.stock < 5">+5</button>
+                                    <button @click="quickAdd(product, 10)" class="quick-add-btn bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded touch-btn" :disabled="product.stock < 10">+10</button>
                                 </div>
                             </button>
                         </template>
@@ -460,21 +303,16 @@
                         <div class="flex items-center justify-between">
                             <h3 class="text-sm font-semibold text-gray-700">Tipo de Entrega</h3>
                             <div class="flex space-x-2">
-                                <button @click="deliveryType = 'pickup'"
-                                    :class="deliveryType === 'pickup' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
-                                    class="px-4 py-2 rounded-lg text-sm font-medium transition touch-btn">
+                                <button @click="deliveryType = 'pickup'" :class="deliveryType === 'pickup' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'" class="px-4 py-2 rounded-lg text-sm font-medium transition touch-btn">
                                     <i class="fas fa-store mr-1"></i>Retiro
                                 </button>
-                                <button @click="deliveryType = 'delivery'"
-                                    :class="deliveryType === 'delivery' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
-                                    class="px-4 py-2 rounded-lg text-sm font-medium transition touch-btn">
+                                <button @click="deliveryType = 'delivery'" :class="deliveryType === 'delivery' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'" class="px-4 py-2 rounded-lg text-sm font-medium transition touch-btn">
                                     <i class="fas fa-truck mr-1"></i>Delivery
                                 </button>
                             </div>
                         </div>
                         <div x-show="deliveryType === 'delivery'" class="mt-3">
-                            <textarea x-model="deliveryAddress" placeholder="Dirección de entrega..."
-                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"></textarea>
+                            <textarea x-model="deliveryAddress" placeholder="Dirección de entrega..." class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"></textarea>
                         </div>
                     </div>
                 </div>
@@ -485,9 +323,7 @@
                 <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
                     <i class="fas fa-shopping-cart text-cyan-500 mr-2"></i>
                     Carrito
-                    <span x-show="cartItemCount > 0"
-                        class="ml-2 bg-cyan-500 text-white rounded-full px-2 py-0.5 text-xs font-bold"
-                        x-text="cartItemCount"></span>
+                    <span x-show="cartItemCount > 0" class="ml-2 bg-cyan-500 text-white rounded-full px-2 py-0.5 text-xs font-bold" x-text="cartItemCount"></span>
                 </h3>
 
                 <div class="space-y-3 mb-4">
@@ -498,30 +334,24 @@
                                     <h4 class="font-semibold text-gray-800 text-sm" x-text="item.name"></h4>
                                     <p class="text-xs text-gray-500" x-text="'$' + item.price.toFixed(2) + ' c/u'"></p>
                                 </div>
-                                <button @click="removeFromCart(index)"
-                                    class="text-red-500 hover:text-red-700 touch-btn p-2">
+                                <button @click="removeFromCart(index)" class="text-red-500 hover:text-red-700 touch-btn p-2">
                                     <i class="fas fa-trash text-sm"></i>
                                 </button>
                             </div>
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-2">
-                                    <button @click="updateQuantity(index, -1)"
-                                        class="touch-btn w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">
+                                    <button @click="updateQuantity(index, -1)" class="touch-btn w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">
                                         <i class="fas fa-minus text-xs"></i>
                                     </button>
-                                    <span class="font-bold text-lg w-8 text-center text-gray-800"
-                                        x-text="item.quantity"></span>
-                                    <button @click="updateQuantity(index, 1)"
-                                        class="touch-btn w-8 h-8 bg-cyan-500 text-white rounded-full flex items-center justify-center hover:bg-cyan-600">
+                                    <span class="font-bold text-lg w-8 text-center text-gray-800" x-text="item.quantity"></span>
+                                    <button @click="updateQuantity(index, 1)" class="touch-btn w-8 h-8 bg-cyan-500 text-white rounded-full flex items-center justify-center hover:bg-cyan-600">
                                         <i class="fas fa-plus text-xs"></i>
                                     </button>
-                                    <button @click="updateQuantity(index, 5)"
-                                        class="touch-btn px-2 h-8 bg-blue-500 text-white rounded text-xs font-bold hover:bg-blue-600">+5</button>
+                                    <button @click="updateQuantity(index, 5)" class="touch-btn px-2 h-8 bg-blue-500 text-white rounded text-xs font-bold hover:bg-blue-600">+5</button>
                                 </div>
                                 <div class="text-right">
                                     <p class="text-xs text-gray-500">Subtotal</p>
-                                    <p class="font-bold text-cyan-600"
-                                        x-text="'$' + (item.price * item.quantity).toFixed(2)"></p>
+                                    <p class="font-bold text-cyan-600" x-text="'$' + (item.price * item.quantity).toFixed(2)"></p>
                                 </div>
                             </div>
                         </div>
@@ -546,8 +376,7 @@
                         <span class="text-gray-800">Total USD:</span>
                         <span class="text-cyan-600" x-text="'$' + totalUSD.toFixed(2)"></span>
                     </div>
-                    <div @click="copyTotalToReceived()"
-                        class="total-bs-clickable flex justify-between text-sm bg-green-50 p-2 rounded-lg cursor-pointer">
+                    <div @click="copyTotalToReceived()" class="total-bs-clickable flex justify-between text-sm bg-green-50 p-2 rounded-lg cursor-pointer">
                         <span class="text-gray-600">Total Bs. <i class="fas fa-hand-pointer text-xs"></i></span>
                         <span class="font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></span>
                     </div>
@@ -556,13 +385,11 @@
                 <div class="mt-4">
                     <div class="flex items-center justify-between mb-2">
                         <label class="text-xs font-semibold text-gray-700">Cliente</label>
-                        <button @click="openCustomerModal()"
-                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-medium touch-btn">
+                        <button @click="openCustomerModal()" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-medium touch-btn">
                             <i class="fas fa-user-plus mr-1"></i>Nuevo
                         </button>
                     </div>
-                    <select x-model="selectedCustomer"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                    <select x-model="selectedCustomer" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
                         <option value="">Cliente no registrado</option>
                         <template x-for="customer in customers" :key="customer.id">
                             <option :value="customer.id" x-text="customer.full_name"></option>
@@ -572,8 +399,7 @@
 
                 <div class="mt-4">
                     <label class="text-xs font-semibold text-gray-700 mb-2 block">Método de Pago</label>
-                    <select x-model="paymentMethod"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                    <select x-model="paymentMethod" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
                         <option value="efectivo_bs">Efectivo Bs</option>
                         <option value="efectivo_divisas">Efectivo Divisas</option>
                         <option value="pago_movil">Pago Móvil</option>
@@ -583,36 +409,27 @@
                     </select>
                 </div>
 
-                <div x-show="['pago_movil', 'transferencia'].includes(paymentMethod)"
-                    class="mt-4 p-3 bg-yellow-50 rounded-lg">
+                <div x-show="['pago_movil', 'transferencia'].includes(paymentMethod)" class="mt-4 p-3 bg-yellow-50 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Referencia</label>
-                    <input type="text" x-model="paymentReference" placeholder="Últimos 4 dígitos"
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+                    <input type="text" x-model="paymentReference" placeholder="Últimos 4 dígitos" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                 </div>
 
                 <div x-show="paymentMethod === 'efectivo_bs'" class="mt-4 p-3 bg-green-50 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (Bs.)</label>
-                    <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0"
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
+                    <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
                     <div x-show="amountReceivedBs > 0" class="mt-2 text-xs space-y-1">
-                        <p class="text-gray-600">En USD: <span class="font-bold"
-                                x-text="'$' + (amountReceivedBs / exchangeRate).toFixed(2)"></span></p>
-                        <p x-show="amountReceivedBs >= totalBs" class="text-green-600 font-semibold">Cambio: Bs. <span
-                                x-text="(amountReceivedBs - totalBs).toFixed(2)"></span></p>
-                        <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs. <span
-                                x-text="(totalBs - amountReceivedBs).toFixed(2)"></span></p>
+                        <p class="text-gray-600">En USD: <span class="font-bold" x-text="'$' + (amountReceivedBs / exchangeRate).toFixed(2)"></span></p>
+                        <p x-show="amountReceivedBs >= totalBs" class="text-green-600 font-semibold">Cambio: Bs. <span x-text="(amountReceivedBs - totalBs).toFixed(2)"></span></p>
+                        <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs. <span x-text="(totalBs - amountReceivedBs).toFixed(2)"></span></p>
                     </div>
                 </div>
 
                 <div x-show="paymentMethod === 'efectivo_divisas'" class="mt-4 p-3 bg-green-50 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (USD)</label>
-                    <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0"
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
+                    <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
                     <div x-show="amountReceivedUsd > 0" class="mt-2 text-xs space-y-1">
-                        <p x-show="amountReceivedUsd >= totalUSD" class="text-green-600 font-semibold">Cambio: $<span
-                                x-text="(amountReceivedUsd - totalUSD).toFixed(2)"></span></p>
-                        <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta: $<span
-                                x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
+                        <p x-show="amountReceivedUsd >= totalUSD" class="text-green-600 font-semibold">Cambio: $<span x-text="(amountReceivedUsd - totalUSD).toFixed(2)"></span></p>
+                        <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta: $<span x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
                     </div>
                 </div>
 
@@ -624,29 +441,24 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 mt-6">
-                    <button @click="processSale()"
-                        :disabled="cart.length === 0 || processing || paymentMethod === 'credito'"
-                        class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-xl font-semibold touch-btn disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2">
+                    <button @click="processSale()" :disabled="cart.length === 0 || processing || paymentMethod === 'credito'" class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-xl font-semibold touch-btn disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2">
                         <i class="fas fa-circle-notch fa-spin" x-show="processing"></i>
                         <i class="fas fa-check-circle" x-show="!processing"></i>
                         <span x-text="processing ? 'Procesando...' : 'Cobrar'"></span>
                     </button>
 
-                    <button @click="openCreditModal()" :disabled="cart.length === 0 || processing"
-                        class="bg-gradient-to-r from-green-500 to-emerald-500 text-white py-3 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2">
+                    <button @click="openCreditModal()" :disabled="cart.length === 0 || processing" class="bg-gradient-to-r from-green-500 to-emerald-500 text-white py-3 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2">
                         <i class="fas fa-hand-holding-usd"></i>
                         <span>Crédito</span>
                     </button>
                 </div>
 
-                <button @click="openPaymentModal()"
-                    class="w-full mt-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 rounded-xl font-semibold touch-btn flex items-center justify-center space-x-2 text-sm">
+                <button @click="openPaymentModal()" class="w-full mt-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 rounded-xl font-semibold touch-btn flex items-center justify-center space-x-2 text-sm">
                     <i class="fas fa-wallet"></i>
                     <span>Pagos Múltiples</span>
                 </button>
 
-                <button @click="quickSale()" :disabled="cart.length === 0 || processing"
-                    class="w-full mt-2 bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2 text-sm">
+                <button @click="quickSale()" :disabled="cart.length === 0 || processing" class="w-full mt-2 bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2 text-sm">
                     <i class="fas fa-bolt"></i>
                     <span>Venta Rápida (Contado sin cliente)</span>
                 </button>
@@ -668,13 +480,10 @@
         </div>
         <div class="flex items-center justify-between text-xs">
             <span class="text-gray-500"><span x-text="cartItemCount"></span> items en carrito</span>
-            <button @click="openCart()"
-                class="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg font-semibold touch-btn flex items-center space-x-2">
+            <button @click="openCart()" class="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg font-semibold touch-btn flex items-center space-x-2">
                 <i class="fas fa-shopping-cart"></i>
                 <span>Ver Carrito</span>
-                <span x-show="cartItemCount > 0"
-                    class="bg-white text-cyan-600 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold"
-                    x-text="cartItemCount"></span>
+                <span x-show="cartItemCount > 0" class="bg-white text-cyan-600 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold" x-text="cartItemCount"></span>
             </button>
         </div>
     </div>
@@ -686,10 +495,8 @@
     </div>
 
     <!-- Modal Pagos Múltiples -->
-    <div x-show="showPaymentModal" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-        @click.self="showPaymentModal = false">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-bounce-in"
-            @click.stop>
+    <div x-show="showPaymentModal" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showPaymentModal = false">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-bounce-in" @click.stop>
             <!-- Header -->
             <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white">
                 <h3 class="text-xl font-bold text-gray-800">
@@ -708,8 +515,7 @@
                         <div>
                             <p class="text-sm text-gray-600">Total Venta:</p>
                             <p class="text-2xl font-bold text-blue-600">$<span x-text="totalUSD.toFixed(2)"></span></p>
-                            <p class="text-xs text-gray-500">Bs. <span
-                                    x-text="(totalUSD * exchangeRate).toFixed(2)"></span></p>
+                            <p class="text-xs text-gray-500">Bs. <span x-text="(totalUSD * exchangeRate).toFixed(2)"></span></p>
                         </div>
                         <i class="fas fa-shopping-cart text-4xl text-blue-200"></i>
                     </div>
@@ -719,8 +525,7 @@
                 <div class="space-y-3">
                     <div class="flex justify-between items-center">
                         <h4 class="font-semibold text-gray-800">Pagos (<span x-text="payments.length"></span>)</h4>
-                        <button @click="addPayment()"
-                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-medium">
+                        <button @click="addPayment()" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-medium">
                             <i class="fas fa-plus mr-1"></i>Agregar Pago
                         </button>
                     </div>
@@ -733,17 +538,14 @@
 
                     <template x-for="(payment, index) in payments" :key="index">
                         <div class="bg-gray-50 rounded-xl p-4 border border-gray-200 relative">
-                            <button @click="removePayment(index)"
-                                class="absolute top-2 right-2 text-red-500 hover:text-red-700">
+                            <button @click="removePayment(index)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">
                                 <i class="fas fa-trash"></i>
                             </button>
 
                             <div class="grid grid-cols-2 gap-3">
                                 <div class="col-span-2">
-                                    <label class="block text-xs font-medium text-gray-700 mb-1">Método de Pago <span
-                                            x-text="index + 1"></span></label>
-                                    <select x-model="payment.method"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Método de Pago <span x-text="index + 1"></span></label>
+                                    <select x-model="payment.method" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
                                         <option value="efectivo_divisas">Efectivo Divisas</option>
                                         <option value="efectivo_bs">Efectivo Bolívares</option>
                                         <option value="pago_movil">Pago Móvil</option>
@@ -754,31 +556,23 @@
 
                                 <div x-show="payment.method !== 'efectivo_bs'">
                                     <label class="block text-xs font-medium text-gray-700 mb-1">Monto (USD)</label>
-                                    <input type="number" x-model.number="payment.amountUsd" step="0.01" min="0.01"
-                                        :max="totalUSD"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                    <input type="number" x-model.number="payment.amountUsd" step="0.01" min="0.01" :max="totalUSD" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
                                 </div>
 
                                 <div x-show="payment.method === 'efectivo_bs'">
                                     <label class="block text-xs font-medium text-gray-700 mb-1">Monto (Bs.)</label>
-                                    <input type="number" x-model.number="payment.amountBs" step="0.01" min="0.01"
-                                        @input="calculateUsdFromBs(index)"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                                    <p class="text-xs text-gray-500 mt-1">Equivale: $<span
-                                            x-text="(payment.amountBs / exchangeRate).toFixed(2)"></span></p>
+                                    <input type="number" x-model.number="payment.amountBs" step="0.01" min="0.01" @input="calculateUsdFromBs(index)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                    <p class="text-xs text-gray-500 mt-1">Equivale: $<span x-text="(payment.amountBs / exchangeRate).toFixed(2)"></span></p>
                                 </div>
 
-                                <div x-show="['pago_movil', 'transferencia', 'punto_venta'].includes(payment.method)"
-                                    class="col-span-2">
+                                <div x-show="['pago_movil', 'transferencia', 'punto_venta'].includes(payment.method)" class="col-span-2">
                                     <label class="block text-xs font-medium text-gray-700 mb-1">Referencia</label>
-                                    <input type="text" x-model="payment.reference" placeholder="Últimos 4 dígitos"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                    <input type="text" x-model="payment.reference" placeholder="Últimos 4 dígitos" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
                                 </div>
 
                                 <div class="col-span-2">
                                     <label class="block text-xs font-medium text-gray-700 mb-1">Notas (opcional)</label>
-                                    <input type="text" x-model="payment.notes" placeholder="Notas adicionales"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                    <input type="text" x-model="payment.notes" placeholder="Notas adicionales" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
                                 </div>
                             </div>
                         </div>
@@ -797,8 +591,7 @@
                     </div>
                     <div class="border-t border-gray-300 pt-2 flex justify-between">
                         <span class="font-semibold">Restante:</span>
-                        <span class="font-bold text-xl"
-                            :class="Math.abs(remaining) < 0.02 ? 'text-green-600' : 'text-red-600'">
+                        <span class="font-bold text-xl" :class="Math.abs(remaining) < 0.02 ? 'text-green-600' : 'text-red-600'">
                             $<span x-text="remaining.toFixed(2)"></span>
                         </span>
                     </div>
@@ -810,10 +603,8 @@
 
             <!-- Footer -->
             <div class="px-6 py-4 border-t bg-gray-50 flex justify-end space-x-3 sticky bottom-0">
-                <button @click="showPaymentModal = false"
-                    class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
-                <button @click="processSale()" :disabled="!canProcessSale() || processing"
-                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                <button @click="showPaymentModal = false" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
+                <button @click="processSale()" :disabled="!canProcessSale() || processing" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
                     <i class="fas fa-check-circle mr-2" x-show="!processing"></i>
                     <i class="fas fa-circle-notch fa-spin mr-2" x-show="processing"></i>
                     <span x-text="processing ? 'Procesando...' : 'Procesar Venta'"></span>
@@ -874,11 +665,9 @@
                 amountReceivedBs: 0, amountReceivedUsd: 0, exchangeRate: 700.22, deliveryCost: 1.00,
                 userName: '', userRole: '', userBranch: '', userInitials: '??',
                 payments: [],
-                // Control de tasa de cambio
                 lastExchangeRate: 700.22,
                 lastRateDate: null,
                 rateUpdateRequired: false,
-                // Toggle para pagos múltiples (OFF por defecto)
                 useMultiplePayments: false,
                 newCustomer: { full_name: '', phone: '', email: '', address: '', recommended_by: '' },
                 creditForm: { customer_id: '', customer_phone: '', customer_id_card: '', payment_date: '', payment_terms: '', initial_payment: 0, initial_payment_method: 'efectivo', notes: '' },
@@ -1062,13 +851,13 @@
                 async loadExchangeRate() {
                     try {
                         const savedData = localStorage.getItem('exchangeRate_' + this.userBranch);
-                        console.log(' localStorage para', this.userBranch, ':', savedData);
+                        console.log('🔵 localStorage para', this.userBranch, ':', savedData);
                         
                         if (savedData) {
                             const parsed = JSON.parse(savedData);
                             console.log('🔵 Fecha guardada:', new Date(parsed.date));
                             console.log('🔵 Fecha hoy:', new Date());
-                            console.log(' Mismo día:', new Date(parsed.date).toDateString() === new Date().toDateString());
+                            console.log('🔵 Mismo día:', new Date(parsed.date).toDateString() === new Date().toDateString());
                             
                             if (new Date(parsed.date).toDateString() === new Date().toDateString()) {
                                 this.exchangeRate = parseFloat(parsed.rate) || 700.22;
@@ -1151,7 +940,11 @@
 
                 removeFromCart(index) { this.cart.splice(index, 1); showToast('Producto eliminado', 'warning'); },
                 clearCart() { if (this.cart.length > 0) { if (confirm('¿Limpiar carrito?')) { this.cart = []; showToast('Carrito limpiado', 'info'); } } },
-                openCart() { this.cartOpen = true; }, closeCart() { this.cartOpen = false; },
+                openCart() { this.cartOpen = true; }, 
+                closeCart() { 
+                    this.cartOpen = false;
+                    document.body.style.overflow = '';
+                },
 
                 copyTotalToReceived() {
                     if (this.paymentMethod === 'efectivo_bs') { this.amountReceivedBs = this.totalBs; showToast('Monto copiado a recibido', 'info'); }
@@ -1190,10 +983,15 @@
                 canProcessCredit() { if (!this.creditForm.customer_id) return false; if (!this.creditForm.payment_date) return false; if (this.creditForm.initial_payment > this.totalUSD) return false; return true; },
 
                 async processSale() {
-
                     console.log('📱 Móvil detectado:', window.innerWidth < 1024);
                     console.log('📱 User Agent:', navigator.userAgent);
                     console.log('📱 Touch support:', 'ontouchstart' in window);
+                    
+                    // Cerrar carrito si está abierto (fix para móviles)
+                    if (this.cartOpen) {
+                        this.closeCart();
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                    }
                     
                     // VALIDACIÓN MEJORADA - Forzar conversión a número
                     const rate = parseFloat(this.exchangeRate);
@@ -1390,45 +1188,47 @@
                             if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
                         }
 
-                await Swal.fire({
-                    icon: 'success',
-                    iconHtml: '✓',
-                    title: '<strong>¡Venta Exitosa!</strong>',
-                    text: 'Venta procesada correctamente',
-                    html: `
-                        <div class="space-y-3 w-full max-w-xs mx-auto">
-                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4">
-                                <p class="text-xs text-gray-500 mb-2 text-center">Total</p>
-                                <div class="space-y-2">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-sm text-gray-600">USD:</span>
-                                        <span class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</span>
+                        await Swal.fire({
+                            icon: 'success',
+                            iconHtml: '✓',
+                            title: '<strong>¡Venta Exitosa!</strong>',
+                            text: 'Venta procesada correctamente',
+                            html: `
+                                <div class="space-y-3 w-full max-w-xs mx-auto">
+                                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4">
+                                        <p class="text-xs text-gray-500 mb-2 text-center">Total</p>
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-sm text-gray-600">USD:</span>
+                                                <span class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</span>
+                                            </div>
+                                            <div class="border-t border-green-200 pt-2 flex justify-between items-center">
+                                                <span class="text-sm text-gray-600">Bs.:</span>
+                                                <span class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * parseFloat(this.exchangeRate)).toFixed(2)}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="border-t border-green-200 pt-2 flex justify-between items-center">
-                                        <span class="text-sm text-gray-600">Bs.:</span>
-                                        <span class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * parseFloat(this.exchangeRate)).toFixed(2)}</span>
-                                    </div>
+                                    <p class="text-sm text-green-600 flex items-center justify-center">
+                                        <i class="fas fa-check-circle mr-1"></i> 
+                                        Inventario actualizado
+                                    </p>
                                 </div>
-                            </div>
-                            <p class="text-sm text-green-600 flex items-center justify-center">
-                                <i class="fas fa-check-circle mr-1"></i> 
-                                Inventario actualizado
-                            </p>
-                        </div>
-                    `,
-                    timer: 3000,
-                    showConfirmButton: false,
-                    customClass: {
-                        popup: 'rounded-2xl w-11/12 max-w-sm'
-                    }
-                });
+                            `,
+                            timer: 3000,
+                            showConfirmButton: false,
+                            customClass: {
+                                popup: 'rounded-2xl w-11/12 max-w-sm'
+                            }
+                        });
 
                         this.cart = [];
+                        this.payments = [];
                         this.deliveryAddress = '';
                         this.selectedCustomer = '';
                         this.paymentReference = '';
                         this.amountReceivedBs = 0;
                         this.amountReceivedUsd = 0;
+                        this.showPaymentModal = false; // Cerrar modal de pagos múltiples
                         this.closeCart();
                         await this.loadProducts();
 
