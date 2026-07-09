@@ -1368,31 +1368,38 @@
                             if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
                         }
 
-                        await Swal.fire({
-                            icon: 'success',
-                            title: '<strong>¡Venta Exitosa!</strong>',
-                            html: `
-                                <div class="text-center space-y-3">
-                                    <p class="text-gray-600">Venta procesada correctamente</p>
-                                    <div class="space-y-2">
-                                        <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4">
-                                            <p class="text-xs text-gray-500 mb-1">Total</p>
-                                            <p class="text-3xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</p>
-                                            <p class="text-sm text-gray-600 mt-1">Bs. ${(this.totalUSD * parseFloat(this.exchangeRate)).toFixed(2)}</p>
-                                        </div>
+                await Swal.fire({
+                    icon: 'success',
+                    iconHtml: '✓',
+                    title: '<strong>¡Venta Exitosa!</strong>',
+                    text: 'Venta procesada correctamente',
+                    html: `
+                        <div class="space-y-3 w-full max-w-xs mx-auto">
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4">
+                                <p class="text-xs text-gray-500 mb-2 text-center">Total</p>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-600">USD:</span>
+                                        <span class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</span>
                                     </div>
-                                    <p class="text-sm text-gray-500">
-                                        <i class="fas fa-check-circle text-green-500"></i> 
-                                        Inventario actualizado
-                                    </p>
+                                    <div class="border-t border-green-200 pt-2 flex justify-between items-center">
+                                        <span class="text-sm text-gray-600">Bs.:</span>
+                                        <span class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * parseFloat(this.exchangeRate)).toFixed(2)}</span>
+                                    </div>
                                 </div>
-                            `,
-                            timer: 3000,
-                            showConfirmButton: false,
-                            customClass: {
-                                popup: 'rounded-2xl'
-                            }
-                        });
+                            </div>
+                            <p class="text-sm text-green-600 flex items-center justify-center">
+                                <i class="fas fa-check-circle mr-1"></i> 
+                                Inventario actualizado
+                            </p>
+                        </div>
+                    `,
+                    timer: 3000,
+                    showConfirmButton: false,
+                    customClass: {
+                        popup: 'rounded-2xl w-11/12 max-w-sm'
+                    }
+                });
 
                         this.cart = [];
                         this.deliveryAddress = '';
