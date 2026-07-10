@@ -1274,9 +1274,9 @@
                 // ============================================
                 async loadExchangeRate() {
                     try {
-                        console.log('🔄 Consultando tasa de Supabase para sucursal:', this.userBranch);
+                        console.log('🔄 Consultando tasa centralizada de Supabase');
 
-                        const { data, error } = await supabase.rpc('get_active_exchange_rate', { branch_param: this.userBranch });
+                        const { data, error } = await supabase.rpc('get_active_exchange_rate');
 
                         if (!error && data) {
                             const rate = ensureValidRate(data);
@@ -1297,8 +1297,15 @@
                         const validRate = ensureValidRate(this.exchangeRate);
                         this.exchangeRate = validRate;
 
+                        // Desactivar todas las tasas activas
                         await supabase.from('exchange_rates').update({ is_active: false }).eq('is_active', true);
-                        await supabase.from('exchange_rates').insert({ rate: validRate, branch: this.userBranch, is_active: true });
+
+                        // Insertar nueva tasa (sin branch, centralizada)
+                        await supabase.from('exchange_rates').insert({
+                            rate: validRate,
+                            is_active: true
+                        });
+
                         showToast('Tasa actualizada en Supabase', 'success');
                     } catch (err) {
                         console.error('Error actualizando tasa:', err);
