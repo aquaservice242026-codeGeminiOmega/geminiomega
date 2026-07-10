@@ -174,7 +174,8 @@
                 <div class="hidden md:flex items-center bg-blue-50 px-4 py-2 rounded-lg">
                     <i class="fas fa-dollar-sign text-green-600 mr-2"></i>
                     <span class="text-sm text-gray-600">Tasa: </span>
-                    <span class="text-sm font-bold text-blue-600 ml-1" x-text="'Bs. ' + exchangeRate.toFixed(2)"></span>
+                    <span class="text-sm font-bold text-blue-600 ml-1"
+                        x-text="'Bs. ' + (parseFloat(exchangeRate) || 700.22).toFixed(2)"></span>
                 </div>
                 <button class="relative p-2 text-gray-400 hover:text-gray-600">
                     <i class="fas fa-bell text-xl"></i>
@@ -220,7 +221,8 @@
                                 <p class="text-3xl font-bold text-gray-900"
                                     x-text="'$' + stats.todayRevenue.toFixed(2)"></p>
                                 <p class="text-xs text-gray-500 mt-2">
-                                    <span x-text="'Bs. ' + (stats.todayRevenue * exchangeRate).toFixed(2)"></span>
+                                    <span
+                                        x-text="'Bs. ' + (stats.todayRevenue * (parseFloat(exchangeRate) || 700.22)).toFixed(2)"></span>
                                 </p>
                             </div>
                             <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
@@ -400,6 +402,15 @@
                 window.location.href = 'login.html';
             }
         }
+        // Función auxiliar para validar tasa
+        function ensureValidRate(rate) {
+            const parsed = parseFloat(rate);
+            if (isNaN(parsed) || parsed <= 0) {
+                console.warn('⚠️ Tasa inválida detectada, usando valor por defecto 700.22');
+                return 700.22;
+            }
+            return parsed;
+        }
 
         function dashboardApp() {
             return {
@@ -487,14 +498,21 @@
 
                 async loadExchangeRate() {
                     try {
-                        const { data, error } = await supabase.rpc('get_active_exchange_rate', {
-                            branch_param: this.userBranch
-                        });
+                        console.log('🔄 Consultando tasa centralizada de Supabase');
+
+                        const { data, error } = await supabase.rpc('get_active_exchange_rate');
+
                         if (!error && data) {
-                            this.exchangeRate = parseFloat(data);
+                            const rate = ensureValidRate(data);
+                            this.exchangeRate = rate;
+                            console.log('✅ Tasa cargada desde Supabase:', this.exchangeRate);
+                        } else {
+                            console.warn('⚠️ No se encontró tasa en BD, usando 700.22');
+                            this.exchangeRate = 700.22;
                         }
                     } catch (err) {
-                        console.error('Error cargando tasa:', err);
+                        console.error('❌ Error cargando tasa:', err);
+                        this.exchangeRate = 700.22;
                     }
                 },
 
