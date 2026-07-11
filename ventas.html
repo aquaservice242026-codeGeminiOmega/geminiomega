@@ -316,6 +316,25 @@
         .compact-mode .product-card p.font-bold {
             font-size: 0.9rem !important;
         }
+
+        /* Toggle Switch Styles */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #0ea5e9;
+        }
+
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: #0ea5e9;
+        }
+
+        .payment-method-card {
+            transition: all 0.2s ease;
+        }
+
+        .payment-method-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 
@@ -1152,7 +1171,7 @@
                 success: '✓',
                 error: '✗',
                 warning: '⚠',
-                info: 'ℹ'
+                info: ''
             };
 
             Toastify({
@@ -1227,6 +1246,15 @@
                 newCustomer: { full_name: '', phone: '', email: '', address: '', recommended_by: '' },
                 creditForm: { customer_id: '', customer_phone: '', customer_id_card: '', payment_date: '', payment_terms: '', initial_payment: 0, initial_payment_method: 'efectivo', notes: '' },
 
+                // Pago Múltiple
+                useMultiplePayments: false,
+                multiplePayments: [],
+                newPayment: {
+                    method: 'efectivo_divisas',
+                    amount: 0,
+                    reference: ''
+                },
+
                 get filteredProducts() {
                     if (!this.productSearch) return this.products;
                     const search = this.productSearch.toLowerCase();
@@ -1248,6 +1276,26 @@
                 },
 
                 get cartItemCount() { return this.cart.reduce((sum, item) => sum + item.quantity, 0); },
+
+                // Cálculos de pago múltiple
+                get totalPaid() {
+                    return this.multiplePayments.reduce((sum, p) => sum + p.amount, 0);
+                },
+
+                get remainingAmount() {
+                    return round2(this.totalUSD - this.totalPaid);
+                },
+
+                get paymentProgress() {
+                    if (this.totalUSD === 0) return 0;
+                    return Math.min(100, Math.round((this.totalPaid / this.totalUSD) * 100));
+                },
+
+                canAddPayment() {
+                    if (this.newPayment.amount <= 0) return false;
+                    if (this.newPayment.amount > this.remainingAmount) return false;
+                    return true;
+                },
 
                 async initVentas() {
                     const { data: { session } } = await supabase.auth.getSession();
@@ -1283,7 +1331,7 @@
                             this.exchangeRate = rate;
                             console.log('✅ Tasa cargada desde Supabase:', this.exchangeRate);
                         } else {
-                            console.warn('⚠️ No se encontró tasa en BD, usando 700.22');
+                            console.warn('️ No se encontró tasa en BD, usando 700.22');
                             this.exchangeRate = 700.22;
                         }
                     } catch (err) {
@@ -1404,6 +1452,40 @@
                 loadCustomerData() { const customer = this.customers.find(c => c.id === this.creditForm.customer_id); if (customer) { this.creditForm.customer_phone = customer.phone || ''; } },
                 canProcessCredit() { if (!this.creditForm.customer_id) return false; if (!this.creditForm.payment_date) return false; if (this.creditForm.initial_payment > this.totalUSD) return false; return true; },
 
+                // Métodos para Pago Múltiple
+                addMultiplePayment() {
+                    if (!this.canAddPayment()) {
+                        showToast('Monto inválido o excede el restante', 'error');
+                        return;
+                    }
+
+                    this.multiplePayments.push({
+                        ...this.newPayment,
+                        id: Date.now(),
+                        amountBs: this.newPayment.method === 'efectivo_bs' ?
+                            round2(this.newPayment.amount * this.exchangeRate) :
+                            (this.newPayment.method === 'efectivo_divisas' ?
+                                round2(this.newPayment.amount * this.exchangeRate) : 0)
+                    });
+
+                    this.newPayment = {
+                        method: 'efectivo_divisas',
+                        amount: 0,
+                        reference: ''
+                    };
+
+                    showToast('Pago agregado', 'success');
+                },
+
+                removeMultiplePayment(id) {
+                    this.multiplePayments = this.multiplePayments.filter(p => p.id !== id);
+                    showToast('Pago eliminado', 'warning');
+                },
+
+                getSuggestedAmount() {
+                    return this.remainingAmount;
+                },
+
                 async processSale() {
                     // Validar tasa antes de procesar
                     this.exchangeRate = ensureValidRate(this.exchangeRate);
@@ -1424,62 +1506,124 @@
                     const customer = this.customers.find(c => c.id === this.selectedCustomer);
                     const customerName = customer?.full_name || 'Cliente no registrado';
 
-                    // SweetAlert2 Confirmation con USD y Bs.
+                    // Construir HTML del modal según el modo de pago
+                    let modalHtml = '';
+
+                    if (this.useMultiplePayments && this.multiplePayments.length > 0) {
+                        // Modo Pago Múltiple
+                        modalHtml = `
+                            <div class="text-left space-y-4">
+                                <div class="bg-blue-50 rounded-lg p-4">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm font-semibold text-gray-700">Total de la Venta:</span>
+                                        <span class="text-xl font-bold text-blue-600">$${this.totalUSD.toFixed(2)}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm text-gray-600">Pagado:</span>
+                                        <span class="text-lg font-semibold text-green-600">$${this.totalPaid.toFixed(2)}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center pt-2 border-t border-blue-200">
+                                        <span class="text-sm font-bold text-gray-700">Restante:</span>
+                                        <span class="text-xl font-bold ${this.remainingAmount === 0 ? 'text-green-600' : 'text-red-600'}">$${this.remainingAmount.toFixed(2)}</span>
+                                    </div>
+                                    <div class="mt-3">
+                                        <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
+                                            <div class="bg-gradient-to-r from-blue-500 to-cyan-500 h-3 rounded-full transition-all duration-300" 
+                                                style="width: ${this.paymentProgress}%"></div>
+                                        </div>
+                                        <p class="text-xs text-center text-gray-600">${this.paymentProgress}% completado</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <h4 class="font-semibold text-gray-800 text-sm mb-2">Pagos Registrados (${this.multiplePayments.length}):</h4>
+                                    ${this.multiplePayments.map((p, i) => `
+                                        <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
+                                            <div>
+                                                <p class="text-sm font-medium">${i + 1}. ${this.getPaymentMethodName(p.method)}</p>
+                                                <p class="text-xs text-gray-500">${p.method === 'efectivo_bs' || p.method === 'efectivo_divisas' ? 'Bs. ' + p.amountBs.toFixed(2) : ''}</p>
+                                            </div>
+                                            <span class="text-sm font-bold text-green-600">$${p.amount.toFixed(2)}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // Modo Pago Simple
+                        modalHtml = `
+                            <div class="text-left space-y-3">
+                                <div class="flex items-center space-x-2 text-gray-700">
+                                    <i class="fas fa-user text-blue-500"></i>
+                                    <span><strong>Cliente:</strong> ${customerName}</span>
+                                </div>
+                                <div class="flex items-center space-x-2 text-gray-700">
+                                    <i class="fas fa-shopping-cart text-blue-500"></i>
+                                    <span><strong>Productos:</strong> ${this.cartItemCount} items</span>
+                                </div>
+                                <div class="flex items-center space-x-2 text-gray-700">
+                                    <i class="fas fa-credit-card text-blue-500"></i>
+                                    <span><strong>Método:</strong> ${this.paymentMethod.replace('_', ' ')}</span>
+                                </div>
+                                <div class="mt-4 space-y-2">
+                                    <div class="p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-700 font-semibold">Total USD:</span>
+                                            <span class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                    <div class="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-700 font-semibold">Total Bs.:</span>
+                                            <span class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-center text-xs text-gray-500">
+                                        <i class="fas fa-exchange-alt mr-1"></i>
+                                        Tasa: Bs. ${this.exchangeRate.toFixed(2)} por USD
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    // SweetAlert2 Confirmation
                     const confirmed = await showConfirm(
-                        'Confirmar Venta',
-                        `
-                        <div class="text-left space-y-3">
-                            <div class="flex items-center space-x-2 text-gray-700">
-                                <i class="fas fa-user text-blue-500"></i>
-                                <span><strong>Cliente:</strong> ${customerName}</span>
-                            </div>
-                            <div class="flex items-center space-x-2 text-gray-700">
-                                <i class="fas fa-shopping-cart text-blue-500"></i>
-                                <span><strong>Productos:</strong> ${this.cartItemCount} items</span>
-                            </div>
-                            <div class="flex items-center space-x-2 text-gray-700">
-                                <i class="fas fa-credit-card text-blue-500"></i>
-                                <span><strong>Método:</strong> ${this.paymentMethod.replace('_', ' ')}</span>
-                            </div>
-                            <div class="mt-4 space-y-2">
-                                <div class="p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-gray-700 font-semibold">Total USD:</span>
-                                        <span class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</span>
-                                    </div>
-                                </div>
-                                <div class="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-gray-700 font-semibold">Total Bs.:</span>
-                                        <span class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</span>
-                                    </div>
-                                </div>
-                                <div class="text-center text-xs text-gray-500">
-                                    <i class="fas fa-exchange-alt mr-1"></i>
-                                    Tasa: Bs. ${this.exchangeRate.toFixed(2)} por USD
-                                </div>
-                            </div>
-                        </div>
-                        `,
-                        'Procesar Venta',
+                        this.useMultiplePayments && this.multiplePayments.length > 0 ? 'Confirmar Venta - Pago Múltiple' : 'Confirmar Venta',
+                        modalHtml,
+                        this.remainingAmount === 0 && this.useMultiplePayments ? 'Procesar Venta' : 'Confirmar',
                         'Cancelar'
                     );
 
                     if (!confirmed) return;
 
+                    if (this.useMultiplePayments && this.multiplePayments.length > 0 && this.remainingAmount !== 0) {
+                        showToast('Falta completar el pago', 'error');
+                        return;
+                    }
+
                     this.processing = true;
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
                         let notes = [];
+
                         if (this.deliveryType === 'delivery') notes.push(`Delivery: ${this.deliveryAddress}`);
-                        if (this.paymentReference) notes.push(`Ref: ${this.paymentReference}`);
-                        if (this.paymentMethod === 'efectivo_bs' && this.amountReceivedBs > 0) {
-                            notes.push(`Recibido Bs: ${round2(this.amountReceivedBs).toFixed(2)}`);
-                            notes.push(`Cambio Bs: ${(round2(this.amountReceivedBs) - this.totalBs).toFixed(2)}`);
-                        }
-                        if (this.paymentMethod === 'efectivo_divisas' && this.amountReceivedUsd > 0) {
-                            notes.push(`Recibido USD: $${round2(this.amountReceivedUsd).toFixed(2)}`);
-                            notes.push(`Cambio USD: $${(round2(this.amountReceivedUsd) - this.totalUSD).toFixed(2)}`);
+
+                        if (this.useMultiplePayments && this.multiplePayments.length > 0) {
+                            notes.push('Pago Múltiple:');
+                            this.multiplePayments.forEach((p, i) => {
+                                notes.push(`  ${i + 1}. ${this.getPaymentMethodName(p.method)}: $${p.amount.toFixed(2)}`);
+                            });
+                        } else {
+                            if (this.paymentReference) notes.push(`Ref: ${this.paymentReference}`);
+                            if (this.paymentMethod === 'efectivo_bs' && this.amountReceivedBs > 0) {
+                                notes.push(`Recibido Bs: ${round2(this.amountReceivedBs).toFixed(2)}`);
+                                notes.push(`Cambio Bs: ${(round2(this.amountReceivedBs) - this.totalBs).toFixed(2)}`);
+                            }
+                            if (this.paymentMethod === 'efectivo_divisas' && this.amountReceivedUsd > 0) {
+                                notes.push(`Recibido USD: $${round2(this.amountReceivedUsd).toFixed(2)}`);
+                                notes.push(`Cambio USD: $${(round2(this.amountReceivedUsd) - this.totalUSD).toFixed(2)}`);
+                            }
                         }
 
                         const { data: sale, error: saleError } = await supabase.from('sales').insert({
@@ -1489,7 +1633,7 @@
                             subtotal: this.subtotal,
                             tax: 0,
                             total: this.totalUSD,
-                            payment_method: this.paymentMethod,
+                            payment_method: this.useMultiplePayments && this.multiplePayments.length > 0 ? 'multiple' : this.paymentMethod,
                             status: this.paymentMethod === 'credito' ? 'pending' : 'completed',
                             notes: notes.join('\n') || null,
                             created_by: session.user.id
@@ -1550,6 +1694,8 @@
                         this.paymentReference = '';
                         this.amountReceivedBs = 0;
                         this.amountReceivedUsd = 0;
+                        this.multiplePayments = [];
+                        this.useMultiplePayments = false;
                         this.closeCart();
                         await this.loadProducts();
                     } catch (err) {
@@ -1563,6 +1709,17 @@
                     } finally {
                         this.processing = false;
                     }
+                },
+
+                getPaymentMethodName(method) {
+                    const names = {
+                        'efectivo_bs': 'Efectivo Bs',
+                        'efectivo_divisas': 'Efectivo USD',
+                        'pago_movil': 'Pago Móvil',
+                        'transferencia': 'Transferencia',
+                        'punto_venta': 'Punto de Venta'
+                    };
+                    return names[method] || method;
                 },
 
                 async quickSale() {
