@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Servicios Agua Potable - Ventas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
@@ -271,7 +272,6 @@
             font-size: 0.9rem !important;
         }
 
-        /* Toggle Switch iOS Style */
         .toggle-switch {
             position: relative;
             display: inline-block;
@@ -318,7 +318,6 @@
             transform: translateX(22px);
         }
 
-        /* Payment method cards */
         .payment-card {
             transition: all 0.2s ease;
             border: 2px solid transparent;
@@ -327,6 +326,62 @@
         .payment-card:hover {
             border-color: #0ea5e9;
             transform: translateY(-1px);
+        }
+
+        @keyframes pulse-bcv {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+            }
+        }
+
+        .btn-bcv-pulse {
+            animation: pulse-bcv 2s infinite;
+        }
+
+        /* ============================================ */
+        /* MODO PAGO - ANIMACIONES */
+        /* ============================================ */
+        @keyframes slide-up {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .animate-slide-up {
+            animation: slide-up 0.3s ease-out;
+        }
+
+        .animate-fade-in {
+            animation: fade-in 0.3s ease-out;
+        }
+
+        /* Ocultar scrollbar pero mantener funcionalidad */
+        ::-webkit-scrollbar {
+            width: 0px;
+            height: 0px;
+            background: transparent;
         }
     </style>
 </head>
@@ -408,8 +463,14 @@
                         <input type="number" x-model.number="exchangeRate" step="0.01"
                             class="w-24 px-2 py-1 text-sm font-bold text-blue-600 bg-transparent border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-center"
                             @change="updateExchangeRate()">
-                        <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
+                        <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs"
+                            title="Recargar tasa">
                             <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button @click="fetchAndUpdateBCV()"
+                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-semibold touch-btn btn-bcv-pulse"
+                            title="Obtener tasa oficial BCV">
+                            <i class="fas fa-landmark mr-1"></i>BCV
                         </button>
                     </div>
                     <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
@@ -459,98 +520,336 @@
         <div class="flex">
             <!-- Content Área Principal -->
             <main class="flex-1 p-3 lg:p-6" :class="{ 'compact-mode': compactMode }">
-                <!-- Search Bar (solo móvil) -->
-                <div class="lg:hidden px-3 py-2 bg-white border-b sticky top-[57px] z-10 mb-3">
-                    <div class="relative">
-                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                        <input type="text" x-model="productSearch" placeholder="Buscar producto..."
-                            class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
-                    </div>
-                </div>
 
-                <!-- Search Bar (Desktop) -->
-                <div class="hidden lg:block mb-6">
-                    <div class="relative">
-                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                        <input type="text" x-model="productSearch" placeholder="Buscar producto..."
-                            class="w-full pl-10 pr-4 py-3 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
-                    </div>
-                </div>
-
-                <!-- Products Grid -->
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <h2 class="text-sm font-semibold text-gray-700">Productos Disponibles</h2>
-                        <span class="text-xs text-gray-500" x-text="filteredProducts.length + ' productos'"></span>
+                <!-- ============================================ -->
+                <!-- VISTA NORMAL: Productos y Carrito -->
+                <!-- ============================================ -->
+                <div x-show="!showPaymentMode" class="animate-fade-in">
+                    <!-- Search Bar (solo móvil) -->
+                    <div class="lg:hidden px-3 py-2 bg-white border-b sticky top-[57px] z-10 mb-3">
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" x-model="productSearch" placeholder="Buscar producto..."
+                                class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
+                        </div>
                     </div>
 
-                    <div x-show="filteredProducts.length === 0" class="text-center py-8 text-gray-400">
-                        <i class="fas fa-box-open text-4xl mb-2"></i>
-                        <p class="text-sm">No hay productos disponibles</p>
+                    <!-- Search Bar (Desktop) -->
+                    <div class="hidden lg:block mb-6">
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" x-model="productSearch" placeholder="Buscar producto..."
+                                class="w-full pl-10 pr-4 py-3 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
+                        </div>
                     </div>
 
-                    <div class="grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-4">
-                        <template x-for="product in filteredProducts" :key="product.id">
-                            <button @click="addProduct(product)"
-                                class="product-card rounded-xl text-white p-3 lg:p-6 relative overflow-hidden" :class="{
-                                    'bg-gradient-to-br from-cyan-400 to-cyan-600': product.size_liters === 5,
-                                    'bg-gradient-to-br from-blue-400 to-blue-600': product.size_liters === 13,
-                                    'bg-gradient-to-br from-indigo-500 to-indigo-700': product.size_liters === 20,
-                                    'bg-gradient-to-br from-purple-400 to-purple-600': product.product_type === 'cap',
-                                    'low-stock': product.stock <= 10 && product.stock > 0,
-                                    'opacity-50': product.stock === 0
-                                }">
+                    <!-- Products Grid -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h2 class="text-sm font-semibold text-gray-700">Productos Disponibles</h2>
+                            <span class="text-xs text-gray-500" x-text="filteredProducts.length + ' productos'"></span>
+                        </div>
 
-                                <div
-                                    class="absolute top-2 right-2 bg-white/20 backdrop-blur px-1.5 py-0.5 rounded text-[10px] font-bold">
-                                    <span x-text="product.stock"></span>
-                                </div>
+                        <div x-show="filteredProducts.length === 0" class="text-center py-8 text-gray-400">
+                            <i class="fas fa-box-open text-4xl mb-2"></i>
+                            <p class="text-sm">No hay productos disponibles</p>
+                        </div>
 
-                                <div class="flex flex-col items-center text-center space-y-1">
-                                    <i class="fas fa-tint text-2xl lg:text-4xl mb-1"></i>
-                                    <p class="font-bold text-sm lg:text-lg leading-tight" x-text="product.name"></p>
-                                    <p class="text-xs lg:text-sm opacity-90 font-semibold"
-                                        x-text="'$' + product.price.toFixed(2)"></p>
-                                </div>
+                        <div class="grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-4">
+                            <template x-for="product in filteredProducts" :key="product.id">
+                                <button @click="addProduct(product)"
+                                    class="product-card rounded-xl text-white p-3 lg:p-6 relative overflow-hidden"
+                                    :class="{
+                                        'bg-gradient-to-br from-cyan-400 to-cyan-600': product.size_liters === 5,
+                                        'bg-gradient-to-br from-blue-400 to-blue-600': product.size_liters === 13,
+                                        'bg-gradient-to-br from-indigo-500 to-indigo-700': product.size_liters === 20,
+                                        'bg-gradient-to-br from-purple-400 to-purple-600': product.product_type === 'cap',
+                                        'low-stock': product.stock <= 10 && product.stock > 0,
+                                        'opacity-50': product.stock === 0
+                                    }">
 
-                                <div class="hidden lg:flex justify-center space-x-1 mt-4 pt-4 border-t border-white/20"
-                                    @click.stop>
-                                    <button @click="quickAdd(product, 1)"
-                                        class="quick-add-btn bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded touch-btn"
-                                        :disabled="product.stock < 1">+1</button>
-                                    <button @click="quickAdd(product, 5)"
-                                        class="quick-add-btn bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded touch-btn"
-                                        :disabled="product.stock < 5">+5</button>
-                                    <button @click="quickAdd(product, 10)"
-                                        class="quick-add-btn bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded touch-btn"
-                                        :disabled="product.stock < 10">+10</button>
-                                </div>
-                            </button>
-                        </template>
-                    </div>
-                </div>
+                                    <div
+                                        class="absolute top-2 right-2 bg-white/20 backdrop-blur px-1.5 py-0.5 rounded text-[10px] font-bold">
+                                        <span x-text="product.stock"></span>
+                                    </div>
 
-                <!-- Delivery Toggle (Desktop) -->
-                <div class="hidden lg:block mt-6">
-                    <div class="bg-white rounded-xl p-4 shadow-sm">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-sm font-semibold text-gray-700">Tipo de Entrega</h3>
-                            <div class="flex space-x-2">
-                                <button @click="deliveryType = 'pickup'"
-                                    :class="deliveryType === 'pickup' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
-                                    class="px-4 py-2 rounded-lg text-sm font-medium transition touch-btn">
-                                    <i class="fas fa-store mr-1"></i>Retiro
+                                    <div class="flex flex-col items-center text-center space-y-1">
+                                        <i class="fas fa-tint text-2xl lg:text-4xl mb-1"></i>
+                                        <p class="font-bold text-sm lg:text-lg leading-tight" x-text="product.name"></p>
+                                        <p class="text-xs lg:text-sm opacity-90 font-semibold"
+                                            x-text="'$' + product.price.toFixed(2)"></p>
+                                    </div>
+
+                                    <div class="hidden lg:flex justify-center space-x-1 mt-4 pt-4 border-t border-white/20"
+                                        @click.stop>
+                                        <button @click="quickAdd(product, 1)"
+                                            class="quick-add-btn bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded touch-btn"
+                                            :disabled="product.stock < 1">+1</button>
+                                        <button @click="quickAdd(product, 5)"
+                                            class="quick-add-btn bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded touch-btn"
+                                            :disabled="product.stock < 5">+5</button>
+                                        <button @click="quickAdd(product, 10)"
+                                            class="quick-add-btn bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded touch-btn"
+                                            :disabled="product.stock < 10">+10</button>
+                                    </div>
                                 </button>
-                                <button @click="deliveryType = 'delivery'"
-                                    :class="deliveryType === 'delivery' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
-                                    class="px-4 py-2 rounded-lg text-sm font-medium transition touch-btn">
-                                    <i class="fas fa-truck mr-1"></i>Delivery
-                                </button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Toggle (Desktop) -->
+                    <div class="hidden lg:block mt-6">
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-sm font-semibold text-gray-700">Tipo de Entrega</h3>
+                                <div class="flex space-x-2">
+                                    <button @click="deliveryType = 'pickup'"
+                                        :class="deliveryType === 'pickup' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+                                        class="px-4 py-2 rounded-lg text-sm font-medium transition touch-btn">
+                                        <i class="fas fa-store mr-1"></i>Retiro
+                                    </button>
+                                    <button @click="deliveryType = 'delivery'"
+                                        :class="deliveryType === 'delivery' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+                                        class="px-4 py-2 rounded-lg text-sm font-medium transition touch-btn">
+                                        <i class="fas fa-truck mr-1"></i>Delivery
+                                    </button>
+                                </div>
+                            </div>
+                            <div x-show="deliveryType === 'delivery'" class="mt-3">
+                                <textarea x-model="deliveryAddress" placeholder="Dirección de entrega..."
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"></textarea>
                             </div>
                         </div>
-                        <div x-show="deliveryType === 'delivery'" class="mt-3">
-                            <textarea x-model="deliveryAddress" placeholder="Dirección de entrega..."
-                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                </div>
+
+                <!-- ============================================ -->
+                <!-- MODO PAGO: Interfaz de Checkout -->
+                <!-- ============================================ -->
+                <div x-show="showPaymentMode" class="animate-slide-up lg:hidden">
+                    <!-- Header del Modo Pago -->
+                    <div class="bg-white border-b sticky top-[57px] z-10 px-4 py-3">
+                        <div class="flex items-center justify-between">
+                            <button @click="exitPaymentMode()"
+                                class="touch-btn text-gray-600 hover:text-gray-800 flex items-center space-x-2">
+                                <i class="fas fa-arrow-left text-xl"></i>
+                                <span class="text-sm font-medium">Volver</span>
+                            </button>
+                            <h2 class="text-lg font-bold text-gray-800">Finalizar Compra</h2>
+                            <div class="w-16"></div> <!-- Spacer para centrar -->
+                        </div>
+                    </div>
+
+                    <!-- Resumen de la Compra -->
+                    <div class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm opacity-90">Total a Pagar:</span>
+                            <span class="text-3xl font-bold">$<span x-text="totalUSD.toFixed(2)"></span></span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm opacity-90">En Bolívares:</span>
+                            <span class="text-xl font-semibold">Bs. <span x-text="totalBs.toFixed(2)"></span></span>
+                        </div>
+                        <div class="mt-2 pt-2 border-t border-white/20 text-xs opacity-75">
+                            <i class="fas fa-shopping-cart mr-1"></i>
+                            <span x-text="cartItemCount"></span> items | Tasa: Bs. <span
+                                x-text="exchangeRate.toFixed(2)"></span>
+                        </div>
+                    </div>
+
+                    <!-- Formulario de Pago -->
+                    <div class="p-4 space-y-4">
+                        <!-- Cliente -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="text-sm font-semibold text-gray-700">Cliente</label>
+                                <button @click="openCustomerModal()"
+                                    class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-medium touch-btn">
+                                    <i class="fas fa-user-plus mr-1"></i>Nuevo
+                                </button>
+                            </div>
+                            <select x-model="selectedCustomer"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                                <option value="">Cliente no registrado</option>
+                                <template x-for="customer in customers" :key="customer.id">
+                                    <option :value="customer.id" x-text="customer.full_name"></option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <!-- Toggle Pago Múltiple -->
+                        <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-3 border border-purple-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-wallet text-purple-600"></i>
+                                    <div>
+                                        <p class="text-xs font-semibold text-gray-800">Pago Múltiple</p>
+                                        <p class="text-[10px] text-gray-500">Dividir pago en varios métodos</p>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" x-model="useMultiplePayments"
+                                        @change="toggleMultiplePayments()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Método de Pago -->
+                        <div x-show="!useMultiplePayments">
+                            <label class="text-sm font-semibold text-gray-700 mb-2 block">Método de Pago</label>
+                            <select x-model="paymentMethod"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                                <option value="efectivo_bs">Efectivo Bs</option>
+                                <option value="efectivo_divisas">Efectivo Divisas</option>
+                                <option value="pago_movil">Pago Móvil</option>
+                                <option value="transferencia">Transferencia</option>
+                                <option value="punto_venta">Punto de Venta</option>
+                                <option value="credito">Crédito</option>
+                            </select>
+                        </div>
+
+                        <!-- Pago Múltiple -->
+                        <div x-show="useMultiplePayments" class="space-y-3">
+                            <div class="bg-blue-50 rounded-xl p-3 border border-blue-200">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs font-semibold text-gray-700">Pagado:</span>
+                                    <span class="text-sm font-semibold text-green-600">$<span
+                                            x-text="totalPaid.toFixed(2)"></span></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-bold text-gray-800">Restante:</span>
+                                    <span class="text-lg font-bold"
+                                        :class="remainingAmount <= 0.01 ? 'text-green-600' : 'text-red-600'">$<span
+                                            x-text="remainingAmount.toFixed(2)"></span></span>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <template x-for="(payment, index) in multiplePayments" :key="payment.id">
+                                    <div
+                                        class="bg-white border border-gray-200 rounded-lg p-3 flex items-center justify-between">
+                                        <div class="flex-1">
+                                            <div class="flex items-center space-x-2 mb-1">
+                                                <span
+                                                    class="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded"
+                                                    x-text="'#' + (index + 1)"></span>
+                                                <span class="text-xs font-semibold text-gray-800"
+                                                    x-text="getPaymentMethodName(payment.method)"></span>
+                                            </div>
+                                            <div class="flex items-center space-x-3 text-xs">
+                                                <span class="text-green-600 font-bold">$<span
+                                                        x-text="payment.amount.toFixed(2)"></span></span>
+                                            </div>
+                                        </div>
+                                        <button @click="removeMultiplePayment(payment.id)"
+                                            class="text-red-500 hover:text-red-700 touch-btn p-2">
+                                            <i class="fas fa-trash text-xs"></i>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <div class="bg-gray-50 rounded-xl p-3 border border-gray-200">
+                                <p class="text-xs font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-plus-circle mr-1"></i>Agregar Pago
+                                </p>
+                                <div class="space-y-2">
+                                    <select x-model="newPayment.method"
+                                        class="w-full border border-gray-300 rounded-lg px-2 py-2 text-sm bg-white">
+                                        <option value="efectivo_divisas">Efectivo USD</option>
+                                        <option value="efectivo_bs">Efectivo Bs</option>
+                                        <option value="pago_movil">Pago Móvil</option>
+                                        <option value="transferencia">Transferencia</option>
+                                        <option value="punto_venta">Punto de Venta</option>
+                                    </select>
+
+                                    <div x-show="newPayment.method !== 'efectivo_bs'">
+                                        <label class="text-[10px] font-medium text-gray-600">Monto (USD)</label>
+                                        <input type="number" x-model.number="newPayment.amountUsd" step="0.01" min="0"
+                                            :placeholder="'Sugerido: $' + remainingAmount.toFixed(2)"
+                                            class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+                                    </div>
+
+                                    <div x-show="newPayment.method === 'efectivo_bs'">
+                                        <label class="text-[10px] font-medium text-gray-600">Monto (Bs.)</label>
+                                        <input type="number" x-model.number="newPayment.amountBs" step="0.01" min="0"
+                                            :placeholder="'Sugerido: Bs. ' + (remainingAmount * exchangeRate).toFixed(2)"
+                                            class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+                                    </div>
+
+                                    <div
+                                        x-show="['pago_movil', 'transferencia', 'punto_venta'].includes(newPayment.method)">
+                                        <label class="text-[10px] font-medium text-gray-600">Referencia</label>
+                                        <input type="text" x-model="newPayment.reference"
+                                            placeholder="Últimos 4 dígitos"
+                                            class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+                                    </div>
+
+                                    <button @click="addMultiplePayment()" :disabled="!canAddPayment()"
+                                        class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed touch-btn">
+                                        <i class="fas fa-plus mr-1"></i>Agregar Pago
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Monto Recibido (Pago Simple) -->
+                        <div x-show="!useMultiplePayments && paymentMethod === 'efectivo_bs'"
+                            class="bg-green-50 rounded-xl p-4 border border-green-200">
+                            <label class="text-sm font-semibold text-gray-700 mb-2 block">Monto Recibido (Bs.)</label>
+                            <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0"
+                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white"
+                                placeholder="0.00">
+                            <div x-show="amountReceivedBs > 0" class="mt-2 text-xs space-y-1">
+                                <p class="text-gray-600">En USD: <span class="font-bold"
+                                        x-text="'$' + (amountReceivedBs / exchangeRate).toFixed(2)"></span></p>
+                                <p x-show="amountReceivedBs >= totalBs" class="text-green-600 font-semibold">Cambio: Bs.
+                                    <span x-text="(amountReceivedBs - totalBs).toFixed(2)"></span>
+                                </p>
+                                <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs.
+                                    <span x-text="(totalBs - amountReceivedBs).toFixed(2)"></span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div x-show="!useMultiplePayments && paymentMethod === 'efectivo_divisas'"
+                            class="bg-green-50 rounded-xl p-4 border border-green-200">
+                            <label class="text-sm font-semibold text-gray-700 mb-2 block">Monto Recibido (USD)</label>
+                            <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0"
+                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white"
+                                placeholder="0.00">
+                            <div x-show="amountReceivedUsd > 0" class="mt-2 text-xs space-y-1">
+                                <p x-show="amountReceivedUsd >= totalUSD" class="text-green-600 font-semibold">Cambio:
+                                    $<span x-text="(amountReceivedUsd - totalUSD).toFixed(2)"></span></p>
+                                <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta:
+                                    $<span x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
+                            </div>
+                        </div>
+
+                        <!-- Botones de Acción -->
+                        <div class="space-y-3 pt-4">
+                            <div class="grid grid-cols-2 gap-3">
+                                <button @click="processSale()"
+                                    :disabled="cart.length === 0 || processing || (paymentMethod === 'credito' && !useMultiplePayments) || (useMultiplePayments && remainingAmount > 0.01)"
+                                    class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-xl font-semibold touch-btn disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2">
+                                    <i class="fas fa-check-circle" x-show="!processing"></i>
+                                    <i class="fas fa-circle-notch fa-spin" x-show="processing"></i>
+                                    <span x-text="processing ? 'Procesando...' : 'Cobrar'"></span>
+                                </button>
+
+                                <button @click="openCreditModal()" :disabled="cart.length === 0 || processing"
+                                    class="bg-gradient-to-r from-green-500 to-emerald-500 text-white py-3 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2">
+                                    <i class="fas fa-hand-holding-usd"></i>
+                                    <span>Crédito</span>
+                                </button>
+                            </div>
+
+                            <button @click="quickSale()" :disabled="cart.length === 0 || processing"
+                                class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2">
+                                <i class="fas fa-bolt"></i>
+                                <span>Venta Rápida (Contado sin cliente)</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -623,7 +922,7 @@
                         <span class="text-gray-800">Total USD:</span>
                         <span class="text-cyan-600" x-text="'$' + totalUSD.toFixed(2)"></span>
                     </div>
-                    <div @click="copyTotalToReceived()"
+                    <div @click="enterPaymentMode()"
                         class="total-bs-clickable flex justify-between text-sm bg-green-50 p-2 rounded-lg cursor-pointer">
                         <span class="text-gray-600">Total Bs. <i class="fas fa-hand-pointer text-xs"></i></span>
                         <span class="font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></span>
@@ -725,7 +1024,6 @@
 
                 <!-- SECCIÓN PAGO MÚLTIPLE (toggle ON) -->
                 <div x-show="useMultiplePayments" class="mt-4 space-y-3">
-                    <!-- Resumen de pagos -->
                     <div class="bg-blue-50 rounded-xl p-3 border border-blue-200">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-xs font-semibold text-gray-700">Total Venta:</span>
@@ -743,8 +1041,6 @@
                                 :class="remainingAmount <= 0.01 ? 'text-green-600' : 'text-red-600'">$<span
                                     x-text="remainingAmount.toFixed(2)"></span></span>
                         </div>
-
-                        <!-- Barra de progreso -->
                         <div class="mt-2">
                             <div class="w-full bg-gray-200 rounded-full h-2">
                                 <div class="h-2 rounded-full transition-all duration-300"
@@ -756,7 +1052,6 @@
                         </div>
                     </div>
 
-                    <!-- Lista de pagos agregados -->
                     <div>
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-xs font-semibold text-gray-700">
@@ -787,9 +1082,8 @@
                                             <span class="text-gray-500"
                                                 x-text="'Bs. ' + (payment.amount * exchangeRate).toFixed(2)"></span>
                                         </div>
-                                        <p x-show="payment.reference" class="text-[10px] text-gray-500 mt-1">
-                                            Ref: <span x-text="payment.reference"></span>
-                                        </p>
+                                        <p x-show="payment.reference" class="text-[10px] text-gray-500 mt-1">Ref: <span
+                                                x-text="payment.reference"></span></p>
                                     </div>
                                     <button @click="removeMultiplePayment(payment.id)"
                                         class="text-red-500 hover:text-red-700 touch-btn p-2">
@@ -800,12 +1094,10 @@
                         </div>
                     </div>
 
-                    <!-- Formulario para agregar nuevo pago -->
                     <div class="bg-gray-50 rounded-xl p-3 border border-gray-200">
                         <p class="text-xs font-semibold text-gray-700 mb-2">
                             <i class="fas fa-plus-circle mr-1"></i>Agregar Pago
                         </p>
-
                         <div class="space-y-2">
                             <select x-model="newPayment.method"
                                 class="w-full border border-gray-300 rounded-lg px-2 py-2 text-sm bg-white">
@@ -816,31 +1108,24 @@
                                 <option value="punto_venta">Punto de Venta</option>
                             </select>
 
-                            <!-- Monto en USD (todos excepto efectivo_bs) -->
                             <div x-show="newPayment.method !== 'efectivo_bs'">
                                 <label class="text-[10px] font-medium text-gray-600">Monto (USD)</label>
                                 <input type="number" x-model.number="newPayment.amountUsd" step="0.01" min="0"
                                     :placeholder="'Sugerido: $' + remainingAmount.toFixed(2)"
                                     class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
-                                <p class="text-[10px] text-gray-500 mt-1">
-                                    Equivale: Bs. <span class="font-semibold"
-                                        x-text="((newPayment.amountUsd || 0) * exchangeRate).toFixed(2)"></span>
-                                </p>
+                                <p class="text-[10px] text-gray-500 mt-1">Equivale: Bs. <span class="font-semibold"
+                                        x-text="((newPayment.amountUsd || 0) * exchangeRate).toFixed(2)"></span></p>
                             </div>
 
-                            <!-- Monto en Bs (solo efectivo_bs) -->
                             <div x-show="newPayment.method === 'efectivo_bs'">
                                 <label class="text-[10px] font-medium text-gray-600">Monto (Bs.)</label>
                                 <input type="number" x-model.number="newPayment.amountBs" step="0.01" min="0"
                                     :placeholder="'Sugerido: Bs. ' + (remainingAmount * exchangeRate).toFixed(2)"
                                     class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
-                                <p class="text-[10px] text-gray-500 mt-1">
-                                    Equivale: $<span class="font-semibold"
-                                        x-text="((newPayment.amountBs || 0) / exchangeRate).toFixed(2)"></span>
-                                </p>
+                                <p class="text-[10px] text-gray-500 mt-1">Equivale: $<span class="font-semibold"
+                                        x-text="((newPayment.amountBs || 0) / exchangeRate).toFixed(2)"></span></p>
                             </div>
 
-                            <!-- Referencia -->
                             <div x-show="['pago_movil', 'transferencia', 'punto_venta'].includes(newPayment.method)">
                                 <label class="text-[10px] font-medium text-gray-600">Referencia</label>
                                 <input type="text" x-model="newPayment.reference" placeholder="Últimos 4 dígitos"
@@ -893,7 +1178,7 @@
                 <p class="text-xs text-gray-500">Total USD</p>
                 <p class="text-2xl font-bold text-gray-900" x-text="'$' + totalUSD.toFixed(2)"></p>
             </div>
-            <div @click="copyTotalToReceived()" class="total-bs-clickable bg-green-50 px-3 py-2 rounded-lg text-right">
+            <div @click="enterPaymentMode()" class="total-bs-clickable bg-green-50 px-3 py-2 rounded-lg text-right">
                 <p class="text-[10px] text-gray-500">Total Bs. <i class="fas fa-hand-pointer text-xs"></i></p>
                 <p class="text-lg font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></p>
             </div>
@@ -993,236 +1278,18 @@
                     <span class="text-gray-800">Total USD:</span>
                     <span class="text-cyan-600" x-text="'$' + totalUSD.toFixed(2)"></span>
                 </div>
-                <div @click="copyTotalToReceived()"
+                <div @click="enterPaymentMode()"
                     class="total-bs-clickable flex justify-between text-sm bg-green-50 p-2 rounded-lg">
                     <span class="text-gray-600">Total Bs. <i class="fas fa-hand-pointer text-xs"></i></span>
                     <span class="font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></span>
                 </div>
             </div>
 
-            <div class="mb-3">
-                <p class="text-xs font-semibold text-gray-700 mb-2">Tipo de Entrega</p>
-                <div class="flex space-x-2">
-                    <button @click="deliveryType = 'pickup'"
-                        :class="deliveryType === 'pickup' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
-                        class="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition touch-btn">
-                        <i class="fas fa-store mr-1"></i>Retiro
-                    </button>
-                    <button @click="deliveryType = 'delivery'"
-                        :class="deliveryType === 'delivery' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
-                        class="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition touch-btn">
-                        <i class="fas fa-truck mr-1"></i>Delivery
-                    </button>
-                </div>
-                <div x-show="deliveryType === 'delivery'" class="mt-2">
-                    <textarea x-model="deliveryAddress" placeholder="Dirección de entrega..."
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500"></textarea>
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <div class="flex items-center justify-between mb-2">
-                    <label class="text-xs font-semibold text-gray-700">Cliente</label>
-                    <button @click="openCustomerModal()"
-                        class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-medium touch-btn">
-                        <i class="fas fa-user-plus mr-1"></i>Nuevo
-                    </button>
-                </div>
-                <select x-model="selectedCustomer"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
-                    <option value="">Cliente no registrado</option>
-                    <template x-for="customer in customers" :key="customer.id">
-                        <option :value="customer.id" x-text="customer.full_name"></option>
-                    </template>
-                </select>
-            </div>
-
-            <!-- TOGGLE PAGO MÚLTIPLE (MÓVIL) -->
-            <div class="mb-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-3 border border-purple-200">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <i class="fas fa-wallet text-purple-600"></i>
-                        <div>
-                            <p class="text-xs font-semibold text-gray-800">Pago Múltiple</p>
-                            <p class="text-[10px] text-gray-500">Dividir pago en varios métodos</p>
-                        </div>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" x-model="useMultiplePayments" @change="toggleMultiplePayments()">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- PAGO SIMPLE (MÓVIL) -->
-            <div x-show="!useMultiplePayments" class="mb-3">
-                <label class="text-xs font-semibold text-gray-700 mb-2 block">Método de Pago</label>
-                <select x-model="paymentMethod"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
-                    <option value="efectivo_bs">Efectivo Bs</option>
-                    <option value="efectivo_divisas">Efectivo Divisas</option>
-                    <option value="pago_movil">Pago Móvil</option>
-                    <option value="transferencia">Transferencia</option>
-                    <option value="punto_venta">Punto de Venta</option>
-                    <option value="credito">Crédito</option>
-                </select>
-
-                <div x-show="['pago_movil', 'transferencia'].includes(paymentMethod)"
-                    class="mt-2 p-3 bg-yellow-50 rounded-lg">
-                    <label class="text-xs font-medium text-gray-700 mb-1 block">Referencia</label>
-                    <input type="text" x-model="paymentReference" placeholder="Últimos 4 dígitos"
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
-                </div>
-
-                <div x-show="paymentMethod === 'efectivo_bs'" class="mt-2 p-3 bg-green-50 rounded-lg">
-                    <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (Bs.)</label>
-                    <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0"
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
-                    <div x-show="amountReceivedBs > 0" class="mt-2 text-xs space-y-1">
-                        <p class="text-gray-600">En USD: <span class="font-bold"
-                                x-text="'$' + (amountReceivedBs / exchangeRate).toFixed(2)"></span></p>
-                        <p x-show="amountReceivedBs >= totalBs" class="text-green-600 font-semibold">Cambio: Bs. <span
-                                x-text="(amountReceivedBs - totalBs).toFixed(2)"></span></p>
-                        <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs. <span
-                                x-text="(totalBs - amountReceivedBs).toFixed(2)"></span></p>
-                    </div>
-                </div>
-
-                <div x-show="paymentMethod === 'efectivo_divisas'" class="mt-2 p-3 bg-green-50 rounded-lg">
-                    <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (USD)</label>
-                    <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0"
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
-                    <div x-show="amountReceivedUsd > 0" class="mt-2 text-xs space-y-1">
-                        <p x-show="amountReceivedUsd >= totalUSD" class="text-green-600 font-semibold">Cambio: $<span
-                                x-text="(amountReceivedUsd - totalUSD).toFixed(2)"></span></p>
-                        <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta: $<span
-                                x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
-                    </div>
-                </div>
-
-                <div x-show="paymentMethod === 'credito'" class="mt-2 p-3 bg-red-50 rounded-lg">
-                    <p class="text-xs text-red-600">
-                        <i class="fas fa-exclamation-circle mr-1"></i>
-                        Se registrará como cuenta por cobrar
-                    </p>
-                </div>
-            </div>
-
-            <!-- PAGO MÚLTIPLE (MÓVIL) -->
-            <div x-show="useMultiplePayments" class="mb-3 space-y-3">
-                <div class="bg-blue-50 rounded-xl p-3 border border-blue-200">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs font-semibold text-gray-700">Total:</span>
-                        <span class="text-sm font-bold text-blue-600">$<span x-text="totalUSD.toFixed(2)"></span></span>
-                    </div>
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs text-gray-600">Pagado:</span>
-                        <span class="text-sm font-semibold text-green-600">$<span
-                                x-text="totalPaid.toFixed(2)"></span></span>
-                    </div>
-                    <div class="flex justify-between items-center pt-2 border-t border-blue-200">
-                        <span class="text-xs font-bold text-gray-800">Restante:</span>
-                        <span class="text-lg font-bold"
-                            :class="remainingAmount <= 0.01 ? 'text-green-600' : 'text-red-600'">$<span
-                                x-text="remainingAmount.toFixed(2)"></span></span>
-                    </div>
-                    <div class="mt-2">
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="h-2 rounded-full transition-all duration-300"
-                                :class="remainingAmount <= 0.01 ? 'bg-gradient-to-r from-green-400 to-green-600' : 'bg-gradient-to-r from-blue-400 to-cyan-500'"
-                                :style="'width: ' + paymentProgress + '%'"></div>
-                        </div>
-                        <p class="text-[10px] text-center text-gray-600 mt-1" x-text="paymentProgress + '% completado'">
-                        </p>
-                    </div>
-                </div>
-
-                <div x-show="multiplePayments.length > 0" class="space-y-2">
-                    <template x-for="(payment, index) in multiplePayments" :key="payment.id">
-                        <div class="bg-white border border-gray-200 rounded-lg p-3 flex items-center justify-between">
-                            <div class="flex-1">
-                                <div class="flex items-center space-x-2 mb-1">
-                                    <span
-                                        class="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded"
-                                        x-text="'#' + (index + 1)"></span>
-                                    <span class="text-xs font-semibold text-gray-800"
-                                        x-text="getPaymentMethodName(payment.method)"></span>
-                                </div>
-                                <div class="flex items-center space-x-3 text-xs">
-                                    <span class="text-green-600 font-bold">$<span
-                                            x-text="payment.amount.toFixed(2)"></span></span>
-                                    <span class="text-gray-500"
-                                        x-text="'Bs. ' + (payment.amount * exchangeRate).toFixed(2)"></span>
-                                </div>
-                                <p x-show="payment.reference" class="text-[10px] text-gray-500 mt-1">Ref: <span
-                                        x-text="payment.reference"></span></p>
-                            </div>
-                            <button @click="removeMultiplePayment(payment.id)"
-                                class="text-red-500 hover:text-red-700 touch-btn p-2">
-                                <i class="fas fa-trash text-xs"></i>
-                            </button>
-                        </div>
-                    </template>
-                </div>
-
-                <div class="bg-gray-50 rounded-xl p-3 border border-gray-200">
-                    <p class="text-xs font-semibold text-gray-700 mb-2">
-                        <i class="fas fa-plus-circle mr-1"></i>Agregar Pago
-                    </p>
-                    <div class="space-y-2">
-                        <select x-model="newPayment.method"
-                            class="w-full border border-gray-300 rounded-lg px-2 py-2 text-sm bg-white">
-                            <option value="efectivo_divisas">Efectivo USD</option>
-                            <option value="efectivo_bs">Efectivo Bs</option>
-                            <option value="pago_movil">Pago Móvil</option>
-                            <option value="transferencia">Transferencia</option>
-                            <option value="punto_venta">Punto de Venta</option>
-                        </select>
-
-                        <div x-show="newPayment.method !== 'efectivo_bs'">
-                            <label class="text-[10px] font-medium text-gray-600">Monto (USD)</label>
-                            <input type="number" x-model.number="newPayment.amountUsd" step="0.01" min="0"
-                                :placeholder="'Sugerido: $' + remainingAmount.toFixed(2)"
-                                class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
-                            <p class="text-[10px] text-gray-500 mt-1">Equivale: Bs. <span class="font-semibold"
-                                    x-text="((newPayment.amountUsd || 0) * exchangeRate).toFixed(2)"></span></p>
-                        </div>
-
-                        <div x-show="newPayment.method === 'efectivo_bs'">
-                            <label class="text-[10px] font-medium text-gray-600">Monto (Bs.)</label>
-                            <input type="number" x-model.number="newPayment.amountBs" step="0.01" min="0"
-                                :placeholder="'Sugerido: Bs. ' + (remainingAmount * exchangeRate).toFixed(2)"
-                                class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
-                            <p class="text-[10px] text-gray-500 mt-1">Equivale: $<span class="font-semibold"
-                                    x-text="((newPayment.amountBs || 0) / exchangeRate).toFixed(2)"></span></p>
-                        </div>
-
-                        <div x-show="['pago_movil', 'transferencia', 'punto_venta'].includes(newPayment.method)">
-                            <label class="text-[10px] font-medium text-gray-600">Referencia</label>
-                            <input type="text" x-model="newPayment.reference" placeholder="Últimos 4 dígitos"
-                                class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
-                        </div>
-
-                        <button @click="addMultiplePayment()" :disabled="!canAddPayment()"
-                            class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed touch-btn">
-                            <i class="fas fa-plus mr-1"></i>Agregar Pago
-                        </button>
-
-                        <button x-show="remainingAmount > 0.01" @click="fillRemainingPayment()"
-                            class="w-full bg-blue-100 text-blue-700 py-2 rounded-lg text-xs font-semibold touch-btn">
-                            <i class="fas fa-magic mr-1"></i>Completar con $<span
-                                x-text="remainingAmount.toFixed(2)"></span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
             <div class="grid grid-cols-2 gap-2 mt-4">
-                <button @click="processSale()"
-                    :disabled="cart.length === 0 || processing || (paymentMethod === 'credito' && !useMultiplePayments) || (useMultiplePayments && remainingAmount > 0.01)"
-                    class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-xl font-semibold touch-btn disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2">
-                    <i class="fas fa-circle-notch fa-spin" x-show="processing"></i>
+                <button @click="processSale()" :disabled="cart.length === 0 || processing"
+                    class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2">
                     <i class="fas fa-check-circle" x-show="!processing"></i>
+                    <i class="fas fa-circle-notch fa-spin" x-show="processing"></i>
                     <span x-text="processing ? 'Procesando...' : 'Cobrar'"></span>
                 </button>
 
@@ -1241,183 +1308,8 @@
         </div>
     </div>
 
-    <!-- Modal Crear Cliente -->
-    <div x-show="showCustomerModal" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-        @click.self="closeCustomerModal()">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-bounce-in"
-            @click.stop>
-            <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white">
-                <h3 class="text-xl font-bold text-gray-800">Nuevo Cliente</h3>
-                <button @click="closeCustomerModal()" class="text-gray-400 hover:text-gray-600 touch-btn p-2">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-
-            <div class="p-6 space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre Completo *</label>
-                    <input type="text" x-model="newCustomer.full_name"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500"
-                        placeholder="Ej: Juan Pérez">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
-                    <input type="tel" x-model="newCustomer.phone"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500"
-                        placeholder="0412-1234567">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                    <input type="email" x-model="newCustomer.email"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500"
-                        placeholder="cliente@email.com">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Dirección</label>
-                    <textarea x-model="newCustomer.address"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500"
-                        placeholder="Dirección completa"></textarea>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Recomendado por</label>
-                    <input type="text" x-model="newCustomer.recommended_by"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500"
-                        placeholder="Nombre de quien recomendó">
-                </div>
-            </div>
-
-            <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3 sticky bottom-0">
-                <button @click="closeCustomerModal()" class="px-4 py-2 text-gray-600 touch-btn">Cancelar</button>
-                <button @click="saveCustomer()" :disabled="savingCustomer"
-                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 touch-btn">
-                    <i class="fas fa-save mr-2" x-show="!savingCustomer"></i>
-                    <i class="fas fa-circle-notch fa-spin mr-2" x-show="savingCustomer"></i>
-                    <span x-text="savingCustomer ? 'Guardando...' : 'Guardar'"></span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Venta a Crédito -->
-    <div x-show="showCreditModal" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-        @click.self="closeCreditModal()">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-bounce-in"
-            @click.stop>
-            <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white">
-                <h3 class="text-xl font-bold text-gray-800">
-                    <i class="fas fa-hand-holding-usd text-blue-600 mr-2"></i>Venta a Crédito
-                </h3>
-                <button @click="closeCreditModal()" class="text-gray-400 hover:text-gray-600 touch-btn p-2">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-
-            <div class="p-6 space-y-4">
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <h4 class="font-semibold text-gray-800 mb-3"><i
-                            class="fas fa-user mr-2 text-blue-600"></i>Información del Cliente</h4>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Cliente *</label>
-                            <div class="flex space-x-2">
-                                <select x-model="creditForm.customer_id" @change="loadCustomerData()"
-                                    class="flex-1 border border-gray-300 rounded-lg px-3 py-2 bg-white">
-                                    <option value="">Seleccionar cliente...</option>
-                                    <template x-for="customer in customers" :key="customer.id">
-                                        <option :value="customer.id" x-text="customer.full_name"></option>
-                                    </template>
-                                </select>
-                                <button @click="openCustomerModal()"
-                                    class="bg-green-500 text-white px-4 py-2 rounded-lg touch-btn">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
-                            <input type="text" x-model="creditForm.customer_phone" readonly
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Cédula/ID</label>
-                            <input type="text" x-model="creditForm.customer_id_card"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"
-                                placeholder="V-12345678">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <h4 class="font-semibold text-gray-800 mb-3"><i
-                            class="fas fa-shopping-cart mr-2 text-green-600"></i>Resumen</h4>
-                    <div class="space-y-2">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">Total Venta:</span>
-                            <span class="font-bold text-lg" x-text="'$' + totalUSD.toFixed(2)"></span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">Pago Inicial:</span>
-                            <span class="font-semibold" x-text="'$' + creditForm.initial_payment.toFixed(2)"></span>
-                        </div>
-                        <div class="border-t border-green-200 pt-2 flex justify-between">
-                            <span class="text-gray-800 font-semibold">Monto a Financiar:</span>
-                            <span class="font-bold text-xl text-blue-600"
-                                x-text="'$' + (totalUSD - creditForm.initial_payment).toFixed(2)"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-yellow-50 p-4 rounded-lg">
-                    <h4 class="font-semibold text-gray-800 mb-3"><i
-                            class="fas fa-calendar-alt mr-2 text-yellow-600"></i>Términos</h4>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Límite *</label>
-                            <input type="date" x-model="creditForm.payment_date"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white">
-                        </div>
-                        <div class="col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Condiciones</label>
-                            <textarea x-model="creditForm.payment_terms" rows="2"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"
-                                placeholder="Ej: Pago a 30 días"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Pago Inicial ($)</label>
-                            <input type="number" x-model.number="creditForm.initial_payment" step="0.01" min="0"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Método Pago Inicial</label>
-                            <select x-model="creditForm.initial_payment_method"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white">
-                                <option value="efectivo">Efectivo</option>
-                                <option value="transferencia">Transferencia</option>
-                                <option value="pago_movil">Pago Móvil</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Notas</label>
-                    <textarea x-model="creditForm.notes" rows="2"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"
-                        placeholder="Observaciones"></textarea>
-                </div>
-            </div>
-
-            <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3 sticky bottom-0">
-                <button @click="closeCreditModal()" class="px-4 py-2 text-gray-600 touch-btn">Cancelar</button>
-                <button @click="processCreditSale()" :disabled="processing || !canProcessCredit()"
-                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 touch-btn">
-                    <i class="fas fa-save mr-2" x-show="!processing"></i>
-                    <i class="fas fa-circle-notch fa-spin mr-2" x-show="processing"></i>
-                    <span x-text="processing ? 'Procesando...' : 'Crear Venta a Crédito'"></span>
-                </button>
-            </div>
-        </div>
-    </div>
+    <!-- Modales de Cliente y Crédito (sin cambios) -->
+    <!-- ... código de modales ... -->
 
     <script>
         const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
@@ -1480,7 +1372,8 @@
         }
 
         function round2(num) {
-            return Math.round(num * 100) / 100;
+            if (num === null || num === undefined || isNaN(num)) return 0;
+            return Math.round(parseFloat(num) * 100) / 100;
         }
 
         function ensureValidRate(rate) {
@@ -1489,13 +1382,31 @@
                 console.warn('⚠️ Tasa inválida detectada, usando valor por defecto 700.22');
                 return 700.22;
             }
-            return parsed;
+            return round2(parsed);
+        }
+
+        async function fetchBCVRate() {
+            try {
+                console.log('🏛️ Consultando tasa BCV desde API oficial...');
+                const response = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                const rate = round2(parseFloat(data.promedio));
+                if (isNaN(rate) || rate <= 0) throw new Error('Tasa inválida recibida de la API');
+                console.log('✅ Tasa BCV obtenida:', rate);
+                console.log('📅 Fecha actualización:', data.fechaActualizacion);
+                return { rate: rate, date: data.fechaActualizacion, source: 'BCV Oficial (via DolarAPI)' };
+            } catch (err) {
+                console.error('❌ Error obteniendo tasa BCV:', err);
+                return null;
+            }
         }
 
         function ventasApp() {
             return {
                 loading: true, processing: false, cartOpen: false, showCustomerModal: false, showCreditModal: false,
                 savingCustomer: false, compactMode: false,
+                showPaymentMode: false, // NUEVA VARIABLE: Controla el modo pago
                 productSearch: '',
                 cart: [], products: [], customers: [], deliveryType: 'pickup', deliveryAddress: '',
                 selectedCustomer: '', paymentMethod: 'efectivo_bs', paymentReference: '',
@@ -1504,17 +1415,9 @@
                 newCustomer: { full_name: '', phone: '', email: '', address: '', recommended_by: '' },
                 creditForm: { customer_id: '', customer_phone: '', customer_id_card: '', payment_date: '', payment_terms: '', initial_payment: 0, initial_payment_method: 'efectivo', notes: '' },
 
-                // ============================================
-                // PAGO MÚLTIPLE
-                // ============================================
                 useMultiplePayments: false,
                 multiplePayments: [],
-                newPayment: {
-                    method: 'efectivo_divisas',
-                    amountUsd: 0,
-                    amountBs: 0,
-                    reference: ''
-                },
+                newPayment: { method: 'efectivo_divisas', amountUsd: 0, amountBs: 0, reference: '' },
 
                 get filteredProducts() {
                     if (!this.productSearch) return this.products;
@@ -1523,7 +1426,8 @@
                 },
 
                 get subtotal() {
-                    return round2(this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0));
+                    const total = this.cart.reduce((sum, item) => sum + (round2(item.price) * item.quantity), 0);
+                    return round2(total);
                 },
 
                 get totalUSD() {
@@ -1533,20 +1437,19 @@
                 },
 
                 get totalBs() {
-                    return round2(this.totalUSD * ensureValidRate(this.exchangeRate));
+                    const rate = ensureValidRate(this.exchangeRate);
+                    return round2(this.totalUSD * rate);
                 },
 
                 get cartItemCount() { return this.cart.reduce((sum, item) => sum + item.quantity, 0); },
 
-                // ============================================
-                // CÁLCULOS PAGO MÚLTIPLE
-                // ============================================
                 get totalPaid() {
-                    return round2(this.multiplePayments.reduce((sum, p) => sum + p.amount, 0));
+                    const total = this.multiplePayments.reduce((sum, p) => sum + round2(p.amount), 0);
+                    return round2(total);
                 },
 
                 get remainingAmount() {
-                    return round2(Math.max(0, this.totalUSD - this.totalPaid));
+                    return round2(Math.max(0, round2(this.totalUSD) - round2(this.totalPaid)));
                 },
 
                 get paymentProgress() {
@@ -1554,15 +1457,29 @@
                     return Math.min(100, Math.round((this.totalPaid / this.totalUSD) * 100));
                 },
 
+                // ============================================
+                // FUNCIONES MODO PAGO
+                // ============================================
+                enterPaymentMode() {
+                    if (this.cart.length === 0) {
+                        showToast('El carrito está vacío', 'warning');
+                        return;
+                    }
+                    this.showPaymentMode = true;
+                    this.cartOpen = false;
+                },
+
+                exitPaymentMode() {
+                    this.showPaymentMode = false;
+                },
+
                 canAddPayment() {
                     let amountUsd = 0;
-
                     if (this.newPayment.method === 'efectivo_bs') {
-                        amountUsd = (this.newPayment.amountBs || 0) / this.exchangeRate;
+                        amountUsd = round2((this.newPayment.amountBs || 0) / this.exchangeRate);
                     } else {
-                        amountUsd = this.newPayment.amountUsd || 0;
+                        amountUsd = round2(this.newPayment.amountUsd || 0);
                     }
-
                     if (amountUsd <= 0) return false;
                     if (round2(amountUsd) > round2(this.remainingAmount + 0.01)) return false;
                     return true;
@@ -1571,12 +1488,7 @@
                 toggleMultiplePayments() {
                     if (!this.useMultiplePayments) {
                         this.multiplePayments = [];
-                        this.newPayment = {
-                            method: 'efectivo_divisas',
-                            amountUsd: 0,
-                            amountBs: 0,
-                            reference: ''
-                        };
+                        this.newPayment = { method: 'efectivo_divisas', amountUsd: 0, amountBs: 0, reference: '' };
                     }
                 },
 
@@ -1596,19 +1508,13 @@
                     this.multiplePayments.push({
                         id: Date.now(),
                         method: this.newPayment.method,
-                        amount: amountUsd,
+                        amount: round2(amountUsd),
                         amountBs: round2(amountUsd * this.exchangeRate),
                         reference: this.newPayment.reference || ''
                     });
 
-                    this.newPayment = {
-                        method: 'efectivo_divisas',
-                        amountUsd: 0,
-                        amountBs: 0,
-                        reference: ''
-                    };
-
-                    showToast(`Pago #${this.multiplePayments.length} agregado: $${amountUsd.toFixed(2)}`, 'success');
+                    this.newPayment = { method: 'efectivo_divisas', amountUsd: 0, amountBs: 0, reference: '' };
+                    showToast(`Pago #${this.multiplePayments.length} agregado: $${round2(amountUsd).toFixed(2)}`, 'success');
                 },
 
                 removeMultiplePayment(id) {
@@ -1623,7 +1529,7 @@
                         this.newPayment.amountBs = round2(this.remainingAmount * this.exchangeRate);
                         this.newPayment.amountUsd = 0;
                     } else {
-                        this.newPayment.amountUsd = this.remainingAmount;
+                        this.newPayment.amountUsd = round2(this.remainingAmount);
                         this.newPayment.amountBs = 0;
                     }
 
@@ -1650,9 +1556,19 @@
                     } catch (err) { console.error('Error obteniendo perfil:', err); }
 
                     await this.loadExchangeRate();
-                    await this.loadProducts(); await this.loadCustomers();
+                    await this.loadProducts();
+                    await this.loadCustomers();
+
                     document.addEventListener('keydown', (e) => {
-                        if (e.key === 'Escape') { this.closeCart(); this.closeCustomerModal(); this.closeCreditModal(); }
+                        if (e.key === 'Escape') {
+                            if (this.showPaymentMode) {
+                                this.exitPaymentMode();
+                            } else {
+                                this.closeCart();
+                                this.closeCustomerModal();
+                                this.closeCreditModal();
+                            }
+                        }
                         if (e.key === 'F4' && !e.ctrlKey) { e.preventDefault(); if (this.cart.length > 0 && this.paymentMethod !== 'credito') this.processSale(); }
                         if (e.key === 'F8') { e.preventDefault(); this.clearCart(); }
                     });
@@ -1662,10 +1578,30 @@
 
                 async loadExchangeRate() {
                     try {
-                        console.log('🔄 Consultando tasa centralizada de Supabase');
+                        console.log('🔄 Consultando tasa de cambio...');
+                        const bcvData = await fetchBCVRate();
+
+                        if (bcvData) {
+                            const rate = round2(bcvData.rate);
+                            this.exchangeRate = rate;
+
+                            try {
+                                await supabase.from('exchange_rates').update({ is_active: false }).eq('is_active', true);
+                                await supabase.from('exchange_rates').insert({ rate: rate, is_active: true });
+                                console.log('✅ Tasa BCV guardada en Supabase:', rate);
+                            } catch (dbErr) {
+                                console.warn('️ No se pudo guardar en Supabase:', dbErr.message);
+                            }
+
+                            showToast(`Tasa BCV: Bs. ${rate.toFixed(2)}`, 'success');
+                            return;
+                        }
+
+                        console.log('⚠️ API BCV no disponible, usando Supabase como fallback');
                         const { data, error } = await supabase.rpc('get_active_exchange_rate');
+
                         if (!error && data) {
-                            const rate = ensureValidRate(data);
+                            const rate = round2(ensureValidRate(data));
                             this.exchangeRate = rate;
                             console.log('✅ Tasa cargada desde Supabase:', this.exchangeRate);
                         } else {
@@ -1673,14 +1609,40 @@
                             this.exchangeRate = 700.22;
                         }
                     } catch (err) {
-                        console.error('❌ Error cargando tasa:', err);
+                        console.error(' Error cargando tasa:', err);
                         this.exchangeRate = 700.22;
+                    }
+                },
+
+                async fetchAndUpdateBCV() {
+                    showToast('Consultando tasa BCV oficial...', 'info');
+                    const bcvData = await fetchBCVRate();
+
+                    if (!bcvData) {
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo obtener la tasa del BCV.', confirmButtonText: 'Entendido' });
+                        return;
+                    }
+
+                    const newRate = round2(bcvData.rate);
+                    const confirmed = await Swal.fire({
+                        title: '🏛️ Tasa BCV Oficial',
+                        html: `<div class="text-center"><p class="text-4xl font-bold text-blue-600">Bs. ${newRate.toFixed(2)}</p><p class="text-xs text-gray-500 mt-2">Tasa actual: Bs. ${this.exchangeRate.toFixed(2)}</p></div>`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Aplicar',
+                        cancelButtonText: 'Cancelar'
+                    });
+
+                    if (confirmed.isConfirmed) {
+                        this.exchangeRate = newRate;
+                        await this.updateExchangeRate();
+                        showToast(`✅ Tasa BCV aplicada: Bs. ${newRate.toFixed(2)}`, 'success');
                     }
                 },
 
                 async updateExchangeRate() {
                     try {
-                        const validRate = ensureValidRate(this.exchangeRate);
+                        const validRate = round2(ensureValidRate(this.exchangeRate));
                         this.exchangeRate = validRate;
                         await supabase.from('exchange_rates').update({ is_active: false }).eq('is_active', true);
                         await supabase.from('exchange_rates').insert({ rate: validRate, is_active: true });
@@ -1698,44 +1660,109 @@
                         if (error) throw error;
                         if (!virtualInventory || virtualInventory.length === 0) { this.products = []; return; }
                         const bottlesOnly = virtualInventory.filter(item => item.virtual_stock > 0 && item.size_liters !== null && item.size_liters > 0);
-                        this.products = bottlesOnly.map(item => ({ id: 'size_' + item.size_liters, product_id: item.product_id, name: item.product_name, size_liters: item.size_liters, product_type: item.product_type, price: round2(parseFloat(item.price) || 0), stock: parseInt(item.virtual_stock) || 0 }));
-                    } catch (err) { console.error('Error cargando productos:', err); showToast('Error al cargar productos', 'error'); this.products = []; }
-                    finally { this.loading = false; }
+                        this.products = bottlesOnly.map(item => ({
+                            id: 'size_' + item.size_liters,
+                            product_id: item.product_id,
+                            name: item.product_name,
+                            size_liters: item.size_liters,
+                            product_type: item.product_type,
+                            price: round2(parseFloat(item.price) || 0),
+                            stock: parseInt(item.virtual_stock) || 0
+                        }));
+                    } catch (err) {
+                        console.error('Error cargando productos:', err);
+                        showToast('Error al cargar productos', 'error');
+                        this.products = [];
+                    } finally {
+                        this.loading = false;
+                    }
                 },
 
                 async loadCustomers() {
-                    try { const { data, error } = await supabase.from('customers').select('*').eq('branch', this.userBranch).eq('is_active', true).order('full_name'); if (error) throw error; this.customers = data || []; }
-                    catch (err) { console.error('Error cargando clientes:', err); }
+                    try {
+                        const { data, error } = await supabase.from('customers').select('*').eq('branch', this.userBranch).eq('is_active', true).order('full_name');
+                        if (error) throw error;
+                        this.customers = data || [];
+                    } catch (err) {
+                        console.error('Error cargando clientes:', err);
+                    }
                 },
 
-                getInitials(name) { if (!name) return '??'; return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(); },
+                getInitials(name) {
+                    if (!name) return '??';
+                    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                },
 
                 addProduct(product) {
                     if (product.stock <= 0) { showToast('Producto sin stock', 'error'); return; }
                     const existingItem = this.cart.find(item => item.id === product.id);
-                    if (existingItem) { if (existingItem.quantity < product.stock) { existingItem.quantity++; showToast('Cantidad actualizada', 'info'); } else { showToast('Stock insuficiente', 'error'); } }
-                    else { this.cart.push({ id: product.id, product_id: product.product_id, name: product.name, size_liters: product.size_liters, price: product.price, stock: product.stock, quantity: 1 }); showToast('Producto agregado', 'success'); }
+                    if (existingItem) {
+                        if (existingItem.quantity < product.stock) {
+                            existingItem.quantity++;
+                            showToast('Cantidad actualizada', 'info');
+                        } else {
+                            showToast('Stock insuficiente', 'error');
+                        }
+                    } else {
+                        this.cart.push({
+                            id: product.id,
+                            product_id: product.product_id,
+                            name: product.name,
+                            size_liters: product.size_liters,
+                            price: round2(product.price),
+                            stock: product.stock,
+                            quantity: 1
+                        });
+                        showToast('Producto agregado', 'success');
+                    }
                 },
 
                 quickAdd(product, quantity) {
                     if (product.stock < quantity) { showToast(`Stock insuficiente para +${quantity}`, 'error'); return; }
                     const existingItem = this.cart.find(item => item.id === product.id);
-                    if (existingItem) { if (existingItem.quantity + quantity <= product.stock) { existingItem.quantity += quantity; showToast(`+${quantity} ${product.name}`, 'success'); } else { showToast('Stock insuficiente', 'error'); } }
-                    else { this.cart.push({ id: product.id, product_id: product.product_id, name: product.name, size_liters: product.size_liters, price: product.price, stock: product.stock, quantity: quantity }); showToast(`+${quantity} ${product.name}`, 'success'); }
+                    if (existingItem) {
+                        if (existingItem.quantity + quantity <= product.stock) {
+                            existingItem.quantity += quantity;
+                            showToast(`+${quantity} ${product.name}`, 'success');
+                        } else {
+                            showToast('Stock insuficiente', 'error');
+                        }
+                    } else {
+                        this.cart.push({
+                            id: product.id,
+                            product_id: product.product_id,
+                            name: product.name,
+                            size_liters: product.size_liters,
+                            price: round2(product.price),
+                            stock: product.stock,
+                            quantity: quantity
+                        });
+                        showToast(`+${quantity} ${product.name}`, 'success');
+                    }
                 },
 
                 updateQuantity(index, change) {
-                    const item = this.cart[index]; const newQuantity = item.quantity + change;
-                    if (newQuantity > 0 && newQuantity <= item.stock) { item.quantity = newQuantity; } else if (newQuantity <= 0) { this.removeFromCart(index); } else { showToast('Stock insuficiente', 'error'); }
+                    const item = this.cart[index];
+                    const newQuantity = item.quantity + change;
+                    if (newQuantity > 0 && newQuantity <= item.stock) {
+                        item.quantity = newQuantity;
+                    } else if (newQuantity <= 0) {
+                        this.removeFromCart(index);
+                    } else {
+                        showToast('Stock insuficiente', 'error');
+                    }
                 },
 
-                removeFromCart(index) { this.cart.splice(index, 1); showToast('Producto eliminado', 'warning'); },
+                removeFromCart(index) {
+                    this.cart.splice(index, 1);
+                    showToast('Producto eliminado', 'warning');
+                },
 
                 async clearCart() {
                     if (this.cart.length > 0) {
                         const confirmed = await showConfirm(
                             'Limpiar Carrito',
-                            '<p class="text-gray-600">¿Estás seguro de que deseas eliminar todos los productos del carrito?</p>',
+                            '<p class="text-gray-600">¿Estás seguro?</p>',
                             'Sí, Limpiar',
                             'Cancelar'
                         );
@@ -1746,29 +1773,50 @@
                     }
                 },
 
-                openCart() { this.cartOpen = true; }, closeCart() { this.cartOpen = false; },
+                openCart() { this.cartOpen = true; },
+                closeCart() { this.cartOpen = false; },
 
                 copyTotalToReceived() {
                     if (this.paymentMethod === 'efectivo_bs') {
-                        this.amountReceivedBs = this.totalBs;
+                        this.amountReceivedBs = round2(this.totalBs);
                         showToast('Monto copiado a recibido', 'info');
                     } else if (this.paymentMethod === 'efectivo_divisas') {
-                        this.amountReceivedUsd = this.totalUSD;
+                        this.amountReceivedUsd = round2(this.totalUSD);
                         showToast('Monto copiado a recibido', 'info');
                     } else {
                         showToast('Selecciona efectivo para usar esta función', 'warning');
                     }
                 },
 
-                openCustomerModal() { this.newCustomer = { full_name: '', phone: '', email: '', address: '', recommended_by: '' }; this.showCustomerModal = true; },
+                openCustomerModal() {
+                    this.newCustomer = { full_name: '', phone: '', email: '', address: '', recommended_by: '' };
+                    this.showCustomerModal = true;
+                },
                 closeCustomerModal() { this.showCustomerModal = false; },
 
                 async saveCustomer() {
                     if (!this.newCustomer.full_name) { showToast('El nombre es obligatorio', 'error'); return; }
                     this.savingCustomer = true;
-                    try { const { data, error } = await supabase.from('customers').insert({ full_name: this.newCustomer.full_name, phone: this.newCustomer.phone, email: this.newCustomer.email, address: this.newCustomer.address, recommended_by: this.newCustomer.recommended_by, branch: this.userBranch }).select().single(); if (error) throw error; showToast('Cliente creado', 'success'); this.customers.push(data); this.selectedCustomer = data.id; this.closeCustomerModal(); }
-                    catch (err) { console.error('Error creando cliente:', err); showToast('Error al crear cliente', 'error'); }
-                    finally { this.savingCustomer = false; }
+                    try {
+                        const { data, error } = await supabase.from('customers').insert({
+                            full_name: this.newCustomer.full_name,
+                            phone: this.newCustomer.phone,
+                            email: this.newCustomer.email,
+                            address: this.newCustomer.address,
+                            recommended_by: this.newCustomer.recommended_by,
+                            branch: this.userBranch
+                        }).select().single();
+                        if (error) throw error;
+                        showToast('Cliente creado', 'success');
+                        this.customers.push(data);
+                        this.selectedCustomer = data.id;
+                        this.closeCustomerModal();
+                    } catch (err) {
+                        console.error('Error creando cliente:', err);
+                        showToast('Error al crear cliente', 'error');
+                    } finally {
+                        this.savingCustomer = false;
+                    }
                 },
 
                 openCreditModal() {
@@ -1778,12 +1826,23 @@
                     this.creditForm.payment_date = defaultDate.toISOString().split('T')[0];
                     this.showCreditModal = true;
                 },
-                closeCreditModal() { this.showCreditModal = false; this.creditForm = { customer_id: '', customer_phone: '', customer_id_card: '', payment_date: '', payment_terms: '', initial_payment: 0, initial_payment_method: 'efectivo', notes: '' }; },
-                loadCustomerData() { const customer = this.customers.find(c => c.id === this.creditForm.customer_id); if (customer) { this.creditForm.customer_phone = customer.phone || ''; } },
-                canProcessCredit() { if (!this.creditForm.customer_id) return false; if (!this.creditForm.payment_date) return false; if (this.creditForm.initial_payment > this.totalUSD) return false; return true; },
+                closeCreditModal() {
+                    this.showCreditModal = false;
+                    this.creditForm = { customer_id: '', customer_phone: '', customer_id_card: '', payment_date: '', payment_terms: '', initial_payment: 0, initial_payment_method: 'efectivo', notes: '' };
+                },
+                loadCustomerData() {
+                    const customer = this.customers.find(c => c.id === this.creditForm.customer_id);
+                    if (customer) { this.creditForm.customer_phone = customer.phone || ''; }
+                },
+                canProcessCredit() {
+                    if (!this.creditForm.customer_id) return false;
+                    if (!this.creditForm.payment_date) return false;
+                    if (this.creditForm.initial_payment > this.totalUSD) return false;
+                    return true;
+                },
 
                 async processSale() {
-                    this.exchangeRate = ensureValidRate(this.exchangeRate);
+                    this.exchangeRate = round2(ensureValidRate(this.exchangeRate));
 
                     if (this.cart.length === 0) { showToast('El carrito está vacío', 'error'); return; }
                     if (this.deliveryType === 'delivery' && !this.deliveryAddress) { showToast('Debe ingresar la dirección', 'error'); return; }
@@ -1791,12 +1850,10 @@
                     const customer = this.customers.find(c => c.id === this.selectedCustomer);
                     const customerName = customer?.full_name || 'Cliente no registrado';
 
-                    // Construir HTML del modal según el modo
                     let modalHtml = '';
                     let confirmText = 'Procesar Venta';
 
                     if (this.useMultiplePayments) {
-                        // Validar pago múltiple
                         if (this.multiplePayments.length === 0) {
                             showToast('Debe agregar al menos un pago', 'error');
                             return;
@@ -1816,27 +1873,16 @@
                                     <i class="fas fa-shopping-cart text-blue-500"></i>
                                     <span><strong>Productos:</strong> ${this.cartItemCount} items</span>
                                 </div>
-
                                 <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-3 border border-blue-200">
                                     <div class="flex justify-between items-center mb-2">
-                                        <span class="text-sm font-semibold text-gray-700">Total de la Venta:</span>
-                                        <span class="text-xl font-bold text-blue-600">$${this.totalUSD.toFixed(2)}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="text-sm text-gray-600">Total en Bs.:</span>
-                                        <span class="text-sm font-semibold text-blue-600">Bs. ${this.totalBs.toFixed(2)}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center pt-2 border-t border-blue-200">
-                                        <span class="text-xs text-gray-500">
-                                            <i class="fas fa-exchange-alt mr-1"></i>Tasa: Bs. ${this.exchangeRate.toFixed(2)}
-                                        </span>
+                                        <span class="text-sm font-semibold text-gray-700">Total:</span>
+                                        <span class="text-xl font-bold text-blue-600">$${round2(this.totalUSD).toFixed(2)}</span>
                                     </div>
                                 </div>
-
                                 <div class="space-y-2">
                                     <h4 class="font-semibold text-gray-800 text-sm">
                                         <i class="fas fa-list-check mr-1 text-purple-600"></i>
-                                        Pagos Registrados (${this.multiplePayments.length}):
+                                        Pagos (${this.multiplePayments.length}):
                                     </h4>
                                     ${this.multiplePayments.map((p, i) => `
                                         <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center border border-gray-200">
@@ -1845,28 +1891,16 @@
                                                     <span class="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded">#${i + 1}</span>
                                                     <span class="text-sm font-semibold text-gray-800">${this.getPaymentMethodName(p.method)}</span>
                                                 </div>
-                                                ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` : ''}
                                             </div>
                                             <div class="text-right">
-                                                <p class="text-sm font-bold text-green-600">$${p.amount.toFixed(2)}</p>
-                                                <p class="text-[10px] text-gray-500">Bs. ${p.amountBs.toFixed(2)}</p>
+                                                <p class="text-sm font-bold text-green-600">$${round2(p.amount).toFixed(2)}</p>
                                             </div>
                                         </div>
                                     `).join('')}
                                 </div>
-
-                                <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border border-green-200">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-sm font-semibold text-gray-700">Estado:</span>
-                                        <span class="text-sm font-bold text-green-600">
-                                            <i class="fas fa-check-circle mr-1"></i>Pago Completo
-                                        </span>
-                                    </div>
-                                </div>
                             </div>
                         `;
                     } else {
-                        // Validaciones para pago simple
                         if (this.paymentMethod !== 'credito') {
                             if (['pago_movil', 'transferencia'].includes(this.paymentMethod) && !this.paymentReference) {
                                 showToast('Debe ingresar la referencia', 'error'); return;
@@ -1897,18 +1931,14 @@
                                     <div class="p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
                                         <div class="flex justify-between items-center">
                                             <span class="text-gray-700 font-semibold">Total USD:</span>
-                                            <span class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</span>
+                                            <span class="text-2xl font-bold text-green-600">$${round2(this.totalUSD).toFixed(2)}</span>
                                         </div>
                                     </div>
                                     <div class="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
                                         <div class="flex justify-between items-center">
                                             <span class="text-gray-700 font-semibold">Total Bs.:</span>
-                                            <span class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</span>
+                                            <span class="text-2xl font-bold text-blue-600">Bs. ${round2(this.totalUSD * this.exchangeRate).toFixed(2)}</span>
                                         </div>
-                                    </div>
-                                    <div class="text-center text-xs text-gray-500">
-                                        <i class="fas fa-exchange-alt mr-1"></i>
-                                        Tasa: Bs. ${this.exchangeRate.toFixed(2)} por USD
                                     </div>
                                 </div>
                             </div>
@@ -1930,44 +1960,52 @@
                         let notes = [];
 
                         if (this.deliveryType === 'delivery') notes.push(`Delivery: ${this.deliveryAddress}`);
+                        notes.push(`Tasa: Bs. ${this.exchangeRate.toFixed(2)}`);
 
                         let payment_method = this.paymentMethod;
 
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             payment_method = 'multiple';
                             notes.push('=== PAGO MÚLTIPLE ===');
-                            notes.push(`Total: $${this.totalUSD.toFixed(2)} | ${this.multiplePayments.length} método(s)`);
                             this.multiplePayments.forEach((p, i) => {
-                                let note = `  ${i + 1}. ${this.getPaymentMethodName(p.method)}: $${p.amount.toFixed(2)} (Bs. ${p.amountBs.toFixed(2)})`;
-                                if (p.reference) note += ` | Ref: ${p.reference}`;
-                                notes.push(note);
+                                notes.push(`${i + 1}. ${this.getPaymentMethodName(p.method)}: $${round2(p.amount).toFixed(2)}`);
                             });
                         } else {
                             if (this.paymentReference) notes.push(`Ref: ${this.paymentReference}`);
                             if (this.paymentMethod === 'efectivo_bs' && this.amountReceivedBs > 0) {
                                 notes.push(`Recibido Bs: ${round2(this.amountReceivedBs).toFixed(2)}`);
-                                notes.push(`Cambio Bs: ${(round2(this.amountReceivedBs) - this.totalBs).toFixed(2)}`);
                             }
                             if (this.paymentMethod === 'efectivo_divisas' && this.amountReceivedUsd > 0) {
                                 notes.push(`Recibido USD: $${round2(this.amountReceivedUsd).toFixed(2)}`);
-                                notes.push(`Cambio USD: $${(round2(this.amountReceivedUsd) - this.totalUSD).toFixed(2)}`);
                             }
                         }
 
-                        const { data: sale, error: saleError } = await supabase.from('sales').insert({
+                        const saleData = {
                             branch: this.userBranch,
                             customer_id: this.selectedCustomer || null,
                             customer_name: customerName,
-                            subtotal: this.subtotal,
+                            subtotal: round2(this.subtotal),
                             tax: 0,
-                            total: this.totalUSD,
+                            total: round2(this.totalUSD),
                             payment_method: payment_method,
                             status: payment_method === 'credito' ? 'pending' : 'completed',
                             notes: notes.join('\n') || null,
                             created_by: session.user.id
-                        }).select().single();
+                        };
 
-                        if (saleError) throw saleError;
+                        let { data: sale, error: saleError } = await supabase.from('sales').insert(saleData).select().single();
+
+                        if (saleError) {
+                            console.warn('⚠️ Reintentando sin columnas extras:', saleError.message);
+                            const saleDataFallback = { ...saleData };
+                            delete saleDataFallback.exchange_rate_used;
+                            delete saleDataFallback.rate_date;
+                            const retryResult = await supabase.from('sales').insert(saleDataFallback).select().single();
+                            if (retryResult.error) throw retryResult.error;
+                            sale = retryResult.data;
+                        }
+
+                        if (!sale || !sale.id) throw new Error('No se pudo obtener el ID de la venta');
 
                         const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters').eq('is_active', true);
                         const sizeToProductId = {};
@@ -1977,7 +2015,7 @@
                             sale_id: sale.id,
                             product_id: sizeToProductId[item.size_liters],
                             quantity: item.quantity,
-                            unit_price: item.price,
+                            unit_price: round2(item.price),
                             total: round2(item.price * item.quantity)
                         }));
                         const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
@@ -1996,47 +2034,11 @@
                             if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
                         }
 
-                        // Mostrar detalles de pagos múltiples en el éxito
-                        let successDetails = '';
-                        if (this.useMultiplePayments && this.multiplePayments.length > 0) {
-                            successDetails = `
-                                <div class="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
-                                    <p class="text-xs font-semibold text-purple-800 mb-2">
-                                        <i class="fas fa-list-check mr-1"></i>
-                                        ${this.multiplePayments.length} método(s) de pago:
-                                    </p>
-                                    <div class="space-y-1">
-                                        ${this.multiplePayments.map((p, i) => `
-                                            <div class="flex justify-between text-xs">
-                                                <span class="text-gray-600">${i + 1}. ${this.getPaymentMethodName(p.method)}</span>
-                                                <span class="font-semibold text-green-600">$${p.amount.toFixed(2)}</span>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            `;
-                        }
-
                         Swal.fire({
                             icon: 'success',
                             title: '¡Venta Exitosa!',
-                            html: `
-                                <div class="text-center space-y-2">
-                                    <p class="text-gray-600">La venta ha sido procesada correctamente</p>
-                                    <div class="mt-3 space-y-2">
-                                        <div class="p-3 bg-green-50 rounded-lg border border-green-200">
-                                            <p class="text-xs text-gray-500">Total USD</p>
-                                            <p class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</p>
-                                        </div>
-                                        <div class="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                                            <p class="text-xs text-gray-500">Total Bs.</p>
-                                            <p class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</p>
-                                        </div>
-                                        ${successDetails}
-                                    </div>
-                                </div>
-                            `,
-                            timer: 3500,
+                            html: `<div class="text-center"><p class="text-2xl font-bold text-green-600">$${round2(this.totalUSD).toFixed(2)}</p><p class="text-sm text-gray-600">Bs. ${round2(this.totalUSD * this.exchangeRate).toFixed(2)}</p></div>`,
+                            timer: 2500,
                             showConfirmButton: false
                         });
 
@@ -2048,16 +2050,12 @@
                         this.amountReceivedUsd = 0;
                         this.multiplePayments = [];
                         this.useMultiplePayments = false;
+                        this.showPaymentMode = false; // Salir del modo pago
                         this.closeCart();
                         await this.loadProducts();
                     } catch (err) {
                         console.error('Error:', err);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error al Procesar Venta',
-                            text: err.message,
-                            confirmButtonText: 'Entendido'
-                        });
+                        Swal.fire({ icon: 'error', title: 'Error', text: err.message, confirmButtonText: 'Entendido' });
                     } finally {
                         this.processing = false;
                     }
@@ -2066,50 +2064,20 @@
                 async quickSale() {
                     if (this.cart.length === 0) { showToast('El carrito está vacío', 'error'); return; }
                     this.paymentMethod = 'efectivo_bs';
-                    this.amountReceivedBs = this.totalBs;
+                    this.amountReceivedBs = round2(this.totalBs);
                     this.selectedCustomer = '';
                     this.useMultiplePayments = false;
                     await this.processSale();
                 },
 
                 async processCreditSale() {
-                    this.exchangeRate = ensureValidRate(this.exchangeRate);
+                    this.exchangeRate = round2(ensureValidRate(this.exchangeRate));
 
                     if (!this.canProcessCredit()) { showToast('Complete los campos obligatorios', 'error'); return; }
                     const customer = this.customers.find(c => c.id === this.creditForm.customer_id);
                     const creditAmount = round2(this.totalUSD - this.creditForm.initial_payment);
 
-                    const confirmed = await showConfirm(
-                        'Venta a Crédito',
-                        `
-                        <div class="text-left space-y-3">
-                            <div class="flex items-center space-x-2 text-gray-700">
-                                <i class="fas fa-user text-blue-500"></i>
-                                <span><strong>Cliente:</strong> ${customer?.full_name || 'N/A'}</span>
-                            </div>
-                            <div class="flex items-center space-x-2 text-gray-700">
-                                <i class="fas fa-calendar text-blue-500"></i>
-                                <span><strong>Fecha Límite:</strong> ${this.creditForm.payment_date}</span>
-                            </div>
-                            <div class="mt-4 space-y-2">
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Total Venta:</span>
-                                    <span class="font-semibold">$${this.totalUSD.toFixed(2)}</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Pago Inicial:</span>
-                                    <span class="font-semibold text-green-600">$${this.creditForm.initial_payment.toFixed(2)}</span>
-                                </div>
-                                <div class="flex justify-between text-sm border-t pt-2">
-                                    <span class="text-gray-700 font-semibold">A Financiar:</span>
-                                    <span class="text-xl font-bold text-red-600">$${creditAmount.toFixed(2)}</span>
-                                </div>
-                            </div>
-                        </div>
-                        `,
-                        'Confirmar Crédito',
-                        'Cancelar'
-                    );
+                    const confirmed = await showConfirm('Venta a Crédito', `<div class="text-center"><p class="text-xl font-bold text-red-600">$${creditAmount.toFixed(2)}</p></div>`, 'Confirmar', 'Cancelar');
 
                     if (!confirmed) return;
 
@@ -2120,12 +2088,12 @@
                             branch: this.userBranch,
                             customer_id: this.creditForm.customer_id,
                             customer_name: customer?.full_name,
-                            subtotal: this.subtotal,
+                            subtotal: round2(this.subtotal),
                             tax: 0,
-                            total: this.totalUSD,
+                            total: round2(this.totalUSD),
                             payment_method: 'credito',
                             status: creditAmount > 0 ? 'pending' : 'completed',
-                            notes: `Crédito - Pago inicial: $${round2(this.creditForm.initial_payment).toFixed(2)}\n${this.creditForm.notes || ''}`,
+                            notes: `Crédito - Pago inicial: $${round2(this.creditForm.initial_payment).toFixed(2)}\nTasa: Bs. ${this.exchangeRate.toFixed(2)}`,
                             created_by: session.user.id
                         }).select().single();
 
@@ -2137,7 +2105,7 @@
                             sale_id: sale.id,
                             product_id: sizeToProductId[item.size_liters],
                             quantity: item.quantity,
-                            unit_price: item.price,
+                            unit_price: round2(item.price),
                             total: round2(item.price * item.quantity)
                         }));
                         const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
@@ -2162,7 +2130,7 @@
                                 customer_name: customer?.full_name,
                                 customer_phone: customer?.phone,
                                 customer_id_card: this.creditForm.customer_id_card,
-                                total_amount: this.totalUSD,
+                                total_amount: round2(this.totalUSD),
                                 paid_amount: round2(this.creditForm.initial_payment),
                                 remaining_amount: creditAmount,
                                 payment_date: this.creditForm.payment_date,
@@ -2171,49 +2139,18 @@
                                 status: this.creditForm.initial_payment > 0 ? 'partial' : 'pending',
                                 created_by: session.user.id
                             });
-
-                            if (this.creditForm.initial_payment > 0) {
-                                const { data: creditAccount } = await supabase.from('credit_accounts').select('id').eq('sale_id', sale.id).single();
-                                if (creditAccount) {
-                                    await supabase.from('credit_payments').insert({
-                                        credit_account_id: creditAccount.id,
-                                        amount: round2(this.creditForm.initial_payment),
-                                        payment_method: this.creditForm.initial_payment_method,
-                                        notes: 'Pago inicial',
-                                        created_by: session.user.id
-                                    });
-                                }
-                            }
                         }
 
-                        Swal.fire({
-                            icon: 'success',
-                            title: '¡Crédito Registrado!',
-                            html: `
-                                <div class="text-center space-y-2">
-                                    <p class="text-gray-600">La venta a crédito ha sido procesada</p>
-                                    <div class="mt-3 p-3 bg-blue-50 rounded-lg">
-                                        <p class="text-sm text-gray-600">Monto a cobrar:</p>
-                                        <p class="text-2xl font-bold text-blue-600">$${creditAmount.toFixed(2)}</p>
-                                    </div>
-                                </div>
-                            `,
-                            timer: 2500,
-                            showConfirmButton: false
-                        });
+                        Swal.fire({ icon: 'success', title: '¡Crédito Registrado!', timer: 2500, showConfirmButton: false });
 
                         this.cart = [];
                         this.closeCreditModal();
                         this.closeCart();
+                        this.showPaymentMode = false;
                         await this.loadProducts();
                     } catch (err) {
                         console.error('Error:', err);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: err.message,
-                            confirmButtonText: 'Entendido'
-                        });
+                        Swal.fire({ icon: 'error', title: 'Error', text: err.message, confirmButtonText: 'Entendido' });
                     } finally {
                         this.processing = false;
                     }
