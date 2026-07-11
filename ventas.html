@@ -1568,8 +1568,10 @@
                     return this.products.filter(p => p.name.toLowerCase().includes(search) || (p.size_liters && p.size_liters.toString().includes(search)));
                 },
 
-                get subtotal() {
-                    return round2(this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0));
+                get totalUSD() {
+                    let total = this.subtotal;
+                    if (this.deliveryType === 'delivery') total += this.deliveryCost;
+                    return round2(total);
                 },
 
                 get totalUSD() {
@@ -1585,11 +1587,11 @@
                 get cartItemCount() { return this.cart.reduce((sum, item) => sum + item.quantity, 0); },
 
                 get totalPaid() {
-                    return round2(this.multiplePayments.reduce((sum, p) => sum + p.amount, 0));
+                    return round2(this.multiplePayments.reduce((sum, p) => sum + round2(p.amount), 0));
                 },
 
                 get remainingAmount() {
-                    return round2(Math.max(0, this.totalUSD - this.totalPaid));
+                    return round2(Math.max(0, round2(this.totalUSD) - round2(this.totalPaid)));
                 },
 
                 get paymentProgress() {
@@ -1637,7 +1639,7 @@
                     this.multiplePayments.push({
                         id: Date.now(),
                         method: this.newPayment.method,
-                        amount: amountUsd,
+                        amount: round2(amountUsd),
                         amountBs: round2(amountUsd * this.exchangeRate),
                         reference: this.newPayment.reference || ''
                     });
@@ -1649,7 +1651,7 @@
                         reference: ''
                     };
 
-                    showToast(`Pago #${this.multiplePayments.length} agregado: $${amountUsd.toFixed(2)}`, 'success');
+                    showToast(`Pago #${this.multiplePayments.length} agregado: $${round2(amountUsd).toFixed(2)}`, 'success');
                 },
 
                 removeMultiplePayment(id) {
@@ -2096,28 +2098,42 @@
                             branch: this.userBranch,
                             customer_id: this.selectedCustomer || null,
                             customer_name: customerName,
-                            subtotal: this.subtotal,
+                            subtotal: round2(this.subtotal),
                             tax: 0,
-                            total: this.totalUSD,
+                            total: round2(this.totalUSD),
                             payment_method: payment_method,
                             status: payment_method === 'credito' ? 'pending' : 'completed',
                             notes: notes.join('\n') || null,
-                            created_by: session.user.id
+                            created_by: session.user.id,
+                            exchange_rate_used: round2(this.exchangeRate),
+                            rate_date: new Date().toISOString().split('T')[0]
                         };
 
-                        // Agregar tasa usada si la columna existe
-                        saleData.exchange_rate_used = this.exchangeRate;
-                        saleData.rate_date = new Date().toISOString().split('T')[0];
+                        // Intentar insertar con las columnas nuevas
+                        let { data: sale, error: saleError } = await supabase.from('sales').insert(saleData).select().single();
 
-                        const { data: sale, error: saleError } = await supabase.from('sales').insert(saleData).select().single();
-
+                        // Si falla por las columnas, intentar sin ellas
                         if (saleError) {
-                            // Si falla por las columnas nuevas, intentar sin ellas
-                            console.warn('⚠️ Columnas exchange_rate_used/rate_date no existen, insertando sin ellas:', saleError.message);
-                            delete saleData.exchange_rate_used;
-                            delete saleData.rate_date;
-                            const retry = await supabase.from('sales').insert(saleData).select().single();
-                            if (retry.error) throw retry.error;
+                            console.warn('⚠️ Columnas no existen, reintentando sin exchange_rate_used/rate_date:', saleError.message);
+
+                            // Eliminar columnas problemáticas
+                            const saleDataFallback = { ...saleData };
+                            delete saleDataFallback.exchange_rate_used;
+                            delete saleDataFallback.rate_date;
+
+                            // Reintentar inserción
+                            const retryResult = await supabase.from('sales').insert(saleDataFallback).select().single();
+
+                            if (retryResult.error) {
+                                throw retryResult.error;
+                            }
+
+                            sale = retryResult.data;
+                        }
+
+                        // Verificar que tenemos el sale
+                        if (!sale || !sale.id) {
+                            throw new Error('No se pudo obtener el ID de la venta creada');
                         }
 
                         const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters').eq('is_active', true);
