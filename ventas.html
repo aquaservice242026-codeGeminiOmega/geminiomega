@@ -8,17 +8,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
-
-    <!-- Toastify CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <!-- Toastify JS -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-
-    <!-- SweetAlert2 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
@@ -135,8 +128,24 @@
             }
         }
 
+        @keyframes pulse-bcv {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+            }
+        }
+
         .animate-bounce-in {
             animation: bounce-in 0.4s ease-out;
+        }
+
+        .btn-bcv-pulse {
+            animation: pulse-bcv 2s infinite;
         }
 
         .product-card {
@@ -271,7 +280,6 @@
             font-size: 0.9rem !important;
         }
 
-        /* Toggle Switch iOS Style */
         .toggle-switch {
             position: relative;
             display: inline-block;
@@ -317,67 +325,6 @@
         input:checked+.toggle-slider:before {
             transform: translateX(22px);
         }
-
-        /* Payment method cards */
-        .payment-card {
-            transition: all 0.2s ease;
-            border: 2px solid transparent;
-        }
-
-        .payment-card:hover {
-            border-color: #0ea5e9;
-            transform: translateY(-1px);
-        }
-
-        /* Botón BCV animado */
-        @keyframes pulse-bcv {
-
-            0%,
-            100% {
-                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
-            }
-
-            50% {
-                box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
-            }
-        }
-
-        .btn-bcv-pulse {
-            animation: pulse-bcv 2s infinite;
-        }
-
-        /* ============================================ */
-        /* CARRITO COMPACTO - 25% MENOS ALTO, 15% MÁS OSCURO */
-        /* ============================================ */
-        .cart-item-compact {
-            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%) !important;
-            padding: 8px 12px !important;
-            margin-bottom: 8px !important;
-        }
-
-        .cart-item-compact h4 {
-            font-size: 0.85rem !important;
-            line-height: 1.2 !important;
-        }
-
-        .cart-item-compact .text-xs {
-            font-size: 0.7rem !important;
-        }
-
-        .cart-item-compact .touch-btn {
-            width: 28px !important;
-            height: 28px !important;
-            min-height: 28px !important;
-            min-width: 28px !important;
-        }
-
-        .cart-item-compact .font-bold.text-lg {
-            font-size: 1rem !important;
-        }
-
-        .cart-item-compact .font-bold.text-cyan-600 {
-            font-size: 0.875rem !important;
-        }
     </style>
 </head>
 
@@ -399,7 +346,6 @@
                     <p class="font-semibold capitalize text-sm" x-text="userBranch || 'Cargando...'"></p>
                 </div>
             </div>
-
             <nav class="space-y-2">
                 <a href="index.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
@@ -430,7 +376,6 @@
                 </a>
             </nav>
         </div>
-
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
@@ -461,7 +406,6 @@
                         <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
                             <i class="fas fa-sync-alt"></i>
                         </button>
-                        <!-- BOTÓN BCV -->
                         <button @click="fetchAndUpdateBCV()"
                             class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-semibold touch-btn btn-bcv-pulse"
                             title="Obtener tasa oficial BCV">
@@ -492,7 +436,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="flex items-center space-x-2">
                     <div class="bg-blue-50 px-2 py-1 rounded-lg flex items-center space-x-1">
                         <span class="text-[10px] text-gray-600">USD:</span>
@@ -502,14 +445,12 @@
                         <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
                             <i class="fas fa-sync-alt"></i>
                         </button>
-                        <!-- BOTÓN BCV MÓVIL -->
                         <button @click="fetchAndUpdateBCV()"
                             class="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-[10px] font-bold touch-btn"
                             title="BCV">
                             <i class="fas fa-landmark"></i>
                         </button>
                     </div>
-
                     <button @click="compactMode = !compactMode" class="touch-btn text-gray-600 hover:text-gray-800 p-1"
                         title="Vista compacta">
                         <i class="fas" :class="compactMode ? 'fa-expand' : 'fa-compress'"></i>
@@ -529,7 +470,6 @@
                             class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
                     </div>
                 </div>
-
                 <!-- Search Bar (Desktop) -->
                 <div class="hidden lg:block mb-6">
                     <div class="relative">
@@ -545,12 +485,10 @@
                         <h2 class="text-sm font-semibold text-gray-700">Productos Disponibles</h2>
                         <span class="text-xs text-gray-500" x-text="filteredProducts.length + ' productos'"></span>
                     </div>
-
                     <div x-show="filteredProducts.length === 0" class="text-center py-8 text-gray-400">
                         <i class="fas fa-box-open text-4xl mb-2"></i>
                         <p class="text-sm">No hay productos disponibles</p>
                     </div>
-
                     <div class="grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-4">
                         <template x-for="product in filteredProducts" :key="product.id">
                             <button @click="addProduct(product)"
@@ -561,19 +499,16 @@
                                     'low-stock': product.stock <= 10 && product.stock > 0,
                                     'opacity-50': product.stock === 0
                                 }">
-
                                 <div
                                     class="absolute top-2 right-2 bg-white/20 backdrop-blur px-1.5 py-0.5 rounded text-[10px] font-bold">
                                     <span x-text="product.stock"></span>
                                 </div>
-
                                 <div class="flex flex-col items-center text-center space-y-1">
                                     <i class="fas fa-tint text-2xl lg:text-4xl mb-1"></i>
                                     <p class="font-bold text-sm lg:text-lg leading-tight" x-text="product.name"></p>
                                     <p class="text-xs lg:text-sm opacity-90 font-semibold"
                                         x-text="'$' + product.price.toFixed(2)"></p>
                                 </div>
-
                                 <div class="hidden lg:flex justify-center space-x-1 mt-4 pt-4 border-t border-white/20"
                                     @click.stop>
                                     <button @click="quickAdd(product, 1)"
@@ -626,51 +561,47 @@
                         class="ml-2 bg-cyan-500 text-white rounded-full px-2 py-0.5 text-xs font-bold"
                         x-text="cartItemCount"></span>
                 </h3>
-
-                <div class="space-y-2 mb-4">
+                <div class="space-y-3 mb-4">
                     <template x-for="(item, index) in cart" :key="index">
-                        <div class="animate-bounce-in cart-item-compact rounded-xl">
-                            <div class="flex items-center justify-between mb-1">
+                        <div class="animate-bounce-in bg-gray-50 rounded-xl p-3">
+                            <div class="flex items-center justify-between mb-2">
                                 <div class="flex-1">
-                                    <h4 class="font-semibold text-gray-800" x-text="item.name"></h4>
-                                    <p class="text-xs text-gray-600" x-text="'$' + item.price.toFixed(2) + ' c/u'"></p>
+                                    <h4 class="font-semibold text-gray-800 text-sm" x-text="item.name"></h4>
+                                    <p class="text-xs text-gray-500" x-text="'$' + item.price.toFixed(2) + ' c/u'"></p>
                                 </div>
                                 <button @click="removeFromCart(index)"
-                                    class="text-red-500 hover:text-red-700 touch-btn p-1">
+                                    class="text-red-500 hover:text-red-700 touch-btn p-2">
                                     <i class="fas fa-trash text-sm"></i>
                                 </button>
                             </div>
-
                             <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-1">
+                                <div class="flex items-center space-x-2">
                                     <button @click="updateQuantity(index, -1)"
-                                        class="touch-btn w-7 h-7 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400">
+                                        class="touch-btn w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">
                                         <i class="fas fa-minus text-xs"></i>
                                     </button>
-                                    <span class="font-bold text-base w-6 text-center text-gray-800"
+                                    <span class="font-bold text-lg w-8 text-center text-gray-800"
                                         x-text="item.quantity"></span>
                                     <button @click="updateQuantity(index, 1)"
-                                        class="touch-btn w-7 h-7 bg-cyan-500 text-white rounded-full flex items-center justify-center hover:bg-cyan-600">
+                                        class="touch-btn w-8 h-8 bg-cyan-500 text-white rounded-full flex items-center justify-center hover:bg-cyan-600">
                                         <i class="fas fa-plus text-xs"></i>
                                     </button>
                                     <button @click="updateQuantity(index, 5)"
-                                        class="touch-btn px-2 h-7 bg-blue-500 text-white rounded text-xs font-bold hover:bg-blue-600">+5</button>
+                                        class="touch-btn px-2 h-8 bg-blue-500 text-white rounded text-xs font-bold hover:bg-blue-600">+5</button>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-[10px] text-gray-600">Subtotal</p>
-                                    <p class="font-bold text-cyan-600 text-sm"
+                                    <p class="text-xs text-gray-500">Subtotal</p>
+                                    <p class="font-bold text-cyan-600"
                                         x-text="'$' + (item.price * item.quantity).toFixed(2)"></p>
                                 </div>
                             </div>
                         </div>
                     </template>
                 </div>
-
                 <div x-show="cart.length === 0" class="text-center py-8 text-gray-400">
                     <i class="fas fa-shopping-cart text-4xl mb-2"></i>
                     <p class="text-sm">Carrito vacío</p>
                 </div>
-
                 <div class="border-t pt-4 space-y-2">
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-600">Subtotal:</span>
@@ -690,7 +621,6 @@
                         <span class="font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></span>
                     </div>
                 </div>
-
                 <div class="mt-4">
                     <div class="flex items-center justify-between mb-2">
                         <label class="text-xs font-semibold text-gray-700">Cliente</label>
@@ -739,14 +669,12 @@
                             <option value="credito">Crédito</option>
                         </select>
                     </div>
-
                     <div x-show="['pago_movil', 'transferencia'].includes(paymentMethod)"
                         class="mt-4 p-3 bg-yellow-50 rounded-lg">
                         <label class="text-xs font-medium text-gray-700 mb-1 block">Referencia</label>
                         <input type="text" x-model="paymentReference" placeholder="Últimos 4 dígitos"
                             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                     </div>
-
                     <div x-show="paymentMethod === 'efectivo_bs'" class="mt-4 p-3 bg-green-50 rounded-lg">
                         <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (Bs.)</label>
                         <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0"
@@ -762,7 +690,6 @@
                                     x-text="(totalBs - amountReceivedBs).toFixed(2)"></span></p>
                         </div>
                     </div>
-
                     <div x-show="paymentMethod === 'efectivo_divisas'" class="mt-4 p-3 bg-green-50 rounded-lg">
                         <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (USD)</label>
                         <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0"
@@ -775,7 +702,6 @@
                                     x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
                         </div>
                     </div>
-
                     <div x-show="paymentMethod === 'credito'" class="mt-4 p-3 bg-red-50 rounded-lg">
                         <p class="text-xs text-red-600">
                             <i class="fas fa-exclamation-circle mr-1"></i>
@@ -786,7 +712,6 @@
 
                 <!-- SECCIÓN PAGO MÚLTIPLE (toggle ON) -->
                 <div x-show="useMultiplePayments" class="mt-4 space-y-3">
-                    <!-- Resumen de pagos -->
                     <div class="bg-blue-50 rounded-xl p-3 border border-blue-200">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-xs font-semibold text-gray-700">Total Venta:</span>
@@ -804,8 +729,6 @@
                                 :class="remainingAmount <= 0.01 ? 'text-green-600' : 'text-red-600'">$<span
                                     x-text="remainingAmount.toFixed(2)"></span></span>
                         </div>
-
-                        <!-- Barra de progreso -->
                         <div class="mt-2">
                             <div class="w-full bg-gray-200 rounded-full h-2">
                                 <div class="h-2 rounded-full transition-all duration-300"
@@ -816,20 +739,16 @@
                                 x-text="paymentProgress + '% completado'"></p>
                         </div>
                     </div>
-
-                    <!-- Lista de pagos agregados -->
                     <div>
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-xs font-semibold text-gray-700">
                                 <i class="fas fa-list mr-1"></i>Pagos (<span x-text="multiplePayments.length"></span>)
                             </span>
                         </div>
-
                         <div x-show="multiplePayments.length === 0" class="text-center py-4 bg-gray-50 rounded-lg">
                             <i class="fas fa-receipt text-2xl text-gray-300 mb-2"></i>
                             <p class="text-xs text-gray-500">No hay pagos agregados</p>
                         </div>
-
                         <div class="space-y-2">
                             <template x-for="(payment, index) in multiplePayments" :key="payment.id">
                                 <div
@@ -848,9 +767,8 @@
                                             <span class="text-gray-500"
                                                 x-text="'Bs. ' + (payment.amount * exchangeRate).toFixed(2)"></span>
                                         </div>
-                                        <p x-show="payment.reference" class="text-[10px] text-gray-500 mt-1">
-                                            Ref: <span x-text="payment.reference"></span>
-                                        </p>
+                                        <p x-show="payment.reference" class="text-[10px] text-gray-500 mt-1">Ref: <span
+                                                x-text="payment.reference"></span></p>
                                     </div>
                                     <button @click="removeMultiplePayment(payment.id)"
                                         class="text-red-500 hover:text-red-700 touch-btn p-2">
@@ -860,13 +778,10 @@
                             </template>
                         </div>
                     </div>
-
-                    <!-- Formulario para agregar nuevo pago -->
                     <div class="bg-gray-50 rounded-xl p-3 border border-gray-200">
                         <p class="text-xs font-semibold text-gray-700 mb-2">
                             <i class="fas fa-plus-circle mr-1"></i>Agregar Pago
                         </p>
-
                         <div class="space-y-2">
                             <select x-model="newPayment.method"
                                 class="w-full border border-gray-300 rounded-lg px-2 py-2 text-sm bg-white">
@@ -876,43 +791,31 @@
                                 <option value="transferencia">Transferencia</option>
                                 <option value="punto_venta">Punto de Venta</option>
                             </select>
-
-                            <!-- Monto en USD (todos excepto efectivo_bs) -->
                             <div x-show="newPayment.method !== 'efectivo_bs'">
                                 <label class="text-[10px] font-medium text-gray-600">Monto (USD)</label>
                                 <input type="number" x-model.number="newPayment.amountUsd" step="0.01" min="0"
                                     :placeholder="'Sugerido: $' + remainingAmount.toFixed(2)"
                                     class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
-                                <p class="text-[10px] text-gray-500 mt-1">
-                                    Equivale: Bs. <span class="font-semibold"
-                                        x-text="((newPayment.amountUsd || 0) * exchangeRate).toFixed(2)"></span>
-                                </p>
+                                <p class="text-[10px] text-gray-500 mt-1">Equivale: Bs. <span class="font-semibold"
+                                        x-text="((newPayment.amountUsd || 0) * exchangeRate).toFixed(2)"></span></p>
                             </div>
-
-                            <!-- Monto en Bs (solo efectivo_bs) -->
                             <div x-show="newPayment.method === 'efectivo_bs'">
                                 <label class="text-[10px] font-medium text-gray-600">Monto (Bs.)</label>
                                 <input type="number" x-model.number="newPayment.amountBs" step="0.01" min="0"
                                     :placeholder="'Sugerido: Bs. ' + (remainingAmount * exchangeRate).toFixed(2)"
                                     class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
-                                <p class="text-[10px] text-gray-500 mt-1">
-                                    Equivale: $<span class="font-semibold"
-                                        x-text="((newPayment.amountBs || 0) / exchangeRate).toFixed(2)"></span>
-                                </p>
+                                <p class="text-[10px] text-gray-500 mt-1">Equivale: $<span class="font-semibold"
+                                        x-text="((newPayment.amountBs || 0) / exchangeRate).toFixed(2)"></span></p>
                             </div>
-
-                            <!-- Referencia -->
                             <div x-show="['pago_movil', 'transferencia', 'punto_venta'].includes(newPayment.method)">
                                 <label class="text-[10px] font-medium text-gray-600">Referencia</label>
                                 <input type="text" x-model="newPayment.reference" placeholder="Últimos 4 dígitos"
                                     class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                             </div>
-
                             <button @click="addMultiplePayment()" :disabled="!canAddPayment()"
                                 class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed touch-btn">
                                 <i class="fas fa-plus mr-1"></i>Agregar Pago
                             </button>
-
                             <button x-show="remainingAmount > 0.01" @click="fillRemainingPayment()"
                                 class="w-full bg-blue-100 text-blue-700 py-2 rounded-lg text-xs font-semibold touch-btn">
                                 <i class="fas fa-magic mr-1"></i>Completar con $<span
@@ -930,14 +833,12 @@
                         <i class="fas fa-check-circle" x-show="!processing"></i>
                         <span x-text="processing ? 'Procesando...' : 'Cobrar'"></span>
                     </button>
-
                     <button @click="openCreditModal()" :disabled="cart.length === 0 || processing"
                         class="bg-gradient-to-r from-green-500 to-emerald-500 text-white py-3 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2">
                         <i class="fas fa-hand-holding-usd"></i>
                         <span>Crédito</span>
                     </button>
                 </div>
-
                 <button @click="quickSale()" :disabled="cart.length === 0 || processing"
                     class="w-full mt-2 bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2 text-sm">
                     <i class="fas fa-bolt"></i>
@@ -959,7 +860,6 @@
                 <p class="text-lg font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></p>
             </div>
         </div>
-
         <div class="flex items-center justify-between text-xs">
             <span class="text-gray-500">
                 <span x-text="cartItemCount"></span> items en carrito
@@ -996,52 +896,46 @@
                 </button>
             </div>
         </div>
-
-        <div class="p-4 space-y-2 max-h-[50vh] overflow-y-auto">
+        <div class="p-4 space-y-3 max-h-[50vh] overflow-y-auto">
             <div x-show="cart.length === 0" class="text-center py-8 text-gray-400">
                 <i class="fas fa-shopping-cart text-4xl mb-2"></i>
                 <p class="text-sm">Carrito vacío</p>
                 <p class="text-xs mt-1">Agrega productos para comenzar</p>
             </div>
-
             <template x-for="(item, index) in cart" :key="index">
-                <div class="animate-bounce-in cart-item-compact rounded-xl">
-                    <div class="flex items-center justify-between mb-1">
+                <div class="animate-bounce-in bg-gray-50 rounded-xl p-3">
+                    <div class="flex items-center justify-between mb-2">
                         <div class="flex-1">
-                            <h4 class="font-semibold text-gray-800" x-text="item.name"></h4>
-                            <p class="text-xs text-gray-600" x-text="'$' + item.price.toFixed(2) + ' c/u'"></p>
+                            <h4 class="font-semibold text-gray-800 text-sm" x-text="item.name"></h4>
+                            <p class="text-xs text-gray-500" x-text="'$' + item.price.toFixed(2) + ' c/u'"></p>
                         </div>
-                        <button @click="removeFromCart(index)" class="text-red-500 hover:text-red-700 touch-btn p-1">
+                        <button @click="removeFromCart(index)" class="text-red-500 hover:text-red-700 touch-btn p-2">
                             <i class="fas fa-trash text-sm"></i>
                         </button>
                     </div>
-
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-1">
+                        <div class="flex items-center space-x-2">
                             <button @click="updateQuantity(index, -1)"
-                                class="touch-btn w-7 h-7 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400">
+                                class="touch-btn w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">
                                 <i class="fas fa-minus text-xs"></i>
                             </button>
-                            <span class="font-bold text-base w-6 text-center text-gray-800"
-                                x-text="item.quantity"></span>
+                            <span class="font-bold text-lg w-8 text-center text-gray-800" x-text="item.quantity"></span>
                             <button @click="updateQuantity(index, 1)"
-                                class="touch-btn w-7 h-7 bg-cyan-500 text-white rounded-full flex items-center justify-center hover:bg-cyan-600">
+                                class="touch-btn w-8 h-8 bg-cyan-500 text-white rounded-full flex items-center justify-center hover:bg-cyan-600">
                                 <i class="fas fa-plus text-xs"></i>
                             </button>
                             <button @click="updateQuantity(index, 5)"
-                                class="touch-btn px-2 h-7 bg-blue-500 text-white rounded text-xs font-bold hover:bg-blue-600">+5</button>
+                                class="touch-btn px-2 h-8 bg-blue-500 text-white rounded text-xs font-bold hover:bg-blue-600">+5</button>
                         </div>
                         <div class="text-right">
-                            <p class="text-[10px] text-gray-600">Subtotal</p>
-                            <p class="font-bold text-cyan-600 text-sm"
-                                x-text="'$' + (item.price * item.quantity).toFixed(2)">
+                            <p class="text-xs text-gray-500">Subtotal</p>
+                            <p class="font-bold text-cyan-600" x-text="'$' + (item.price * item.quantity).toFixed(2)">
                             </p>
                         </div>
                     </div>
                 </div>
             </template>
         </div>
-
         <div class="border-t p-4 bg-gray-50">
             <div class="space-y-2 mb-3">
                 <div class="flex justify-between text-sm">
@@ -1062,7 +956,6 @@
                     <span class="font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></span>
                 </div>
             </div>
-
             <div class="mb-3">
                 <p class="text-xs font-semibold text-gray-700 mb-2">Tipo de Entrega</p>
                 <div class="flex space-x-2">
@@ -1082,7 +975,6 @@
                         class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500"></textarea>
                 </div>
             </div>
-
             <div class="mb-3">
                 <div class="flex items-center justify-between mb-2">
                     <label class="text-xs font-semibold text-gray-700">Cliente</label>
@@ -1129,14 +1021,12 @@
                     <option value="punto_venta">Punto de Venta</option>
                     <option value="credito">Crédito</option>
                 </select>
-
                 <div x-show="['pago_movil', 'transferencia'].includes(paymentMethod)"
                     class="mt-2 p-3 bg-yellow-50 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Referencia</label>
                     <input type="text" x-model="paymentReference" placeholder="Últimos 4 dígitos"
                         class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                 </div>
-
                 <div x-show="paymentMethod === 'efectivo_bs'" class="mt-2 p-3 bg-green-50 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (Bs.)</label>
                     <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0"
@@ -1150,7 +1040,6 @@
                                 x-text="(totalBs - amountReceivedBs).toFixed(2)"></span></p>
                     </div>
                 </div>
-
                 <div x-show="paymentMethod === 'efectivo_divisas'" class="mt-2 p-3 bg-green-50 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (USD)</label>
                     <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0"
@@ -1162,7 +1051,6 @@
                                 x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
                     </div>
                 </div>
-
                 <div x-show="paymentMethod === 'credito'" class="mt-2 p-3 bg-red-50 rounded-lg">
                     <p class="text-xs text-red-600">
                         <i class="fas fa-exclamation-circle mr-1"></i>
@@ -1199,7 +1087,6 @@
                         </p>
                     </div>
                 </div>
-
                 <div x-show="multiplePayments.length > 0" class="space-y-2">
                     <template x-for="(payment, index) in multiplePayments" :key="payment.id">
                         <div class="bg-white border border-gray-200 rounded-lg p-3 flex items-center justify-between">
@@ -1227,7 +1114,6 @@
                         </div>
                     </template>
                 </div>
-
                 <div class="bg-gray-50 rounded-xl p-3 border border-gray-200">
                     <p class="text-xs font-semibold text-gray-700 mb-2">
                         <i class="fas fa-plus-circle mr-1"></i>Agregar Pago
@@ -1241,7 +1127,6 @@
                             <option value="transferencia">Transferencia</option>
                             <option value="punto_venta">Punto de Venta</option>
                         </select>
-
                         <div x-show="newPayment.method !== 'efectivo_bs'">
                             <label class="text-[10px] font-medium text-gray-600">Monto (USD)</label>
                             <input type="number" x-model.number="newPayment.amountUsd" step="0.01" min="0"
@@ -1250,7 +1135,6 @@
                             <p class="text-[10px] text-gray-500 mt-1">Equivale: Bs. <span class="font-semibold"
                                     x-text="((newPayment.amountUsd || 0) * exchangeRate).toFixed(2)"></span></p>
                         </div>
-
                         <div x-show="newPayment.method === 'efectivo_bs'">
                             <label class="text-[10px] font-medium text-gray-600">Monto (Bs.)</label>
                             <input type="number" x-model.number="newPayment.amountBs" step="0.01" min="0"
@@ -1259,18 +1143,15 @@
                             <p class="text-[10px] text-gray-500 mt-1">Equivale: $<span class="font-semibold"
                                     x-text="((newPayment.amountBs || 0) / exchangeRate).toFixed(2)"></span></p>
                         </div>
-
                         <div x-show="['pago_movil', 'transferencia', 'punto_venta'].includes(newPayment.method)">
                             <label class="text-[10px] font-medium text-gray-600">Referencia</label>
                             <input type="text" x-model="newPayment.reference" placeholder="Últimos 4 dígitos"
                                 class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                         </div>
-
                         <button @click="addMultiplePayment()" :disabled="!canAddPayment()"
                             class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed touch-btn">
                             <i class="fas fa-plus mr-1"></i>Agregar Pago
                         </button>
-
                         <button x-show="remainingAmount > 0.01" @click="fillRemainingPayment()"
                             class="w-full bg-blue-100 text-blue-700 py-2 rounded-lg text-xs font-semibold touch-btn">
                             <i class="fas fa-magic mr-1"></i>Completar con $<span
@@ -1288,14 +1169,12 @@
                     <i class="fas fa-check-circle" x-show="!processing"></i>
                     <span x-text="processing ? 'Procesando...' : 'Cobrar'"></span>
                 </button>
-
                 <button @click="openCreditModal()" :disabled="cart.length === 0 || processing"
                     class="bg-gradient-to-r from-green-500 to-emerald-500 text-white py-3 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2">
                     <i class="fas fa-hand-holding-usd"></i>
                     <span>Crédito</span>
                 </button>
             </div>
-
             <button @click="quickSale()" :disabled="cart.length === 0 || processing"
                 class="w-full mt-2 bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2 text-sm">
                 <i class="fas fa-bolt"></i>
@@ -1315,7 +1194,6 @@
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
-
             <div class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nombre Completo *</label>
@@ -1348,7 +1226,6 @@
                         placeholder="Nombre de quien recomendó">
                 </div>
             </div>
-
             <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3 sticky bottom-0">
                 <button @click="closeCustomerModal()" class="px-4 py-2 text-gray-600 touch-btn">Cancelar</button>
                 <button @click="saveCustomer()" :disabled="savingCustomer"
@@ -1374,7 +1251,6 @@
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
-
             <div class="p-6 space-y-4">
                 <div class="bg-blue-50 p-4 rounded-lg">
                     <h4 class="font-semibold text-gray-800 mb-3"><i
@@ -1409,7 +1285,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="bg-green-50 p-4 rounded-lg">
                     <h4 class="font-semibold text-gray-800 mb-3"><i
                             class="fas fa-shopping-cart mr-2 text-green-600"></i>Resumen</h4>
@@ -1429,7 +1304,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="bg-yellow-50 p-4 rounded-lg">
                     <h4 class="font-semibold text-gray-800 mb-3"><i
                             class="fas fa-calendar-alt mr-2 text-yellow-600"></i>Términos</h4>
@@ -1461,7 +1335,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Notas</label>
                     <textarea x-model="creditForm.notes" rows="2"
@@ -1469,7 +1342,6 @@
                         placeholder="Observaciones"></textarea>
                 </div>
             </div>
-
             <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3 sticky bottom-0">
                 <button @click="closeCreditModal()" class="px-4 py-2 text-gray-600 touch-btn">Cancelar</button>
                 <button @click="processCreditSale()" :disabled="processing || !canProcessCredit()"
@@ -1500,38 +1372,22 @@
                 warning: 'linear-gradient(to right, #f59e0b, #d97706)',
                 info: 'linear-gradient(to right, #3b82f6, #2563eb)'
             };
-            const icons = { success: '✓', error: '✗', warning: '', info: 'ℹ' };
-
+            const icons = { success: '✓', error: '✗', warning: '⚠', info: 'ℹ' };
             Toastify({
                 text: `${icons[type]} ${message}`,
-                duration: 3000,
-                close: true,
-                gravity: 'top',
-                position: 'right',
-                stopOnFocus: true,
+                duration: 3000, close: true, gravity: 'top', position: 'right', stopOnFocus: true,
                 style: {
-                    background: gradients[type],
-                    borderRadius: '12px',
-                    fontFamily: 'Inter, sans-serif',
-                    fontWeight: '500',
-                    fontSize: '14px',
-                    padding: '14px 20px',
-                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
-                    minWidth: '280px'
+                    background: gradients[type], borderRadius: '12px', fontFamily: 'Inter, sans-serif',
+                    fontWeight: '500', fontSize: '14px', padding: '14px 20px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15)', minWidth: '280px'
                 }
             }).showToast();
         }
 
         async function showConfirm(title, html, confirmText = 'Confirmar', cancelText = 'Cancelar') {
             const result = await Swal.fire({
-                title: title,
-                html: html,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: confirmText,
-                cancelButtonText: cancelText,
-                reverseButtons: true,
-                focusCancel: true,
+                title: title, html: html, icon: 'question', showCancelButton: true,
+                confirmButtonText: confirmText, cancelButtonText: cancelText, reverseButtons: true, focusCancel: true,
                 customClass: {
                     popup: 'rounded-2xl',
                     confirmButton: 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-xl font-semibold',
@@ -1550,7 +1406,7 @@
         function ensureValidRate(rate) {
             const parsed = parseFloat(rate);
             if (isNaN(parsed) || parsed <= 0) {
-                console.warn('⚠️ Tasa inválida detectada, usando valor por defecto 700.22');
+                console.warn('️ Tasa inválida detectada, usando valor por defecto 700.22');
                 return 700.22;
             }
             return round2(parsed);
@@ -1587,6 +1443,7 @@
                 useMultiplePayments: false,
                 multiplePayments: [],
                 newPayment: { method: 'efectivo_divisas', amountUsd: 0, amountBs: 0, reference: '' },
+                capProductId: null, // ID del producto de tapas
 
                 get filteredProducts() {
                     if (!this.productSearch) return this.products;
@@ -1678,6 +1535,19 @@
                     return names[method] || method;
                 },
 
+                // ============================================
+                // CONTAR TAPAS NECESARIAS EN EL CARRITO
+                // ============================================
+                countCapsNeeded() {
+                    let total = 0;
+                    this.cart.forEach(item => {
+                        if (item.size_liters === 13 || item.size_liters === 20) {
+                            total += item.quantity;
+                        }
+                    });
+                    return total;
+                },
+
                 async initVentas() {
                     const { data: { session } } = await supabase.auth.getSession();
                     if (!session) { window.location.href = 'login.html'; return; }
@@ -1687,6 +1557,7 @@
                     } catch (err) { console.error('Error obteniendo perfil:', err); }
 
                     await this.loadExchangeRate();
+                    await this.loadCapProductId(); // Cargar ID de tapas
                     await this.loadProducts();
                     await this.loadCustomers();
                     document.addEventListener('keydown', (e) => {
@@ -1707,12 +1578,38 @@
                             this.exchangeRate = rate;
                             console.log('✅ Tasa cargada desde Supabase:', this.exchangeRate);
                         } else {
-                            console.warn('️ No se encontró tasa en BD, usando 700.22');
+                            console.warn('⚠️ No se encontró tasa en BD, usando 700.22');
                             this.exchangeRate = 700.22;
                         }
                     } catch (err) {
                         console.error('❌ Error cargando tasa:', err);
                         this.exchangeRate = 700.22;
+                    }
+                },
+
+                // ============================================
+                // CARGAR ID DEL PRODUCTO DE TAPAS
+                // ============================================
+                async loadCapProductId() {
+                    try {
+                        const { data, error } = await supabase
+                            .from('products')
+                            .select('id')
+                            .eq('product_type', 'cap')
+                            .eq('is_active', true)
+                            .single();
+
+                        if (error) {
+                            console.warn('⚠️ No se encontró producto de tapas:', error.message);
+                            this.capProductId = null;
+                            return;
+                        }
+
+                        this.capProductId = data.id;
+                        console.log('✅ ID de tapas cargado:', this.capProductId);
+                    } catch (err) {
+                        console.error('❌ Error cargando ID de tapas:', err);
+                        this.capProductId = null;
                     }
                 },
 
@@ -1726,7 +1623,7 @@
                     const newRate = round2(bcvData.rate);
                     const rateDate = new Date(bcvData.date).toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' });
                     const confirmed = await Swal.fire({
-                        title: '️ Tasa BCV Oficial',
+                        title: '🏛️ Tasa BCV Oficial',
                         html: `<div class="text-center space-y-3">
                             <div class="bg-blue-50 rounded-lg p-4">
                                 <p class="text-sm text-gray-600 mb-2">Tasa oficial del BCV:</p>
@@ -1738,11 +1635,8 @@
                             </div>
                             <p class="text-xs text-gray-500 mt-2">Fuente: ${bcvData.source}</p>
                         </div>`,
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonText: 'Aplicar Tasa',
-                        cancelButtonText: 'Cancelar',
-                        reverseButtons: true
+                        icon: 'question', showCancelButton: true,
+                        confirmButtonText: 'Aplicar Tasa', cancelButtonText: 'Cancelar', reverseButtons: true
                     });
                     if (confirmed.isConfirmed) {
                         this.exchangeRate = newRate;
@@ -1801,9 +1695,7 @@
                         const { data, error } = await supabase.from('customers').select('*').eq('branch', this.userBranch).eq('is_active', true).order('full_name');
                         if (error) throw error;
                         this.customers = data || [];
-                    } catch (err) {
-                        console.error('Error cargando clientes:', err);
-                    }
+                    } catch (err) { console.error('Error cargando clientes:', err); }
                 },
 
                 getInitials(name) { if (!name) return '??'; return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(); },
@@ -1812,22 +1704,10 @@
                     if (product.stock <= 0) { showToast('Producto sin stock', 'error'); return; }
                     const existingItem = this.cart.find(item => item.id === product.id);
                     if (existingItem) {
-                        if (existingItem.quantity < product.stock) {
-                            existingItem.quantity++;
-                            showToast('Cantidad actualizada', 'info');
-                        } else {
-                            showToast('Stock insuficiente', 'error');
-                        }
+                        if (existingItem.quantity < product.stock) { existingItem.quantity++; showToast('Cantidad actualizada', 'info'); }
+                        else { showToast('Stock insuficiente', 'error'); }
                     } else {
-                        this.cart.push({
-                            id: product.id,
-                            product_id: product.product_id,
-                            name: product.name,
-                            size_liters: product.size_liters,
-                            price: product.price,
-                            stock: product.stock,
-                            quantity: 1
-                        });
+                        this.cart.push({ id: product.id, product_id: product.product_id, name: product.name, size_liters: product.size_liters, price: product.price, stock: product.stock, quantity: 1 });
                         showToast('Producto agregado', 'success');
                     }
                 },
@@ -1836,22 +1716,10 @@
                     if (product.stock < quantity) { showToast(`Stock insuficiente para +${quantity}`, 'error'); return; }
                     const existingItem = this.cart.find(item => item.id === product.id);
                     if (existingItem) {
-                        if (existingItem.quantity + quantity <= product.stock) {
-                            existingItem.quantity += quantity;
-                            showToast(`+${quantity} ${product.name}`, 'success');
-                        } else {
-                            showToast('Stock insuficiente', 'error');
-                        }
+                        if (existingItem.quantity + quantity <= product.stock) { existingItem.quantity += quantity; showToast(`+${quantity} ${product.name}`, 'success'); }
+                        else { showToast('Stock insuficiente', 'error'); }
                     } else {
-                        this.cart.push({
-                            id: product.id,
-                            product_id: product.product_id,
-                            name: product.name,
-                            size_liters: product.size_liters,
-                            price: product.price,
-                            stock: product.stock,
-                            quantity: quantity
-                        });
+                        this.cart.push({ id: product.id, product_id: product.product_id, name: product.name, size_liters: product.size_liters, price: product.price, stock: product.stock, quantity: quantity });
                         showToast(`+${quantity} ${product.name}`, 'success');
                     }
                 },
@@ -1859,13 +1727,9 @@
                 updateQuantity(index, change) {
                     const item = this.cart[index];
                     const newQuantity = item.quantity + change;
-                    if (newQuantity > 0 && newQuantity <= item.stock) {
-                        item.quantity = newQuantity;
-                    } else if (newQuantity <= 0) {
-                        this.removeFromCart(index);
-                    } else {
-                        showToast('Stock insuficiente', 'error');
-                    }
+                    if (newQuantity > 0 && newQuantity <= item.stock) { item.quantity = newQuantity; }
+                    else if (newQuantity <= 0) { this.removeFromCart(index); }
+                    else { showToast('Stock insuficiente', 'error'); }
                 },
 
                 removeFromCart(index) { this.cart.splice(index, 1); showToast('Producto eliminado', 'warning'); },
@@ -1892,25 +1756,14 @@
                     if (!this.newCustomer.full_name) { showToast('El nombre es obligatorio', 'error'); return; }
                     this.savingCustomer = true;
                     try {
-                        const { data, error } = await supabase.from('customers').insert({
-                            full_name: this.newCustomer.full_name,
-                            phone: this.newCustomer.phone,
-                            email: this.newCustomer.email,
-                            address: this.newCustomer.address,
-                            recommended_by: this.newCustomer.recommended_by,
-                            branch: this.userBranch
-                        }).select().single();
+                        const { data, error } = await supabase.from('customers').insert({ full_name: this.newCustomer.full_name, phone: this.newCustomer.phone, email: this.newCustomer.email, address: this.newCustomer.address, recommended_by: this.newCustomer.recommended_by, branch: this.userBranch }).select().single();
                         if (error) throw error;
                         showToast('Cliente creado', 'success');
                         this.customers.push(data);
                         this.selectedCustomer = data.id;
                         this.closeCustomerModal();
-                    } catch (err) {
-                        console.error('Error creando cliente:', err);
-                        showToast('Error al crear cliente', 'error');
-                    } finally {
-                        this.savingCustomer = false;
-                    }
+                    } catch (err) { console.error('Error creando cliente:', err); showToast('Error al crear cliente', 'error'); }
+                    finally { this.savingCustomer = false; }
                 },
 
                 openCreditModal() {
@@ -1924,10 +1777,93 @@
                 loadCustomerData() { const customer = this.customers.find(c => c.id === this.creditForm.customer_id); if (customer) { this.creditForm.customer_phone = customer.phone || ''; } },
                 canProcessCredit() { if (!this.creditForm.customer_id) return false; if (!this.creditForm.payment_date) return false; if (this.creditForm.initial_payment > this.totalUSD) return false; return true; },
 
+                // ============================================
+                // VALIDAR STOCK DE TAPAS ANTES DE VENDER
+                // ============================================
+                async validateCapsStock() {
+                    const capsNeeded = this.countCapsNeeded();
+                    if (capsNeeded === 0) return true; // No se necesitan tapas
+
+                    if (!this.capProductId) {
+                        showToast('⚠️ Producto de tapas no configurado', 'warning');
+                        return true; // Permitir venta pero advertir
+                    }
+
+                    try {
+                        const { data, error } = await supabase
+                            .from('inventory')
+                            .select('quantity')
+                            .eq('product_id', this.capProductId)
+                            .eq('branch', this.userBranch)
+                            .single();
+
+                        if (error) {
+                            console.warn('⚠️ Error consultando inventario de tapas:', error.message);
+                            return true;
+                        }
+
+                        if (data.quantity < capsNeeded) {
+                            showToast(` Stock insuficiente de tapas: ${data.quantity} disponibles, se necesitan ${capsNeeded}`, 'error');
+                            return false;
+                        }
+
+                        return true;
+                    } catch (err) {
+                        console.error('❌ Error validando stock de tapas:', err);
+                        return true;
+                    }
+                },
+
+                // ============================================
+                // DESCUENTAR TAPAS DEL INVENTARIO
+                // ============================================
+                async deductCapsFromInventory(capsNeeded) {
+                    if (capsNeeded === 0 || !this.capProductId) return;
+
+                    try {
+                        const { data: capInventory, error: fetchError } = await supabase
+                            .from('inventory')
+                            .select('quantity')
+                            .eq('product_id', this.capProductId)
+                            .eq('branch', this.userBranch)
+                            .single();
+
+                        if (fetchError) {
+                            console.warn('⚠️ Error consultando inventario de tapas:', fetchError.message);
+                            return;
+                        }
+
+                        const newQuantity = capInventory.quantity - capsNeeded;
+
+                        const { error: updateError } = await supabase
+                            .from('inventory')
+                            .update({
+                                quantity: newQuantity,
+                                updated_at: new Date().toISOString()
+                            })
+                            .eq('product_id', this.capProductId)
+                            .eq('branch', this.userBranch);
+
+                        if (updateError) {
+                            console.warn('️ Error actualizando tapas:', updateError.message);
+                        } else {
+                            console.log(`✅ ${capsNeeded} tapas descontadas del inventario`);
+                        }
+                    } catch (err) {
+                        console.error('❌ Error descontando tapas:', err);
+                    }
+                },
+
                 async processSale() {
                     this.exchangeRate = ensureValidRate(this.exchangeRate);
                     if (this.cart.length === 0) { showToast('El carrito está vacío', 'error'); return; }
                     if (this.deliveryType === 'delivery' && !this.deliveryAddress) { showToast('Debe ingresar la dirección', 'error'); return; }
+
+                    // ============================================
+                    // VALIDAR STOCK DE TAPAS
+                    // ============================================
+                    const capsValid = await this.validateCapsStock();
+                    if (!capsValid) return;
 
                     const customer = this.customers.find(c => c.id === this.selectedCustomer);
                     const customerName = customer?.full_name || 'Cliente no registrado';
@@ -2062,9 +1998,6 @@
                             }
                         }
 
-                        // ============================================
-                        // INSERTAR VENTA
-                        // ============================================
                         const { data: sale, error: saleError } = await supabase.from('sales').insert({
                             branch: this.userBranch,
                             customer_id: this.selectedCustomer || null,
@@ -2082,9 +2015,6 @@
 
                         if (saleError) throw saleError;
 
-                        // ============================================
-                        // GUARDAR PAGOS EN sale_payments
-                        // ============================================
                         const paymentsToInsert = [];
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             this.multiplePayments.forEach((p, i) => {
@@ -2129,12 +2059,9 @@
                             }
                         }
 
-                        const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters, product_type').eq('is_active', true);
+                        const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters').eq('is_active', true);
                         const sizeToProductId = {};
                         productsFromDB.forEach(p => { if (p.size_liters) sizeToProductId[p.size_liters] = p.id; });
-
-                        // Obtener el producto de tipo 'cap' (tapas)
-                        const capProduct = productsFromDB.find(p => p.product_type === 'cap');
 
                         const saleItems = this.cart.map(item => ({
                             sale_id: sale.id,
@@ -2146,15 +2073,9 @@
                         const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
                         if (itemsError) throw itemsError;
 
-                        // ============================================
-                        // DESCUENTAR AGUA DE TANQUES Y CONTAR TAPAS
-                        // ============================================
-                        let totalCapsNeeded = 0;
-
                         for (const item of this.cart) {
                             const realProductId = sizeToProductId[item.size_liters];
                             if (!realProductId) continue;
-
                             const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
                                 branch_param: this.userBranch,
                                 product_id_param: realProductId,
@@ -2163,47 +2084,15 @@
                             });
                             if (tankError) throw tankError;
                             if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
-
-                            // Contar tapas necesarias para botellones 13L y 20L
-                            if (item.size_liters === 13 || item.size_liters === 20) {
-                                totalCapsNeeded += item.quantity;
-                            }
                         }
 
                         // ============================================
-                        // DESCUENTAR TAPAS DEL INVENTARIO
+                        // DESCUENTAR TAPAS AUTOMÁTICAMENTE
                         // ============================================
-                        if (totalCapsNeeded > 0 && capProduct) {
-                            const { data: capInventory, error: capInventoryError } = await supabase
-                                .from('inventory')
-                                .select('quantity, product_id')
-                                .eq('product_id', capProduct.id)
-                                .eq('branch', this.userBranch)
-                                .single();
-
-                            if (capInventoryError) {
-                                console.warn('️ Error consultando inventario de tapas:', capInventoryError.message);
-                            } else if (capInventory) {
-                                if (capInventory.quantity < totalCapsNeeded) {
-                                    showToast(`⚠️ Stock de tapas bajo: ${capInventory.quantity} disponibles, se necesitan ${totalCapsNeeded}`, 'warning');
-                                }
-
-                                // Actualizar inventario de tapas
-                                const { error: updateCapError } = await supabase
-                                    .from('inventory')
-                                    .update({
-                                        quantity: capInventory.quantity - totalCapsNeeded,
-                                        updated_at: new Date().toISOString()
-                                    })
-                                    .eq('product_id', capProduct.id)
-                                    .eq('branch', this.userBranch);
-
-                                if (updateCapError) {
-                                    console.warn('⚠️ Error actualizando tapas:', updateCapError.message);
-                                } else {
-                                    console.log(`✅ ${totalCapsNeeded} tapas descontadas del inventario`);
-                                }
-                            }
+                        const capsNeeded = this.countCapsNeeded();
+                        if (capsNeeded > 0) {
+                            await this.deductCapsFromInventory(capsNeeded);
+                            notes.push(`Tapas descontadas: ${capsNeeded}`);
                         }
 
                         let successDetails = '';
@@ -2219,6 +2108,18 @@
                                             </div>
                                         `).join('')}
                                     </div>
+                                </div>
+                            `;
+                        }
+
+                        // Mostrar info de tapas descontadas
+                        if (capsNeeded > 0) {
+                            successDetails += `
+                                <div class="mt-2 p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+                                    <p class="text-xs text-yellow-800">
+                                        <i class="fas fa-circle-notch mr-1"></i>
+                                        ${capsNeeded} tapa(s) descontada(s) del inventario
+                                    </p>
                                 </div>
                             `;
                         }
@@ -2276,6 +2177,13 @@
                 async processCreditSale() {
                     this.exchangeRate = ensureValidRate(this.exchangeRate);
                     if (!this.canProcessCredit()) { showToast('Complete los campos obligatorios', 'error'); return; }
+
+                    // ============================================
+                    // VALIDAR STOCK DE TAPAS
+                    // ============================================
+                    const capsValid = await this.validateCapsStock();
+                    if (!capsValid) return;
+
                     const customer = this.customers.find(c => c.id === this.creditForm.customer_id);
                     const creditAmount = round2(this.totalUSD - this.creditForm.initial_payment);
                     const confirmed = await showConfirm('Venta a Crédito', `
@@ -2323,10 +2231,9 @@
                             created_by: session.user.id
                         }).select().single();
                         if (saleError) throw saleError;
-                        const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters, product_type').eq('is_active', true);
+                        const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters').eq('is_active', true);
                         const sizeToProductId = {};
                         productsFromDB.forEach(p => { if (p.size_liters) sizeToProductId[p.size_liters] = p.id; });
-                        const capProduct = productsFromDB.find(p => p.product_type === 'cap');
                         const saleItems = this.cart.map(item => ({
                             sale_id: sale.id,
                             product_id: sizeToProductId[item.size_liters],
@@ -2336,8 +2243,6 @@
                         }));
                         const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
                         if (itemsError) throw itemsError;
-
-                        let totalCapsNeeded = 0;
                         for (const item of this.cart) {
                             const realProductId = sizeToProductId[item.size_liters];
                             if (!realProductId) continue;
@@ -2348,29 +2253,14 @@
                                 user_id_param: session.user.id
                             });
                             if (tankError) throw tankError;
-                            if (item.size_liters === 13 || item.size_liters === 20) {
-                                totalCapsNeeded += item.quantity;
-                            }
                         }
 
-                        if (totalCapsNeeded > 0 && capProduct) {
-                            const { data: capInventory } = await supabase
-                                .from('inventory')
-                                .select('quantity')
-                                .eq('product_id', capProduct.id)
-                                .eq('branch', this.userBranch)
-                                .single();
-
-                            if (capInventory) {
-                                await supabase
-                                    .from('inventory')
-                                    .update({
-                                        quantity: capInventory.quantity - totalCapsNeeded,
-                                        updated_at: new Date().toISOString()
-                                    })
-                                    .eq('product_id', capProduct.id)
-                                    .eq('branch', this.userBranch);
-                            }
+                        // ============================================
+                        // DESCUENTAR TAPAS AUTOMÁTICAMENTE
+                        // ============================================
+                        const capsNeeded = this.countCapsNeeded();
+                        if (capsNeeded > 0) {
+                            await this.deductCapsFromInventory(capsNeeded);
                         }
 
                         if (creditAmount > 0) {
