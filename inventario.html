@@ -9,6 +9,16 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
 
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <!-- Toastify JS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -70,6 +80,110 @@
             .menu-toggle {
                 display: none !important;
             }
+        }
+
+        /* Toastify personalizado */
+        .toastify {
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 500 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
+            padding: 14px 20px !important;
+            min-width: 280px;
+            font-size: 14px !important;
+            color: white !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        .toastify-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        }
+
+        .toastify-error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+        }
+
+        .toastify-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+        }
+
+        .toastify-info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+        }
+
+        /* SweetAlert2 personalizado */
+        .swal2-popup {
+            font-family: 'Inter', sans-serif !important;
+            border-radius: 16px !important;
+            padding: 2rem !important;
+        }
+
+        .swal2-title {
+            font-size: 1.5rem !important;
+            font-weight: 700 !important;
+            color: #1f2937 !important;
+        }
+
+        .swal2-html-container {
+            font-size: 0.95rem !important;
+            color: #4b5563 !important;
+        }
+
+        .swal2-confirm {
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%) !important;
+            border: none !important;
+            border-radius: 12px !important;
+            padding: 0.75rem 2rem !important;
+            font-weight: 600 !important;
+            font-size: 1rem !important;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3) !important;
+            transition: all 0.2s !important;
+        }
+
+        .swal2-confirm:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4) !important;
+        }
+
+        .swal2-cancel {
+            background: #f3f4f6 !important;
+            color: #4b5563 !important;
+            border: none !important;
+            border-radius: 12px !important;
+            padding: 0.75rem 2rem !important;
+            font-weight: 600 !important;
+            font-size: 1rem !important;
+            transition: all 0.2s !important;
+        }
+
+        .swal2-cancel:hover {
+            background: #e5e7eb !important;
+            transform: translateY(-2px) !important;
+        }
+
+        @keyframes bounce-in {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            70% {
+                transform: scale(0.9);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .animate-bounce-in {
+            animation: bounce-in 0.4s ease-out;
         }
     </style>
 </head>
@@ -158,9 +272,21 @@
                             class="capitalize font-semibold" x-text="userBranch"></span></p>
                 </div>
             </div>
-            <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
-                <i class="fas fa-sign-out-alt mr-2"></i>Salir
-            </button>
+            <div class="flex items-center space-x-2">
+                <button @click="openRefillTankModal()"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                    <i class="fas fa-plus"></i>
+                    <span class="hidden sm:inline">Recargar Tanque</span>
+                </button>
+                <button @click="openFillBottlesModal()"
+                    class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                    <i class="fas fa-tint"></i>
+                    <span class="hidden sm:inline">Llenar Botellones</span>
+                </button>
+                <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Salir
+                </button>
+            </div>
         </header>
 
         <!-- Content -->
@@ -188,7 +314,7 @@
 
                 <!-- Virtual Inventory Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <template x-for="item in virtualInventory" :key="item.size_liters">
+                    <template x-for="item in virtualInventory" :key="item.size_liters || item.product_type">
                         <div class="bg-white rounded-2xl shadow-sm p-6 border-t-4" :class="{
                                 'border-cyan-500': item.size_liters === 5,
                                 'border-blue-500': item.size_liters === 13,
@@ -223,7 +349,7 @@
                                 <div class="flex justify-between text-sm mt-1">
                                     <span class="text-gray-600">Agua asignada:</span>
                                     <span class="font-semibold text-blue-600"
-                                        x-text="((item.virtual_stock * item.size_liters) || 0).toLocaleString() + 'L'"></span>
+                                        x-text="((item.virtual_stock * (item.size_liters || 0)) || 0).toLocaleString() + 'L'"></span>
                                 </div>
                             </div>
                         </div>
@@ -232,13 +358,19 @@
 
                 <!-- Water Tanks -->
                 <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-database text-blue-500 mr-2"></i>
-                        Tanques de Almacenamiento
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center justify-between">
+                        <span class="flex items-center">
+                            <i class="fas fa-database text-blue-500 mr-2"></i>
+                            Tanques de Almacenamiento
+                        </span>
+                        <button @click="openRefillTankModal()"
+                            class="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg">
+                            <i class="fas fa-plus mr-1"></i>Recargar
+                        </button>
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <template x-for="tank in tanks" :key="tank.id">
-                            <div class="border border-gray-200 rounded-xl p-4">
+                            <div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
                                 <div class="flex justify-between items-start mb-3">
                                     <div>
                                         <h4 class="font-semibold text-gray-800" x-text="tank.name"></h4>
@@ -330,10 +462,164 @@
         </main>
     </div>
 
-    <!-- Alertify -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
+    <!-- Modal Recargar Tanque -->
+    <div x-show="showRefillTankModal" x-cloak
+        class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        @click.self="closeRefillTankModal()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-bounce-in"
+            @click.stop>
+            <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white">
+                <h3 class="text-xl font-bold text-gray-800">
+                    <i class="fas fa-plus-circle text-blue-600 mr-2"></i>Recargar Tanque
+                </h3>
+                <button @click="closeRefillTankModal()" class="text-gray-400 hover:text-gray-600 touch-btn p-2">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tanque *</label>
+                    <select x-model="refillForm.tankId"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500">
+                        <option value="">Seleccionar tanque...</option>
+                        <template x-for="tank in tanks" :key="tank.id">
+                            <option :value="tank.id"
+                                x-text="tank.name + ' (' + tank.current_liters + 'L / ' + tank.capacity_liters + 'L)'">
+                            </option>
+                        </template>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Litros a Agregar *</label>
+                    <input type="number" x-model.number="refillForm.liters" step="1" min="1"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500"
+                        placeholder="Ej: 3500">
+                    <p class="text-xs text-gray-500 mt-1">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Se sumará al nivel actual del tanque
+                    </p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Notas</label>
+                    <textarea x-model="refillForm.notes" rows="2"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500"
+                        placeholder="Ej: Compra de agua - Factura #1234"></textarea>
+                </div>
+
+                <div class="bg-blue-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-blue-900 mb-2">Resumen</h4>
+                    <div class="space-y-1 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Nivel actual:</span>
+                            <span class="font-semibold"
+                                x-text="(getCurrentTankLevel() || 0).toLocaleString() + 'L'"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">A agregar:</span>
+                            <span class="font-semibold text-blue-600"
+                                x-text="(refillForm.liters || 0).toLocaleString() + 'L'"></span>
+                        </div>
+                        <div class="flex justify-between pt-2 border-t border-blue-200">
+                            <span class="text-gray-800 font-semibold">Nuevo nivel:</span>
+                            <span class="font-bold text-green-600"
+                                x-text="(getCurrentTankLevel() + (refillForm.liters || 0)).toLocaleString() + 'L'"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3 sticky bottom-0">
+                <button @click="closeRefillTankModal()" class="px-4 py-2 text-gray-600 touch-btn">Cancelar</button>
+                <button @click="refillTank()" :disabled="processing"
+                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 touch-btn flex items-center space-x-2">
+                    <i class="fas fa-circle-notch fa-spin" x-show="processing"></i>
+                    <i class="fas fa-save" x-show="!processing"></i>
+                    <span x-text="processing ? 'Procesando...' : 'Recargar'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Llenar Botellones -->
+    <div x-show="showFillBottlesModal" x-cloak
+        class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        @click.self="closeFillBottlesModal()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-bounce-in"
+            @click.stop>
+            <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white">
+                <h3 class="text-xl font-bold text-gray-800">
+                    <i class="fas fa-tint text-cyan-600 mr-2"></i>Llenar Botellones
+                </h3>
+                <button @click="closeFillBottlesModal()" class="text-gray-400 hover:text-gray-600 touch-btn p-2">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Botellón *</label>
+                    <select x-model="fillForm.sizeLiters"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500">
+                        <option value="">Seleccionar...</option>
+                        <option value="5">Botellón 5 Litros</option>
+                        <option value="13">Botellón 13 Litros</option>
+                        <option value="20">Botellón 20 Litros</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Cantidad de Botellones *</label>
+                    <input type="number" x-model.number="fillForm.quantity" step="1" min="1"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500"
+                        placeholder="Ej: 50">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tanque de Origen *</label>
+                    <select x-model="fillForm.tankId"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500">
+                        <option value="">Seleccionar tanque...</option>
+                        <template x-for="tank in tanks" :key="tank.id">
+                            <option :value="tank.id" x-text="tank.name + ' (' + tank.current_liters + 'L disponibles)'">
+                            </option>
+                        </template>
+                    </select>
+                </div>
+
+                <div class="bg-cyan-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-cyan-900 mb-2">Resumen</h4>
+                    <div class="space-y-1 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Botellones:</span>
+                            <span class="font-semibold" x-text="(fillForm.quantity || 0) + ' unidades'"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Tamaño:</span>
+                            <span class="font-semibold" x-text="getFillFormSizeName()"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Agua requerida:</span>
+                            <span class="font-semibold text-cyan-600"
+                                x-text="((fillForm.quantity || 0) * (fillForm.sizeLiters || 0)).toLocaleString() + 'L'"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3 sticky bottom-0">
+                <button @click="closeFillBottlesModal()" class="px-4 py-2 text-gray-600 touch-btn">Cancelar</button>
+                <button @click="fillBottles()" :disabled="processing"
+                    class="px-6 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 disabled:opacity-50 touch-btn flex items-center space-x-2">
+                    <i class="fas fa-circle-notch fa-spin" x-show="processing"></i>
+                    <i class="fas fa-save" x-show="!processing"></i>
+                    <span x-text="processing ? 'Procesando...' : 'Llenar'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script>
         const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
@@ -346,14 +632,56 @@
             window.location.href = 'login.html';
         }
 
-        function notify(message, type = 'success') {
-            if (typeof alertify !== 'undefined') {
-                if (type === 'success') alertify.success(message);
-                else if (type === 'error') alertify.error(message);
-                else alertify.message(message);
-            } else {
-                alert(message);
-            }
+        // ============================================
+        // NOTIFICACIONES TOASTIFY (IGUAL A VENTAS)
+        // ============================================
+        function showToast(message, type = 'success') {
+            const gradients = {
+                success: 'linear-gradient(to right, #10b981, #059669)',
+                error: 'linear-gradient(to right, #ef4444, #dc2626)',
+                warning: 'linear-gradient(to right, #f59e0b, #d97706)',
+                info: 'linear-gradient(to right, #3b82f6, #2563eb)'
+            };
+            const icons = { success: '✓', error: '✗', warning: '⚠', info: 'ℹ' };
+
+            Toastify({
+                text: `${icons[type]} ${message}`,
+                duration: 3000,
+                close: true,
+                gravity: 'top',
+                position: 'right',
+                stopOnFocus: true,
+                style: {
+                    background: gradients[type],
+                    borderRadius: '12px',
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: '500',
+                    fontSize: '14px',
+                    padding: '14px 20px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
+                    minWidth: '280px'
+                }
+            }).showToast();
+        }
+
+        async function showConfirm(title, html, confirmText = 'Confirmar', cancelText = 'Cancelar') {
+            const result = await Swal.fire({
+                title: title,
+                html: html,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: confirmText,
+                cancelButtonText: cancelText,
+                reverseButtons: true,
+                focusCancel: true,
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-xl font-semibold',
+                    cancelButton: 'bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold'
+                },
+                buttonsStyling: false
+            });
+            return result.isConfirmed;
         }
 
         function inventarioApp() {
@@ -363,6 +691,7 @@
                 currentPage: 'inventario',
 
                 loading: true,
+                processing: false,
                 virtualInventory: [],
                 tanks: [],
                 totalWater: 0,
@@ -373,11 +702,24 @@
                 userBranch: '',
                 userInitials: '??',
 
-                async initInventario() {
-                    if (typeof alertify !== 'undefined') {
-                        alertify.set('notifier', { position: 'top-right' });
-                    }
+                // Modales
+                showRefillTankModal: false,
+                showFillBottlesModal: false,
 
+                // Formularios
+                refillForm: {
+                    tankId: '',
+                    liters: 0,
+                    notes: ''
+                },
+
+                fillForm: {
+                    sizeLiters: '',
+                    quantity: 0,
+                    tankId: ''
+                },
+
+                async initInventario() {
                     // Verificar autenticación
                     const { data: { session } } = await supabase.auth.getSession();
                     if (!session) {
@@ -421,7 +763,7 @@
 
                     } catch (err) {
                         console.error('Error cargando inventario virtual:', err);
-                        notify('Error al cargar inventario: ' + err.message, 'error');
+                        showToast('Error al cargar inventario: ' + err.message, 'error');
                     } finally {
                         this.loading = false;
                     }
@@ -443,12 +785,237 @@
 
                     } catch (err) {
                         console.error('Error cargando tanques:', err);
+                        showToast('Error al cargar tanques', 'error');
                     }
                 },
 
                 getInitials(name) {
                     if (!name) return '??';
                     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                },
+
+                // ============================================
+                // MODAL RECARGAR TANQUE
+                // ============================================
+                openRefillTankModal() {
+                    this.refillForm = {
+                        tankId: '',
+                        liters: 0,
+                        notes: ''
+                    };
+                    this.showRefillTankModal = true;
+                },
+
+                closeRefillTankModal() {
+                    this.showRefillTankModal = false;
+                },
+
+                getCurrentTankLevel() {
+                    const tank = this.tanks.find(t => t.id === this.refillForm.tankId);
+                    return tank ? tank.current_liters : 0;
+                },
+
+                async refillTank() {
+                    if (!this.refillForm.tankId) {
+                        showToast('Seleccione un tanque', 'warning');
+                        return;
+                    }
+                    if (!this.refillForm.liters || this.refillForm.liters <= 0) {
+                        showToast('Ingrese una cantidad válida de litros', 'warning');
+                        return;
+                    }
+
+                    const tank = this.tanks.find(t => t.id === this.refillForm.tankId);
+                    const newLevel = tank.current_liters + this.refillForm.liters;
+
+                    if (newLevel > tank.capacity_liters) {
+                        showToast(`Excede la capacidad del tanque (${tank.capacity_liters}L)`, 'error');
+                        return;
+                    }
+
+                    const confirmed = await showConfirm(
+                        'Confirmar Recarga',
+                        `
+                        <div class="text-left space-y-2">
+                            <p><strong>Tanque:</strong> ${tank.name}</p>
+                            <p><strong>Nivel actual:</strong> ${tank.current_liters.toLocaleString()}L</p>
+                            <p><strong>A agregar:</strong> ${this.refillForm.liters.toLocaleString()}L</p>
+                            <div class="bg-green-50 p-3 rounded-lg mt-2">
+                                <p class="font-bold text-green-600">Nuevo nivel: ${newLevel.toLocaleString()}L</p>
+                            </div>
+                        </div>
+                        `,
+                        'Confirmar Recarga',
+                        'Cancelar'
+                    );
+
+                    if (!confirmed) return;
+
+                    this.processing = true;
+                    try {
+                        const { data: { session } } = await supabase.auth.getSession();
+
+                        // Actualizar tanque
+                        const { error: updateError } = await supabase
+                            .from('tanks')
+                            .update({
+                                current_liters: newLevel,
+                                updated_at: new Date().toISOString()
+                            })
+                            .eq('id', this.refillForm.tankId);
+
+                        if (updateError) throw updateError;
+
+                        // Registrar en tank_logs
+                        const { error: logError } = await supabase
+                            .from('tank_logs')
+                            .insert({
+                                tank_id: this.refillForm.tankId,
+                                change_type: 'refill',
+                                liters_changed: this.refillForm.liters,
+                                previous_level: tank.current_liters,
+                                new_level: newLevel,
+                                notes: this.refillForm.notes || 'Recarga de tanque',
+                                created_by: session.user.id
+                            });
+
+                        if (logError) console.warn('Error registrando log:', logError);
+
+                        showToast(`Tanque recargado: ${newLevel.toLocaleString()}L`, 'success');
+                        this.closeRefillTankModal();
+                        await this.loadTanks();
+                        await this.loadVirtualInventory();
+
+                    } catch (err) {
+                        console.error('Error recargando tanque:', err);
+                        showToast('Error al recargar tanque: ' + err.message, 'error');
+                    } finally {
+                        this.processing = false;
+                    }
+                },
+
+                // ============================================
+                // MODAL LLENAR BOTELLONES
+                // ============================================
+                openFillBottlesModal() {
+                    this.fillForm = {
+                        sizeLiters: '',
+                        quantity: 0,
+                        tankId: ''
+                    };
+                    this.showFillBottlesModal = true;
+                },
+
+                closeFillBottlesModal() {
+                    this.showFillBottlesModal = false;
+                },
+
+                getFillFormSizeName() {
+                    const sizes = {
+                        '5': '5 Litros',
+                        '13': '13 Litros',
+                        '20': '20 Litros'
+                    };
+                    return sizes[this.fillForm.sizeLiters] || '';
+                },
+
+                async fillBottles() {
+                    if (!this.fillForm.sizeLiters) {
+                        showToast('Seleccione el tipo de botellón', 'warning');
+                        return;
+                    }
+                    if (!this.fillForm.quantity || this.fillForm.quantity <= 0) {
+                        showToast('Ingrese una cantidad válida', 'warning');
+                        return;
+                    }
+                    if (!this.fillForm.tankId) {
+                        showToast('Seleccione un tanque de origen', 'warning');
+                        return;
+                    }
+
+                    const tank = this.tanks.find(t => t.id === this.fillForm.tankId);
+                    const waterNeeded = this.fillForm.quantity * parseInt(this.fillForm.sizeLiters);
+
+                    if (waterNeeded > tank.current_liters) {
+                        showToast(`Agua insuficiente en el tanque. Disponible: ${tank.current_liters}L`, 'error');
+                        return;
+                    }
+
+                    const newLevel = tank.current_liters - waterNeeded;
+
+                    const confirmed = await showConfirm(
+                        'Confirmar Llenado',
+                        `
+                        <div class="text-left space-y-2">
+                            <p><strong>Botellones:</strong> ${this.fillForm.quantity} x ${this.fillForm.sizeLiters}L</p>
+                            <p><strong>Agua requerida:</strong> ${waterNeeded.toLocaleString()}L</p>
+                            <p><strong>Tanque:</strong> ${tank.name}</p>
+                            <div class="bg-yellow-50 p-3 rounded-lg mt-2">
+                                <p class="font-bold text-yellow-600">Nuevo nivel: ${newLevel.toLocaleString()}L</p>
+                            </div>
+                        </div>
+                        `,
+                        'Confirmar Llenado',
+                        'Cancelar'
+                    );
+
+                    if (!confirmed) return;
+
+                    this.processing = true;
+                    try {
+                        const { data: { session } } = await supabase.auth.getSession();
+
+                        // Actualizar tanque
+                        const { error: updateError } = await supabase
+                            .from('tanks')
+                            .update({
+                                current_liters: newLevel,
+                                updated_at: new Date().toISOString()
+                            })
+                            .eq('id', this.fillForm.tankId);
+
+                        if (updateError) throw updateError;
+
+                        // Registrar en tank_logs
+                        const { error: logError } = await supabase
+                            .from('tank_logs')
+                            .insert({
+                                tank_id: this.fillForm.tankId,
+                                change_type: 'bottle_filling',
+                                liters_changed: -waterNeeded,
+                                previous_level: tank.current_liters,
+                                new_level: newLevel,
+                                notes: `Llenado de ${this.fillForm.quantity} botellones de ${this.fillForm.sizeLiters}L`,
+                                created_by: session.user.id
+                            });
+
+                        if (logError) console.warn('Error registrando log:', logError);
+
+                        // Registrar en bottle_filling
+                        const { error: fillingError } = await supabase
+                            .from('bottle_filling')
+                            .insert({
+                                branch: this.userBranch,
+                                product_id: null, // Se puede obtener de products si existe
+                                quantity_filled: this.fillForm.quantity,
+                                water_used_liters: waterNeeded,
+                                tank_id: this.fillForm.tankId,
+                                filled_by: session.user.id
+                            });
+
+                        if (fillingError) console.warn('Error registrando llenado:', fillingError);
+
+                        showToast(`${this.fillForm.quantity} botellones de ${this.fillForm.sizeLiters}L llenados`, 'success');
+                        this.closeFillBottlesModal();
+                        await this.loadTanks();
+                        await this.loadVirtualInventory();
+
+                    } catch (err) {
+                        console.error('Error llenando botellones:', err);
+                        showToast('Error al llenar botellones: ' + err.message, 'error');
+                    } finally {
+                        this.processing = false;
+                    }
                 }
             }
         }
