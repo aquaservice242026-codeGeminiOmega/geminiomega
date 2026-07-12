@@ -428,7 +428,7 @@
                         <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
                             <i class="fas fa-sync-alt"></i>
                         </button>
-                        <!-- NUEVO BOTÓN BCV -->
+                        <!-- BOTÓN BCV -->
                         <button @click="fetchAndUpdateBCV()"
                             class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-semibold touch-btn btn-bcv-pulse"
                             title="Obtener tasa oficial BCV">
@@ -469,7 +469,7 @@
                         <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
                             <i class="fas fa-sync-alt"></i>
                         </button>
-                        <!-- NUEVO BOTÓN BCV MÓVIL -->
+                        <!-- BOTÓN BCV MÓVIL -->
                         <button @click="fetchAndUpdateBCV()"
                             class="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-[10px] font-bold touch-btn"
                             title="BCV">
@@ -1750,7 +1750,7 @@
                     });
 
                     const confirmed = await Swal.fire({
-                        title: '🏛️ Tasa BCV Oficial',
+                        title: '️ Tasa BCV Oficial',
                         html: `
                             <div class="text-center space-y-3">
                                 <div class="bg-blue-50 rounded-lg p-4">
@@ -2035,6 +2035,7 @@
                         let notes = [];
 
                         if (this.deliveryType === 'delivery') notes.push(`Delivery: ${this.deliveryAddress}`);
+                        notes.push(`Tasa aplicada: Bs. ${this.exchangeRate.toFixed(2)}`);
 
                         let payment_method = this.paymentMethod;
 
@@ -2059,6 +2060,9 @@
                             }
                         }
 
+                        // ============================================
+                        // INSERTAR VENTA
+                        // ============================================
                         const { data: sale, error: saleError } = await supabase.from('sales').insert({
                             branch: this.userBranch,
                             customer_id: this.selectedCustomer || null,
@@ -2069,10 +2073,68 @@
                             payment_method: payment_method,
                             status: payment_method === 'credito' ? 'pending' : 'completed',
                             notes: notes.join('\n') || null,
+                            exchange_rate_used: this.exchangeRate,
+                            rate_date: new Date().toISOString().split('T')[0],
                             created_by: session.user.id
                         }).select().single();
 
                         if (saleError) throw saleError;
+
+                        // ============================================
+                        // GUARDAR PAGOS EN sale_payments
+                        // ============================================
+                        const paymentsToInsert = [];
+
+                        if (this.useMultiplePayments && this.multiplePayments.length > 0) {
+                            // Pago múltiple: un registro por cada método
+                            this.multiplePayments.forEach((p, i) => {
+                                paymentsToInsert.push({
+                                    sale_id: sale.id,
+                                    payment_method: p.method,
+                                    amount_usd: round2(p.amount),
+                                    amount_bs: round2(p.amountBs),
+                                    reference: p.reference || null,
+                                    exchange_rate: this.exchangeRate,
+                                    notes: `Pago #${i + 1}`
+                                });
+                            });
+                        } else {
+                            // Pago simple: un solo registro
+                            let amountUsd = 0;
+                            let amountBs = 0;
+
+                            if (this.paymentMethod === 'efectivo_bs') {
+                                amountBs = round2(this.amountReceivedBs);
+                                amountUsd = round2(amountBs / this.exchangeRate);
+                            } else if (this.paymentMethod === 'efectivo_divisas') {
+                                amountUsd = round2(this.amountReceivedUsd);
+                                amountBs = round2(amountUsd * this.exchangeRate);
+                            } else {
+                                amountUsd = round2(this.totalUSD);
+                                amountBs = round2(this.totalBs);
+                            }
+
+                            paymentsToInsert.push({
+                                sale_id: sale.id,
+                                payment_method: this.paymentMethod,
+                                amount_usd: amountUsd,
+                                amount_bs: amountBs,
+                                reference: this.paymentReference || null,
+                                exchange_rate: this.exchangeRate,
+                                notes: 'Pago único'
+                            });
+                        }
+
+                        // Insertar todos los pagos
+                        if (paymentsToInsert.length > 0) {
+                            const { error: paymentsError } = await supabase
+                                .from('sale_payments')
+                                .insert(paymentsToInsert);
+
+                            if (paymentsError) {
+                                console.warn('⚠️ No se pudo guardar en sale_payments:', paymentsError.message);
+                            }
+                        }
 
                         const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters').eq('is_active', true);
                         const sizeToProductId = {};
@@ -2230,6 +2292,8 @@
                             payment_method: 'credito',
                             status: creditAmount > 0 ? 'pending' : 'completed',
                             notes: `Crédito - Pago inicial: $${round2(this.creditForm.initial_payment).toFixed(2)}\n${this.creditForm.notes || ''}`,
+                            exchange_rate_used: this.exchangeRate,
+                            rate_date: new Date().toISOString().split('T')[0],
                             created_by: session.user.id
                         }).select().single();
 
