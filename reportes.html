@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
+    <!-- UTILIDADES DE FECHA - ZONA HORARIA CARACAS -->
+    <script src="date-utils.js"></script>
 
     <!-- Toastify CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
@@ -253,7 +255,8 @@
                 </button>
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800">Reportes y Cierre Contable</h2>
-                    <p class="text-sm text-gray-500">Generación de reportes profesionales</p>
+                    <p class="text-sm text-gray-500"
+                        x-text="'Generación de reportes profesionales - ' + DateUtils.formatDateLong(new Date())"></p>
                 </div>
             </div>
             <div class="flex items-center space-x-3">
@@ -650,7 +653,7 @@
                             </div>
                             <div class="text-center mt-6">
                                 <p class="text-xs text-gray-500"
-                                    x-text="'Generado el ' + new Date().toLocaleString('es-VE')"></p>
+                                    x-text="'Generado el ' + DateUtils.formatDateTime(new Date())"></p>
                             </div>
                         </div>
                     </div>
@@ -677,7 +680,7 @@
                 warning: 'linear-gradient(to right, #f59e0b, #d97706)',
                 info: 'linear-gradient(to right, #3b82f6, #2563eb)'
             };
-            const icons = { success: '✓', error: '✗', warning: '', info: 'ℹ' };
+            const icons = { success: '✓', error: '✗', warning: '⚠', info: 'ℹ' };
             Toastify({
                 text: `${icons[type]} ${message}`,
                 duration: 3000, close: true, gravity: 'top', position: 'right', stopOnFocus: true,
@@ -705,9 +708,10 @@
                 userInitials: '??',
                 exchangeRate: 700.22,
 
+                // ✅ USAR DateUtils para fechas iniciales
                 filters: {
-                    startDate: new Date().toISOString().split('T')[0],
-                    endDate: new Date().toISOString().split('T')[0],
+                    startDate: DateUtils.getCurrentDateInput(),
+                    endDate: DateUtils.getCurrentDateInput(),
                     reportType: 'daily'
                 },
 
@@ -769,13 +773,14 @@
                     }
                 },
 
+                // ✅ USAR DateUtils para consultas SQL
                 async loadSales() {
                     const { data, error } = await supabase
                         .from('sales')
                         .select('*')
                         .eq('branch', this.userBranch)
-                        .gte('created_at', this.filters.startDate + 'T00:00:00')
-                        .lte('created_at', this.filters.endDate + 'T23:59:59')
+                        .gte('created_at', DateUtils.getStartOfDay(this.filters.startDate))
+                        .lte('created_at', DateUtils.getEndOfDay(this.filters.endDate))
                         .order('created_at', { ascending: false });
 
                     if (error) throw error;
@@ -787,8 +792,8 @@
                         .from('sales')
                         .select('*')
                         .eq('branch', this.userBranch)
-                        .gte('created_at', this.filters.startDate + 'T00:00:00')
-                        .lte('created_at', this.filters.endDate + 'T23:59:59');
+                        .gte('created_at', DateUtils.getStartOfDay(this.filters.startDate))
+                        .lte('created_at', DateUtils.getEndOfDay(this.filters.endDate));
 
                     if (error) throw error;
 
@@ -863,8 +868,8 @@
                         .from('sales')
                         .select('id')
                         .eq('branch', this.userBranch)
-                        .gte('created_at', this.filters.startDate + 'T00:00:00')
-                        .lte('created_at', this.filters.endDate + 'T23:59:59');
+                        .gte('created_at', DateUtils.getStartOfDay(this.filters.startDate))
+                        .lte('created_at', DateUtils.getEndOfDay(this.filters.endDate));
 
                     if (!sales || sales.length === 0) {
                         this.topProducts = [];
@@ -945,16 +950,13 @@
                     return names[method] || method;
                 },
 
+                // ✅ USAR DateUtils para formatear fechas
                 formatDate(dateString) {
-                    if (!dateString) return 'N/A';
-                    const date = new Date(dateString);
-                    return date.toLocaleDateString('es-VE', { year: 'numeric', month: 'short', day: 'numeric' });
+                    return DateUtils.formatDate(dateString);
                 },
 
                 formatDateTime(dateString) {
-                    if (!dateString) return 'N/A';
-                    const date = new Date(dateString);
-                    return date.toLocaleString('es-VE', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    return DateUtils.formatDateTime(dateString);
                 },
 
                 getInitials(name) {
