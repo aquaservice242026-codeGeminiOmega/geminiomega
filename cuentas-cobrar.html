@@ -9,11 +9,18 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
 
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <!-- Toastify JS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
 
     <style>
         [x-cloak] {
@@ -73,6 +80,103 @@
             .menu-toggle {
                 display: none !important;
             }
+        }
+
+        /* Toastify personalizado */
+        .toastify {
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 500 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
+            padding: 14px 20px !important;
+            min-width: 280px;
+            font-size: 14px !important;
+            color: white !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        .toastify-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        }
+
+        .toastify-error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+        }
+
+        .toastify-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+        }
+
+        .toastify-info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+        }
+
+        /* SweetAlert2 personalizado */
+        .swal2-popup {
+            font-family: 'Inter', sans-serif !important;
+            border-radius: 16px !important;
+            padding: 2rem !important;
+        }
+
+        .swal2-title {
+            font-size: 1.5rem !important;
+            font-weight: 700 !important;
+            color: #1f2937 !important;
+        }
+
+        .swal2-html-container {
+            font-size: 0.95rem !important;
+            color: #4b5563 !important;
+        }
+
+        .swal2-confirm {
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%) !important;
+            border: none !important;
+            border-radius: 12px !important;
+            padding: 0.75rem 2rem !important;
+            font-weight: 600 !important;
+            font-size: 1rem !important;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3) !important;
+            transition: all 0.2s !important;
+        }
+
+        .swal2-confirm:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4) !important;
+        }
+
+        .swal2-cancel {
+            background: #f3f4f6 !important;
+            color: #4b5563 !important;
+            border: none !important;
+            border-radius: 12px !important;
+            padding: 0.75rem 2rem !important;
+            font-weight: 600 !important;
+            font-size: 1rem !important;
+            transition: all 0.2s !important;
+        }
+
+        .swal2-cancel:hover {
+            background: #e5e7eb !important;
+            transform: translateY(-2px) !important;
+        }
+
+        /* Botón BCV animado */
+        @keyframes pulse-bcv {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+            }
+        }
+
+        .btn-bcv-pulse {
+            animation: pulse-bcv 2s infinite;
         }
     </style>
 </head>
@@ -165,9 +269,14 @@
                 <div class="hidden md:flex items-center bg-blue-50 px-4 py-2 rounded-lg">
                     <i class="fas fa-exchange-alt text-blue-600 mr-2"></i>
                     <span class="text-sm text-gray-600">Tasa: </span>
-                    <span class="text-sm font-bold text-blue-600 ml-1"
-                        x-text="'Bs. ' + exchangeRate.toFixed(2)"></span>
+                    <span class="text-sm font-bold text-blue-600 ml-1" x-text="'Bs. ' + exchangeRate.toFixed(2)"></span>
                 </div>
+                <!-- Botón BCV -->
+                <button @click="fetchAndUpdateBCV()"
+                    class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-semibold btn-bcv-pulse"
+                    title="Obtener tasa oficial BCV">
+                    <i class="fas fa-landmark mr-1"></i>BCV
+                </button>
                 <button @click="loadCuentas()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
                     <i class="fas fa-sync-alt mr-2"></i>Actualizar
                 </button>
@@ -192,8 +301,8 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm text-gray-600 mb-1">Total por Cobrar</p>
-                                <p class="text-3xl font-bold text-gray-900"
-                                    x-text="'$' + stats.totalCredit.toFixed(2)"></p>
+                                <p class="text-3xl font-bold text-gray-900" x-text="'$' + stats.totalCredit.toFixed(2)">
+                                </p>
                                 <p class="text-xs text-gray-500 mt-1"
                                     x-text="'Bs. ' + (stats.totalCredit * exchangeRate).toFixed(2)"></p>
                                 <p class="text-xs text-gray-500 mt-2" x-text="stats.totalAccounts + ' cuentas'"></p>
@@ -231,8 +340,8 @@
                                     x-text="'$' + stats.pendingAmount.toFixed(2)"></p>
                                 <p class="text-xs text-gray-500 mt-1"
                                     x-text="'Bs. ' + (stats.pendingAmount * exchangeRate).toFixed(2)"></p>
-                                <p class="text-xs text-blue-600 mt-2"
-                                    x-text="stats.pendingAccounts + ' pendientes'"></p>
+                                <p class="text-xs text-blue-600 mt-2" x-text="stats.pendingAccounts + ' pendientes'">
+                                </p>
                             </div>
                             <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                                 <i class="fas fa-clock text-blue-600 text-xl"></i>
@@ -301,21 +410,29 @@
                         <table class="w-full">
                             <thead class="bg-gray-50 border-b border-gray-200">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Cliente</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Teléfono</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Total</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Pagado</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Pendiente</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Fecha Límite</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Estado</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Acciones</th>
                                 </tr>
                             </thead>
@@ -363,14 +480,14 @@
                                                 x-text="formatDate(account.payment_date)"></span>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                            <span
+                                                class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
                                                 :class="{
                                                     'bg-red-100 text-red-800': isOverdue(account),
                                                     'bg-yellow-100 text-yellow-800': account.status === 'partial',
                                                     'bg-blue-100 text-blue-800': account.status === 'pending' && !isOverdue(account),
                                                     'bg-green-100 text-green-800': account.status === 'paid'
-                                                }"
-                                                x-text="getStatusText(account)"></span>
+                                                }" x-text="getStatusText(account)"></span>
                                         </td>
                                         <td class="px-6 py-4 text-right">
                                             <button @click="viewAccount(account)"
@@ -425,8 +542,8 @@
                         </div>
                         <div>
                             <p class="text-xs text-gray-600">Cédula/ID:</p>
-                            <p class="text-sm font-medium"
-                                x-text="selectedAccount.customer_id_card || 'No registrado'"></p>
+                            <p class="text-sm font-medium" x-text="selectedAccount.customer_id_card || 'No registrado'">
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -511,7 +628,8 @@
                                     </p>
                                     <p class="text-xs text-gray-500" x-text="formatDate(payment.payment_date)"></p>
                                 </div>
-                                <span class="text-xs text-green-600 font-medium" x-text="'Bs. ' + (payment.amount * exchangeRate).toFixed(2)"></span>
+                                <span class="text-xs text-green-600 font-medium"
+                                    x-text="'Bs. ' + (payment.amount * exchangeRate).toFixed(2)"></span>
                             </div>
                         </template>
                     </div>
@@ -552,7 +670,8 @@
                             <p class="text-lg font-bold text-blue-600"
                                 x-text="'$' + (selectedAccount?.remaining_amount || 0).toFixed(2)"></p>
                             <p class="text-xs text-gray-500"
-                                x-text="'Bs. ' + ((selectedAccount?.remaining_amount || 0) * exchangeRate).toFixed(2)"></p>
+                                x-text="'Bs. ' + ((selectedAccount?.remaining_amount || 0) * exchangeRate).toFixed(2)">
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -562,8 +681,7 @@
                     <input type="number" x-model.number="paymentForm.amount" step="0.01" min="0.01"
                         :max="selectedAccount?.remaining_amount"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <p class="text-xs text-gray-500 mt-1"
-                        x-show="paymentForm.amount > 0">
+                    <p class="text-xs text-gray-500 mt-1" x-show="paymentForm.amount > 0">
                         Equivalente: Bs. <span x-text="(paymentForm.amount * exchangeRate).toFixed(2)"></span>
                     </p>
                 </div>
@@ -618,13 +736,72 @@
             window.location.href = 'login.html';
         }
 
-        function notify(message, type = 'success') {
-            if (typeof alertify !== 'undefined') {
-                if (type === 'success') alertify.success(message);
-                else if (type === 'error') alertify.error(message);
-                else alertify.message(message);
-            } else {
-                alert(message);
+        // ============================================
+        // NOTIFICACIONES TOASTIFY (IGUAL A VENTAS)
+        // ============================================
+        function showToast(message, type = 'success') {
+            const gradients = {
+                success: 'linear-gradient(to right, #10b981, #059669)',
+                error: 'linear-gradient(to right, #ef4444, #dc2626)',
+                warning: 'linear-gradient(to right, #f59e0b, #d97706)',
+                info: 'linear-gradient(to right, #3b82f6, #2563eb)'
+            };
+            const icons = { success: '✓', error: '✗', warning: '⚠', info: 'ℹ' };
+
+            Toastify({
+                text: `${icons[type]} ${message}`,
+                duration: 3000,
+                close: true,
+                gravity: 'top',
+                position: 'right',
+                stopOnFocus: true,
+                style: {
+                    background: gradients[type],
+                    borderRadius: '12px',
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: '500',
+                    fontSize: '14px',
+                    padding: '14px 20px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
+                    minWidth: '280px'
+                }
+            }).showToast();
+        }
+
+        // ============================================
+        // REDONDEO A 2 DECIMALES
+        // ============================================
+        function round2(num) {
+            if (num === null || num === undefined || isNaN(num)) return 0;
+            return Math.round(parseFloat(num) * 100) / 100;
+        }
+
+        function ensureValidRate(rate) {
+            const parsed = parseFloat(rate);
+            if (isNaN(parsed) || parsed <= 0) {
+                console.warn('⚠️ Tasa inválida detectada, usando valor por defecto 700.22');
+                return 700.22;
+            }
+            return round2(parsed);
+        }
+
+        // ============================================
+        // CONSULTAR API BCV OFICIAL
+        // ============================================
+        async function fetchBCVRate() {
+            try {
+                console.log('🏛️ Consultando tasa BCV desde API oficial...');
+                const response = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                const rate = round2(parseFloat(data.promedio));
+                if (isNaN(rate) || rate <= 0) throw new Error('Tasa inválida recibida de la API');
+                console.log('✅ Tasa BCV obtenida:', rate);
+                console.log('📅 Fecha actualización:', data.fechaActualizacion);
+                return { rate: rate, date: data.fechaActualizacion, source: 'BCV Oficial' };
+            } catch (err) {
+                console.error('❌ Error obteniendo tasa BCV:', err);
+                return null;
             }
         }
 
@@ -650,7 +827,7 @@
                 userInitials: '??',
 
                 // Exchange rate
-                exchangeRate: 38.50,
+                exchangeRate: 700.22,
 
                 // Stats
                 stats: {
@@ -679,10 +856,6 @@
                 },
 
                 async initCuentas() {
-                    if (typeof alertify !== 'undefined') {
-                        alertify.set('notifier', { position: 'top-right' });
-                    }
-
                     const { data: { session } } = await supabase.auth.getSession();
                     if (!session) {
                         window.location.href = 'login.html';
@@ -713,38 +886,94 @@
                     }
                 },
 
+                // ============================================
+                // CARGAR TASA DESDE SUPABASE
+                // ============================================
                 async loadExchangeRate() {
                     try {
-                        // Try to load from localStorage first
-                        const savedData = localStorage.getItem('exchangeRate_' + this.userBranch);
-                        if (savedData) {
-                            const parsed = JSON.parse(savedData);
-                            const savedDate = new Date(parsed.date);
-                            const today = new Date();
-                            if (savedDate.toDateString() === today.toDateString()) {
-                                this.exchangeRate = parsed.rate;
-                                return;
-                            }
-                        }
-
-                        // Load from database
-                        const { data, error } = await supabase.rpc('get_active_exchange_rate', {
-                            branch_param: this.userBranch
-                        });
-
+                        console.log('🔄 Consultando tasa centralizada de Supabase');
+                        const { data, error } = await supabase.rpc('get_active_exchange_rate');
                         if (!error && data) {
-                            this.exchangeRate = parseFloat(data);
-                            // Save to localStorage
-                            localStorage.setItem('exchangeRate_' + this.userBranch, JSON.stringify({
-                                rate: this.exchangeRate,
-                                date: new Date().toISOString()
-                            }));
+                            const rate = ensureValidRate(data);
+                            this.exchangeRate = rate;
+                            console.log('✅ Tasa cargada desde Supabase:', this.exchangeRate);
                         } else {
-                            this.exchangeRate = 38.50;
+                            console.warn('⚠️ No se encontró tasa en BD, usando 700.22');
+                            this.exchangeRate = 700.22;
                         }
                     } catch (err) {
-                        console.error('Error cargando tasa:', err);
-                        this.exchangeRate = 38.50;
+                        console.error('❌ Error cargando tasa:', err);
+                        this.exchangeRate = 700.22;
+                    }
+                },
+
+                // ============================================
+                // OBTENER BCV Y GUARDAR EN BD
+                // ============================================
+                async fetchAndUpdateBCV() {
+                    showToast('Consultando tasa BCV oficial...', 'info');
+                    const bcvData = await fetchBCVRate();
+                    if (!bcvData) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudo obtener la tasa del BCV. Verifica tu conexión a internet.',
+                            confirmButtonText: 'Entendido'
+                        });
+                        return;
+                    }
+                    const newRate = round2(bcvData.rate);
+                    const rateDate = new Date(bcvData.date).toLocaleDateString('es-VE', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                    const confirmed = await Swal.fire({
+                        title: '🏛️ Tasa BCV Oficial',
+                        html: `
+                            <div class="text-center space-y-3">
+                                <div class="bg-blue-50 rounded-lg p-4">
+                                    <p class="text-sm text-gray-600 mb-2">Tasa oficial del BCV:</p>
+                                    <p class="text-4xl font-bold text-blue-600">Bs. ${newRate.toFixed(2)}</p>
+                                    <p class="text-xs text-gray-500 mt-2">
+                                        <i class="fas fa-calendar mr-1"></i>
+                                        Actualizada: ${rateDate}
+                                    </p>
+                                </div>
+                                <div class="bg-yellow-50 rounded-lg p-3">
+                                    <p class="text-xs text-gray-700">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        Tasa actual en el sistema: <strong>Bs. ${this.exchangeRate.toFixed(2)}</strong>
+                                    </p>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2">
+                                    Fuente: ${bcvData.source}
+                                </p>
+                            </div>
+                        `,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Aplicar Tasa',
+                        cancelButtonText: 'Cancelar',
+                        reverseButtons: true
+                    });
+                    if (confirmed.isConfirmed) {
+                        this.exchangeRate = newRate;
+                        await this.updateExchangeRate();
+                        showToast(`✅ Tasa BCV aplicada: Bs. ${newRate.toFixed(2)}`, 'success');
+                    }
+                },
+
+                async updateExchangeRate() {
+                    try {
+                        const validRate = round2(ensureValidRate(this.exchangeRate));
+                        this.exchangeRate = validRate;
+                        await supabase.from('exchange_rates').update({ is_active: false }).eq('is_active', true);
+                        await supabase.from('exchange_rates').insert({ rate: validRate, is_active: true });
+                        showToast('Tasa actualizada en Supabase', 'success');
+                    } catch (err) {
+                        console.error('Error actualizando tasa:', err);
+                        showToast('Error al actualizar tasa', 'error');
                     }
                 },
 
@@ -765,7 +994,7 @@
 
                     } catch (err) {
                         console.error('Error cargando cuentas:', err);
-                        notify('Error al cargar cuentas: ' + err.message, 'error');
+                        showToast('Error al cargar cuentas: ' + err.message, 'error');
                     } finally {
                         this.loading = false;
                     }
@@ -955,13 +1184,27 @@
 
                 async registerPayment() {
                     if (!this.canRegisterPayment()) {
-                        notify('Ingrese un monto válido', 'error');
+                        showToast('Ingrese un monto válido', 'error');
                         return;
                     }
 
-                    if (!confirm(`¿Registrar pago de $${this.paymentForm.amount.toFixed(2)}?`)) {
-                        return;
-                    }
+                    const confirmed = await Swal.fire({
+                        title: 'Confirmar Pago',
+                        html: `
+                            <div class="text-center space-y-2">
+                                <p class="text-gray-600">¿Registrar pago de:</p>
+                                <p class="text-3xl font-bold text-blue-600">$${this.paymentForm.amount.toFixed(2)}</p>
+                                <p class="text-sm text-gray-500">Método: ${this.paymentForm.payment_method}</p>
+                            </div>
+                        `,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, Registrar',
+                        cancelButtonText: 'Cancelar',
+                        reverseButtons: true
+                    });
+
+                    if (!confirmed.isConfirmed) return;
 
                     this.processing = true;
 
@@ -982,13 +1225,13 @@
 
                         if (paymentError) throw paymentError;
 
-                        notify('Pago registrado exitosamente');
+                        showToast('Pago registrado exitosamente', 'success');
                         this.closePaymentModal();
                         await this.loadCuentas();
 
                     } catch (err) {
                         console.error('Error registrando pago:', err);
-                        notify('Error: ' + err.message, 'error');
+                        showToast('Error: ' + err.message, 'error');
                     } finally {
                         this.processing = false;
                     }
