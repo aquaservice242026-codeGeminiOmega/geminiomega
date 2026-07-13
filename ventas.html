@@ -8,17 +8,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
-
+    <!-- UTILIDADES DE FECHA - ZONA HORARIA CARACAS -->
+    <script src="date-utils.js"></script>
     <!-- Toastify CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <!-- Toastify JS -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-
     <!-- SweetAlert2 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
@@ -135,8 +134,24 @@
             }
         }
 
+        @keyframes pulse-bcv {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+            }
+        }
+
         .animate-bounce-in {
             animation: bounce-in 0.4s ease-out;
+        }
+
+        .btn-bcv-pulse {
+            animation: pulse-bcv 2s infinite;
         }
 
         .product-card {
@@ -271,7 +286,6 @@
             font-size: 0.9rem !important;
         }
 
-        /* Toggle Switch iOS Style */
         .toggle-switch {
             position: relative;
             display: inline-block;
@@ -317,67 +331,6 @@
         input:checked+.toggle-slider:before {
             transform: translateX(22px);
         }
-
-        /* Payment method cards */
-        .payment-card {
-            transition: all 0.2s ease;
-            border: 2px solid transparent;
-        }
-
-        .payment-card:hover {
-            border-color: #0ea5e9;
-            transform: translateY(-1px);
-        }
-
-        /* Botón BCV animado */
-        @keyframes pulse-bcv {
-
-            0%,
-            100% {
-                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
-            }
-
-            50% {
-                box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
-            }
-        }
-
-        .btn-bcv-pulse {
-            animation: pulse-bcv 2s infinite;
-        }
-
-        /* ============================================ */
-        /* CARRITO COMPACTO - 25% MENOS ALTO, 15% MÁS OSCURO */
-        /* ============================================ */
-        .cart-item-compact {
-            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%) !important;
-            padding: 8px 12px !important;
-            margin-bottom: 8px !important;
-        }
-
-        .cart-item-compact h4 {
-            font-size: 0.85rem !important;
-            line-height: 1.2 !important;
-        }
-
-        .cart-item-compact .text-xs {
-            font-size: 0.7rem !important;
-        }
-
-        .cart-item-compact .touch-btn {
-            width: 28px !important;
-            height: 28px !important;
-            min-height: 28px !important;
-            min-width: 28px !important;
-        }
-
-        .cart-item-compact .font-bold.text-lg {
-            font-size: 1rem !important;
-        }
-
-        .cart-item-compact .font-bold.text-cyan-600 {
-            font-size: 0.875rem !important;
-        }
     </style>
 </head>
 
@@ -399,7 +352,6 @@
                     <p class="font-semibold capitalize text-sm" x-text="userBranch || 'Cargando...'"></p>
                 </div>
             </div>
-
             <nav class="space-y-2">
                 <a href="index.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
@@ -430,7 +382,6 @@
                 </a>
             </nav>
         </div>
-
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
@@ -461,7 +412,6 @@
                         <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
                             <i class="fas fa-sync-alt"></i>
                         </button>
-                        <!-- BOTÓN BCV -->
                         <button @click="fetchAndUpdateBCV()"
                             class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-semibold touch-btn btn-bcv-pulse"
                             title="Obtener tasa oficial BCV">
@@ -492,7 +442,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="flex items-center space-x-2">
                     <div class="bg-blue-50 px-2 py-1 rounded-lg flex items-center space-x-1">
                         <span class="text-[10px] text-gray-600">USD:</span>
@@ -502,14 +451,12 @@
                         <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
                             <i class="fas fa-sync-alt"></i>
                         </button>
-                        <!-- BOTÓN BCV MÓVIL -->
                         <button @click="fetchAndUpdateBCV()"
                             class="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-[10px] font-bold touch-btn"
                             title="BCV">
                             <i class="fas fa-landmark"></i>
                         </button>
                     </div>
-
                     <button @click="compactMode = !compactMode" class="touch-btn text-gray-600 hover:text-gray-800 p-1"
                         title="Vista compacta">
                         <i class="fas" :class="compactMode ? 'fa-expand' : 'fa-compress'"></i>
@@ -529,7 +476,6 @@
                             class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
                     </div>
                 </div>
-
                 <!-- Search Bar (Desktop) -->
                 <div class="hidden lg:block mb-6">
                     <div class="relative">
@@ -545,12 +491,10 @@
                         <h2 class="text-sm font-semibold text-gray-700">Productos Disponibles</h2>
                         <span class="text-xs text-gray-500" x-text="filteredProducts.length + ' productos'"></span>
                     </div>
-
                     <div x-show="filteredProducts.length === 0" class="text-center py-8 text-gray-400">
                         <i class="fas fa-box-open text-4xl mb-2"></i>
                         <p class="text-sm">No hay productos disponibles</p>
                     </div>
-
                     <div class="grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-4">
                         <template x-for="product in filteredProducts" :key="product.id">
                             <button @click="addProduct(product)"
@@ -558,22 +502,20 @@
                                     'bg-gradient-to-br from-cyan-400 to-cyan-600': product.size_liters === 5,
                                     'bg-gradient-to-br from-blue-400 to-blue-600': product.size_liters === 13,
                                     'bg-gradient-to-br from-indigo-500 to-indigo-700': product.size_liters === 20,
+                                    'bg-gradient-to-br from-purple-400 to-purple-600': product.product_type === 'cap',
                                     'low-stock': product.stock <= 10 && product.stock > 0,
                                     'opacity-50': product.stock === 0
                                 }">
-
                                 <div
                                     class="absolute top-2 right-2 bg-white/20 backdrop-blur px-1.5 py-0.5 rounded text-[10px] font-bold">
                                     <span x-text="product.stock"></span>
                                 </div>
-
                                 <div class="flex flex-col items-center text-center space-y-1">
                                     <i class="fas fa-tint text-2xl lg:text-4xl mb-1"></i>
                                     <p class="font-bold text-sm lg:text-lg leading-tight" x-text="product.name"></p>
                                     <p class="text-xs lg:text-sm opacity-90 font-semibold"
                                         x-text="'$' + product.price.toFixed(2)"></p>
                                 </div>
-
                                 <div class="hidden lg:flex justify-center space-x-1 mt-4 pt-4 border-t border-white/20"
                                     @click.stop>
                                     <button @click="quickAdd(product, 1)"
@@ -626,51 +568,47 @@
                         class="ml-2 bg-cyan-500 text-white rounded-full px-2 py-0.5 text-xs font-bold"
                         x-text="cartItemCount"></span>
                 </h3>
-
-                <div class="space-y-2 mb-4">
+                <div class="space-y-3 mb-4">
                     <template x-for="(item, index) in cart" :key="index">
-                        <div class="animate-bounce-in cart-item-compact rounded-xl">
-                            <div class="flex items-center justify-between mb-1">
+                        <div class="animate-bounce-in bg-gray-50 rounded-xl p-3">
+                            <div class="flex items-center justify-between mb-2">
                                 <div class="flex-1">
-                                    <h4 class="font-semibold text-gray-800" x-text="item.name"></h4>
-                                    <p class="text-xs text-gray-600" x-text="'$' + item.price.toFixed(2) + ' c/u'"></p>
+                                    <h4 class="font-semibold text-gray-800 text-sm" x-text="item.name"></h4>
+                                    <p class="text-xs text-gray-500" x-text="'$' + item.price.toFixed(2) + ' c/u'"></p>
                                 </div>
                                 <button @click="removeFromCart(index)"
-                                    class="text-red-500 hover:text-red-700 touch-btn p-1">
+                                    class="text-red-500 hover:text-red-700 touch-btn p-2">
                                     <i class="fas fa-trash text-sm"></i>
                                 </button>
                             </div>
-
                             <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-1">
+                                <div class="flex items-center space-x-2">
                                     <button @click="updateQuantity(index, -1)"
-                                        class="touch-btn w-7 h-7 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400">
+                                        class="touch-btn w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">
                                         <i class="fas fa-minus text-xs"></i>
                                     </button>
-                                    <span class="font-bold text-base w-6 text-center text-gray-800"
+                                    <span class="font-bold text-lg w-8 text-center text-gray-800"
                                         x-text="item.quantity"></span>
                                     <button @click="updateQuantity(index, 1)"
-                                        class="touch-btn w-7 h-7 bg-cyan-500 text-white rounded-full flex items-center justify-center hover:bg-cyan-600">
+                                        class="touch-btn w-8 h-8 bg-cyan-500 text-white rounded-full flex items-center justify-center hover:bg-cyan-600">
                                         <i class="fas fa-plus text-xs"></i>
                                     </button>
                                     <button @click="updateQuantity(index, 5)"
-                                        class="touch-btn px-2 h-7 bg-blue-500 text-white rounded text-xs font-bold hover:bg-blue-600">+5</button>
+                                        class="touch-btn px-2 h-8 bg-blue-500 text-white rounded text-xs font-bold hover:bg-blue-600">+5</button>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-[10px] text-gray-600">Subtotal</p>
-                                    <p class="font-bold text-cyan-600 text-sm"
+                                    <p class="text-xs text-gray-500">Subtotal</p>
+                                    <p class="font-bold text-cyan-600"
                                         x-text="'$' + (item.price * item.quantity).toFixed(2)"></p>
                                 </div>
                             </div>
                         </div>
                     </template>
                 </div>
-
                 <div x-show="cart.length === 0" class="text-center py-8 text-gray-400">
                     <i class="fas fa-shopping-cart text-4xl mb-2"></i>
                     <p class="text-sm">Carrito vacío</p>
                 </div>
-
                 <div class="border-t pt-4 space-y-2">
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-600">Subtotal:</span>
@@ -690,7 +628,6 @@
                         <span class="font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></span>
                     </div>
                 </div>
-
                 <div class="mt-4">
                     <div class="flex items-center justify-between mb-2">
                         <label class="text-xs font-semibold text-gray-700">Cliente</label>
@@ -739,14 +676,12 @@
                             <option value="credito">Crédito</option>
                         </select>
                     </div>
-
                     <div x-show="['pago_movil', 'transferencia'].includes(paymentMethod)"
                         class="mt-4 p-3 bg-yellow-50 rounded-lg">
                         <label class="text-xs font-medium text-gray-700 mb-1 block">Referencia</label>
                         <input type="text" x-model="paymentReference" placeholder="Últimos 4 dígitos"
                             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                     </div>
-
                     <div x-show="paymentMethod === 'efectivo_bs'" class="mt-4 p-3 bg-green-50 rounded-lg">
                         <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (Bs.)</label>
                         <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0"
@@ -762,7 +697,6 @@
                                     x-text="(totalBs - amountReceivedBs).toFixed(2)"></span></p>
                         </div>
                     </div>
-
                     <div x-show="paymentMethod === 'efectivo_divisas'" class="mt-4 p-3 bg-green-50 rounded-lg">
                         <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (USD)</label>
                         <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0"
@@ -775,7 +709,6 @@
                                     x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
                         </div>
                     </div>
-
                     <div x-show="paymentMethod === 'credito'" class="mt-4 p-3 bg-red-50 rounded-lg">
                         <p class="text-xs text-red-600">
                             <i class="fas fa-exclamation-circle mr-1"></i>
@@ -786,7 +719,6 @@
 
                 <!-- SECCIÓN PAGO MÚLTIPLE (toggle ON) -->
                 <div x-show="useMultiplePayments" class="mt-4 space-y-3">
-                    <!-- Resumen de pagos -->
                     <div class="bg-blue-50 rounded-xl p-3 border border-blue-200">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-xs font-semibold text-gray-700">Total Venta:</span>
@@ -804,8 +736,6 @@
                                 :class="remainingAmount <= 0.01 ? 'text-green-600' : 'text-red-600'">$<span
                                     x-text="remainingAmount.toFixed(2)"></span></span>
                         </div>
-
-                        <!-- Barra de progreso -->
                         <div class="mt-2">
                             <div class="w-full bg-gray-200 rounded-full h-2">
                                 <div class="h-2 rounded-full transition-all duration-300"
@@ -816,20 +746,16 @@
                                 x-text="paymentProgress + '% completado'"></p>
                         </div>
                     </div>
-
-                    <!-- Lista de pagos agregados -->
                     <div>
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-xs font-semibold text-gray-700">
                                 <i class="fas fa-list mr-1"></i>Pagos (<span x-text="multiplePayments.length"></span>)
                             </span>
                         </div>
-
                         <div x-show="multiplePayments.length === 0" class="text-center py-4 bg-gray-50 rounded-lg">
                             <i class="fas fa-receipt text-2xl text-gray-300 mb-2"></i>
                             <p class="text-xs text-gray-500">No hay pagos agregados</p>
                         </div>
-
                         <div class="space-y-2">
                             <template x-for="(payment, index) in multiplePayments" :key="payment.id">
                                 <div
@@ -848,9 +774,8 @@
                                             <span class="text-gray-500"
                                                 x-text="'Bs. ' + (payment.amount * exchangeRate).toFixed(2)"></span>
                                         </div>
-                                        <p x-show="payment.reference" class="text-[10px] text-gray-500 mt-1">
-                                            Ref: <span x-text="payment.reference"></span>
-                                        </p>
+                                        <p x-show="payment.reference" class="text-[10px] text-gray-500 mt-1">Ref: <span
+                                                x-text="payment.reference"></span></p>
                                     </div>
                                     <button @click="removeMultiplePayment(payment.id)"
                                         class="text-red-500 hover:text-red-700 touch-btn p-2">
@@ -860,13 +785,10 @@
                             </template>
                         </div>
                     </div>
-
-                    <!-- Formulario para agregar nuevo pago -->
                     <div class="bg-gray-50 rounded-xl p-3 border border-gray-200">
                         <p class="text-xs font-semibold text-gray-700 mb-2">
                             <i class="fas fa-plus-circle mr-1"></i>Agregar Pago
                         </p>
-
                         <div class="space-y-2">
                             <select x-model="newPayment.method"
                                 class="w-full border border-gray-300 rounded-lg px-2 py-2 text-sm bg-white">
@@ -876,43 +798,31 @@
                                 <option value="transferencia">Transferencia</option>
                                 <option value="punto_venta">Punto de Venta</option>
                             </select>
-
-                            <!-- Monto en USD (todos excepto efectivo_bs) -->
                             <div x-show="newPayment.method !== 'efectivo_bs'">
                                 <label class="text-[10px] font-medium text-gray-600">Monto (USD)</label>
                                 <input type="number" x-model.number="newPayment.amountUsd" step="0.01" min="0"
                                     :placeholder="'Sugerido: $' + remainingAmount.toFixed(2)"
                                     class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
-                                <p class="text-[10px] text-gray-500 mt-1">
-                                    Equivale: Bs. <span class="font-semibold"
-                                        x-text="((newPayment.amountUsd || 0) * exchangeRate).toFixed(2)"></span>
-                                </p>
+                                <p class="text-[10px] text-gray-500 mt-1">Equivale: Bs. <span class="font-semibold"
+                                        x-text="((newPayment.amountUsd || 0) * exchangeRate).toFixed(2)"></span></p>
                             </div>
-
-                            <!-- Monto en Bs (solo efectivo_bs) -->
                             <div x-show="newPayment.method === 'efectivo_bs'">
                                 <label class="text-[10px] font-medium text-gray-600">Monto (Bs.)</label>
                                 <input type="number" x-model.number="newPayment.amountBs" step="0.01" min="0"
                                     :placeholder="'Sugerido: Bs. ' + (remainingAmount * exchangeRate).toFixed(2)"
                                     class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
-                                <p class="text-[10px] text-gray-500 mt-1">
-                                    Equivale: $<span class="font-semibold"
-                                        x-text="((newPayment.amountBs || 0) / exchangeRate).toFixed(2)"></span>
-                                </p>
+                                <p class="text-[10px] text-gray-500 mt-1">Equivale: $<span class="font-semibold"
+                                        x-text="((newPayment.amountBs || 0) / exchangeRate).toFixed(2)"></span></p>
                             </div>
-
-                            <!-- Referencia -->
                             <div x-show="['pago_movil', 'transferencia', 'punto_venta'].includes(newPayment.method)">
                                 <label class="text-[10px] font-medium text-gray-600">Referencia</label>
                                 <input type="text" x-model="newPayment.reference" placeholder="Últimos 4 dígitos"
                                     class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                             </div>
-
                             <button @click="addMultiplePayment()" :disabled="!canAddPayment()"
                                 class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed touch-btn">
                                 <i class="fas fa-plus mr-1"></i>Agregar Pago
                             </button>
-
                             <button x-show="remainingAmount > 0.01" @click="fillRemainingPayment()"
                                 class="w-full bg-blue-100 text-blue-700 py-2 rounded-lg text-xs font-semibold touch-btn">
                                 <i class="fas fa-magic mr-1"></i>Completar con $<span
@@ -930,14 +840,12 @@
                         <i class="fas fa-check-circle" x-show="!processing"></i>
                         <span x-text="processing ? 'Procesando...' : 'Cobrar'"></span>
                     </button>
-
                     <button @click="openCreditModal()" :disabled="cart.length === 0 || processing"
                         class="bg-gradient-to-r from-green-500 to-emerald-500 text-white py-3 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2">
                         <i class="fas fa-hand-holding-usd"></i>
                         <span>Crédito</span>
                     </button>
                 </div>
-
                 <button @click="quickSale()" :disabled="cart.length === 0 || processing"
                     class="w-full mt-2 bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2 text-sm">
                     <i class="fas fa-bolt"></i>
@@ -959,7 +867,6 @@
                 <p class="text-lg font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></p>
             </div>
         </div>
-
         <div class="flex items-center justify-between text-xs">
             <span class="text-gray-500">
                 <span x-text="cartItemCount"></span> items en carrito
@@ -996,52 +903,46 @@
                 </button>
             </div>
         </div>
-
-        <div class="p-4 space-y-2 max-h-[50vh] overflow-y-auto">
+        <div class="p-4 space-y-3 max-h-[50vh] overflow-y-auto">
             <div x-show="cart.length === 0" class="text-center py-8 text-gray-400">
                 <i class="fas fa-shopping-cart text-4xl mb-2"></i>
                 <p class="text-sm">Carrito vacío</p>
                 <p class="text-xs mt-1">Agrega productos para comenzar</p>
             </div>
-
             <template x-for="(item, index) in cart" :key="index">
-                <div class="animate-bounce-in cart-item-compact rounded-xl">
-                    <div class="flex items-center justify-between mb-1">
+                <div class="animate-bounce-in bg-gray-50 rounded-xl p-3">
+                    <div class="flex items-center justify-between mb-2">
                         <div class="flex-1">
-                            <h4 class="font-semibold text-gray-800" x-text="item.name"></h4>
-                            <p class="text-xs text-gray-600" x-text="'$' + item.price.toFixed(2) + ' c/u'"></p>
+                            <h4 class="font-semibold text-gray-800 text-sm" x-text="item.name"></h4>
+                            <p class="text-xs text-gray-500" x-text="'$' + item.price.toFixed(2) + ' c/u'"></p>
                         </div>
-                        <button @click="removeFromCart(index)" class="text-red-500 hover:text-red-700 touch-btn p-1">
+                        <button @click="removeFromCart(index)" class="text-red-500 hover:text-red-700 touch-btn p-2">
                             <i class="fas fa-trash text-sm"></i>
                         </button>
                     </div>
-
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-1">
+                        <div class="flex items-center space-x-2">
                             <button @click="updateQuantity(index, -1)"
-                                class="touch-btn w-7 h-7 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400">
+                                class="touch-btn w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">
                                 <i class="fas fa-minus text-xs"></i>
                             </button>
-                            <span class="font-bold text-base w-6 text-center text-gray-800"
-                                x-text="item.quantity"></span>
+                            <span class="font-bold text-lg w-8 text-center text-gray-800" x-text="item.quantity"></span>
                             <button @click="updateQuantity(index, 1)"
-                                class="touch-btn w-7 h-7 bg-cyan-500 text-white rounded-full flex items-center justify-center hover:bg-cyan-600">
+                                class="touch-btn w-8 h-8 bg-cyan-500 text-white rounded-full flex items-center justify-center hover:bg-cyan-600">
                                 <i class="fas fa-plus text-xs"></i>
                             </button>
                             <button @click="updateQuantity(index, 5)"
-                                class="touch-btn px-2 h-7 bg-blue-500 text-white rounded text-xs font-bold hover:bg-blue-600">+5</button>
+                                class="touch-btn px-2 h-8 bg-blue-500 text-white rounded text-xs font-bold hover:bg-blue-600">+5</button>
                         </div>
                         <div class="text-right">
-                            <p class="text-[10px] text-gray-600">Subtotal</p>
-                            <p class="font-bold text-cyan-600 text-sm"
-                                x-text="'$' + (item.price * item.quantity).toFixed(2)">
+                            <p class="text-xs text-gray-500">Subtotal</p>
+                            <p class="font-bold text-cyan-600" x-text="'$' + (item.price * item.quantity).toFixed(2)">
                             </p>
                         </div>
                     </div>
                 </div>
             </template>
         </div>
-
         <div class="border-t p-4 bg-gray-50">
             <div class="space-y-2 mb-3">
                 <div class="flex justify-between text-sm">
@@ -1062,7 +963,6 @@
                     <span class="font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></span>
                 </div>
             </div>
-
             <div class="mb-3">
                 <p class="text-xs font-semibold text-gray-700 mb-2">Tipo de Entrega</p>
                 <div class="flex space-x-2">
@@ -1082,7 +982,6 @@
                         class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500"></textarea>
                 </div>
             </div>
-
             <div class="mb-3">
                 <div class="flex items-center justify-between mb-2">
                     <label class="text-xs font-semibold text-gray-700">Cliente</label>
@@ -1129,14 +1028,12 @@
                     <option value="punto_venta">Punto de Venta</option>
                     <option value="credito">Crédito</option>
                 </select>
-
                 <div x-show="['pago_movil', 'transferencia'].includes(paymentMethod)"
                     class="mt-2 p-3 bg-yellow-50 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Referencia</label>
                     <input type="text" x-model="paymentReference" placeholder="Últimos 4 dígitos"
                         class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                 </div>
-
                 <div x-show="paymentMethod === 'efectivo_bs'" class="mt-2 p-3 bg-green-50 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (Bs.)</label>
                     <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0"
@@ -1150,7 +1047,6 @@
                                 x-text="(totalBs - amountReceivedBs).toFixed(2)"></span></p>
                     </div>
                 </div>
-
                 <div x-show="paymentMethod === 'efectivo_divisas'" class="mt-2 p-3 bg-green-50 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (USD)</label>
                     <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0"
@@ -1162,7 +1058,6 @@
                                 x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
                     </div>
                 </div>
-
                 <div x-show="paymentMethod === 'credito'" class="mt-2 p-3 bg-red-50 rounded-lg">
                     <p class="text-xs text-red-600">
                         <i class="fas fa-exclamation-circle mr-1"></i>
@@ -1199,7 +1094,6 @@
                         </p>
                     </div>
                 </div>
-
                 <div x-show="multiplePayments.length > 0" class="space-y-2">
                     <template x-for="(payment, index) in multiplePayments" :key="payment.id">
                         <div class="bg-white border border-gray-200 rounded-lg p-3 flex items-center justify-between">
@@ -1227,7 +1121,6 @@
                         </div>
                     </template>
                 </div>
-
                 <div class="bg-gray-50 rounded-xl p-3 border border-gray-200">
                     <p class="text-xs font-semibold text-gray-700 mb-2">
                         <i class="fas fa-plus-circle mr-1"></i>Agregar Pago
@@ -1241,7 +1134,6 @@
                             <option value="transferencia">Transferencia</option>
                             <option value="punto_venta">Punto de Venta</option>
                         </select>
-
                         <div x-show="newPayment.method !== 'efectivo_bs'">
                             <label class="text-[10px] font-medium text-gray-600">Monto (USD)</label>
                             <input type="number" x-model.number="newPayment.amountUsd" step="0.01" min="0"
@@ -1250,7 +1142,6 @@
                             <p class="text-[10px] text-gray-500 mt-1">Equivale: Bs. <span class="font-semibold"
                                     x-text="((newPayment.amountUsd || 0) * exchangeRate).toFixed(2)"></span></p>
                         </div>
-
                         <div x-show="newPayment.method === 'efectivo_bs'">
                             <label class="text-[10px] font-medium text-gray-600">Monto (Bs.)</label>
                             <input type="number" x-model.number="newPayment.amountBs" step="0.01" min="0"
@@ -1259,18 +1150,15 @@
                             <p class="text-[10px] text-gray-500 mt-1">Equivale: $<span class="font-semibold"
                                     x-text="((newPayment.amountBs || 0) / exchangeRate).toFixed(2)"></span></p>
                         </div>
-
                         <div x-show="['pago_movil', 'transferencia', 'punto_venta'].includes(newPayment.method)">
                             <label class="text-[10px] font-medium text-gray-600">Referencia</label>
                             <input type="text" x-model="newPayment.reference" placeholder="Últimos 4 dígitos"
                                 class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                         </div>
-
                         <button @click="addMultiplePayment()" :disabled="!canAddPayment()"
                             class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed touch-btn">
                             <i class="fas fa-plus mr-1"></i>Agregar Pago
                         </button>
-
                         <button x-show="remainingAmount > 0.01" @click="fillRemainingPayment()"
                             class="w-full bg-blue-100 text-blue-700 py-2 rounded-lg text-xs font-semibold touch-btn">
                             <i class="fas fa-magic mr-1"></i>Completar con $<span
@@ -1288,14 +1176,12 @@
                     <i class="fas fa-check-circle" x-show="!processing"></i>
                     <span x-text="processing ? 'Procesando...' : 'Cobrar'"></span>
                 </button>
-
                 <button @click="openCreditModal()" :disabled="cart.length === 0 || processing"
                     class="bg-gradient-to-r from-green-500 to-emerald-500 text-white py-3 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2">
                     <i class="fas fa-hand-holding-usd"></i>
                     <span>Crédito</span>
                 </button>
             </div>
-
             <button @click="quickSale()" :disabled="cart.length === 0 || processing"
                 class="w-full mt-2 bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2 text-sm">
                 <i class="fas fa-bolt"></i>
@@ -1315,7 +1201,6 @@
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
-
             <div class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nombre Completo *</label>
@@ -1348,7 +1233,6 @@
                         placeholder="Nombre de quien recomendó">
                 </div>
             </div>
-
             <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3 sticky bottom-0">
                 <button @click="closeCustomerModal()" class="px-4 py-2 text-gray-600 touch-btn">Cancelar</button>
                 <button @click="saveCustomer()" :disabled="savingCustomer"
@@ -1374,7 +1258,6 @@
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
-
             <div class="p-6 space-y-4">
                 <div class="bg-blue-50 p-4 rounded-lg">
                     <h4 class="font-semibold text-gray-800 mb-3"><i
@@ -1409,7 +1292,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="bg-green-50 p-4 rounded-lg">
                     <h4 class="font-semibold text-gray-800 mb-3"><i
                             class="fas fa-shopping-cart mr-2 text-green-600"></i>Resumen</h4>
@@ -1429,7 +1311,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="bg-yellow-50 p-4 rounded-lg">
                     <h4 class="font-semibold text-gray-800 mb-3"><i
                             class="fas fa-calendar-alt mr-2 text-yellow-600"></i>Términos</h4>
@@ -1461,7 +1342,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Notas</label>
                     <textarea x-model="creditForm.notes" rows="2"
@@ -1469,7 +1349,6 @@
                         placeholder="Observaciones"></textarea>
                 </div>
             </div>
-
             <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3 sticky bottom-0">
                 <button @click="closeCreditModal()" class="px-4 py-2 text-gray-600 touch-btn">Cancelar</button>
                 <button @click="processCreditSale()" :disabled="processing || !canProcessCredit()"
@@ -1500,38 +1379,22 @@
                 warning: 'linear-gradient(to right, #f59e0b, #d97706)',
                 info: 'linear-gradient(to right, #3b82f6, #2563eb)'
             };
-            const icons = { success: '✓', error: '✗', warning: '', info: 'ℹ' };
-
+            const icons = { success: '✓', error: '✗', warning: '⚠', info: 'ℹ' };
             Toastify({
                 text: `${icons[type]} ${message}`,
-                duration: 3000,
-                close: true,
-                gravity: 'top',
-                position: 'right',
-                stopOnFocus: true,
+                duration: 3000, close: true, gravity: 'top', position: 'right', stopOnFocus: true,
                 style: {
-                    background: gradients[type],
-                    borderRadius: '12px',
-                    fontFamily: 'Inter, sans-serif',
-                    fontWeight: '500',
-                    fontSize: '14px',
-                    padding: '14px 20px',
-                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
-                    minWidth: '280px'
+                    background: gradients[type], borderRadius: '12px', fontFamily: 'Inter, sans-serif',
+                    fontWeight: '500', fontSize: '14px', padding: '14px 20px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15)', minWidth: '280px'
                 }
             }).showToast();
         }
 
         async function showConfirm(title, html, confirmText = 'Confirmar', cancelText = 'Cancelar') {
             const result = await Swal.fire({
-                title: title,
-                html: html,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: confirmText,
-                cancelButtonText: cancelText,
-                reverseButtons: true,
-                focusCancel: true,
+                title: title, html: html, icon: 'question', showCancelButton: true,
+                confirmButtonText: confirmText, cancelButtonText: cancelText, reverseButtons: true, focusCancel: true,
                 customClass: {
                     popup: 'rounded-2xl',
                     confirmButton: 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-xl font-semibold',
@@ -1558,7 +1421,7 @@
 
         async function fetchBCVRate() {
             try {
-                console.log('🏛️ Consultando tasa BCV desde API oficial...');
+                console.log('️ Consultando tasa BCV desde API oficial...');
                 const response = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
@@ -1593,7 +1456,6 @@
                     const search = this.productSearch.toLowerCase();
                     return this.products.filter(p => p.name.toLowerCase().includes(search) || (p.size_liters && p.size_liters.toString().includes(search)));
                 },
-
                 get subtotal() { return round2(this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)); },
                 get totalUSD() {
                     let total = this.subtotal;
@@ -1611,11 +1473,8 @@
 
                 canAddPayment() {
                     let amountUsd = 0;
-                    if (this.newPayment.method === 'efectivo_bs') {
-                        amountUsd = (this.newPayment.amountBs || 0) / this.exchangeRate;
-                    } else {
-                        amountUsd = this.newPayment.amountUsd || 0;
-                    }
+                    if (this.newPayment.method === 'efectivo_bs') { amountUsd = (this.newPayment.amountBs || 0) / this.exchangeRate; }
+                    else { amountUsd = this.newPayment.amountUsd || 0; }
                     if (amountUsd <= 0) return false;
                     if (round2(amountUsd) > round2(this.remainingAmount + 0.01)) return false;
                     return true;
@@ -1629,22 +1488,13 @@
                 },
 
                 addMultiplePayment() {
-                    if (!this.canAddPayment()) {
-                        showToast('Monto inválido o excede el restante', 'error');
-                        return;
-                    }
+                    if (!this.canAddPayment()) { showToast('Monto inválido o excede el restante', 'error'); return; }
                     let amountUsd = 0;
-                    if (this.newPayment.method === 'efectivo_bs') {
-                        amountUsd = round2((this.newPayment.amountBs || 0) / this.exchangeRate);
-                    } else {
-                        amountUsd = round2(this.newPayment.amountUsd || 0);
-                    }
+                    if (this.newPayment.method === 'efectivo_bs') { amountUsd = round2((this.newPayment.amountBs || 0) / this.exchangeRate); }
+                    else { amountUsd = round2(this.newPayment.amountUsd || 0); }
                     this.multiplePayments.push({
-                        id: Date.now(),
-                        method: this.newPayment.method,
-                        amount: amountUsd,
-                        amountBs: round2(amountUsd * this.exchangeRate),
-                        reference: this.newPayment.reference || ''
+                        id: Date.now(), method: this.newPayment.method, amount: amountUsd,
+                        amountBs: round2(amountUsd * this.exchangeRate), reference: this.newPayment.reference || ''
                     });
                     this.newPayment = { method: 'efectivo_divisas', amountUsd: 0, amountBs: 0, reference: '' };
                     showToast(`Pago #${this.multiplePayments.length} agregado: $${amountUsd.toFixed(2)}`, 'success');
@@ -1669,13 +1519,21 @@
 
                 getPaymentMethodName(method) {
                     const names = {
-                        'efectivo_bs': 'Efectivo Bs',
-                        'efectivo_divisas': 'Efectivo USD',
-                        'pago_movil': 'Pago Móvil',
-                        'transferencia': 'Transferencia',
-                        'punto_venta': 'Punto de Venta'
+                        'efectivo_bs': 'Efectivo Bs', 'efectivo_divisas': 'Efectivo USD',
+                        'pago_movil': 'Pago Móvil', 'transferencia': 'Transferencia', 'punto_venta': 'Punto de Venta'
                     };
                     return names[method] || method;
+                },
+
+                // ============================================
+                // FORMATEO DE FECHAS CON DateUtils
+                // ============================================
+                formatDate(dateString) {
+                    return DateUtils.formatDate(dateString);
+                },
+
+                formatDateTime(dateString) {
+                    return DateUtils.formatDateTime(dateString);
                 },
 
                 async initVentas() {
@@ -1685,7 +1543,6 @@
                         const { data: profile } = await supabase.from('profiles').select('full_name, role, branch').eq('id', session.user.id).single();
                         if (profile) { this.userName = profile.full_name; this.userRole = profile.role; this.userBranch = profile.branch; this.userInitials = this.getInitials(profile.full_name); }
                     } catch (err) { console.error('Error obteniendo perfil:', err); }
-
                     await this.loadExchangeRate();
                     await this.loadProducts();
                     await this.loadCustomers();
@@ -1700,14 +1557,14 @@
 
                 async loadExchangeRate() {
                     try {
-                        console.log('🔄 Consultando tasa centralizada de Supabase');
+                        console.log(' Consultando tasa centralizada de Supabase');
                         const { data, error } = await supabase.rpc('get_active_exchange_rate');
                         if (!error && data) {
                             const rate = ensureValidRate(data);
                             this.exchangeRate = rate;
                             console.log('✅ Tasa cargada desde Supabase:', this.exchangeRate);
                         } else {
-                            console.warn('️ No se encontró tasa en BD, usando 700.22');
+                            console.warn('⚠️ No se encontró tasa en BD, usando 700.22');
                             this.exchangeRate = 700.22;
                         }
                     } catch (err) {
@@ -1724,9 +1581,10 @@
                         return;
                     }
                     const newRate = round2(bcvData.rate);
-                    const rateDate = new Date(bcvData.date).toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' });
+                    // ✅ USAR DateUtils para formatear fecha
+                    const rateDate = DateUtils.formatDateLong(bcvData.date);
                     const confirmed = await Swal.fire({
-                        title: '️ Tasa BCV Oficial',
+                        title: '🏛️ Tasa BCV Oficial',
                         html: `<div class="text-center space-y-3">
                             <div class="bg-blue-50 rounded-lg p-4">
                                 <p class="text-sm text-gray-600 mb-2">Tasa oficial del BCV:</p>
@@ -1738,11 +1596,8 @@
                             </div>
                             <p class="text-xs text-gray-500 mt-2">Fuente: ${bcvData.source}</p>
                         </div>`,
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonText: 'Aplicar Tasa',
-                        cancelButtonText: 'Cancelar',
-                        reverseButtons: true
+                        icon: 'question', showCancelButton: true,
+                        confirmButtonText: 'Aplicar Tasa', cancelButtonText: 'Cancelar', reverseButtons: true
                     });
                     if (confirmed.isConfirmed) {
                         this.exchangeRate = newRate;
@@ -1770,30 +1625,14 @@
                         const { data: virtualInventory, error } = await supabase.rpc('calculate_virtual_inventory', { branch_param: this.userBranch });
                         if (error) throw error;
                         if (!virtualInventory || virtualInventory.length === 0) { this.products = []; return; }
-
-                        // Filtrar SOLO botellones (excluir tapas y otros productos sin size_liters)
-                        const bottlesOnly = virtualInventory.filter(item =>
-                            item.virtual_stock > 0 &&
-                            item.size_liters !== null &&
-                            item.size_liters > 0
-                        );
-
+                        const bottlesOnly = virtualInventory.filter(item => item.virtual_stock > 0 && item.size_liters !== null && item.size_liters > 0);
                         this.products = bottlesOnly.map(item => ({
-                            id: 'size_' + item.size_liters,
-                            product_id: item.product_id,
-                            name: item.product_name,
-                            size_liters: item.size_liters,
-                            product_type: item.product_type,
-                            price: round2(parseFloat(item.price) || 0),
-                            stock: parseInt(item.virtual_stock) || 0
+                            id: 'size_' + item.size_liters, product_id: item.product_id, name: item.product_name,
+                            size_liters: item.size_liters, product_type: item.product_type,
+                            price: round2(parseFloat(item.price) || 0), stock: parseInt(item.virtual_stock) || 0
                         }));
-                    } catch (err) {
-                        console.error('Error cargando productos:', err);
-                        showToast('Error al cargar productos', 'error');
-                        this.products = [];
-                    } finally {
-                        this.loading = false;
-                    }
+                    } catch (err) { console.error('Error cargando productos:', err); showToast('Error al cargar productos', 'error'); this.products = []; }
+                    finally { this.loading = false; }
                 },
 
                 async loadCustomers() {
@@ -1801,9 +1640,7 @@
                         const { data, error } = await supabase.from('customers').select('*').eq('branch', this.userBranch).eq('is_active', true).order('full_name');
                         if (error) throw error;
                         this.customers = data || [];
-                    } catch (err) {
-                        console.error('Error cargando clientes:', err);
-                    }
+                    } catch (err) { console.error('Error cargando clientes:', err); }
                 },
 
                 getInitials(name) { if (!name) return '??'; return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(); },
@@ -1812,22 +1649,10 @@
                     if (product.stock <= 0) { showToast('Producto sin stock', 'error'); return; }
                     const existingItem = this.cart.find(item => item.id === product.id);
                     if (existingItem) {
-                        if (existingItem.quantity < product.stock) {
-                            existingItem.quantity++;
-                            showToast('Cantidad actualizada', 'info');
-                        } else {
-                            showToast('Stock insuficiente', 'error');
-                        }
+                        if (existingItem.quantity < product.stock) { existingItem.quantity++; showToast('Cantidad actualizada', 'info'); }
+                        else { showToast('Stock insuficiente', 'error'); }
                     } else {
-                        this.cart.push({
-                            id: product.id,
-                            product_id: product.product_id,
-                            name: product.name,
-                            size_liters: product.size_liters,
-                            price: product.price,
-                            stock: product.stock,
-                            quantity: 1
-                        });
+                        this.cart.push({ id: product.id, product_id: product.product_id, name: product.name, size_liters: product.size_liters, price: product.price, stock: product.stock, quantity: 1 });
                         showToast('Producto agregado', 'success');
                     }
                 },
@@ -1836,22 +1661,10 @@
                     if (product.stock < quantity) { showToast(`Stock insuficiente para +${quantity}`, 'error'); return; }
                     const existingItem = this.cart.find(item => item.id === product.id);
                     if (existingItem) {
-                        if (existingItem.quantity + quantity <= product.stock) {
-                            existingItem.quantity += quantity;
-                            showToast(`+${quantity} ${product.name}`, 'success');
-                        } else {
-                            showToast('Stock insuficiente', 'error');
-                        }
+                        if (existingItem.quantity + quantity <= product.stock) { existingItem.quantity += quantity; showToast(`+${quantity} ${product.name}`, 'success'); }
+                        else { showToast('Stock insuficiente', 'error'); }
                     } else {
-                        this.cart.push({
-                            id: product.id,
-                            product_id: product.product_id,
-                            name: product.name,
-                            size_liters: product.size_liters,
-                            price: product.price,
-                            stock: product.stock,
-                            quantity: quantity
-                        });
+                        this.cart.push({ id: product.id, product_id: product.product_id, name: product.name, size_liters: product.size_liters, price: product.price, stock: product.stock, quantity: quantity });
                         showToast(`+${quantity} ${product.name}`, 'success');
                     }
                 },
@@ -1859,13 +1672,9 @@
                 updateQuantity(index, change) {
                     const item = this.cart[index];
                     const newQuantity = item.quantity + change;
-                    if (newQuantity > 0 && newQuantity <= item.stock) {
-                        item.quantity = newQuantity;
-                    } else if (newQuantity <= 0) {
-                        this.removeFromCart(index);
-                    } else {
-                        showToast('Stock insuficiente', 'error');
-                    }
+                    if (newQuantity > 0 && newQuantity <= item.stock) { item.quantity = newQuantity; }
+                    else if (newQuantity <= 0) { this.removeFromCart(index); }
+                    else { showToast('Stock insuficiente', 'error'); }
                 },
 
                 removeFromCart(index) { this.cart.splice(index, 1); showToast('Producto eliminado', 'warning'); },
@@ -1893,31 +1702,24 @@
                     this.savingCustomer = true;
                     try {
                         const { data, error } = await supabase.from('customers').insert({
-                            full_name: this.newCustomer.full_name,
-                            phone: this.newCustomer.phone,
-                            email: this.newCustomer.email,
-                            address: this.newCustomer.address,
-                            recommended_by: this.newCustomer.recommended_by,
-                            branch: this.userBranch
+                            full_name: this.newCustomer.full_name, phone: this.newCustomer.phone, email: this.newCustomer.email,
+                            address: this.newCustomer.address, recommended_by: this.newCustomer.recommended_by, branch: this.userBranch
                         }).select().single();
                         if (error) throw error;
                         showToast('Cliente creado', 'success');
                         this.customers.push(data);
                         this.selectedCustomer = data.id;
                         this.closeCustomerModal();
-                    } catch (err) {
-                        console.error('Error creando cliente:', err);
-                        showToast('Error al crear cliente', 'error');
-                    } finally {
-                        this.savingCustomer = false;
-                    }
+                    } catch (err) { console.error('Error creando cliente:', err); showToast('Error al crear cliente', 'error'); }
+                    finally { this.savingCustomer = false; }
                 },
 
                 openCreditModal() {
                     if (this.cart.length === 0) { showToast('El carrito está vacío', 'error'); return; }
+                    // ✅ USAR DateUtils para obtener fecha actual en Caracas + 30 días
                     const defaultDate = new Date();
                     defaultDate.setDate(defaultDate.getDate() + 30);
-                    this.creditForm.payment_date = defaultDate.toISOString().split('T')[0];
+                    this.creditForm.payment_date = DateUtils.getCurrentDateInput(defaultDate);
                     this.showCreditModal = true;
                 },
                 closeCreditModal() { this.showCreditModal = false; this.creditForm = { customer_id: '', customer_phone: '', customer_id_card: '', payment_date: '', payment_terms: '', initial_payment: 0, initial_payment_method: 'efectivo', notes: '' }; },
@@ -1928,63 +1730,36 @@
                     this.exchangeRate = ensureValidRate(this.exchangeRate);
                     if (this.cart.length === 0) { showToast('El carrito está vacío', 'error'); return; }
                     if (this.deliveryType === 'delivery' && !this.deliveryAddress) { showToast('Debe ingresar la dirección', 'error'); return; }
-
                     const customer = this.customers.find(c => c.id === this.selectedCustomer);
                     const customerName = customer?.full_name || 'Cliente no registrado';
-
                     let modalHtml = '';
                     let confirmText = 'Procesar Venta';
-
                     if (this.useMultiplePayments) {
                         if (this.multiplePayments.length === 0) { showToast('Debe agregar al menos un pago', 'error'); return; }
                         if (this.remainingAmount > 0.01) { showToast(`Falta completar: $${this.remainingAmount.toFixed(2)}`, 'error'); return; }
-
                         modalHtml = `
                             <div class="text-left space-y-3">
-                                <div class="flex items-center space-x-2 text-gray-700">
-                                    <i class="fas fa-user text-blue-500"></i>
-                                    <span><strong>Cliente:</strong> ${customerName}</span>
-                                </div>
-                                <div class="flex items-center space-x-2 text-gray-700">
-                                    <i class="fas fa-shopping-cart text-blue-500"></i>
-                                    <span><strong>Productos:</strong> ${this.cartItemCount} items</span>
-                                </div>
+                                <div class="flex items-center space-x-2 text-gray-700"><i class="fas fa-user text-blue-500"></i><span><strong>Cliente:</strong> ${customerName}</span></div>
+                                <div class="flex items-center space-x-2 text-gray-700"><i class="fas fa-shopping-cart text-blue-500"></i><span><strong>Productos:</strong> ${this.cartItemCount} items</span></div>
                                 <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-3 border border-blue-200">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="text-sm font-semibold text-gray-700">Total de la Venta:</span>
-                                        <span class="text-xl font-bold text-blue-600">$${this.totalUSD.toFixed(2)}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="text-sm text-gray-600">Total en Bs.:</span>
-                                        <span class="text-sm font-semibold text-blue-600">Bs. ${this.totalBs.toFixed(2)}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center pt-2 border-t border-blue-200">
-                                        <span class="text-xs text-gray-500"><i class="fas fa-exchange-alt mr-1"></i>Tasa: Bs. ${this.exchangeRate.toFixed(2)}</span>
-                                    </div>
+                                    <div class="flex justify-between items-center mb-2"><span class="text-sm font-semibold text-gray-700">Total de la Venta:</span><span class="text-xl font-bold text-blue-600">$${this.totalUSD.toFixed(2)}</span></div>
+                                    <div class="flex justify-between items-center mb-2"><span class="text-sm text-gray-600">Total en Bs.:</span><span class="text-sm font-semibold text-blue-600">Bs. ${this.totalBs.toFixed(2)}</span></div>
+                                    <div class="flex justify-between items-center pt-2 border-t border-blue-200"><span class="text-xs text-gray-500"><i class="fas fa-exchange-alt mr-1"></i>Tasa: Bs. ${this.exchangeRate.toFixed(2)}</span></div>
                                 </div>
                                 <div class="space-y-2">
                                     <h4 class="font-semibold text-gray-800 text-sm"><i class="fas fa-list-check mr-1 text-purple-600"></i>Pagos Registrados (${this.multiplePayments.length}):</h4>
                                     ${this.multiplePayments.map((p, i) => `
                                         <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center border border-gray-200">
                                             <div>
-                                                <div class="flex items-center space-x-2 mb-1">
-                                                    <span class="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded">#${i + 1}</span>
-                                                    <span class="text-sm font-semibold text-gray-800">${this.getPaymentMethodName(p.method)}</span>
-                                                </div>
+                                                <div class="flex items-center space-x-2 mb-1"><span class="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded">#${i + 1}</span><span class="text-sm font-semibold text-gray-800">${this.getPaymentMethodName(p.method)}</span></div>
                                                 ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` : ''}
                                             </div>
-                                            <div class="text-right">
-                                                <p class="text-sm font-bold text-green-600">$${p.amount.toFixed(2)}</p>
-                                                <p class="text-[10px] text-gray-500">Bs. ${p.amountBs.toFixed(2)}</p>
-                                            </div>
+                                            <div class="text-right"><p class="text-sm font-bold text-green-600">$${p.amount.toFixed(2)}</p><p class="text-[10px] text-gray-500">Bs. ${p.amountBs.toFixed(2)}</p></div>
                                         </div>
                                     `).join('')}
                                 </div>
                                 <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border border-green-200">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-sm font-semibold text-gray-700">Estado:</span>
-                                        <span class="text-sm font-bold text-green-600"><i class="fas fa-check-circle mr-1"></i>Pago Completo</span>
-                                    </div>
+                                    <div class="flex justify-between items-center"><span class="text-sm font-semibold text-gray-700">Estado:</span><span class="text-sm font-bold text-green-600"><i class="fas fa-check-circle mr-1"></i>Pago Completo</span></div>
                                 </div>
                             </div>
                         `;
@@ -1994,52 +1769,31 @@
                             if (this.paymentMethod === 'efectivo_bs' && round2(this.amountReceivedBs) < this.totalBs) { showToast('Monto recibido insuficiente', 'error'); return; }
                             if (this.paymentMethod === 'efectivo_divisas' && round2(this.amountReceivedUsd) < this.totalUSD) { showToast('Monto recibido insuficiente', 'error'); return; }
                         }
-
                         modalHtml = `
                             <div class="text-left space-y-3">
-                                <div class="flex items-center space-x-2 text-gray-700">
-                                    <i class="fas fa-user text-blue-500"></i>
-                                    <span><strong>Cliente:</strong> ${customerName}</span>
-                                </div>
-                                <div class="flex items-center space-x-2 text-gray-700">
-                                    <i class="fas fa-shopping-cart text-blue-500"></i>
-                                    <span><strong>Productos:</strong> ${this.cartItemCount} items</span>
-                                </div>
-                                <div class="flex items-center space-x-2 text-gray-700">
-                                    <i class="fas fa-credit-card text-blue-500"></i>
-                                    <span><strong>Método:</strong> ${this.getPaymentMethodName(this.paymentMethod)}</span>
-                                </div>
+                                <div class="flex items-center space-x-2 text-gray-700"><i class="fas fa-user text-blue-500"></i><span><strong>Cliente:</strong> ${customerName}</span></div>
+                                <div class="flex items-center space-x-2 text-gray-700"><i class="fas fa-shopping-cart text-blue-500"></i><span><strong>Productos:</strong> ${this.cartItemCount} items</span></div>
+                                <div class="flex items-center space-x-2 text-gray-700"><i class="fas fa-credit-card text-blue-500"></i><span><strong>Método:</strong> ${this.getPaymentMethodName(this.paymentMethod)}</span></div>
                                 <div class="mt-4 space-y-2">
                                     <div class="p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-gray-700 font-semibold">Total USD:</span>
-                                            <span class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</span>
-                                        </div>
+                                        <div class="flex justify-between items-center"><span class="text-gray-700 font-semibold">Total USD:</span><span class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</span></div>
                                     </div>
                                     <div class="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-gray-700 font-semibold">Total Bs.:</span>
-                                            <span class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</span>
-                                        </div>
+                                        <div class="flex justify-between items-center"><span class="text-gray-700 font-semibold">Total Bs.:</span><span class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</span></div>
                                     </div>
-                                    <div class="text-center text-xs text-gray-500">
-                                        <i class="fas fa-exchange-alt mr-1"></i>Tasa: Bs. ${this.exchangeRate.toFixed(2)} por USD
-                                    </div>
+                                    <div class="text-center text-xs text-gray-500"><i class="fas fa-exchange-alt mr-1"></i>Tasa: Bs. ${this.exchangeRate.toFixed(2)} por USD</div>
                                 </div>
                             </div>
                         `;
                     }
-
                     const confirmed = await showConfirm(this.useMultiplePayments ? 'Confirmar Venta - Pago Múltiple' : 'Confirmar Venta', modalHtml, confirmText, 'Cancelar');
                     if (!confirmed) return;
-
                     this.processing = true;
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
                         let notes = [];
                         if (this.deliveryType === 'delivery') notes.push(`Delivery: ${this.deliveryAddress}`);
                         notes.push(`Tasa aplicada: Bs. ${this.exchangeRate.toFixed(2)}`);
-
                         let payment_method = this.paymentMethod;
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             payment_method = 'multiple';
@@ -2061,207 +1815,104 @@
                                 notes.push(`Cambio USD: $${(round2(this.amountReceivedUsd) - this.totalUSD).toFixed(2)}`);
                             }
                         }
-
-                        // ============================================
-                        // INSERTAR VENTA
-                        // ============================================
+                        // ✅ USAR DateUtils para obtener fecha actual en Caracas
                         const { data: sale, error: saleError } = await supabase.from('sales').insert({
-                            branch: this.userBranch,
-                            customer_id: this.selectedCustomer || null,
-                            customer_name: customerName,
-                            subtotal: this.subtotal,
-                            tax: 0,
-                            total: this.totalUSD,
-                            payment_method: payment_method,
+                            branch: this.userBranch, customer_id: this.selectedCustomer || null, customer_name: customerName,
+                            subtotal: this.subtotal, tax: 0, total: this.totalUSD, payment_method: payment_method,
                             status: payment_method === 'credito' ? 'pending' : 'completed',
-                            notes: notes.join('\n') || null,
-                            exchange_rate_used: this.exchangeRate,
-                            rate_date: new Date().toISOString().split('T')[0],
-                            created_by: session.user.id
+                            notes: notes.join('\n') || null, exchange_rate_used: this.exchangeRate,
+                            rate_date: DateUtils.getCurrentDateInput(), created_by: session.user.id
                         }).select().single();
-
                         if (saleError) throw saleError;
-
-                        // ============================================
-                        // GUARDAR PAGOS EN sale_payments
-                        // ============================================
                         const paymentsToInsert = [];
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             this.multiplePayments.forEach((p, i) => {
                                 paymentsToInsert.push({
-                                    sale_id: sale.id,
-                                    payment_method: p.method,
-                                    amount_usd: round2(p.amount),
-                                    amount_bs: round2(p.amountBs),
-                                    reference: p.reference || null,
-                                    notes: `Pago #${i + 1}`,
-                                    created_by: session.user.id
+                                    sale_id: sale.id, payment_method: p.method, amount_usd: round2(p.amount),
+                                    amount_bs: round2(p.amountBs), reference: p.reference || null,
+                                    notes: `Pago #${i + 1}`, created_by: session.user.id
                                 });
                             });
                         } else {
-                            let amountUsd = 0;
-                            let amountBs = 0;
-                            if (this.paymentMethod === 'efectivo_bs') {
-                                amountBs = round2(this.amountReceivedBs);
-                                amountUsd = round2(amountBs / this.exchangeRate);
-                            } else if (this.paymentMethod === 'efectivo_divisas') {
-                                amountUsd = round2(this.amountReceivedUsd);
-                                amountBs = round2(amountUsd * this.exchangeRate);
-                            } else {
-                                amountUsd = round2(this.totalUSD);
-                                amountBs = round2(this.totalBs);
-                            }
+                            let amountUsd = 0, amountBs = 0;
+                            if (this.paymentMethod === 'efectivo_bs') { amountBs = round2(this.amountReceivedBs); amountUsd = round2(amountBs / this.exchangeRate); }
+                            else if (this.paymentMethod === 'efectivo_divisas') { amountUsd = round2(this.amountReceivedUsd); amountBs = round2(amountUsd * this.exchangeRate); }
+                            else { amountUsd = round2(this.totalUSD); amountBs = round2(this.totalBs); }
                             paymentsToInsert.push({
-                                sale_id: sale.id,
-                                payment_method: this.paymentMethod,
-                                amount_usd: amountUsd,
-                                amount_bs: amountBs,
-                                reference: this.paymentReference || null,
-                                notes: 'Pago único',
-                                created_by: session.user.id
+                                sale_id: sale.id, payment_method: this.paymentMethod, amount_usd: amountUsd,
+                                amount_bs: amountBs, reference: this.paymentReference || null,
+                                notes: 'Pago único', created_by: session.user.id
                             });
                         }
-
                         if (paymentsToInsert.length > 0) {
                             const { error: paymentsError } = await supabase.from('sale_payments').insert(paymentsToInsert);
-                            if (paymentsError) {
-                                console.warn('⚠️ No se pudo guardar en sale_payments:', paymentsError.message);
-                            }
+                            if (paymentsError) { console.warn('⚠️ No se pudo guardar en sale_payments:', paymentsError.message); }
                         }
-
                         const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters, product_type').eq('is_active', true);
                         const sizeToProductId = {};
                         productsFromDB.forEach(p => { if (p.size_liters) sizeToProductId[p.size_liters] = p.id; });
-
-                        // Obtener el producto de tipo 'cap' (tapas)
                         const capProduct = productsFromDB.find(p => p.product_type === 'cap');
-
                         const saleItems = this.cart.map(item => ({
-                            sale_id: sale.id,
-                            product_id: sizeToProductId[item.size_liters],
-                            quantity: item.quantity,
-                            unit_price: item.price,
-                            total: round2(item.price * item.quantity)
+                            sale_id: sale.id, product_id: sizeToProductId[item.size_liters],
+                            quantity: item.quantity, unit_price: item.price, total: round2(item.price * item.quantity)
                         }));
                         const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
                         if (itemsError) throw itemsError;
-
-                        // ============================================
-                        // DESCUENTAR AGUA DE TANQUES Y CONTAR TAPAS
-                        // ============================================
                         let totalCapsNeeded = 0;
-
                         for (const item of this.cart) {
                             const realProductId = sizeToProductId[item.size_liters];
                             if (!realProductId) continue;
-
                             const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
-                                branch_param: this.userBranch,
-                                product_id_param: realProductId,
-                                quantity_param: item.quantity,
-                                user_id_param: session.user.id
+                                branch_param: this.userBranch, product_id_param: realProductId,
+                                quantity_param: item.quantity, user_id_param: session.user.id
                             });
                             if (tankError) throw tankError;
                             if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
-
-                            // Contar tapas necesarias para botellones 13L y 20L
-                            if (item.size_liters === 13 || item.size_liters === 20) {
-                                totalCapsNeeded += item.quantity;
-                            }
+                            if (item.size_liters === 13 || item.size_liters === 20) { totalCapsNeeded += item.quantity; }
                         }
-
-                        // ============================================
-                        // DESCUENTAR TAPAS DEL INVENTARIO
-                        // ============================================
                         if (totalCapsNeeded > 0 && capProduct) {
-                            const { data: capInventory, error: capInventoryError } = await supabase
-                                .from('inventory')
-                                .select('quantity, product_id')
-                                .eq('product_id', capProduct.id)
-                                .eq('branch', this.userBranch)
-                                .single();
-
-                            if (capInventoryError) {
-                                console.warn('️ Error consultando inventario de tapas:', capInventoryError.message);
-                            } else if (capInventory) {
-                                if (capInventory.quantity < totalCapsNeeded) {
-                                    showToast(`⚠️ Stock de tapas bajo: ${capInventory.quantity} disponibles, se necesitan ${totalCapsNeeded}`, 'warning');
-                                }
-
-                                // Actualizar inventario de tapas
-                                const { error: updateCapError } = await supabase
-                                    .from('inventory')
-                                    .update({
-                                        quantity: capInventory.quantity - totalCapsNeeded,
-                                        updated_at: new Date().toISOString()
-                                    })
-                                    .eq('product_id', capProduct.id)
-                                    .eq('branch', this.userBranch);
-
-                                if (updateCapError) {
-                                    console.warn('⚠️ Error actualizando tapas:', updateCapError.message);
-                                } else {
-                                    console.log(`✅ ${totalCapsNeeded} tapas descontadas del inventario`);
-                                }
+                            const { data: capInventory, error: capInventoryError } = await supabase.from('inventory').select('quantity, product_id').eq('product_id', capProduct.id).eq('branch', this.userBranch).single();
+                            if (capInventoryError) { console.warn('⚠️ Error consultando inventario de tapas:', capInventoryError.message); }
+                            else if (capInventory) {
+                                if (capInventory.quantity < totalCapsNeeded) { showToast(`⚠️ Stock de tapas bajo: ${capInventory.quantity} disponibles, se necesitan ${totalCapsNeeded}`, 'warning'); }
+                                const { error: updateCapError } = await supabase.from('inventory').update({ quantity: capInventory.quantity - totalCapsNeeded, updated_at: new Date().toISOString() }).eq('product_id', capProduct.id).eq('branch', this.userBranch);
+                                if (updateCapError) { console.warn('⚠️ Error actualizando tapas:', updateCapError.message); }
+                                else { console.log(`✅ ${totalCapsNeeded} tapas descontadas del inventario`); }
                             }
                         }
-
                         let successDetails = '';
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             successDetails = `
                                 <div class="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
                                     <p class="text-xs font-semibold text-purple-800 mb-2"><i class="fas fa-list-check mr-1"></i>${this.multiplePayments.length} método(s) de pago:</p>
-                                    <div class="space-y-1">
-                                        ${this.multiplePayments.map((p, i) => `
-                                            <div class="flex justify-between text-xs">
-                                                <span class="text-gray-600">${i + 1}. ${this.getPaymentMethodName(p.method)}</span>
-                                                <span class="font-semibold text-green-600">$${p.amount.toFixed(2)}</span>
-                                            </div>
-                                        `).join('')}
-                                    </div>
+                                    <div class="space-y-1">${this.multiplePayments.map((p, i) => `
+                                        <div class="flex justify-between text-xs"><span class="text-gray-600">${i + 1}. ${this.getPaymentMethodName(p.method)}</span><span class="font-semibold text-green-600">$${p.amount.toFixed(2)}</span></div>
+                                    `).join('')}</div>
                                 </div>
                             `;
                         }
-
                         Swal.fire({
-                            icon: 'success',
-                            title: '¡Venta Exitosa!',
+                            icon: 'success', title: '¡Venta Exitosa!',
                             html: `
                                 <div class="text-center space-y-2">
                                     <p class="text-gray-600">La venta ha sido procesada correctamente</p>
                                     <div class="mt-3 space-y-2">
-                                        <div class="p-3 bg-green-50 rounded-lg border border-green-200">
-                                            <p class="text-xs text-gray-500">Total USD</p>
-                                            <p class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</p>
-                                        </div>
-                                        <div class="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                                            <p class="text-xs text-gray-500">Total Bs.</p>
-                                            <p class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</p>
-                                        </div>
+                                        <div class="p-3 bg-green-50 rounded-lg border border-green-200"><p class="text-xs text-gray-500">Total USD</p><p class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</p></div>
+                                        <div class="p-3 bg-blue-50 rounded-lg border border-blue-200"><p class="text-xs text-gray-500">Total Bs.</p><p class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</p></div>
                                         ${successDetails}
                                     </div>
                                 </div>
                             `,
-                            timer: 3500,
-                            showConfirmButton: false
+                            timer: 3500, showConfirmButton: false
                         });
-
-                        this.cart = [];
-                        this.deliveryAddress = '';
-                        this.selectedCustomer = '';
-                        this.paymentReference = '';
-                        this.amountReceivedBs = 0;
-                        this.amountReceivedUsd = 0;
-                        this.multiplePayments = [];
-                        this.useMultiplePayments = false;
-                        this.closeCart();
-                        await this.loadProducts();
+                        this.cart = []; this.deliveryAddress = ''; this.selectedCustomer = '';
+                        this.paymentReference = ''; this.amountReceivedBs = 0; this.amountReceivedUsd = 0;
+                        this.multiplePayments = []; this.useMultiplePayments = false;
+                        this.closeCart(); await this.loadProducts();
                     } catch (err) {
                         console.error('Error:', err);
                         Swal.fire({ icon: 'error', title: 'Error al Procesar Venta', text: err.message, confirmButtonText: 'Entendido' });
-                    } finally {
-                        this.processing = false;
-                    }
+                    } finally { this.processing = false; }
                 },
 
                 async quickSale() {
@@ -2280,27 +1931,12 @@
                     const creditAmount = round2(this.totalUSD - this.creditForm.initial_payment);
                     const confirmed = await showConfirm('Venta a Crédito', `
                         <div class="text-left space-y-3">
-                            <div class="flex items-center space-x-2 text-gray-700">
-                                <i class="fas fa-user text-blue-500"></i>
-                                <span><strong>Cliente:</strong> ${customer?.full_name || 'N/A'}</span>
-                            </div>
-                            <div class="flex items-center space-x-2 text-gray-700">
-                                <i class="fas fa-calendar text-blue-500"></i>
-                                <span><strong>Fecha Límite:</strong> ${this.creditForm.payment_date}</span>
-                            </div>
+                            <div class="flex items-center space-x-2 text-gray-700"><i class="fas fa-user text-blue-500"></i><span><strong>Cliente:</strong> ${customer?.full_name || 'N/A'}</span></div>
+                            <div class="flex items-center space-x-2 text-gray-700"><i class="fas fa-calendar text-blue-500"></i><span><strong>Fecha Límite:</strong> ${this.formatDate(this.creditForm.payment_date)}</span></div>
                             <div class="mt-4 space-y-2">
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Total Venta:</span>
-                                    <span class="font-semibold">$${this.totalUSD.toFixed(2)}</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Pago Inicial:</span>
-                                    <span class="font-semibold text-green-600">$${this.creditForm.initial_payment.toFixed(2)}</span>
-                                </div>
-                                <div class="flex justify-between text-sm border-t pt-2">
-                                    <span class="text-gray-700 font-semibold">A Financiar:</span>
-                                    <span class="text-xl font-bold text-red-600">$${creditAmount.toFixed(2)}</span>
-                                </div>
+                                <div class="flex justify-between text-sm"><span class="text-gray-600">Total Venta:</span><span class="font-semibold">$${this.totalUSD.toFixed(2)}</span></div>
+                                <div class="flex justify-between text-sm"><span class="text-gray-600">Pago Inicial:</span><span class="font-semibold text-green-600">$${this.creditForm.initial_payment.toFixed(2)}</span></div>
+                                <div class="flex justify-between text-sm border-t pt-2"><span class="text-gray-700 font-semibold">A Financiar:</span><span class="text-xl font-bold text-red-600">$${creditAmount.toFixed(2)}</span></div>
                             </div>
                         </div>
                     `, 'Confirmar Crédito', 'Cancelar');
@@ -2308,18 +1944,13 @@
                     this.processing = true;
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
+                        // ✅ USAR DateUtils para obtener fecha actual en Caracas
                         const { data: sale, error: saleError } = await supabase.from('sales').insert({
-                            branch: this.userBranch,
-                            customer_id: this.creditForm.customer_id,
-                            customer_name: customer?.full_name,
-                            subtotal: this.subtotal,
-                            tax: 0,
-                            total: this.totalUSD,
-                            payment_method: 'credito',
+                            branch: this.userBranch, customer_id: this.creditForm.customer_id, customer_name: customer?.full_name,
+                            subtotal: this.subtotal, tax: 0, total: this.totalUSD, payment_method: 'credito',
                             status: creditAmount > 0 ? 'pending' : 'completed',
                             notes: `Crédito - Pago inicial: $${round2(this.creditForm.initial_payment).toFixed(2)}\n${this.creditForm.notes || ''}`,
-                            exchange_rate_used: this.exchangeRate,
-                            rate_date: new Date().toISOString().split('T')[0],
+                            exchange_rate_used: this.exchangeRate, rate_date: DateUtils.getCurrentDateInput(),
                             created_by: session.user.id
                         }).select().single();
                         if (saleError) throw saleError;
@@ -2328,84 +1959,51 @@
                         productsFromDB.forEach(p => { if (p.size_liters) sizeToProductId[p.size_liters] = p.id; });
                         const capProduct = productsFromDB.find(p => p.product_type === 'cap');
                         const saleItems = this.cart.map(item => ({
-                            sale_id: sale.id,
-                            product_id: sizeToProductId[item.size_liters],
-                            quantity: item.quantity,
-                            unit_price: item.price,
-                            total: round2(item.price * item.quantity)
+                            sale_id: sale.id, product_id: sizeToProductId[item.size_liters],
+                            quantity: item.quantity, unit_price: item.price, total: round2(item.price * item.quantity)
                         }));
                         const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
                         if (itemsError) throw itemsError;
-
                         let totalCapsNeeded = 0;
                         for (const item of this.cart) {
                             const realProductId = sizeToProductId[item.size_liters];
                             if (!realProductId) continue;
                             const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
-                                branch_param: this.userBranch,
-                                product_id_param: realProductId,
-                                quantity_param: item.quantity,
-                                user_id_param: session.user.id
+                                branch_param: this.userBranch, product_id_param: realProductId,
+                                quantity_param: item.quantity, user_id_param: session.user.id
                             });
                             if (tankError) throw tankError;
-                            if (item.size_liters === 13 || item.size_liters === 20) {
-                                totalCapsNeeded += item.quantity;
-                            }
+                            if (item.size_liters === 13 || item.size_liters === 20) { totalCapsNeeded += item.quantity; }
                         }
-
                         if (totalCapsNeeded > 0 && capProduct) {
-                            const { data: capInventory } = await supabase
-                                .from('inventory')
-                                .select('quantity')
-                                .eq('product_id', capProduct.id)
-                                .eq('branch', this.userBranch)
-                                .single();
-
+                            const { data: capInventory } = await supabase.from('inventory').select('quantity').eq('product_id', capProduct.id).eq('branch', this.userBranch).single();
                             if (capInventory) {
-                                await supabase
-                                    .from('inventory')
-                                    .update({
-                                        quantity: capInventory.quantity - totalCapsNeeded,
-                                        updated_at: new Date().toISOString()
-                                    })
-                                    .eq('product_id', capProduct.id)
-                                    .eq('branch', this.userBranch);
+                                await supabase.from('inventory').update({ quantity: capInventory.quantity - totalCapsNeeded, updated_at: new Date().toISOString() }).eq('product_id', capProduct.id).eq('branch', this.userBranch);
                             }
                         }
-
                         if (creditAmount > 0) {
                             await supabase.from('credit_accounts').insert({
-                                sale_id: sale.id,
-                                customer_id: this.creditForm.customer_id,
-                                customer_name: customer?.full_name,
-                                customer_phone: customer?.phone,
-                                customer_id_card: this.creditForm.customer_id_card,
-                                total_amount: this.totalUSD,
-                                paid_amount: round2(this.creditForm.initial_payment),
-                                remaining_amount: creditAmount,
-                                payment_date: this.creditForm.payment_date,
-                                payment_terms: this.creditForm.payment_terms,
-                                notes: this.creditForm.notes,
+                                sale_id: sale.id, customer_id: this.creditForm.customer_id, customer_name: customer?.full_name,
+                                customer_phone: customer?.phone, customer_id_card: this.creditForm.customer_id_card,
+                                total_amount: this.totalUSD, paid_amount: round2(this.creditForm.initial_payment),
+                                remaining_amount: creditAmount, payment_date: this.creditForm.payment_date,
+                                payment_terms: this.creditForm.payment_terms, notes: this.creditForm.notes,
                                 status: this.creditForm.initial_payment > 0 ? 'partial' : 'pending',
-                                created_by: session.user.id,
-                                branch: this.userBranch
+                                created_by: session.user.id, branch: this.userBranch
                             });
                             if (this.creditForm.initial_payment > 0) {
                                 const { data: creditAccount } = await supabase.from('credit_accounts').select('id').eq('sale_id', sale.id).single();
                                 if (creditAccount) {
                                     await supabase.from('credit_payments').insert({
-                                        credit_account_id: creditAccount.id,
-                                        amount: round2(this.creditForm.initial_payment),
-                                        payment_method: this.creditForm.initial_payment_method,
-                                        notes: 'Pago inicial',
+                                        credit_account_id: creditAccount.id, amount: round2(this.creditForm.initial_payment),
+                                        payment_method: this.creditForm.initial_payment_method, notes: 'Pago inicial',
                                         created_by: session.user.id
                                     });
                                 }
                             }
                         }
                         Swal.fire({
-                            icon: 'success',
-                            title: '¡Crédito Registrado!',
+                            icon: 'success', title: '¡Crédito Registrado!',
                             html: `
                                 <div class="text-center space-y-2">
                                     <p class="text-gray-600">La venta a crédito ha sido procesada</p>
@@ -2415,19 +2013,13 @@
                                     </div>
                                 </div>
                             `,
-                            timer: 2500,
-                            showConfirmButton: false
+                            timer: 2500, showConfirmButton: false
                         });
-                        this.cart = [];
-                        this.closeCreditModal();
-                        this.closeCart();
-                        await this.loadProducts();
+                        this.cart = []; this.closeCreditModal(); this.closeCart(); await this.loadProducts();
                     } catch (err) {
                         console.error('Error:', err);
                         Swal.fire({ icon: 'error', title: 'Error', text: err.message, confirmButtonText: 'Entendido' });
-                    } finally {
-                        this.processing = false;
-                    }
+                    } finally { this.processing = false; }
                 }
             }
         }
