@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
+    <!-- UTILIDADES DE FECHA - ZONA HORARIA CARACAS -->
+    <script src="date-utils.js"></script>
 
     <!-- Toastify CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
@@ -261,7 +263,8 @@
 
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800">Cuentas por Cobrar</h2>
-                    <p class="text-sm text-gray-500">Gestión de créditos y pagos pendientes</p>
+                    <p class="text-sm text-gray-500"
+                        x-text="'Gestión de créditos y pagos pendientes - ' + DateUtils.formatDateLong(new Date())"></p>
                 </div>
             </div>
             <div class="flex items-center space-x-4">
@@ -923,11 +926,8 @@
                         return;
                     }
                     const newRate = round2(bcvData.rate);
-                    const rateDate = new Date(bcvData.date).toLocaleDateString('es-VE', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    });
+                    // ✅ USAR DateUtils para formatear fecha
+                    const rateDate = DateUtils.formatDateLong(bcvData.date);
                     const confirmed = await Swal.fire({
                         title: '🏛️ Tasa BCV Oficial',
                         html: `
@@ -1124,14 +1124,13 @@
                     return account.status;
                 },
 
+                // ✅ USAR DateUtils para formatear fechas
                 formatDate(dateString) {
-                    if (!dateString) return 'N/A';
-                    const date = new Date(dateString);
-                    return date.toLocaleDateString('es-VE', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                    });
+                    return DateUtils.formatDate(dateString);
+                },
+
+                formatDateTime(dateString) {
+                    return DateUtils.formatDateTime(dateString);
                 },
 
                 getInitials(name) {
