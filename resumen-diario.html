@@ -4,36 +4,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AquaService - Resumen Diario</title>
+    <title>Servicios Agua Potable - Resumen Diario</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
 
     <style>
-        [x-cloak] { display: none !important; }
-        body { font-family: 'Inter', sans-serif; }
-        .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
-        .sidebar-mobile { transform: translateX(-100%); transition: transform 0.3s ease-in-out; }
-        .sidebar-mobile.open { transform: translateX(0); }
-        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 39; }
-        .sidebar-overlay.show { display: block; }
-        @media (min-width: 1024px) {
-            .sidebar-mobile { transform: translateX(0) !important; }
-            .sidebar-overlay { display: none !important; }
-            .menu-toggle { display: none !important; }
+        [x-cloak] {
+            display: none !important;
         }
-        .print-area { background: white; padding: 20px; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+        }
+
+        .sidebar-mobile {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar-mobile.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 39;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        @media (min-width: 1024px) {
+            .sidebar-mobile {
+                transform: translateX(0) !important;
+            }
+
+            .sidebar-overlay {
+                display: none !important;
+            }
+
+            .menu-toggle {
+                display: none !important;
+            }
+        }
+
+        .print-area {
+            background: white;
+            padding: 20px;
+        }
+
         @media print {
-            .no-print { display: none !important; }
-            .print-area { padding: 0; }
+            .no-print {
+                display: none !important;
+            }
+
+            .print-area {
+                padding: 0;
+            }
         }
     </style>
 </head>
@@ -42,13 +88,14 @@
 
     <div class="sidebar-overlay" :class="{ 'show': mobileMenuOpen }" @click="mobileMenuOpen = false"></div>
 
-    <aside class="sidebar-mobile fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 lg:block" :class="{ 'open': mobileMenuOpen }">
+    <aside class="sidebar-mobile fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 lg:block"
+        :class="{ 'open': mobileMenuOpen }">
         <div class="p-6">
             <div class="mb-6">
                 <div class="flex items-center space-x-3 mb-3">
                     <i class="fas fa-tint text-3xl"></i>
                     <div>
-                        <h1 class="text-xl font-bold">AquaService</h1>
+                        <h1 class="text-xl font-bold">Servicios Agua Potable</h1>
                         <p class="text-xs text-blue-200">Sistema de Gestión</p>
                     </div>
                 </div>
@@ -58,32 +105,40 @@
                 </div>
             </div>
             <nav class="space-y-2">
-                <a href="index.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="index.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-home w-5"></i><span>Dashboard</span>
                 </a>
-                <a href="ventas.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="ventas.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
                 </a>
-                <a href="cuentas-cobrar.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="cuentas-cobrar.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-file-invoice-dollar w-5"></i><span>Cuentas por Cobrar</span>
                 </a>
-                <a href="clientes.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="clientes.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-users w-5"></i><span>Clientes</span>
                 </a>
-                <a href="inventario.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="inventario.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-boxes w-5"></i><span>Inventario</span>
                 </a>
-                <a href="usuarios.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="usuarios.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
                 </a>
-                <a href="resumen-diario.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
+                <a href="resumen-diario.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
                     <i class="fas fa-file-alt w-5"></i><span class="font-medium">Resumen Diario</span>
                 </a>
             </nav>
         </div>
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold" x-text="userInitials"></div>
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
+                    x-text="userInitials"></div>
                 <div>
                     <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
                     <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
@@ -96,7 +151,8 @@
         <header class="bg-white shadow-sm border-b px-6 py-4">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
                 <div class="flex items-center space-x-4">
-                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="menu-toggle lg:hidden text-gray-600 hover:text-gray-800">
+                    <button @click="mobileMenuOpen = !mobileMenuOpen"
+                        class="menu-toggle lg:hidden text-gray-600 hover:text-gray-800">
                         <i class="fas fa-bars text-2xl"></i>
                     </button>
                     <div>
@@ -119,17 +175,20 @@
             <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-3 md:space-y-0">
                 <div class="flex-1">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Fecha del Reporte</label>
-                    <input type="date" x-model="selectedDate" @change="loadDailySummary()" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <input type="date" x-model="selectedDate" @change="loadDailySummary()"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div class="flex-1">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Sucursal</label>
-                    <select x-model="selectedBranch" @change="loadDailySummary()" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <select x-model="selectedBranch" @change="loadDailySummary()"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         <option value="">Todas</option>
                         <option value="geminis">Geminis</option>
                         <option value="omega">Omega</option>
                     </select>
                 </div>
-                <button @click="loadDailySummary()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
+                <button @click="loadDailySummary()"
+                    class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
                     <i class="fas fa-sync-alt mr-2"></i>Actualizar
                 </button>
             </div>
@@ -146,13 +205,15 @@
                 <div class="border-b-2 border-gray-800 pb-4">
                     <div class="flex justify-between items-start">
                         <div>
-                            <h1 class="text-3xl font-bold text-gray-900">AQUASERVICE</h1>
+                            <h1 class="text-3xl font-bold text-gray-900">Servicios Agua Potable</h1>
                             <p class="text-gray-600">Sistema de Gestión de Agua</p>
                         </div>
                         <div class="text-right">
                             <h2 class="text-2xl font-bold text-gray-900">RESUMEN DE VENTA DIARIO</h2>
-                            <p class="text-gray-600">Fecha: <span class="font-semibold" x-text="formatDate(selectedDate)"></span></p>
-                            <p class="text-gray-600">Sucursal: <span class="font-semibold capitalize" x-text="selectedBranch || 'Todas'"></span></p>
+                            <p class="text-gray-600">Fecha: <span class="font-semibold"
+                                    x-text="formatDate(selectedDate)"></span></p>
+                            <p class="text-gray-600">Sucursal: <span class="font-semibold capitalize"
+                                    x-text="selectedBranch || 'Todas'"></span></p>
                         </div>
                     </div>
                 </div>
@@ -166,11 +227,21 @@
                         <table class="w-full">
                             <thead class="bg-blue-100">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-sm font-bold text-gray-800 border-b-2 border-gray-800">Tipo de Pago</th>
-                                    <th class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">5 LITROS</th>
-                                    <th class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">13 LITROS</th>
-                                    <th class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">20 LITROS</th>
-                                    <th class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800 bg-blue-200">TOTAL</th>
+                                    <th
+                                        class="px-4 py-3 text-left text-sm font-bold text-gray-800 border-b-2 border-gray-800">
+                                        Tipo de Pago</th>
+                                    <th
+                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">
+                                        5 LITROS</th>
+                                    <th
+                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">
+                                        13 LITROS</th>
+                                    <th
+                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">
+                                        20 LITROS</th>
+                                    <th
+                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800 bg-blue-200">
+                                        TOTAL</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -179,28 +250,32 @@
                                     <td class="px-4 py-3 text-center" x-text="pivot.units.efectivo[5]"></td>
                                     <td class="px-4 py-3 text-center" x-text="pivot.units.efectivo[13]"></td>
                                     <td class="px-4 py-3 text-center" x-text="pivot.units.efectivo[20]"></td>
-                                    <td class="px-4 py-3 text-center font-bold bg-blue-50" x-text="pivot.units.efectivo.total"></td>
+                                    <td class="px-4 py-3 text-center font-bold bg-blue-50"
+                                        x-text="pivot.units.efectivo.total"></td>
                                 </tr>
                                 <tr class="border-b hover:bg-gray-50">
                                     <td class="px-4 py-3 font-semibold text-gray-800">Pago Móvil</td>
                                     <td class="px-4 py-3 text-center" x-text="pivot.units.pago_movil[5]"></td>
                                     <td class="px-4 py-3 text-center" x-text="pivot.units.pago_movil[13]"></td>
                                     <td class="px-4 py-3 text-center" x-text="pivot.units.pago_movil[20]"></td>
-                                    <td class="px-4 py-3 text-center font-bold bg-blue-50" x-text="pivot.units.pago_movil.total"></td>
+                                    <td class="px-4 py-3 text-center font-bold bg-blue-50"
+                                        x-text="pivot.units.pago_movil.total"></td>
                                 </tr>
                                 <tr class="border-b hover:bg-gray-50">
                                     <td class="px-4 py-3 font-semibold text-gray-800">Punto</td>
                                     <td class="px-4 py-3 text-center" x-text="pivot.units.punto[5]"></td>
                                     <td class="px-4 py-3 text-center" x-text="pivot.units.punto[13]"></td>
                                     <td class="px-4 py-3 text-center" x-text="pivot.units.punto[20]"></td>
-                                    <td class="px-4 py-3 text-center font-bold bg-blue-50" x-text="pivot.units.punto.total"></td>
+                                    <td class="px-4 py-3 text-center font-bold bg-blue-50"
+                                        x-text="pivot.units.punto.total"></td>
                                 </tr>
                                 <tr class="bg-gray-200 font-bold">
                                     <td class="px-4 py-3 text-gray-900">TOTAL</td>
                                     <td class="px-4 py-3 text-center text-gray-900" x-text="pivot.units.total[5]"></td>
                                     <td class="px-4 py-3 text-center text-gray-900" x-text="pivot.units.total[13]"></td>
                                     <td class="px-4 py-3 text-center text-gray-900" x-text="pivot.units.total[20]"></td>
-                                    <td class="px-4 py-3 text-center text-gray-900 bg-blue-300" x-text="pivot.units.grandTotal"></td>
+                                    <td class="px-4 py-3 text-center text-gray-900 bg-blue-300"
+                                        x-text="pivot.units.grandTotal"></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -216,41 +291,67 @@
                         <table class="w-full">
                             <thead class="bg-green-100">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-sm font-bold text-gray-800 border-b-2 border-gray-800">Tipo de Pago</th>
-                                    <th class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">5 LITROS ($0.50)</th>
-                                    <th class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">13 LITROS ($1.00)</th>
-                                    <th class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">20 LITROS ($1.50)</th>
-                                    <th class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800 bg-green-200">TOTAL</th>
+                                    <th
+                                        class="px-4 py-3 text-left text-sm font-bold text-gray-800 border-b-2 border-gray-800">
+                                        Tipo de Pago</th>
+                                    <th
+                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">
+                                        5 LITROS ($0.50)</th>
+                                    <th
+                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">
+                                        13 LITROS ($1.00)</th>
+                                    <th
+                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">
+                                        20 LITROS ($1.50)</th>
+                                    <th
+                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800 bg-green-200">
+                                        TOTAL</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr class="border-b hover:bg-gray-50">
                                     <td class="px-4 py-3 font-semibold text-gray-800">Efectivo</td>
-                                    <td class="px-4 py-3 text-center" x-text="'$' + pivot.amounts.efectivo[5].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center" x-text="'$' + pivot.amounts.efectivo[13].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center" x-text="'$' + pivot.amounts.efectivo[20].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center font-bold bg-green-50" x-text="'$' + pivot.amounts.efectivo.total.toFixed(2)"></td>
+                                    <td class="px-4 py-3 text-center"
+                                        x-text="'$' + pivot.amounts.efectivo[5].toFixed(2)"></td>
+                                    <td class="px-4 py-3 text-center"
+                                        x-text="'$' + pivot.amounts.efectivo[13].toFixed(2)"></td>
+                                    <td class="px-4 py-3 text-center"
+                                        x-text="'$' + pivot.amounts.efectivo[20].toFixed(2)"></td>
+                                    <td class="px-4 py-3 text-center font-bold bg-green-50"
+                                        x-text="'$' + pivot.amounts.efectivo.total.toFixed(2)"></td>
                                 </tr>
                                 <tr class="border-b hover:bg-gray-50">
                                     <td class="px-4 py-3 font-semibold text-gray-800">Pago Móvil</td>
-                                    <td class="px-4 py-3 text-center" x-text="'$' + pivot.amounts.pago_movil[5].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center" x-text="'$' + pivot.amounts.pago_movil[13].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center" x-text="'$' + pivot.amounts.pago_movil[20].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center font-bold bg-green-50" x-text="'$' + pivot.amounts.pago_movil.total.toFixed(2)"></td>
+                                    <td class="px-4 py-3 text-center"
+                                        x-text="'$' + pivot.amounts.pago_movil[5].toFixed(2)"></td>
+                                    <td class="px-4 py-3 text-center"
+                                        x-text="'$' + pivot.amounts.pago_movil[13].toFixed(2)"></td>
+                                    <td class="px-4 py-3 text-center"
+                                        x-text="'$' + pivot.amounts.pago_movil[20].toFixed(2)"></td>
+                                    <td class="px-4 py-3 text-center font-bold bg-green-50"
+                                        x-text="'$' + pivot.amounts.pago_movil.total.toFixed(2)"></td>
                                 </tr>
                                 <tr class="border-b hover:bg-gray-50">
                                     <td class="px-4 py-3 font-semibold text-gray-800">Punto</td>
-                                    <td class="px-4 py-3 text-center" x-text="'$' + pivot.amounts.punto[5].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center" x-text="'$' + pivot.amounts.punto[13].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center" x-text="'$' + pivot.amounts.punto[20].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center font-bold bg-green-50" x-text="'$' + pivot.amounts.punto.total.toFixed(2)"></td>
+                                    <td class="px-4 py-3 text-center" x-text="'$' + pivot.amounts.punto[5].toFixed(2)">
+                                    </td>
+                                    <td class="px-4 py-3 text-center" x-text="'$' + pivot.amounts.punto[13].toFixed(2)">
+                                    </td>
+                                    <td class="px-4 py-3 text-center" x-text="'$' + pivot.amounts.punto[20].toFixed(2)">
+                                    </td>
+                                    <td class="px-4 py-3 text-center font-bold bg-green-50"
+                                        x-text="'$' + pivot.amounts.punto.total.toFixed(2)"></td>
                                 </tr>
                                 <tr class="bg-gray-200 font-bold">
                                     <td class="px-4 py-3 text-gray-900">TOTAL</td>
-                                    <td class="px-4 py-3 text-center text-gray-900" x-text="'$' + pivot.amounts.total[5].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center text-gray-900" x-text="'$' + pivot.amounts.total[13].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center text-gray-900" x-text="'$' + pivot.amounts.total[20].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center text-gray-900 bg-green-300" x-text="'$' + pivot.amounts.grandTotal.toFixed(2)"></td>
+                                    <td class="px-4 py-3 text-center text-gray-900"
+                                        x-text="'$' + pivot.amounts.total[5].toFixed(2)"></td>
+                                    <td class="px-4 py-3 text-center text-gray-900"
+                                        x-text="'$' + pivot.amounts.total[13].toFixed(2)"></td>
+                                    <td class="px-4 py-3 text-center text-gray-900"
+                                        x-text="'$' + pivot.amounts.total[20].toFixed(2)"></td>
+                                    <td class="px-4 py-3 text-center text-gray-900 bg-green-300"
+                                        x-text="'$' + pivot.amounts.grandTotal.toFixed(2)"></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -268,7 +369,8 @@
                         </div>
                         <div class="flex justify-between py-1 border-t">
                             <span class="font-bold">Cobrado:</span>
-                            <span class="font-bold text-green-600" x-text="'$' + (pivot.amounts.grandTotal - summary.pending).toFixed(2)"></span>
+                            <span class="font-bold text-green-600"
+                                x-text="'$' + (pivot.amounts.grandTotal - summary.pending).toFixed(2)"></span>
                         </div>
                     </div>
 
@@ -297,7 +399,8 @@
                         </h3>
                         <p class="text-lg font-bold" x-text="summary.topProduct.name"></p>
                         <p class="text-sm text-gray-600" x-text="summary.topProduct.units + ' unidades'"></p>
-                        <p class="text-xs text-gray-500" x-text="summary.topProduct.percentage.toFixed(1) + '% del total'"></p>
+                        <p class="text-xs text-gray-500"
+                            x-text="summary.topProduct.percentage.toFixed(1) + '% del total'"></p>
                     </div>
                 </div>
 
@@ -351,7 +454,7 @@
                 userRole: '',
                 userBranch: '',
                 userInitials: '??',
-                
+
                 summary: {
                     pending: 0,
                     topProduct: { name: '', units: 0, percentage: 0 }
@@ -460,7 +563,7 @@
 
                         for (const sale of filteredSales) {
                             const method = sale.payment_method;
-                            
+
                             // Mapear método de pago a categoría de la tabla
                             let methodKey = method;
                             if (method === 'efectivo_bs' || method === 'efectivo_divisas') {
@@ -544,7 +647,7 @@
                         const yesterday = new Date(this.selectedDate);
                         yesterday.setDate(yesterday.getDate() - 1);
                         const yesterdayStr = yesterday.toISOString().split('T')[0];
-                        
+
                         const { data: sales } = await supabase
                             .from('sales')
                             .select('total, branch')
@@ -578,7 +681,7 @@
                             unit: 'mm',
                             format: 'letter'
                         });
-                        
+
                         const pageWidth = doc.internal.pageSize.getWidth();
                         const margin = 10;
                         let yPos = 10;
@@ -587,15 +690,15 @@
                         doc.setFontSize(16);
                         doc.setFont(undefined, 'bold');
                         doc.text('AQUASERVICE', pageWidth / 2, yPos, { align: 'center' });
-                        
+
                         doc.setFontSize(9);
                         doc.setFont(undefined, 'normal');
                         doc.text('Sistema de Gestión de Agua', pageWidth / 2, yPos + 4, { align: 'center' });
-                        
+
                         doc.setFontSize(12);
                         doc.setFont(undefined, 'bold');
                         doc.text('RESUMEN DE VENTA DIARIO', pageWidth / 2, yPos + 9, { align: 'center' });
-                        
+
                         doc.setFontSize(8);
                         doc.setFont(undefined, 'normal');
                         doc.text(`Fecha: ${this.formatDate(this.selectedDate)}`, pageWidth / 2, yPos + 14, { align: 'center' });
@@ -632,7 +735,7 @@
                             },
                             margin: { left: margin, right: margin },
                             cellPadding: 2,
-                            didParseCell: function(data) {
+                            didParseCell: function (data) {
                                 if (data.row.index === 3) {
                                     data.cell.styles.fillColor = [200, 200, 200];
                                     data.cell.styles.fontStyle = 'bold';
@@ -671,7 +774,7 @@
                             },
                             margin: { left: margin, right: margin },
                             cellPadding: 2,
-                            didParseCell: function(data) {
+                            didParseCell: function (data) {
                                 if (data.row.index === 3) {
                                     data.cell.styles.fillColor = [200, 200, 200];
                                     data.cell.styles.fontStyle = 'bold';
@@ -715,7 +818,7 @@
                             },
                             margin: { left: margin, right: margin },
                             cellPadding: 1,
-                            didParseCell: function(data) {
+                            didParseCell: function (data) {
                                 if (data.row.index === 0 || data.row.index === 4 || data.row.index === 9) {
                                     data.cell.styles.fillColor = [240, 240, 240];
                                     data.cell.styles.fontStyle = 'bold';
