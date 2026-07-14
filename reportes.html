@@ -4,13 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Servicios Agua Potable - Resumen Diario</title>
+    <title>Servicios Agua Potable - Reportes</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-
     <!-- UTILIDADES DE FECHA - ZONA HORARIA CARACAS -->
     <script src="date-utils.js"></script>
 
@@ -18,6 +15,14 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <!-- Toastify JS -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -57,6 +62,51 @@
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
         }
 
+        .toastify-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+        }
+
+        .toastify-info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+        }
+
+        .swal2-popup {
+            font-family: 'Inter', sans-serif !important;
+            border-radius: 16px !important;
+            padding: 2rem !important;
+        }
+
+        .swal2-title {
+            font-size: 1.5rem !important;
+            font-weight: 700 !important;
+            color: #1f2937 !important;
+        }
+
+        .swal2-html-container {
+            font-size: 0.95rem !important;
+            color: #4b5563 !important;
+        }
+
+        .swal2-confirm {
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%) !important;
+            border: none !important;
+            border-radius: 12px !important;
+            padding: 0.75rem 2rem !important;
+            font-weight: 600 !important;
+            font-size: 1rem !important;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3) !important;
+        }
+
+        .swal2-cancel {
+            background: #f3f4f6 !important;
+            color: #4b5563 !important;
+            border: none !important;
+            border-radius: 12px !important;
+            padding: 0.75rem 2rem !important;
+            font-weight: 600 !important;
+            font-size: 1rem !important;
+        }
+
         .sidebar-mobile {
             transform: translateX(-100%);
             transition: transform 0.3s ease-in-out;
@@ -92,19 +142,32 @@
             }
         }
 
-        .print-area {
-            background: white;
-            padding: 20px;
-        }
-
+        /* Estilos para impresión */
         @media print {
             .no-print {
                 display: none !important;
             }
 
-            .print-area {
-                padding: 0;
+            body {
+                background: white;
             }
+
+            .print-only {
+                display: block !important;
+            }
+        }
+
+        .print-only {
+            display: none;
+        }
+
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
         .tab-active {
@@ -114,10 +177,12 @@
     </style>
 </head>
 
-<body class="bg-gray-50" x-data="resumenApp()" x-init="initResumen()">
+<body class="bg-gray-50" x-data="reportesApp()" x-init="initReportes()">
 
+    <!-- Overlay para móvil -->
     <div class="sidebar-overlay" :class="{ 'show': mobileMenuOpen }" @click="mobileMenuOpen = false"></div>
 
+    <!-- Sidebar -->
     <aside class="sidebar-mobile fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 lg:block"
         :class="{ 'open': mobileMenuOpen }">
         <div class="p-6">
@@ -134,6 +199,7 @@
                     <p class="font-semibold capitalize text-sm" x-text="userBranch || 'Cargando...'"></p>
                 </div>
             </div>
+
             <nav class="space-y-2">
                 <a href="index.html" @click="mobileMenuOpen = false"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
@@ -155,12 +221,17 @@
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-boxes w-5"></i><span>Inventario</span>
                 </a>
-                <a href="resumen.html" @click="mobileMenuOpen = false"
+                <a href="usuarios.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
+                </a>
+                <a href="reportes.html" @click="mobileMenuOpen = false"
                     class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
-                    <i class="fas fa-file-alt w-5"></i><span class="font-medium">Resumen Diario</span>
+                    <i class="fas fa-chart-line w-5"></i><span class="font-medium">Reportes</span>
                 </a>
             </nav>
         </div>
+
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
@@ -173,271 +244,417 @@
         </div>
     </aside>
 
+    <!-- Main Content -->
     <div class="lg:ml-64 min-h-screen">
-        <header class="bg-white shadow-sm border-b px-6 py-4 no-print">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-                <div class="flex items-center space-x-4">
-                    <button @click="mobileMenuOpen = !mobileMenuOpen"
-                        class="menu-toggle lg:hidden text-gray-600 hover:text-gray-800">
-                        <i class="fas fa-bars text-2xl"></i>
-                    </button>
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800">Resumen de Venta Diario</h2>
-                        <p class="text-sm text-gray-500" x-text="DateUtils.formatDateLong(new Date())"></p>
-                    </div>
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center no-print">
+            <div class="flex items-center space-x-4">
+                <button @click="mobileMenuOpen = !mobileMenuOpen"
+                    class="menu-toggle lg:hidden text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Reportes y Cierre Contable</h2>
+                    <p class="text-sm text-gray-500"
+                        x-text="'Generación de reportes profesionales - ' + DateUtils.formatDateLong(new Date())"></p>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <button @click="generatePDF()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
-                        <i class="fas fa-file-pdf mr-2"></i>Generar PDF
-                    </button>
-                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
-                        <i class="fas fa-sign-out-alt mr-2"></i>Salir
-                    </button>
-                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button @click="exportToPDF()"
+                    class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                    <i class="fas fa-file-pdf"></i>
+                    <span class="hidden sm:inline">Exportar PDF</span>
+                </button>
+                <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Salir
+                </button>
             </div>
         </header>
 
-        <div class="bg-white shadow-sm border-b px-6 py-4 no-print">
-            <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-3 md:space-y-0">
-                <div class="flex-1">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Fecha del Reporte</label>
-                    <input type="date" x-model="selectedDate" @change="loadDailySummary()"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div class="flex-1">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Sucursal</label>
-                    <select x-model="selectedBranch" @change="loadDailySummary()"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        <option value="">Todas</option>
-                        <option value="geminis">Geminis</option>
-                        <option value="omega">Omega</option>
-                    </select>
-                </div>
-                <button @click="loadDailySummary()"
-                    class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
-                    <i class="fas fa-sync-alt mr-2"></i>Actualizar
-                </button>
-            </div>
-        </div>
-
-        <main class="p-6 print-area">
+        <!-- Content -->
+        <main class="p-6">
+            <!-- Loading -->
             <div x-show="loading" class="text-center py-12">
                 <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500"></i>
-                <p class="mt-4 text-gray-600">Generando resumen...</p>
+                <p class="mt-4 text-gray-600">Generando reportes...</p>
             </div>
 
-            <div x-show="!loading" class="space-y-6">
-                <!-- Header del Reporte -->
-                <div class="border-b-2 border-gray-800 pb-4">
-                    <div class="flex justify-between items-start">
+            <div x-show="!loading">
+                <!-- Filtros -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 no-print">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-filter mr-2"></i>Filtros de Reporte
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
-                            <h1 class="text-3xl font-bold text-gray-900">Servicios Agua Potable</h1>
-                            <p class="text-gray-600">Sistema de Gestión de Agua</p>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Inicio</label>
+                            <input type="date" x-model="filters.startDate"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         </div>
-                        <div class="text-right">
-                            <h2 class="text-2xl font-bold text-gray-900">RESUMEN DE VENTA DIARIO</h2>
-                            <p class="text-gray-600">Fecha: <span class="font-semibold"
-                                    x-text="DateUtils.formatDate(selectedDate)"></span></p>
-                            <p class="text-gray-600">Sucursal: <span class="font-semibold capitalize"
-                                    x-text="selectedBranch || 'Todas'"></span></p>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Fin</label>
+                            <input type="date" x-model="filters.endDate"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Reporte</label>
+                            <select x-model="filters.reportType"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="daily">Diario</option>
+                                <option value="weekly">Semanal</option>
+                                <option value="monthly">Mensual</option>
+                                <option value="custom">Personalizado</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button @click="generateReport()"
+                                class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>Generar Reporte</span>
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- TABLA DINÁMICA PRINCIPAL (Unidades) -->
-                <div class="border-2 border-gray-800 rounded-lg overflow-hidden">
-                    <div class="bg-gray-800 text-white px-4 py-2">
-                        <h3 class="text-lg font-bold">VENTAS POR PRODUCTO Y MÉTODO DE PAGO (UNIDADES)</h3>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-blue-100">
-                                <tr>
-                                    <th
-                                        class="px-4 py-3 text-left text-sm font-bold text-gray-800 border-b-2 border-gray-800">
-                                        Tipo de Pago</th>
-                                    <th
-                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">
-                                        5 LITROS</th>
-                                    <th
-                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">
-                                        13 LITROS</th>
-                                    <th
-                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">
-                                        20 LITROS</th>
-                                    <th
-                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800 bg-blue-200">
-                                        TOTAL</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="border-b hover:bg-gray-50">
-                                    <td class="px-4 py-3 font-semibold text-gray-800">Efectivo</td>
-                                    <td class="px-4 py-3 text-center" x-text="pivot.units.efectivo[5]"></td>
-                                    <td class="px-4 py-3 text-center" x-text="pivot.units.efectivo[13]"></td>
-                                    <td class="px-4 py-3 text-center" x-text="pivot.units.efectivo[20]"></td>
-                                    <td class="px-4 py-3 text-center font-bold bg-blue-50"
-                                        x-text="pivot.units.efectivo.total"></td>
-                                </tr>
-                                <tr class="border-b hover:bg-gray-50">
-                                    <td class="px-4 py-3 font-semibold text-gray-800">Pago Móvil</td>
-                                    <td class="px-4 py-3 text-center" x-text="pivot.units.pago_movil[5]"></td>
-                                    <td class="px-4 py-3 text-center" x-text="pivot.units.pago_movil[13]"></td>
-                                    <td class="px-4 py-3 text-center" x-text="pivot.units.pago_movil[20]"></td>
-                                    <td class="px-4 py-3 text-center font-bold bg-blue-50"
-                                        x-text="pivot.units.pago_movil.total"></td>
-                                </tr>
-                                <tr class="border-b hover:bg-gray-50">
-                                    <td class="px-4 py-3 font-semibold text-gray-800">Punto</td>
-                                    <td class="px-4 py-3 text-center" x-text="pivot.units.punto[5]"></td>
-                                    <td class="px-4 py-3 text-center" x-text="pivot.units.punto[13]"></td>
-                                    <td class="px-4 py-3 text-center" x-text="pivot.units.punto[20]"></td>
-                                    <td class="px-4 py-3 text-center font-bold bg-blue-50"
-                                        x-text="pivot.units.punto.total"></td>
-                                </tr>
-                                <tr class="bg-gray-200 font-bold">
-                                    <td class="px-4 py-3 text-gray-900">TOTAL</td>
-                                    <td class="px-4 py-3 text-center text-gray-900" x-text="pivot.units.total[5]"></td>
-                                    <td class="px-4 py-3 text-center text-gray-900" x-text="pivot.units.total[13]"></td>
-                                    <td class="px-4 py-3 text-center text-gray-900" x-text="pivot.units.total[20]"></td>
-                                    <td class="px-4 py-3 text-center text-gray-900 bg-blue-300"
-                                        x-text="pivot.units.grandTotal"></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <!-- Tabs -->
+                <div class="bg-white rounded-2xl shadow-sm mb-6 no-print">
+                    <div class="flex space-x-1 p-2">
+                        <button @click="activeTab = 'resumen'"
+                            :class="activeTab === 'resumen' ? 'tab-active' : 'text-gray-600 hover:bg-gray-100'"
+                            class="flex-1 px-4 py-3 rounded-lg font-medium transition">
+                            <i class="fas fa-chart-pie mr-2"></i>Resumen
+                        </button>
+                        <button @click="activeTab = 'ventas'"
+                            :class="activeTab === 'ventas' ? 'tab-active' : 'text-gray-600 hover:bg-gray-100'"
+                            class="flex-1 px-4 py-3 rounded-lg font-medium transition">
+                            <i class="fas fa-shopping-cart mr-2"></i>Ventas
+                        </button>
+                        <button @click="activeTab = 'productos'"
+                            :class="activeTab === 'productos' ? 'tab-active' : 'text-gray-600 hover:bg-gray-100'"
+                            class="flex-1 px-4 py-3 rounded-lg font-medium transition">
+                            <i class="fas fa-box mr-2"></i>Productos
+                        </button>
+                        <button @click="activeTab = 'cierre'"
+                            :class="activeTab === 'cierre' ? 'tab-active' : 'text-gray-600 hover:bg-gray-100'"
+                            class="flex-1 px-4 py-3 rounded-lg font-medium transition">
+                            <i class="fas fa-cash-register mr-2"></i>Cierre de Caja
+                        </button>
                     </div>
                 </div>
 
-                <!-- TABLA DINÁMICA DE MONTOS ($) -->
-                <div class="border-2 border-gray-800 rounded-lg overflow-hidden">
-                    <div class="bg-green-800 text-white px-4 py-2">
-                        <h3 class="text-lg font-bold">VENTAS POR PRODUCTO Y MÉTODO DE PAGO (MONTOS EN USD)</h3>
+                <!-- TAB: RESUMEN -->
+                <div x-show="activeTab === 'resumen'">
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                        <div class="stat-card bg-white rounded-2xl shadow-sm p-6 border-l-4 border-blue-500">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm text-gray-600 mb-1">Total Ventas</p>
+                                    <p class="text-3xl font-bold text-gray-900"
+                                        x-text="'$' + stats.totalSales.toFixed(2)"></p>
+                                    <p class="text-xs text-gray-500 mt-1"
+                                        x-text="'Bs. ' + (stats.totalSales * exchangeRate).toFixed(2)"></p>
+                                </div>
+                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-dollar-sign text-blue-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card bg-white rounded-2xl shadow-sm p-6 border-l-4 border-green-500">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm text-gray-600 mb-1">Transacciones</p>
+                                    <p class="text-3xl font-bold text-gray-900" x-text="stats.totalTransactions"></p>
+                                    <p class="text-xs text-gray-500 mt-1">ventas realizadas</p>
+                                </div>
+                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-receipt text-green-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card bg-white rounded-2xl shadow-sm p-6 border-l-4 border-purple-500">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm text-gray-600 mb-1">Ticket Promedio</p>
+                                    <p class="text-3xl font-bold text-gray-900"
+                                        x-text="'$' + stats.averageTicket.toFixed(2)"></p>
+                                    <p class="text-xs text-gray-500 mt-1"
+                                        x-text="'Bs. ' + (stats.averageTicket * exchangeRate).toFixed(2)"></p>
+                                </div>
+                                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-calculator text-purple-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card bg-white rounded-2xl shadow-sm p-6 border-l-4 border-orange-500">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm text-gray-600 mb-1">Productos Vendidos</p>
+                                    <p class="text-3xl font-bold text-gray-900" x-text="stats.totalProducts"></p>
+                                    <p class="text-xs text-gray-500 mt-1">unidades</p>
+                                </div>
+                                <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-box text-orange-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-green-100">
-                                <tr>
-                                    <th
-                                        class="px-4 py-3 text-left text-sm font-bold text-gray-800 border-b-2 border-gray-800">
-                                        Tipo de Pago</th>
-                                    <th
-                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">
-                                        5 LITROS ($0.50)</th>
-                                    <th
-                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">
-                                        13 LITROS ($1.00)</th>
-                                    <th
-                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">
-                                        20 LITROS ($1.50)</th>
-                                    <th
-                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800 bg-green-200">
-                                        TOTAL</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="border-b hover:bg-gray-50">
-                                    <td class="px-4 py-3 font-semibold text-gray-800">Efectivo</td>
-                                    <td class="px-4 py-3 text-center"
-                                        x-text="'$' + pivot.amounts.efectivo[5].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center"
-                                        x-text="'$' + pivot.amounts.efectivo[13].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center"
-                                        x-text="'$' + pivot.amounts.efectivo[20].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center font-bold bg-green-50"
-                                        x-text="'$' + pivot.amounts.efectivo.total.toFixed(2)"></td>
-                                </tr>
-                                <tr class="border-b hover:bg-gray-50">
-                                    <td class="px-4 py-3 font-semibold text-gray-800">Pago Móvil</td>
-                                    <td class="px-4 py-3 text-center"
-                                        x-text="'$' + pivot.amounts.pago_movil[5].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center"
-                                        x-text="'$' + pivot.amounts.pago_movil[13].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center"
-                                        x-text="'$' + pivot.amounts.pago_movil[20].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center font-bold bg-green-50"
-                                        x-text="'$' + pivot.amounts.pago_movil.total.toFixed(2)"></td>
-                                </tr>
-                                <tr class="border-b hover:bg-gray-50">
-                                    <td class="px-4 py-3 font-semibold text-gray-800">Punto</td>
-                                    <td class="px-4 py-3 text-center" x-text="'$' + pivot.amounts.punto[5].toFixed(2)">
-                                    </td>
-                                    <td class="px-4 py-3 text-center" x-text="'$' + pivot.amounts.punto[13].toFixed(2)">
-                                    </td>
-                                    <td class="px-4 py-3 text-center" x-text="'$' + pivot.amounts.punto[20].toFixed(2)">
-                                    </td>
-                                    <td class="px-4 py-3 text-center font-bold bg-green-50"
-                                        x-text="'$' + pivot.amounts.punto.total.toFixed(2)"></td>
-                                </tr>
-                                <tr class="bg-gray-200 font-bold">
-                                    <td class="px-4 py-3 text-gray-900">TOTAL</td>
-                                    <td class="px-4 py-3 text-center text-gray-900"
-                                        x-text="'$' + pivot.amounts.total[5].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center text-gray-900"
-                                        x-text="'$' + pivot.amounts.total[13].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center text-gray-900"
-                                        x-text="'$' + pivot.amounts.total[20].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center text-gray-900 bg-green-300"
-                                        x-text="'$' + pivot.amounts.grandTotal.toFixed(2)"></td>
-                                </tr>
-                            </tbody>
-                        </table>
+
+                    <!-- Gráfico -->
+                    <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-chart-bar mr-2"></i>Ventas por Método de Pago
+                        </h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <canvas id="paymentChart"></canvas>
+                            </div>
+                            <div class="space-y-3">
+                                <template x-for="method in stats.paymentMethods" :key="method.name">
+                                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-3 h-3 rounded-full" :style="'background: ' + method.color">
+                                            </div>
+                                            <span class="text-sm font-medium" x-text="method.name"></span>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm font-bold" x-text="'$' + method.amount.toFixed(2)"></p>
+                                            <p class="text-xs text-gray-500" x-text="method.count + ' transacciones'">
+                                            </p>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Resumen adicional -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="border-2 border-red-300 rounded-lg p-4 bg-red-50">
-                        <h3 class="font-bold text-gray-900 mb-2">CUENTAS POR COBRAR</h3>
-                        <div class="flex justify-between py-1">
-                            <span>Pendiente:</span>
-                            <span class="font-bold text-red-600" x-text="'$' + summary.pending.toFixed(2)"></span>
+                <!-- TAB: VENTAS -->
+                <div x-show="activeTab === 'ventas'">
+                    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50 border-b border-gray-200">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">N°
+                                            Venta</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Fecha</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Cliente</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Método</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                                            Total USD</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                                            Total Bs.</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <template x-for="sale in sales" :key="sale.id">
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-6 py-4">
+                                                <span class="text-sm font-medium text-blue-600"
+                                                    x-text="'#' + sale.sale_number"></span>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <span class="text-sm text-gray-900"
+                                                    x-text="formatDateTime(sale.created_at)"></span>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <span class="text-sm text-gray-900"
+                                                    x-text="sale.customer_name || 'Cliente no registrado'"></span>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800"
+                                                    x-text="getPaymentMethodName(sale.payment_method)"></span>
+                                            </td>
+                                            <td class="px-6 py-4 text-right">
+                                                <span class="text-sm font-semibold"
+                                                    x-text="'$' + sale.total.toFixed(2)"></span>
+                                            </td>
+                                            <td class="px-6 py-4 text-right">
+                                                <span class="text-sm text-gray-600"
+                                                    x-text="'Bs. ' + (sale.total * sale.exchange_rate_used).toFixed(2)"></span>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <span class="px-2 py-1 text-xs rounded-full" :class="{
+                                                        'bg-green-100 text-green-800': sale.status === 'completed',
+                                                        'bg-yellow-100 text-yellow-800': sale.status === 'pending'
+                                                    }"
+                                                    x-text="sale.status === 'completed' ? 'Completada' : 'Pendiente'"></span>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                    <tr x-show="sales.length === 0">
+                                        <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                                            <i class="fas fa-inbox text-4xl mb-3 text-gray-300"></i>
+                                            <p class="text-lg font-medium">No hay ventas en el período seleccionado</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="flex justify-between py-1 border-t">
-                            <span class="font-bold">Cobrado:</span>
-                            <span class="font-bold text-green-600"
-                                x-text="'$' + (pivot.amounts.grandTotal - summary.pending).toFixed(2)"></span>
-                        </div>
-                    </div>
-
-                    <div class="border-2 border-blue-300 rounded-lg p-4 bg-blue-50">
-                        <h3 class="font-bold text-gray-900 mb-2">COMPARATIVO VS AYER</h3>
-                        <div class="flex justify-between py-1">
-                            <span>Ventas Ayer:</span>
-                            <span class="font-bold" x-text="'$' + comparison.yesterdayRevenue.toFixed(2)"></span>
-                        </div>
-                        <div class="flex justify-between py-1">
-                            <span>Ventas Hoy:</span>
-                            <span class="font-bold" x-text="'$' + pivot.amounts.grandTotal.toFixed(2)"></span>
-                        </div>
-                        <div class="flex justify-between py-1 border-t">
-                            <span class="font-bold">Crecimiento:</span>
-                            <span class="font-bold" :class="comparison.growth >= 0 ? 'text-green-600' : 'text-red-600'"
-                                x-text="(comparison.growth >= 0 ? '+' : '') + comparison.growth.toFixed(1) + '%'"></span>
-                        </div>
-                    </div>
-
-                    <div class="border-2 border-yellow-300 rounded-lg p-4 bg-yellow-50">
-                        <h3 class="font-bold text-gray-900 mb-2"><i
-                                class="fas fa-trophy text-yellow-600 mr-1"></i>PRODUCTO ESTRELLA</h3>
-                        <p class="text-lg font-bold" x-text="summary.topProduct.name"></p>
-                        <p class="text-sm text-gray-600" x-text="summary.topProduct.units + ' unidades'"></p>
-                        <p class="text-xs text-gray-500"
-                            x-text="summary.topProduct.percentage.toFixed(1) + '% del total'"></p>
                     </div>
                 </div>
 
-                <!-- Firmas -->
-                <div class="mt-8 pt-8 border-t-2 border-gray-400">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="text-center">
-                            <div class="border-b-2 border-gray-400 w-64 mx-auto mb-2"></div>
-                            <p class="font-semibold">Firma Vendedor</p>
-                            <p class="text-sm text-gray-500" x-text="userName"></p>
+                <!-- TAB: PRODUCTOS -->
+                <div x-show="activeTab === 'productos'">
+                    <div class="bg-white rounded-2xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-box mr-2"></i>Productos Más Vendidos
+                        </h3>
+                        <div class="space-y-4">
+                            <template x-for="product in topProducts" :key="product.name">
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-12 h-12 rounded-full flex items-center justify-center" :class="{
+                                                'bg-cyan-100': product.size_liters === 5,
+                                                'bg-blue-100': product.size_liters === 13,
+                                                'bg-indigo-100': product.size_liters === 20
+                                            }">
+                                            <i class="fas fa-tint text-2xl"
+                                                :style="{color: product.size_liters === 5 ? '#0891b2' : product.size_liters === 13 ? '#3b82f6' : '#4f46e5'}"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-800" x-text="product.name"></p>
+                                            <p class="text-sm text-gray-500"
+                                                x-text="product.quantity + ' unidades vendidas'"></p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-lg font-bold text-green-600"
+                                            x-text="'$' + product.total.toFixed(2)"></p>
+                                        <p class="text-sm text-gray-500"
+                                            x-text="'Bs. ' + (product.total * exchangeRate).toFixed(2)"></p>
+                                    </div>
+                                </div>
+                            </template>
+                            <div x-show="topProducts.length === 0" class="text-center py-8 text-gray-400">
+                                <i class="fas fa-box-open text-4xl mb-2"></i>
+                                <p>No hay productos vendidos en el período</p>
+                            </div>
                         </div>
-                        <div class="text-center">
-                            <div class="border-b-2 border-gray-400 w-64 mx-auto mb-2"></div>
-                            <p class="font-semibold">Firma Administrador</p>
-                            <p class="text-sm text-gray-500">_________________________</p>
+                    </div>
+                </div>
+
+                <!-- TAB: CIERRE DE CAJA -->
+                <div x-show="activeTab === 'cierre'">
+                    <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800">
+                                <i class="fas fa-cash-register mr-2"></i>Cierre de Caja
+                            </h3>
+                            <span class="text-sm text-gray-500"
+                                x-text="'Período: ' + formatDate(filters.startDate) + ' - ' + formatDate(filters.endDate)"></span>
+                        </div>
+
+                        <!-- Resumen por Método de Pago -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div
+                                class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200">
+                                <h4 class="font-semibold text-green-900 mb-4">
+                                    <i class="fas fa-money-bill-wave mr-2"></i>Efectivo
+                                </h4>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-600">Efectivo Bs.:</span>
+                                        <span class="font-bold" x-text="'Bs. ' + cashSummary.bs.toFixed(2)"></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-600">Efectivo USD:</span>
+                                        <span class="font-bold" x-text="'$' + cashSummary.usd.toFixed(2)"></span>
+                                    </div>
+                                    <div class="pt-3 border-t border-green-200 flex justify-between">
+                                        <span class="font-semibold">Total Efectivo:</span>
+                                        <span class="text-xl font-bold text-green-600"
+                                            x-text="'$' + (cashSummary.bs / exchangeRate + cashSummary.usd).toFixed(2)"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border-2 border-blue-200">
+                                <h4 class="font-semibold text-blue-900 mb-4">
+                                    <i class="fas fa-credit-card mr-2"></i>Transferencias y Pagos Digitales
+                                </h4>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-600">Pago Móvil:</span>
+                                        <span class="font-bold"
+                                            x-text="'$' + digitalSummary.pagoMovil.toFixed(2)"></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-600">Transferencia:</span>
+                                        <span class="font-bold"
+                                            x-text="'$' + digitalSummary.transferencia.toFixed(2)"></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-600">Punto de Venta:</span>
+                                        <span class="font-bold"
+                                            x-text="'$' + digitalSummary.puntoVenta.toFixed(2)"></span>
+                                    </div>
+                                    <div class="pt-3 border-t border-blue-200 flex justify-between">
+                                        <span class="font-semibold">Total Digital:</span>
+                                        <span class="text-xl font-bold text-blue-600"
+                                            x-text="'$' + (digitalSummary.pagoMovil + digitalSummary.transferencia + digitalSummary.puntoVenta).toFixed(2)"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resumen General -->
+                        <div
+                            class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 border-2 border-purple-200">
+                            <h4 class="font-semibold text-purple-900 mb-4">
+                                <i class="fas fa-chart-line mr-2"></i>Resumen General
+                            </h4>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div class="text-center">
+                                    <p class="text-sm text-gray-600">Total Ventas</p>
+                                    <p class="text-2xl font-bold text-purple-600"
+                                        x-text="'$' + stats.totalSales.toFixed(2)"></p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-sm text-gray-600">Tasa Promedio</p>
+                                    <p class="text-2xl font-bold text-purple-600"
+                                        x-text="'Bs. ' + stats.averageRate.toFixed(2)"></p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-sm text-gray-600">Total en Bs.</p>
+                                    <p class="text-2xl font-bold text-purple-600"
+                                        x-text="'Bs. ' + (stats.totalSales * exchangeRate).toFixed(2)"></p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-sm text-gray-600">Transacciones</p>
+                                    <p class="text-2xl font-bold text-purple-600" x-text="stats.totalTransactions"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Firma -->
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <div class="grid grid-cols-2 gap-8">
+                                <div class="text-center">
+                                    <div class="border-b-2 border-gray-400 pb-2 mb-2"></div>
+                                    <p class="text-sm text-gray-600">Elaborado por:</p>
+                                    <p class="font-semibold" x-text="userName"></p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="border-b-2 border-gray-400 pb-2 mb-2"></div>
+                                    <p class="text-sm text-gray-600">Revisado por:</p>
+                                    <p class="font-semibold">_________________</p>
+                                </div>
+                            </div>
+                            <div class="text-center mt-6">
+                                <p class="text-xs text-gray-500"
+                                    x-text="'Generado el ' + DateUtils.formatDateTime(new Date())"></p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -475,65 +692,63 @@
             }).showToast();
         }
 
-        function resumenApp() {
+        function round2(num) {
+            if (num === null || num === undefined || isNaN(num)) return 0;
+            return Math.round(parseFloat(num) * 100) / 100;
+        }
+
+        function reportesApp() {
             return {
                 mobileMenuOpen: false,
                 loading: true,
-                selectedDate: new Date().toISOString().split('T')[0],
-                selectedBranch: '',
+                activeTab: 'resumen',
                 userName: '',
                 userRole: '',
                 userBranch: '',
                 userInitials: '??',
+                exchangeRate: 700.22,
 
-                summary: {
-                    pending: 0,
-                    topProduct: { name: '', units: 0, percentage: 0 }
+                // ✅ USAR DateUtils para fechas iniciales
+                filters: {
+                    startDate: DateUtils.getCurrentDateInput(),
+                    endDate: DateUtils.getCurrentDateInput(),
+                    reportType: 'daily'
                 },
 
-                pivot: {
-                    units: {
-                        efectivo: { 5: 0, 13: 0, 20: 0, total: 0 },
-                        pago_movil: { 5: 0, 13: 0, 20: 0, total: 0 },
-                        punto: { 5: 0, 13: 0, 20: 0, total: 0 },
-                        total: { 5: 0, 13: 0, 20: 0 },
-                        grandTotal: 0
-                    },
-                    amounts: {
-                        efectivo: { 5: 0, 13: 0, 20: 0, total: 0 },
-                        pago_movil: { 5: 0, 13: 0, 20: 0, total: 0 },
-                        punto: { 5: 0, 13: 0, 20: 0, total: 0 },
-                        total: { 5: 0, 13: 0, 20: 0 },
-                        grandTotal: 0
-                    }
+                stats: {
+                    totalSales: 0,
+                    totalTransactions: 0,
+                    averageTicket: 0,
+                    totalProducts: 0,
+                    averageRate: 0,
+                    paymentMethods: []
                 },
 
-                comparison: {
-                    yesterdayRevenue: 0,
-                    yesterdaySales: 0,
-                    growth: 0
-                },
+                sales: [],
+                topProducts: [],
+                cashSummary: { bs: 0, usd: 0 },
+                digitalSummary: { pagoMovil: 0, transferencia: 0, puntoVenta: 0 },
 
-                async initResumen() {
+                chartInstance: null,
+
+                async initReportes() {
                     const { data: { session } } = await supabase.auth.getSession();
                     if (!session) { window.location.href = 'login.html'; return; }
 
                     try {
-                        const { data: profile } = await supabase
-                            .from('profiles')
-                            .select('full_name, role, branch')
-                            .eq('id', session.user.id)
-                            .single();
-
+                        const { data: profile } = await supabase.from('profiles').select('full_name, role, branch').eq('id', session.user.id).single();
                         if (profile) {
                             this.userName = profile.full_name;
                             this.userRole = profile.role;
                             this.userBranch = profile.branch;
                             this.userInitials = this.getInitials(profile.full_name);
-                            this.selectedBranch = profile.branch;
                         }
 
-                        await this.loadDailySummary();
+                        // Cargar tasa
+                        const { data: rateData } = await supabase.rpc('get_active_exchange_rate');
+                        if (rateData) this.exchangeRate = parseFloat(rateData);
+
+                        await this.generateReport();
                     } catch (err) {
                         console.error('Error inicializando:', err);
                     } finally {
@@ -541,253 +756,216 @@
                     }
                 },
 
-                async loadDailySummary() {
+                async generateReport() {
                     this.loading = true;
                     try {
-                        // ✅ CORRECCIÓN 1: Usar formato de fecha compatible y traer sale_items!inner
-                        const startOfDay = this.selectedDate + 'T00:00:00';
-                        const endOfDay = this.selectedDate + 'T23:59:59';
-
-                        const { data: sales, error } = await supabase
-                            .from('sales')
-                            .select(`
-                                id, total, payment_method, status, created_at, branch,
-                                sale_items!inner(quantity, unit_price, product_id)
-                            `)
-                            .gte('created_at', startOfDay)
-                            .lte('created_at', endOfDay)
-                            .eq('status', 'completed');
-
-                        if (error) throw error;
-
-                        let filteredSales = sales || [];
-                        if (this.selectedBranch) {
-                            filteredSales = filteredSales.filter(s => s.branch === this.selectedBranch);
-                        }
-
-                        // ✅ CORRECCIÓN 2: Resetear pivot correctamente
-                        this.pivot = {
-                            units: {
-                                efectivo: { 5: 0, 13: 0, 20: 0, total: 0 },
-                                pago_movil: { 5: 0, 13: 0, 20: 0, total: 0 },
-                                punto: { 5: 0, 13: 0, 20: 0, total: 0 },
-                                total: { 5: 0, 13: 0, 20: 0 },
-                                grandTotal: 0
-                            },
-                            amounts: {
-                                efectivo: { 5: 0, 13: 0, 20: 0, total: 0 },
-                                pago_movil: { 5: 0, 13: 0, 20: 0, total: 0 },
-                                punto: { 5: 0, 13: 0, 20: 0, total: 0 },
-                                total: { 5: 0, 13: 0, 20: 0 },
-                                grandTotal: 0
-                            }
-                        };
-
-                        const productStats = {
-                            20: { name: 'Botellón 20L', units: 0 },
-                            13: { name: 'Botellón 13L', units: 0 },
-                            5: { name: 'Botella 5L', units: 0 }
-                        };
-
-                        // ✅ CORRECCIÓN 3: Procesar datos con la relación ya cargada
-                        for (const sale of filteredSales) {
-                            let methodKey = sale.payment_method;
-                            if (sale.payment_method === 'efectivo_bs' || sale.payment_method === 'efectivo_divisas') methodKey = 'efectivo';
-                            else if (sale.payment_method === 'punto_venta') methodKey = 'punto';
-                            else if (sale.payment_method === 'pago_movil' || sale.payment_method === 'transferencia') methodKey = 'pago_movil';
-
-                            for (const item of sale.sale_items) {
-                                const { data: product } = await supabase
-                                    .from('products')
-                                    .select('size_liters')
-                                    .eq('id', item.product_id)
-                                    .single();
-
-                                if (!product || ![5, 13, 20].includes(product.size_liters)) continue;
-
-                                const size = product.size_liters;
-                                const amount = item.quantity * item.unit_price;
-
-                                // Actualizar tabla dinámica de unidades
-                                if (this.pivot.units[methodKey][size] !== undefined) {
-                                    this.pivot.units[methodKey][size] += item.quantity;
-                                    this.pivot.units[methodKey].total += item.quantity;
-                                }
-                                this.pivot.units.total[size] = (this.pivot.units.total[size] || 0) + item.quantity;
-                                this.pivot.units.grandTotal += item.quantity;
-
-                                // Actualizar tabla dinámica de montos
-                                if (this.pivot.amounts[methodKey][size] !== undefined) {
-                                    this.pivot.amounts[methodKey][size] += amount;
-                                    this.pivot.amounts[methodKey].total += amount;
-                                }
-                                this.pivot.amounts.total[size] = (this.pivot.amounts.total[size] || 0) + amount;
-                                this.pivot.amounts.grandTotal += amount;
-
-                                if (productStats[size]) {
-                                    productStats[size].units += item.quantity;
-                                }
-                            }
-                        }
-
-                        // Producto más vendido
-                        const sortedProducts = Object.values(productStats).sort((a, b) => b.units - a.units);
-                        if (sortedProducts.length > 0 && sortedProducts[0].units > 0) {
-                            this.summary.topProduct = {
-                                name: sortedProducts[0].name,
-                                units: sortedProducts[0].units,
-                                percentage: this.pivot.units.grandTotal > 0 ? (sortedProducts[0].units / this.pivot.units.grandTotal) * 100 : 0
-                            };
-                        }
-
-                        // Cuentas por cobrar
-                        const { data: credits } = await supabase
-                            .from('credit_accounts')
-                            .select('remaining_amount')
-                            .gte('created_at', startOfDay)
-                            .lte('created_at', endOfDay)
-                            .eq('status', 'pending');
-
-                        if (credits) {
-                            this.summary.pending = credits.reduce((sum, c) => sum + c.remaining_amount, 0);
-                        }
-
-                        await this.loadComparison();
-
+                        await Promise.all([
+                            this.loadSales(),
+                            this.loadStats(),
+                            this.loadTopProducts()
+                        ]);
+                        this.updateChart();
                     } catch (err) {
-                        console.error('Error cargando resumen:', err);
-                        showToast('Error al cargar resumen diario', 'error');
+                        console.error('Error generando reporte:', err);
+                        showToast('Error al generar reporte', 'error');
                     } finally {
                         this.loading = false;
                     }
                 },
 
-                async loadComparison() {
-                    try {
-                        const yesterday = new Date(this.selectedDate);
-                        yesterday.setDate(yesterday.getDate() - 1);
-                        const yesterdayStr = yesterday.toISOString().split('T')[0];
+                // ✅ USAR DateUtils para consultas SQL
+                async loadSales() {
+                    const { data, error } = await supabase
+                        .from('sales')
+                        .select('*')
+                        .eq('branch', this.userBranch)
+                        .gte('created_at', DateUtils.getStartOfDay(this.filters.startDate))
+                        .lte('created_at', DateUtils.getEndOfDay(this.filters.endDate))
+                        .order('created_at', { ascending: false });
 
-                        const { data: sales } = await supabase
-                            .from('sales')
-                            .select('total, branch')
-                            .gte('created_at', yesterdayStr + 'T00:00:00')
-                            .lte('created_at', yesterdayStr + 'T23:59:59')
-                            .eq('status', 'completed');
-
-                        let filteredSales = sales || [];
-                        if (this.selectedBranch) {
-                            filteredSales = filteredSales.filter(s => s.branch === this.selectedBranch);
-                        }
-
-                        this.comparison.yesterdayRevenue = filteredSales.reduce((sum, s) => sum + s.total, 0);
-                        this.comparison.yesterdaySales = filteredSales.length;
-
-                        if (this.comparison.yesterdayRevenue > 0) {
-                            this.comparison.growth = ((this.pivot.amounts.grandTotal - this.comparison.yesterdayRevenue) / this.comparison.yesterdayRevenue) * 100;
-                        } else {
-                            this.comparison.growth = this.pivot.amounts.grandTotal > 0 ? 100 : 0;
-                        }
-                    } catch (err) {
-                        console.error('Error cargando comparativo:', err);
-                    }
+                    if (error) throw error;
+                    this.sales = data || [];
                 },
 
-                async generatePDF() {
-                    try {
-                        const { jsPDF } = window.jspdf;
-                        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
-                        const pageWidth = doc.internal.pageSize.getWidth();
-                        const margin = 10;
-                        let yPos = 10;
+                async loadStats() {
+                    const { data: sales, error } = await supabase
+                        .from('sales')
+                        .select('*')
+                        .eq('branch', this.userBranch)
+                        .gte('created_at', DateUtils.getStartOfDay(this.filters.startDate))
+                        .lte('created_at', DateUtils.getEndOfDay(this.filters.endDate));
 
-                        doc.setFontSize(16); doc.setFont(undefined, 'bold');
-                        doc.text('AQUASERVICE', pageWidth / 2, yPos, { align: 'center' });
-                        doc.setFontSize(9); doc.setFont(undefined, 'normal');
-                        doc.text('Sistema de Gestión de Agua', pageWidth / 2, yPos + 4, { align: 'center' });
-                        doc.setFontSize(12); doc.setFont(undefined, 'bold');
-                        doc.text('RESUMEN DE VENTA DIARIO', pageWidth / 2, yPos + 9, { align: 'center' });
-                        doc.setFontSize(8); doc.setFont(undefined, 'normal');
-                        doc.text(`Fecha: ${DateUtils.formatDate(this.selectedDate)}`, pageWidth / 2, yPos + 14, { align: 'center' });
-                        doc.text(`Sucursal: ${this.selectedBranch || 'Todas'}`, pageWidth / 2, yPos + 18, { align: 'center' });
-                        yPos = 25;
+                    if (error) throw error;
 
-                        // Tabla de Unidades
-                        doc.setFontSize(10); doc.setFont(undefined, 'bold');
-                        doc.text('VENTAS POR PRODUCTO Y MÉTODO DE PAGO (UNIDADES)', margin, yPos);
-                        yPos += 3;
+                    const salesList = sales || [];
+                    this.stats.totalSales = salesList.reduce((sum, s) => sum + s.total, 0);
+                    this.stats.totalTransactions = salesList.length;
+                    this.stats.averageTicket = salesList.length > 0 ? this.stats.totalSales / salesList.length : 0;
+                    this.stats.averageRate = salesList.length > 0 ? salesList.reduce((sum, s) => sum + (s.exchange_rate_used || 0), 0) / salesList.length : 0;
 
-                        const unitsData = [
-                            ['Efectivo', this.pivot.units.efectivo[5], this.pivot.units.efectivo[13], this.pivot.units.efectivo[20], this.pivot.units.efectivo.total],
-                            ['Pago Móvil', this.pivot.units.pago_movil[5], this.pivot.units.pago_movil[13], this.pivot.units.pago_movil[20], this.pivot.units.pago_movil.total],
-                            ['Punto', this.pivot.units.punto[5], this.pivot.units.punto[13], this.pivot.units.punto[20], this.pivot.units.punto.total],
-                            ['TOTAL', this.pivot.units.total[5], this.pivot.units.total[13], this.pivot.units.total[20], this.pivot.units.grandTotal]
-                        ];
+                    // Productos vendidos
+                    const { data: items } = await supabase
+                        .from('sale_items')
+                        .select('quantity')
+                        .in('sale_id', salesList.map(s => s.id));
+                    this.stats.totalProducts = (items || []).reduce((sum, i) => sum + i.quantity, 0);
 
-                        doc.autoTable({
-                            startY: yPos,
-                            head: [['Tipo de Pago', '5 LITROS', '13 LITROS', '20 LITROS', 'TOTAL']],
-                            body: unitsData,
-                            theme: 'striped',
-                            tableWidth: pageWidth - (margin * 2),
-                            headStyles: { fillColor: [59, 130, 246], fontStyle: 'bold', fontSize: 8 },
-                            columnStyles: { 0: { fontStyle: 'bold', cellWidth: 40 }, 1: { halign: 'center', cellWidth: 30 }, 2: { halign: 'center', cellWidth: 30 }, 3: { halign: 'center', cellWidth: 30 }, 4: { halign: 'center', fontStyle: 'bold', cellWidth: 30 } },
-                            margin: { left: margin, right: margin },
-                            cellPadding: 2,
-                            didParseCell: function (data) { if (data.row.index === 3) { data.cell.styles.fillColor = [200, 200, 200]; data.cell.styles.fontStyle = 'bold'; } }
-                        });
+                    // Métodos de pago
+                    const paymentMethods = {};
+                    salesList.forEach(sale => {
+                        const method = sale.payment_method || 'other';
+                        if (!paymentMethods[method]) {
+                            paymentMethods[method] = { amount: 0, count: 0 };
+                        }
+                        paymentMethods[method].amount += sale.total;
+                        paymentMethods[method].count++;
+                    });
 
-                        yPos = doc.lastAutoTable.finalY + 5;
+                    const colors = {
+                        'efectivo_bs': '#10b981',
+                        'efectivo_divisas': '#059669',
+                        'pago_movil': '#3b82f6',
+                        'transferencia': '#8b5cf6',
+                        'punto_venta': '#f59e0b',
+                        'credito': '#ef4444',
+                        'multiple': '#ec4899',
+                        'other': '#6b7280'
+                    };
 
-                        // Tabla de Montos
-                        doc.setFontSize(10); doc.setFont(undefined, 'bold');
-                        doc.text('VENTAS POR PRODUCTO Y MÉTODO DE PAGO (MONTOS EN USD)', margin, yPos);
-                        yPos += 3;
+                    this.stats.paymentMethods = Object.entries(paymentMethods).map(([name, data]) => ({
+                        name: this.getPaymentMethodName(name),
+                        amount: data.amount,
+                        count: data.count,
+                        color: colors[name] || colors.other
+                    }));
 
-                        const amountsData = [
-                            ['Efectivo', '$' + this.pivot.amounts.efectivo[5].toFixed(2), '$' + this.pivot.amounts.efectivo[13].toFixed(2), '$' + this.pivot.amounts.efectivo[20].toFixed(2), '$' + this.pivot.amounts.efectivo.total.toFixed(2)],
-                            ['Pago Móvil', '$' + this.pivot.amounts.pago_movil[5].toFixed(2), '$' + this.pivot.amounts.pago_movil[13].toFixed(2), '$' + this.pivot.amounts.pago_movil[20].toFixed(2), '$' + this.pivot.amounts.pago_movil.total.toFixed(2)],
-                            ['Punto', '$' + this.pivot.amounts.punto[5].toFixed(2), '$' + this.pivot.amounts.punto[13].toFixed(2), '$' + this.pivot.amounts.punto[20].toFixed(2), '$' + this.pivot.amounts.punto.total.toFixed(2)],
-                            ['TOTAL', '$' + this.pivot.amounts.total[5].toFixed(2), '$' + this.pivot.amounts.total[13].toFixed(2), '$' + this.pivot.amounts.total[20].toFixed(2), '$' + this.pivot.amounts.grandTotal.toFixed(2)]
-                        ];
+                    // Cierre de caja
+                    this.cashSummary = { bs: 0, usd: 0 };
+                    this.digitalSummary = { pagoMovil: 0, transferencia: 0, puntoVenta: 0 };
 
-                        doc.autoTable({
-                            startY: yPos,
-                            head: [['Tipo de Pago', '5 LITROS ($0.50)', '13 LITROS ($1.00)', '20 LITROS ($1.50)', 'TOTAL']],
-                            body: amountsData,
-                            theme: 'striped',
-                            tableWidth: pageWidth - (margin * 2),
-                            headStyles: { fillColor: [34, 139, 34], fontStyle: 'bold', fontSize: 8 },
-                            columnStyles: { 0: { fontStyle: 'bold', cellWidth: 40 }, 1: { halign: 'center', cellWidth: 30 }, 2: { halign: 'center', cellWidth: 30 }, 3: { halign: 'center', cellWidth: 30 }, 4: { halign: 'center', fontStyle: 'bold', cellWidth: 30 } },
-                            margin: { left: margin, right: margin },
-                            cellPadding: 2,
-                            didParseCell: function (data) { if (data.row.index === 3) { data.cell.styles.fillColor = [200, 200, 200]; data.cell.styles.fontStyle = 'bold'; } }
-                        });
+                    const { data: payments } = await supabase
+                        .from('sale_payments')
+                        .select('*')
+                        .in('sale_id', salesList.map(s => s.id));
 
-                        yPos = doc.lastAutoTable.finalY + 10;
+                    (payments || []).forEach(payment => {
+                        if (payment.payment_method === 'efectivo_bs') {
+                            this.cashSummary.bs += payment.amount_bs || 0;
+                        } else if (payment.payment_method === 'efectivo_divisas') {
+                            this.cashSummary.usd += payment.amount_usd || 0;
+                        } else if (payment.payment_method === 'pago_movil') {
+                            this.digitalSummary.pagoMovil += payment.amount_usd || 0;
+                        } else if (payment.payment_method === 'transferencia') {
+                            this.digitalSummary.transferencia += payment.amount_usd || 0;
+                        } else if (payment.payment_method === 'punto_venta') {
+                            this.digitalSummary.puntoVenta += payment.amount_usd || 0;
+                        }
+                    });
+                },
 
-                        // Firmas
-                        doc.setFontSize(8); doc.setFont(undefined, 'normal');
-                        doc.line(margin, yPos, pageWidth / 2 - 5, yPos);
-                        doc.text('Firma Vendedor', pageWidth / 4, yPos + 4, { align: 'center' });
-                        doc.text(this.userName, pageWidth / 4, yPos + 8, { align: 'center' });
-                        doc.line(pageWidth / 2 + 5, yPos, pageWidth - margin, yPos);
-                        doc.text('Firma Administrador', (pageWidth * 3) / 4, yPos + 4, { align: 'center' });
+                async loadTopProducts() {
+                    const { data: sales } = await supabase
+                        .from('sales')
+                        .select('id')
+                        .eq('branch', this.userBranch)
+                        .gte('created_at', DateUtils.getStartOfDay(this.filters.startDate))
+                        .lte('created_at', DateUtils.getEndOfDay(this.filters.endDate));
 
-                        doc.setFontSize(6);
-                        doc.text(`Generado: ${new Date().toLocaleString('es-VE')}`, pageWidth / 2, 280, { align: 'center' });
-
-                        doc.save(`resumen_diario_${this.selectedDate.replace(/-/g, '')}.pdf`);
-                        showToast('PDF generado exitosamente');
-                    } catch (err) {
-                        console.error('Error generando PDF:', err);
-                        showToast('Error al generar PDF', 'error');
+                    if (!sales || sales.length === 0) {
+                        this.topProducts = [];
+                        return;
                     }
+
+                    const { data: items } = await supabase
+                        .from('sale_items')
+                        .select('product_id, quantity, total')
+                        .in('sale_id', sales.map(s => s.id));
+
+                    const { data: products } = await supabase
+                        .from('products')
+                        .select('id, name, size_liters');
+
+                    const productMap = {};
+                    (items || []).forEach(item => {
+                        if (!productMap[item.product_id]) {
+                            productMap[item.product_id] = { quantity: 0, total: 0 };
+                        }
+                        productMap[item.product_id].quantity += item.quantity;
+                        productMap[item.product_id].total += item.total;
+                    });
+
+                    this.topProducts = Object.entries(productMap)
+                        .map(([productId, data]) => {
+                            const product = products.find(p => p.id === productId);
+                            return {
+                                name: product?.name || 'Producto desconocido',
+                                size_liters: product?.size_liters || 0,
+                                quantity: data.quantity,
+                                total: data.total
+                            };
+                        })
+                        .sort((a, b) => b.quantity - a.quantity);
+                },
+
+                updateChart() {
+                    if (this.chartInstance) {
+                        this.chartInstance.destroy();
+                    }
+
+                    const ctx = document.getElementById('paymentChart');
+                    if (!ctx) return;
+
+                    this.chartInstance = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: this.stats.paymentMethods.map(m => m.name),
+                            datasets: [{
+                                data: this.stats.paymentMethods.map(m => m.amount),
+                                backgroundColor: this.stats.paymentMethods.map(m => m.color),
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+                },
+
+                getPaymentMethodName(method) {
+                    const names = {
+                        'efectivo_bs': 'Efectivo Bs',
+                        'efectivo_divisas': 'Efectivo USD',
+                        'pago_movil': 'Pago Móvil',
+                        'transferencia': 'Transferencia',
+                        'punto_venta': 'Punto de Venta',
+                        'credito': 'Crédito',
+                        'multiple': 'Múltiple',
+                        'other': 'Otro'
+                    };
+                    return names[method] || method;
+                },
+
+                // ✅ USAR DateUtils para formatear fechas
+                formatDate(dateString) {
+                    return DateUtils.formatDate(dateString);
+                },
+
+                formatDateTime(dateString) {
+                    return DateUtils.formatDateTime(dateString);
                 },
 
                 getInitials(name) {
                     if (!name) return '??';
                     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                },
+
+                exportToPDF() {
+                    window.print();
                 }
             }
         }
