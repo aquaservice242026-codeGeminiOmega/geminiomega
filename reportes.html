@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-VE">
 
 <head>
     <meta charset="UTF-8">
@@ -8,8 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
-    <!-- UTILIDADES DE FECHA - ZONA HORARIA CARACAS -->
-    <script src="date-utils.js"></script>
 
     <!-- Toastify CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
@@ -142,7 +140,6 @@
             }
         }
 
-        /* Estilos para impresión */
         @media print {
             .no-print {
                 display: none !important;
@@ -288,12 +285,12 @@
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Inicio</label>
-                            <input type="date" x-model="filters.startDate"
+                            <input type="date" x-model="filters.startDate" lang="es-VE"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Fin</label>
-                            <input type="date" x-model="filters.endDate"
+                            <input type="date" x-model="filters.endDate" lang="es-VE"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
@@ -344,7 +341,6 @@
 
                 <!-- TAB: RESUMEN -->
                 <div x-show="activeTab === 'resumen'">
-                    <!-- Stats Cards -->
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                         <div class="stat-card bg-white rounded-2xl shadow-sm p-6 border-l-4 border-blue-500">
                             <div class="flex justify-between items-start">
@@ -403,7 +399,6 @@
                         </div>
                     </div>
 
-                    <!-- Gráfico -->
                     <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">
                             <i class="fas fa-chart-bar mr-2"></i>Ventas por Método de Pago
@@ -464,7 +459,7 @@
                                             </td>
                                             <td class="px-6 py-4">
                                                 <span class="text-sm text-gray-900"
-                                                    x-text="formatDateTime(sale.created_at)"></span>
+                                                    x-text="DateUtils.formatDateTime(sale.created_at)"></span>
                                             </td>
                                             <td class="px-6 py-4">
                                                 <span class="text-sm text-gray-900"
@@ -476,11 +471,11 @@
                                             </td>
                                             <td class="px-6 py-4 text-right">
                                                 <span class="text-sm font-semibold"
-                                                    x-text="'$' + sale.total.toFixed(2)"></span>
+                                                    x-text="'$' + (sale.total || 0).toFixed(2)"></span>
                                             </td>
                                             <td class="px-6 py-4 text-right">
                                                 <span class="text-sm text-gray-600"
-                                                    x-text="'Bs. ' + (sale.total * sale.exchange_rate_used).toFixed(2)"></span>
+                                                    x-text="'Bs. ' + ((sale.total || 0) * (sale.exchange_rate_used || exchangeRate)).toFixed(2)"></span>
                                             </td>
                                             <td class="px-6 py-4">
                                                 <span class="px-2 py-1 text-xs rounded-full" :class="{
@@ -551,10 +546,9 @@
                                 <i class="fas fa-cash-register mr-2"></i>Cierre de Caja
                             </h3>
                             <span class="text-sm text-gray-500"
-                                x-text="'Período: ' + formatDate(filters.startDate) + ' - ' + formatDate(filters.endDate)"></span>
+                                x-text="'Período: ' + DateUtils.formatDate(filters.startDate) + ' - ' + DateUtils.formatDate(filters.endDate)"></span>
                         </div>
 
-                        <!-- Resumen por Método de Pago -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div
                                 class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200">
@@ -573,7 +567,7 @@
                                     <div class="pt-3 border-t border-green-200 flex justify-between">
                                         <span class="font-semibold">Total Efectivo:</span>
                                         <span class="text-xl font-bold text-green-600"
-                                            x-text="'$' + (cashSummary.bs / exchangeRate + cashSummary.usd).toFixed(2)"></span>
+                                            x-text="'$' + ((cashSummary.bs / exchangeRate) + cashSummary.usd).toFixed(2)"></span>
                                     </div>
                                 </div>
                             </div>
@@ -608,7 +602,6 @@
                             </div>
                         </div>
 
-                        <!-- Resumen General -->
                         <div
                             class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 border-2 border-purple-200">
                             <h4 class="font-semibold text-purple-900 mb-4">
@@ -637,7 +630,6 @@
                             </div>
                         </div>
 
-                        <!-- Firma -->
                         <div class="mt-8 pt-6 border-t border-gray-200">
                             <div class="grid grid-cols-2 gap-8">
                                 <div class="text-center">
@@ -663,6 +655,46 @@
     </div>
 
     <script>
+        // ==========================================
+        // UTILIDADES DE FECHA - ZONA HORARIA CARACAS
+        // ==========================================
+        const DateUtils = {
+            TIMEZONE: 'America/Caracas',
+            LOCALE: 'es-VE',
+
+            getCurrentDateInput() {
+                const now = new Date();
+                const caracasString = now.toLocaleString('en-US', { timeZone: this.TIMEZONE });
+                const caracasDate = new Date(caracasString);
+                return caracasDate.toISOString().split('T')[0];
+            },
+
+            formatDate(dateString) {
+                if (!dateString) return 'N/A';
+                const date = new Date(dateString);
+                return new Intl.DateTimeFormat(this.LOCALE, {
+                    timeZone: this.TIMEZONE, day: '2-digit', month: '2-digit', year: 'numeric'
+                }).format(date);
+            },
+
+            formatDateTime(dateString) {
+                if (!dateString) return 'N/A';
+                const date = new Date(dateString);
+                return new Intl.DateTimeFormat(this.LOCALE, {
+                    timeZone: this.TIMEZONE, day: '2-digit', month: '2-digit', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit', hour12: false
+                }).format(date);
+            },
+
+            formatDateLong(dateString) {
+                if (!dateString) return 'N/A';
+                const date = new Date(dateString);
+                return new Intl.DateTimeFormat(this.LOCALE, {
+                    timeZone: this.TIMEZONE, day: 'numeric', month: 'long', year: 'numeric'
+                }).format(date);
+            }
+        };
+
         const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -704,11 +736,10 @@
                 activeTab: 'resumen',
                 userName: '',
                 userRole: '',
-                userBranch: '',
+                userBranch: 'geminis', // Valor por defecto para evitar errores si el perfil tarda
                 userInitials: '??',
                 exchangeRate: 700.22,
 
-                // ✅ USAR DateUtils para fechas iniciales
                 filters: {
                     startDate: DateUtils.getCurrentDateInput(),
                     endDate: DateUtils.getCurrentDateInput(),
@@ -728,7 +759,6 @@
                 topProducts: [],
                 cashSummary: { bs: 0, usd: 0 },
                 digitalSummary: { pagoMovil: 0, transferencia: 0, puntoVenta: 0 },
-
                 chartInstance: null,
 
                 async initReportes() {
@@ -740,17 +770,17 @@
                         if (profile) {
                             this.userName = profile.full_name;
                             this.userRole = profile.role;
-                            this.userBranch = profile.branch;
+                            this.userBranch = profile.branch || 'geminis';
                             this.userInitials = this.getInitials(profile.full_name);
                         }
 
-                        // Cargar tasa
                         const { data: rateData } = await supabase.rpc('get_active_exchange_rate');
-                        if (rateData) this.exchangeRate = parseFloat(rateData);
+                        if (rateData) this.exchangeRate = parseFloat(rateData) || 700.22;
 
                         await this.generateReport();
                     } catch (err) {
                         console.error('Error inicializando:', err);
+                        showToast('Error al cargar datos iniciales', 'error');
                     } finally {
                         this.loading = false;
                     }
@@ -773,42 +803,57 @@
                     }
                 },
 
-                // ✅ USAR DateUtils para consultas SQL
                 async loadSales() {
+                    if (!this.userBranch) return;
                     const { data, error } = await supabase
                         .from('sales')
                         .select('*')
                         .eq('branch', this.userBranch)
-                        .gte('created_at', DateUtils.getStartOfDay(this.filters.startDate))
-                        .lte('created_at', DateUtils.getEndOfDay(this.filters.endDate))
+                        .gte('created_at', this.filters.startDate + 'T00:00:00')
+                        .lte('created_at', this.filters.endDate + 'T23:59:59')
                         .order('created_at', { ascending: false });
 
-                    if (error) throw error;
+                    if (error) {
+                        console.error('Error cargando ventas:', error);
+                        this.sales = [];
+                        return;
+                    }
                     this.sales = data || [];
                 },
 
                 async loadStats() {
+                    if (!this.userBranch) return;
                     const { data: sales, error } = await supabase
                         .from('sales')
                         .select('*')
                         .eq('branch', this.userBranch)
-                        .gte('created_at', DateUtils.getStartOfDay(this.filters.startDate))
-                        .lte('created_at', DateUtils.getEndOfDay(this.filters.endDate));
+                        .gte('created_at', this.filters.startDate + 'T00:00:00')
+                        .lte('created_at', this.filters.endDate + 'T23:59:59');
 
-                    if (error) throw error;
+                    if (error) {
+                        console.error('Error cargando estadísticas:', error);
+                        return;
+                    }
 
                     const salesList = sales || [];
-                    this.stats.totalSales = salesList.reduce((sum, s) => sum + s.total, 0);
+                    this.stats.totalSales = salesList.reduce((sum, s) => sum + (s.total || 0), 0);
                     this.stats.totalTransactions = salesList.length;
                     this.stats.averageTicket = salesList.length > 0 ? this.stats.totalSales / salesList.length : 0;
                     this.stats.averageRate = salesList.length > 0 ? salesList.reduce((sum, s) => sum + (s.exchange_rate_used || 0), 0) / salesList.length : 0;
 
-                    // Productos vendidos
-                    const { data: items } = await supabase
-                        .from('sale_items')
-                        .select('quantity')
-                        .in('sale_id', salesList.map(s => s.id));
-                    this.stats.totalProducts = (items || []).reduce((sum, i) => sum + i.quantity, 0);
+                    // Productos vendidos (Protegido contra array vacío)
+                    if (salesList.length > 0) {
+                        const { data: items, error: itemsError } = await supabase
+                            .from('sale_items')
+                            .select('quantity')
+                            .in('sale_id', salesList.map(s => s.id));
+
+                        if (!itemsError) {
+                            this.stats.totalProducts = (items || []).reduce((sum, i) => sum + (i.quantity || 0), 0);
+                        }
+                    } else {
+                        this.stats.totalProducts = 0;
+                    }
 
                     // Métodos de pago
                     const paymentMethods = {};
@@ -817,19 +862,15 @@
                         if (!paymentMethods[method]) {
                             paymentMethods[method] = { amount: 0, count: 0 };
                         }
-                        paymentMethods[method].amount += sale.total;
+                        paymentMethods[method].amount += (sale.total || 0);
                         paymentMethods[method].count++;
                     });
 
                     const colors = {
-                        'efectivo_bs': '#10b981',
-                        'efectivo_divisas': '#059669',
-                        'pago_movil': '#3b82f6',
-                        'transferencia': '#8b5cf6',
-                        'punto_venta': '#f59e0b',
-                        'credito': '#ef4444',
-                        'multiple': '#ec4899',
-                        'other': '#6b7280'
+                        'efectivo_bs': '#10b981', 'efectivo_divisas': '#059669',
+                        'pago_movil': '#3b82f6', 'transferencia': '#8b5cf6',
+                        'punto_venta': '#f59e0b', 'credito': '#ef4444',
+                        'multiple': '#ec4899', 'other': '#6b7280'
                     };
 
                     this.stats.paymentMethods = Object.entries(paymentMethods).map(([name, data]) => ({
@@ -839,37 +880,40 @@
                         color: colors[name] || colors.other
                     }));
 
-                    // Cierre de caja
+                    // Cierre de caja (Protegido contra array vacío)
                     this.cashSummary = { bs: 0, usd: 0 };
                     this.digitalSummary = { pagoMovil: 0, transferencia: 0, puntoVenta: 0 };
 
-                    const { data: payments } = await supabase
-                        .from('sale_payments')
-                        .select('*')
-                        .in('sale_id', salesList.map(s => s.id));
+                    if (salesList.length > 0) {
+                        const { data: payments } = await supabase
+                            .from('sale_payments')
+                            .select('*')
+                            .in('sale_id', salesList.map(s => s.id));
 
-                    (payments || []).forEach(payment => {
-                        if (payment.payment_method === 'efectivo_bs') {
-                            this.cashSummary.bs += payment.amount_bs || 0;
-                        } else if (payment.payment_method === 'efectivo_divisas') {
-                            this.cashSummary.usd += payment.amount_usd || 0;
-                        } else if (payment.payment_method === 'pago_movil') {
-                            this.digitalSummary.pagoMovil += payment.amount_usd || 0;
-                        } else if (payment.payment_method === 'transferencia') {
-                            this.digitalSummary.transferencia += payment.amount_usd || 0;
-                        } else if (payment.payment_method === 'punto_venta') {
-                            this.digitalSummary.puntoVenta += payment.amount_usd || 0;
-                        }
-                    });
+                        (payments || []).forEach(payment => {
+                            if (payment.payment_method === 'efectivo_bs') {
+                                this.cashSummary.bs += payment.amount_bs || 0;
+                            } else if (payment.payment_method === 'efectivo_divisas') {
+                                this.cashSummary.usd += payment.amount_usd || 0;
+                            } else if (payment.payment_method === 'pago_movil') {
+                                this.digitalSummary.pagoMovil += payment.amount_usd || 0;
+                            } else if (payment.payment_method === 'transferencia') {
+                                this.digitalSummary.transferencia += payment.amount_usd || 0;
+                            } else if (payment.payment_method === 'punto_venta') {
+                                this.digitalSummary.puntoVenta += payment.amount_usd || 0;
+                            }
+                        });
+                    }
                 },
 
                 async loadTopProducts() {
+                    if (!this.userBranch) return;
                     const { data: sales } = await supabase
                         .from('sales')
                         .select('id')
                         .eq('branch', this.userBranch)
-                        .gte('created_at', DateUtils.getStartOfDay(this.filters.startDate))
-                        .lte('created_at', DateUtils.getEndOfDay(this.filters.endDate));
+                        .gte('created_at', this.filters.startDate + 'T00:00:00')
+                        .lte('created_at', this.filters.endDate + 'T23:59:59');
 
                     if (!sales || sales.length === 0) {
                         this.topProducts = [];
@@ -890,13 +934,13 @@
                         if (!productMap[item.product_id]) {
                             productMap[item.product_id] = { quantity: 0, total: 0 };
                         }
-                        productMap[item.product_id].quantity += item.quantity;
-                        productMap[item.product_id].total += item.total;
+                        productMap[item.product_id].quantity += (item.quantity || 0);
+                        productMap[item.product_id].total += (item.total || 0);
                     });
 
                     this.topProducts = Object.entries(productMap)
                         .map(([productId, data]) => {
-                            const product = products.find(p => p.id === productId);
+                            const product = products ? products.find(p => p.id === productId) : null;
                             return {
                                 name: product?.name || 'Producto desconocido',
                                 size_liters: product?.size_liters || 0,
@@ -911,7 +955,6 @@
                     if (this.chartInstance) {
                         this.chartInstance.destroy();
                     }
-
                     const ctx = document.getElementById('paymentChart');
                     if (!ctx) return;
 
@@ -927,36 +970,19 @@
                         },
                         options: {
                             responsive: true,
-                            plugins: {
-                                legend: {
-                                    display: false
-                                }
-                            }
+                            plugins: { legend: { display: false } }
                         }
                     });
                 },
 
                 getPaymentMethodName(method) {
                     const names = {
-                        'efectivo_bs': 'Efectivo Bs',
-                        'efectivo_divisas': 'Efectivo USD',
-                        'pago_movil': 'Pago Móvil',
-                        'transferencia': 'Transferencia',
-                        'punto_venta': 'Punto de Venta',
-                        'credito': 'Crédito',
-                        'multiple': 'Múltiple',
-                        'other': 'Otro'
+                        'efectivo_bs': 'Efectivo Bs', 'efectivo_divisas': 'Efectivo USD',
+                        'pago_movil': 'Pago Móvil', 'transferencia': 'Transferencia',
+                        'punto_venta': 'Punto de Venta', 'credito': 'Crédito',
+                        'multiple': 'Múltiple', 'other': 'Otro'
                     };
                     return names[method] || method;
-                },
-
-                // ✅ USAR DateUtils para formatear fechas
-                formatDate(dateString) {
-                    return DateUtils.formatDate(dateString);
-                },
-
-                formatDateTime(dateString) {
-                    return DateUtils.formatDateTime(dateString);
                 },
 
                 getInitials(name) {
