@@ -303,12 +303,12 @@
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Inicio</label>
-                            <input type="date" x-model="filters.startDate" lang="es-VE"
+                            <input type="date" x-model="filters.startDate"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Fin</label>
-                            <input type="date" x-model="filters.endDate" lang="es-VE"
+                            <input type="date" x-model="filters.endDate"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         </div>
                         <div>
@@ -732,16 +732,22 @@
                 }).format(date);
             },
 
-            // Inicio del día (00:00:00)
+            // Inicio del día en Caracas (00:00:00) - CORREGIDO PARA ZONA HORARIA
             getStartOfDay(dateString) {
-                if (!dateString) return this.getCurrentDateInput() + 'T00:00:00';
-                return dateString + 'T00:00:00';
+                if (!dateString) {
+                    const today = this.getCurrentDateInput();
+                    return today + 'T00:00:00-04:00'; // Caracas es UTC-4
+                }
+                return dateString + 'T00:00:00-04:00';
             },
 
-            // Fin del día (23:59:59)
+            // Fin del día en Caracas (23:59:59) - CORREGIDO PARA ZONA HORARIA
             getEndOfDay(dateString) {
-                if (!dateString) return this.getCurrentDateInput() + 'T23:59:59';
-                return dateString + 'T23:59:59';
+                if (!dateString) {
+                    const today = this.getCurrentDateInput();
+                    return today + 'T23:59:59-04:00'; // Caracas es UTC-4
+                }
+                return dateString + 'T23:59:59-04:00';
             }
         };
 
@@ -887,6 +893,10 @@
                 async loadSales() {
                     if (!this.userBranch) return;
 
+                    console.log(' Buscando ventas desde:', DateUtils.getStartOfDay(this.filters.startDate));
+                    console.log(' Buscando ventas hasta:', DateUtils.getEndOfDay(this.filters.endDate));
+                    console.log('🔍 Sucursal:', this.userBranch);
+
                     const { data, error } = await supabase
                         .from('sales')
                         .select('*')
@@ -896,10 +906,12 @@
                         .order('created_at', { ascending: false });
 
                     if (error) {
-                        console.error('Error cargando ventas:', error);
+                        console.error('❌ Error cargando ventas:', error);
                         this.sales = [];
                         return;
                     }
+                    
+                    console.log('✅ Ventas encontradas:', data ? data.length : 0);
                     this.sales = data || [];
                 },
 
