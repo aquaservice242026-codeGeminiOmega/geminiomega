@@ -25,161 +25,49 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        [x-cloak] {
-            display: none !important;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-
-        .gradient-bg {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-        }
-
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-        }
-
-        /* Menú móvil */
-        .sidebar-mobile {
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .sidebar-mobile.open {
-            transform: translateX(0);
-        }
-
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 39;
-        }
-
-        .sidebar-overlay.show {
-            display: block;
-        }
-
-        /* Mostrar sidebar en pantallas grandes */
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 50; }
+        .sidebar-mobile { transform: translateX(-100%); transition: transform 0.3s ease-in-out; }
+        .sidebar-mobile.open { transform: translateX(0); }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 39; }
+        .sidebar-overlay.show { display: block; }
         @media (min-width: 1024px) {
-            .sidebar-mobile {
-                transform: translateX(0) !important;
-            }
-
-            .sidebar-overlay {
-                display: none !important;
-            }
-
-            .menu-toggle {
-                display: none !important;
-            }
+            .sidebar-mobile { transform: translateX(0) !important; }
+            .sidebar-overlay { display: none !important; }
+            .menu-toggle { display: none !important; }
         }
-
-        /* Toastify personalizado */
         .toastify {
-            font-family: 'Inter', sans-serif !important;
-            font-weight: 500 !important;
-            border-radius: 12px !important;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
-            padding: 14px 20px !important;
-            min-width: 280px;
-            font-size: 14px !important;
-            color: white !important;
-            display: flex !important;
-            align-items: center !important;
+            font-family: 'Inter', sans-serif !important; font-weight: 500 !important;
+            border-radius: 12px !important; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
+            padding: 14px 20px !important; min-width: 280px; font-size: 14px !important;
+            color: white !important; display: flex !important; align-items: center !important;
         }
-
-        .toastify-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-        }
-
-        .toastify-error {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
-        }
-
-        .toastify-warning {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-        }
-
-        .toastify-info {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-        }
-
-        /* SweetAlert2 personalizado */
-        .swal2-popup {
-            font-family: 'Inter', sans-serif !important;
-            border-radius: 16px !important;
-            padding: 2rem !important;
-        }
-
-        .swal2-title {
-            font-size: 1.5rem !important;
-            font-weight: 700 !important;
-            color: #1f2937 !important;
-        }
-
-        .swal2-html-container {
-            font-size: 0.95rem !important;
-            color: #4b5563 !important;
-        }
-
+        .toastify-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; }
+        .toastify-error { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important; }
+        .toastify-warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important; }
+        .toastify-info { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+        .swal2-popup { font-family: 'Inter', sans-serif !important; border-radius: 16px !important; padding: 2rem !important; }
+        .swal2-title { font-size: 1.5rem !important; font-weight: 700 !important; color: #1f2937 !important; }
+        .swal2-html-container { font-size: 0.95rem !important; color: #4b5563 !important; }
         .swal2-confirm {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%) !important;
-            border: none !important;
-            border-radius: 12px !important;
-            padding: 0.75rem 2rem !important;
-            font-weight: 600 !important;
-            font-size: 1rem !important;
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3) !important;
-            transition: all 0.2s !important;
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%) !important; border: none !important;
+            border-radius: 12px !important; padding: 0.75rem 2rem !important; font-weight: 600 !important;
+            font-size: 1rem !important; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3) !important; transition: all 0.2s !important;
         }
-
-        .swal2-confirm:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4) !important;
-        }
-
+        .swal2-confirm:hover { transform: translateY(-2px) !important; box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4) !important; }
         .swal2-cancel {
-            background: #f3f4f6 !important;
-            color: #4b5563 !important;
-            border: none !important;
-            border-radius: 12px !important;
-            padding: 0.75rem 2rem !important;
-            font-weight: 600 !important;
-            font-size: 1rem !important;
-            transition: all 0.2s !important;
+            background: #f3f4f6 !important; color: #4b5563 !important; border: none !important;
+            border-radius: 12px !important; padding: 0.75rem 2rem !important; font-weight: 600 !important;
+            font-size: 1rem !important; transition: all 0.2s !important;
         }
-
-        .swal2-cancel:hover {
-            background: #e5e7eb !important;
-            transform: translateY(-2px) !important;
-        }
-
-        /* Botón BCV animado */
+        .swal2-cancel:hover { background: #e5e7eb !important; transform: translateY(-2px) !important; }
         @keyframes pulse-bcv {
-
-            0%,
-            100% {
-                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
-            }
-
-            50% {
-                box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
-            }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
         }
-
-        .btn-bcv-pulse {
-            animation: pulse-bcv 2s infinite;
-        }
+        .btn-bcv-pulse { animation: pulse-bcv 2s infinite; }
     </style>
 </head>
 
@@ -189,8 +77,7 @@
     <div class="sidebar-overlay" :class="{ 'show': mobileMenuOpen }" @click="mobileMenuOpen = false"></div>
 
     <!-- Sidebar -->
-    <aside class="sidebar-mobile fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 lg:block"
-        :class="{ 'open': mobileMenuOpen }">
+    <aside class="sidebar-mobile fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 lg:block" :class="{ 'open': mobileMenuOpen }">
         <div class="p-6">
             <div class="mb-6">
                 <div class="flex items-center space-x-3 mb-3">
@@ -207,32 +94,25 @@
             </div>
 
             <nav class="space-y-2">
-                <a href="index.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="index.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-home w-5"></i><span>Dashboard</span>
                 </a>
-                <a href="ventas.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="ventas.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
                 </a>
-                <a href="cuentas-cobrar.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
+                <a href="cuentas-cobrar.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
                     <i class="fas fa-file-invoice-dollar w-5"></i><span class="font-medium">Cuentas por Cobrar</span>
                 </a>
-                <a href="clientes.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="clientes.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-users w-5"></i><span>Clientes</span>
                 </a>
-                <a href="inventario.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="inventario.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-boxes w-5"></i><span>Inventario</span>
                 </a>
-                <a href="usuarios.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="usuarios.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
                 </a>
-                <a href="reportes.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="reportes.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
                 </a>
             </nav>
@@ -240,8 +120,7 @@
 
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
-                    x-text="userInitials"></div>
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold" x-text="userInitials"></div>
                 <div>
                     <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
                     <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
@@ -255,26 +134,31 @@
         <!-- Header -->
         <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-4">
-                <!-- Botón Menú Móvil -->
-                <button @click="mobileMenuOpen = !mobileMenuOpen"
-                    class="menu-toggle lg:hidden text-gray-600 hover:text-gray-800">
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="menu-toggle lg:hidden text-gray-600 hover:text-gray-800">
                     <i class="fas fa-bars text-2xl"></i>
                 </button>
-
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800">Cuentas por Cobrar</h2>
-                    <p class="text-sm text-gray-500"
-                        x-text="'Gestión de créditos y pagos pendientes - ' + DateUtils.formatDateLong(new Date())"></p>
+                    <p class="text-sm text-gray-500" x-text="'Gestión de créditos y pagos pendientes - ' + DateUtils.formatDateLong(new Date())"></p>
                 </div>
             </div>
             <div class="flex items-center space-x-4">
-                <!-- Tasa de cambio -->
+                <!-- Dropdown de Sucursales (Solo Admin) -->
+                <div x-show="userRole === 'admin'" class="hidden md:block">
+                    <select x-model="selectedBranch" @change="loadCuentas()"
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white text-sm">
+                        <option value="all">🌐 Todas las Sucursales (Consolidado)</option>
+                        <template x-for="branch in availableBranches" :key="branch">
+                            <option :value="branch" x-text="branch.charAt(0).toUpperCase() + branch.slice(1)"></option>
+                        </template>
+                    </select>
+                </div>
+
                 <div class="hidden md:flex items-center bg-blue-50 px-4 py-2 rounded-lg">
                     <i class="fas fa-exchange-alt text-blue-600 mr-2"></i>
                     <span class="text-sm text-gray-600">Tasa: </span>
                     <span class="text-sm font-bold text-blue-600 ml-1" x-text="'Bs. ' + exchangeRate.toFixed(2)"></span>
                 </div>
-                <!-- Botón BCV -->
                 <button @click="fetchAndUpdateBCV()"
                     class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-semibold btn-bcv-pulse"
                     title="Obtener tasa oficial BCV">
@@ -291,7 +175,6 @@
 
         <!-- Content -->
         <main class="p-6">
-            <!-- Loading -->
             <div x-show="loading" class="text-center py-12">
                 <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500"></i>
                 <p class="mt-4 text-gray-600">Cargando cuentas...</p>
@@ -304,10 +187,8 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm text-gray-600 mb-1">Total por Cobrar</p>
-                                <p class="text-3xl font-bold text-gray-900" x-text="'$' + stats.totalCredit.toFixed(2)">
-                                </p>
-                                <p class="text-xs text-gray-500 mt-1"
-                                    x-text="'Bs. ' + (stats.totalCredit * exchangeRate).toFixed(2)"></p>
+                                <p class="text-3xl font-bold text-gray-900" x-text="'$' + stats.totalCredit.toFixed(2)"></p>
+                                <p class="text-xs text-gray-500 mt-1" x-text="'Bs. ' + (stats.totalCredit * exchangeRate).toFixed(2)"></p>
                                 <p class="text-xs text-gray-500 mt-2" x-text="stats.totalAccounts + ' cuentas'"></p>
                             </div>
                             <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
@@ -320,10 +201,8 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm text-gray-600 mb-1">Cuentas Vencidas</p>
-                                <p class="text-3xl font-bold text-gray-900"
-                                    x-text="'$' + stats.overdueAmount.toFixed(2)"></p>
-                                <p class="text-xs text-gray-500 mt-1"
-                                    x-text="'Bs. ' + (stats.overdueAmount * exchangeRate).toFixed(2)"></p>
+                                <p class="text-3xl font-bold text-gray-900" x-text="'$' + stats.overdueAmount.toFixed(2)"></p>
+                                <p class="text-xs text-gray-500 mt-1" x-text="'Bs. ' + (stats.overdueAmount * exchangeRate).toFixed(2)"></p>
                                 <p class="text-xs text-yellow-600 mt-2">
                                     <i class="fas fa-exclamation-triangle"></i>
                                     <span x-text="stats.overdueAccounts + ' vencidas'"></span>
@@ -339,12 +218,9 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm text-gray-600 mb-1">Cuentas Pendientes</p>
-                                <p class="text-3xl font-bold text-gray-900"
-                                    x-text="'$' + stats.pendingAmount.toFixed(2)"></p>
-                                <p class="text-xs text-gray-500 mt-1"
-                                    x-text="'Bs. ' + (stats.pendingAmount * exchangeRate).toFixed(2)"></p>
-                                <p class="text-xs text-blue-600 mt-2" x-text="stats.pendingAccounts + ' pendientes'">
-                                </p>
+                                <p class="text-3xl font-bold text-gray-900" x-text="'$' + stats.pendingAmount.toFixed(2)"></p>
+                                <p class="text-xs text-gray-500 mt-1" x-text="'Bs. ' + (stats.pendingAmount * exchangeRate).toFixed(2)"></p>
+                                <p class="text-xs text-blue-600 mt-2" x-text="stats.pendingAccounts + ' pendientes'"></p>
                             </div>
                             <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                                 <i class="fas fa-clock text-blue-600 text-xl"></i>
@@ -400,8 +276,7 @@
                                 <option value="month">Este mes</option>
                             </select>
                         </div>
-                        <button @click="resetFilters()"
-                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                        <button @click="resetFilters()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
                             <i class="fas fa-undo mr-2"></i>Limpiar Filtros
                         </button>
                     </div>
@@ -413,30 +288,14 @@
                         <table class="w-full">
                             <thead class="bg-gray-50 border-b border-gray-200">
                                 <tr>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Cliente</th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Teléfono</th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Total</th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Pagado</th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Pendiente</th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Fecha Límite</th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Estado</th>
-                                    <th
-                                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Acciones</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pagado</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pendiente</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Límite</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
@@ -444,47 +303,36 @@
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-6 py-4">
                                             <div class="flex flex-col">
-                                                <span class="text-sm font-medium text-gray-900"
-                                                    x-text="account.customer_name"></span>
-                                                <span class="text-xs text-gray-500"
-                                                    x-text="account.customer_id_card || 'Sin cédula'"></span>
+                                                <span class="text-sm font-medium text-gray-900" x-text="account.customer_name"></span>
+                                                <span class="text-xs text-gray-500" x-text="account.customer_id_card || 'Sin cédula'"></span>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <span class="text-sm text-gray-900"
-                                                x-text="account.customer_phone || 'Sin teléfono'"></span>
+                                            <span class="text-sm text-gray-900" x-text="account.customer_phone || 'Sin teléfono'"></span>
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="flex flex-col">
-                                                <span class="text-sm font-semibold text-gray-900"
-                                                    x-text="'$' + account.total_amount.toFixed(2)"></span>
-                                                <span class="text-xs text-gray-500"
-                                                    x-text="'Bs. ' + (account.total_amount * exchangeRate).toFixed(2)"></span>
+                                                <span class="text-sm font-semibold text-gray-900" x-text="'$' + account.total_amount.toFixed(2)"></span>
+                                                <span class="text-xs text-gray-500" x-text="'Bs. ' + (account.total_amount * exchangeRate).toFixed(2)"></span>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="flex flex-col">
-                                                <span class="text-sm text-green-600 font-medium"
-                                                    x-text="'$' + account.paid_amount.toFixed(2)"></span>
-                                                <span class="text-xs text-gray-500"
-                                                    x-text="'Bs. ' + (account.paid_amount * exchangeRate).toFixed(2)"></span>
+                                                <span class="text-sm text-green-600 font-medium" x-text="'$' + account.paid_amount.toFixed(2)"></span>
+                                                <span class="text-xs text-gray-500" x-text="'Bs. ' + (account.paid_amount * exchangeRate).toFixed(2)"></span>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="flex flex-col">
-                                                <span class="text-sm font-bold text-red-600"
-                                                    x-text="'$' + account.remaining_amount.toFixed(2)"></span>
-                                                <span class="text-xs text-gray-500"
-                                                    x-text="'Bs. ' + (account.remaining_amount * exchangeRate).toFixed(2)"></span>
+                                                <span class="text-sm font-bold text-red-600" x-text="'$' + account.remaining_amount.toFixed(2)"></span>
+                                                <span class="text-xs text-gray-500" x-text="'Bs. ' + (account.remaining_amount * exchangeRate).toFixed(2)"></span>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <span class="text-sm text-gray-900"
-                                                x-text="formatDate(account.payment_date)"></span>
+                                            <span class="text-sm text-gray-900" x-text="formatDate(account.payment_date)"></span>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <span
-                                                class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
                                                 :class="{
                                                     'bg-red-100 text-red-800': isOverdue(account),
                                                     'bg-yellow-100 text-yellow-800': account.status === 'partial',
@@ -493,8 +341,7 @@
                                                 }" x-text="getStatusText(account)"></span>
                                         </td>
                                         <td class="px-6 py-4 text-right">
-                                            <button @click="viewAccount(account)"
-                                                class="text-blue-600 hover:text-blue-900 font-medium text-sm">
+                                            <button @click="viewAccount(account)" class="text-blue-600 hover:text-blue-900 font-medium text-sm">
                                                 <i class="fas fa-eye mr-1"></i>Ver
                                             </button>
                                         </td>
@@ -528,96 +375,57 @@
             </div>
 
             <div class="p-6 space-y-6" x-show="selectedAccount">
-                <!-- Información del Cliente -->
                 <div class="bg-blue-50 rounded-xl p-4">
-                    <h4 class="font-semibold text-blue-900 mb-3">
-                        <i class="fas fa-user mr-2"></i>Información del Cliente
-                    </h4>
+                    <h4 class="font-semibold text-blue-900 mb-3"><i class="fas fa-user mr-2"></i>Información del Cliente</h4>
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-xs text-gray-600">Nombre:</p>
-                            <p class="text-sm font-medium" x-text="selectedAccount.customer_name"></p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-600">Teléfono:</p>
-                            <p class="text-sm font-medium" x-text="selectedAccount.customer_phone || 'No registrado'">
-                            </p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-600">Cédula/ID:</p>
-                            <p class="text-sm font-medium" x-text="selectedAccount.customer_id_card || 'No registrado'">
-                            </p>
-                        </div>
+                        <div><p class="text-xs text-gray-600">Nombre:</p><p class="text-sm font-medium" x-text="selectedAccount.customer_name"></p></div>
+                        <div><p class="text-xs text-gray-600">Teléfono:</p><p class="text-sm font-medium" x-text="selectedAccount.customer_phone || 'No registrado'"></p></div>
+                        <div><p class="text-xs text-gray-600">Cédula/ID:</p><p class="text-sm font-medium" x-text="selectedAccount.customer_id_card || 'No registrado'"></p></div>
                     </div>
                 </div>
 
-                <!-- Información Financiera -->
                 <div class="bg-green-50 rounded-xl p-4">
-                    <h4 class="font-semibold text-green-900 mb-3">
-                        <i class="fas fa-dollar-sign mr-2"></i>Información Financiera
-                    </h4>
+                    <h4 class="font-semibold text-green-900 mb-3"><i class="fas fa-dollar-sign mr-2"></i>Información Financiera</h4>
                     <div class="space-y-3">
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-600">Monto Total:</span>
                             <div class="text-right">
-                                <p class="text-lg font-bold text-gray-900"
-                                    x-text="'$' + selectedAccount.total_amount.toFixed(2)"></p>
-                                <p class="text-xs text-gray-500"
-                                    x-text="'Bs. ' + (selectedAccount.total_amount * exchangeRate).toFixed(2)"></p>
+                                <p class="text-lg font-bold text-gray-900" x-text="'$' + selectedAccount.total_amount.toFixed(2)"></p>
+                                <p class="text-xs text-gray-500" x-text="'Bs. ' + (selectedAccount.total_amount * exchangeRate).toFixed(2)"></p>
                             </div>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-600">Pagado:</span>
                             <div class="text-right">
-                                <p class="text-lg font-bold text-green-600"
-                                    x-text="'$' + selectedAccount.paid_amount.toFixed(2)"></p>
-                                <p class="text-xs text-gray-500"
-                                    x-text="'Bs. ' + (selectedAccount.paid_amount * exchangeRate).toFixed(2)"></p>
+                                <p class="text-lg font-bold text-green-600" x-text="'$' + selectedAccount.paid_amount.toFixed(2)"></p>
+                                <p class="text-xs text-gray-500" x-text="'Bs. ' + (selectedAccount.paid_amount * exchangeRate).toFixed(2)"></p>
                             </div>
                         </div>
                         <div class="flex justify-between items-center pt-3 border-t border-green-200">
                             <span class="text-sm font-semibold text-gray-700">Pendiente:</span>
                             <div class="text-right">
-                                <p class="text-2xl font-bold text-red-600"
-                                    x-text="'$' + selectedAccount.remaining_amount.toFixed(2)"></p>
-                                <p class="text-xs text-gray-500"
-                                    x-text="'Bs. ' + (selectedAccount.remaining_amount * exchangeRate).toFixed(2)"></p>
+                                <p class="text-2xl font-bold text-red-600" x-text="'$' + selectedAccount.remaining_amount.toFixed(2)"></p>
+                                <p class="text-xs text-gray-500" x-text="'Bs. ' + (selectedAccount.remaining_amount * exchangeRate).toFixed(2)"></p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Términos del Crédito -->
                 <div class="bg-yellow-50 rounded-xl p-4">
-                    <h4 class="font-semibold text-yellow-900 mb-3">
-                        <i class="fas fa-calendar-alt mr-2"></i>Términos del Crédito
-                    </h4>
+                    <h4 class="font-semibold text-yellow-900 mb-3"><i class="fas fa-calendar-alt mr-2"></i>Términos del Crédito</h4>
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-xs text-gray-600">Fecha Límite:</p>
-                            <p class="text-sm font-medium" x-text="formatDate(selectedAccount.payment_date)"></p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-600">Condiciones:</p>
-                            <p class="text-sm font-medium" x-text="selectedAccount.payment_terms || 'No especificadas'">
-                            </p>
-                        </div>
+                        <div><p class="text-xs text-gray-600">Fecha Límite:</p><p class="text-sm font-medium" x-text="formatDate(selectedAccount.payment_date)"></p></div>
+                        <div><p class="text-xs text-gray-600">Condiciones:</p><p class="text-sm font-medium" x-text="selectedAccount.payment_terms || 'No especificadas'"></p></div>
                     </div>
                 </div>
 
-                <!-- Notas -->
                 <div x-show="selectedAccount.notes">
-                    <h4 class="font-semibold text-gray-800 mb-2">
-                        <i class="fas fa-sticky-note mr-2"></i>Notas
-                    </h4>
+                    <h4 class="font-semibold text-gray-800 mb-2"><i class="fas fa-sticky-note mr-2"></i>Notas</h4>
                     <p class="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg" x-text="selectedAccount.notes"></p>
                 </div>
 
-                <!-- Historial de Pagos -->
                 <div>
-                    <h4 class="font-semibold text-gray-800 mb-3">
-                        <i class="fas fa-history mr-2"></i>Historial de Pagos
-                    </h4>
+                    <h4 class="font-semibold text-gray-800 mb-3"><i class="fas fa-history mr-2"></i>Historial de Pagos</h4>
                     <div x-show="accountPayments.length === 0" class="text-center py-6 text-gray-400">
                         <i class="fas fa-receipt text-3xl mb-2"></i>
                         <p class="text-sm">No hay pagos registrados</p>
@@ -626,13 +434,10 @@
                         <template x-for="payment in accountPayments" :key="payment.id">
                             <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
                                 <div>
-                                    <p class="text-sm font-medium"
-                                        x-text="'$' + payment.amount.toFixed(2) + ' - ' + payment.payment_method">
-                                    </p>
+                                    <p class="text-sm font-medium" x-text="'$' + payment.amount.toFixed(2) + ' - ' + payment.payment_method"></p>
                                     <p class="text-xs text-gray-500" x-text="formatDate(payment.payment_date)"></p>
                                 </div>
-                                <span class="text-xs text-green-600 font-medium"
-                                    x-text="'Bs. ' + (payment.amount * exchangeRate).toFixed(2)"></span>
+                                <span class="text-xs text-green-600 font-medium" x-text="'Bs. ' + (payment.amount * exchangeRate).toFixed(2)"></span>
                             </div>
                         </template>
                     </div>
@@ -640,10 +445,8 @@
             </div>
 
             <div class="px-6 py-4 border-t bg-gray-50 flex justify-end space-x-3 sticky bottom-0">
-                <button @click="showViewModal = false"
-                    class="px-4 py-2 text-gray-600 hover:text-gray-800">Cerrar</button>
-                <button @click="openPaymentModal(selectedAccount)"
-                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                <button @click="showViewModal = false" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cerrar</button>
+                <button @click="openPaymentModal(selectedAccount)" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
                     <i class="fas fa-money-bill-wave mr-2"></i>Registrar Pago
                 </button>
             </div>
@@ -670,11 +473,8 @@
                     <div class="flex justify-between items-center">
                         <span class="text-sm text-gray-600">Pendiente:</span>
                         <div class="text-right">
-                            <p class="text-lg font-bold text-blue-600"
-                                x-text="'$' + (selectedAccount?.remaining_amount || 0).toFixed(2)"></p>
-                            <p class="text-xs text-gray-500"
-                                x-text="'Bs. ' + ((selectedAccount?.remaining_amount || 0) * exchangeRate).toFixed(2)">
-                            </p>
+                            <p class="text-lg font-bold text-blue-600" x-text="'$' + (selectedAccount?.remaining_amount || 0).toFixed(2)"></p>
+                            <p class="text-xs text-gray-500" x-text="'Bs. ' + ((selectedAccount?.remaining_amount || 0) * exchangeRate).toFixed(2)"></p>
                         </div>
                     </div>
                 </div>
@@ -691,8 +491,7 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Método de Pago *</label>
-                    <select x-model="paymentForm.payment_method"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <select x-model="paymentForm.payment_method" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="efectivo">Efectivo</option>
                         <option value="transferencia">Transferencia</option>
                         <option value="pago_movil">Pago Móvil</option>
@@ -716,8 +515,7 @@
             </div>
 
             <div class="px-6 py-4 border-t bg-gray-50 flex justify-end space-x-3">
-                <button @click="closePaymentModal()"
-                    class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
+                <button @click="closePaymentModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
                 <button @click="registerPayment()" :disabled="!canRegisterPayment() || processing"
                     class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
                     <i class="fas fa-save mr-2" x-show="!processing"></i>
@@ -739,9 +537,6 @@
             window.location.href = 'login.html';
         }
 
-        // ============================================
-        // NOTIFICACIONES TOASTIFY (IGUAL A VENTAS)
-        // ============================================
         function showToast(message, type = 'success') {
             const gradients = {
                 success: 'linear-gradient(to right, #10b981, #059669)',
@@ -750,33 +545,23 @@
                 info: 'linear-gradient(to right, #3b82f6, #2563eb)'
             };
             const icons = { success: '✓', error: '✗', warning: '⚠', info: 'ℹ' };
-
             Toastify({
                 text: `${icons[type]} ${message}`,
-                duration: 3000,
-                close: true,
-                gravity: 'top',
-                position: 'right',
-                stopOnFocus: true,
+                duration: 3000, close: true, gravity: 'top', position: 'right', stopOnFocus: true,
                 style: {
-                    background: gradients[type],
-                    borderRadius: '12px',
-                    fontFamily: 'Inter, sans-serif',
-                    fontWeight: '500',
-                    fontSize: '14px',
-                    padding: '14px 20px',
-                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
-                    minWidth: '280px'
+                    background: gradients[type], borderRadius: '12px', fontFamily: 'Inter, sans-serif',
+                    fontWeight: '500', fontSize: '14px', padding: '14px 20px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15)', minWidth: '280px'
                 }
             }).showToast();
         }
 
         // ============================================
-        // REDONDEO A 2 DECIMALES
+        // TRUNCAR A 2 DECIMALES (Evita que 723.999 se convierta en 724.00)
         // ============================================
         function round2(num) {
             if (num === null || num === undefined || isNaN(num)) return 0;
-            return Math.round(parseFloat(num) * 100) / 100;
+            return Math.floor(parseFloat(num) * 100) / 100;
         }
 
         function ensureValidRate(rate) {
@@ -788,9 +573,6 @@
             return round2(parsed);
         }
 
-        // ============================================
-        // CONSULTAR API BCV OFICIAL
-        // ============================================
         async function fetchBCVRate() {
             try {
                 console.log('🏛️ Consultando tasa BCV desde API oficial...');
@@ -810,10 +592,8 @@
 
         function cuentasApp() {
             return {
-                // Variables del menú responsive
                 mobileMenuOpen: false,
                 currentPage: 'cuentas',
-
                 cuentas: [],
                 filteredCuentas: [],
                 loading: true,
@@ -822,66 +602,45 @@
                 showPaymentModal: false,
                 selectedAccount: null,
                 accountPayments: [],
-
-                // User info
                 userName: '',
                 userRole: '',
                 userBranch: '',
                 userInitials: '??',
-
-                // Exchange rate
                 exchangeRate: 700.22,
+                
+                // ✅ Control de sucursales (Consolidado para admin)
+                selectedBranch: 'all',
+                availableBranches: [],
 
-                // Stats
                 stats: {
-                    totalCredit: 0,
-                    totalAccounts: 0,
-                    overdueAmount: 0,
-                    overdueAccounts: 0,
-                    pendingAmount: 0,
-                    pendingAccounts: 0,
-                    paidAccounts: 0
+                    totalCredit: 0, totalAccounts: 0, overdueAmount: 0,
+                    overdueAccounts: 0, pendingAmount: 0, pendingAccounts: 0, paidAccounts: 0
                 },
-
-                // Filters
-                filters: {
-                    search: '',
-                    status: '',
-                    dateFilter: ''
-                },
-
-                // Payment form
-                paymentForm: {
-                    amount: 0,
-                    payment_method: 'efectivo',
-                    reference: '',
-                    notes: ''
-                },
+                filters: { search: '', status: '', dateFilter: '' },
+                paymentForm: { amount: 0, payment_method: 'efectivo', reference: '', notes: '' },
 
                 async initCuentas() {
                     const { data: { session } } = await supabase.auth.getSession();
-                    if (!session) {
-                        window.location.href = 'login.html';
-                        return;
-                    }
+                    if (!session) { window.location.href = 'login.html'; return; }
 
                     try {
-                        const { data: profile } = await supabase
-                            .from('profiles')
-                            .select('full_name, role, branch')
-                            .eq('id', session.user.id)
-                            .single();
-
+                        const { data: profile } = await supabase.from('profiles').select('full_name, role, branch').eq('id', session.user.id).single();
                         if (profile) {
                             this.userName = profile.full_name;
                             this.userRole = profile.role;
                             this.userBranch = profile.branch;
                             this.userInitials = this.getInitials(profile.full_name);
+                            
+                            // ✅ CONSOLIDADO POR DEFECTO PARA ADMIN, SUCURSAL PARA VENDEDORES
+                            this.selectedBranch = (profile.role === 'admin') ? 'all' : profile.branch;
+                        }
+
+                        if (this.userRole === 'admin') {
+                            await this.loadAvailableBranches();
                         }
 
                         await this.loadExchangeRate();
                         await this.loadCuentas();
-
                     } catch (err) {
                         console.error('Error inicializando:', err);
                     } finally {
@@ -889,73 +648,53 @@
                     }
                 },
 
-                // ============================================
-                // CARGAR TASA DESDE SUPABASE
-                // ============================================
+                async loadAvailableBranches() {
+                    try {
+                        const { data, error } = await supabase.from('profiles').select('branch').not('branch', 'is', null);
+                        if (!error && data) {
+                            this.availableBranches = [...new Set(data.map(p => p.branch))];
+                        }
+                    } catch (err) {
+                        console.error('Error cargando sucursales:', err);
+                    }
+                },
+
                 async loadExchangeRate() {
                     try {
-                        console.log('🔄 Consultando tasa centralizada de Supabase');
                         const { data, error } = await supabase.rpc('get_active_exchange_rate');
                         if (!error && data) {
-                            const rate = ensureValidRate(data);
-                            this.exchangeRate = rate;
-                            console.log('✅ Tasa cargada desde Supabase:', this.exchangeRate);
+                            this.exchangeRate = ensureValidRate(data);
                         } else {
-                            console.warn('⚠️ No se encontró tasa en BD, usando 700.22');
                             this.exchangeRate = 700.22;
                         }
                     } catch (err) {
-                        console.error('❌ Error cargando tasa:', err);
                         this.exchangeRate = 700.22;
                     }
                 },
 
-                // ============================================
-                // OBTENER BCV Y GUARDAR EN BD
-                // ============================================
                 async fetchAndUpdateBCV() {
                     showToast('Consultando tasa BCV oficial...', 'info');
                     const bcvData = await fetchBCVRate();
                     if (!bcvData) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'No se pudo obtener la tasa del BCV. Verifica tu conexión a internet.',
-                            confirmButtonText: 'Entendido'
-                        });
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo obtener la tasa del BCV. Verifica tu conexión a internet.', confirmButtonText: 'Entendido' });
                         return;
                     }
                     const newRate = round2(bcvData.rate);
-                    // ✅ USAR DateUtils para formatear fecha
                     const rateDate = DateUtils.formatDateLong(bcvData.date);
                     const confirmed = await Swal.fire({
                         title: '🏛️ Tasa BCV Oficial',
-                        html: `
-                            <div class="text-center space-y-3">
-                                <div class="bg-blue-50 rounded-lg p-4">
-                                    <p class="text-sm text-gray-600 mb-2">Tasa oficial del BCV:</p>
-                                    <p class="text-4xl font-bold text-blue-600">Bs. ${newRate.toFixed(2)}</p>
-                                    <p class="text-xs text-gray-500 mt-2">
-                                        <i class="fas fa-calendar mr-1"></i>
-                                        Actualizada: ${rateDate}
-                                    </p>
-                                </div>
-                                <div class="bg-yellow-50 rounded-lg p-3">
-                                    <p class="text-xs text-gray-700">
-                                        <i class="fas fa-info-circle mr-1"></i>
-                                        Tasa actual en el sistema: <strong>Bs. ${this.exchangeRate.toFixed(2)}</strong>
-                                    </p>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-2">
-                                    Fuente: ${bcvData.source}
-                                </p>
+                        html: `<div class="text-center space-y-3">
+                            <div class="bg-blue-50 rounded-lg p-4">
+                                <p class="text-sm text-gray-600 mb-2">Tasa oficial del BCV:</p>
+                                <p class="text-4xl font-bold text-blue-600">Bs. ${newRate.toFixed(2)}</p>
+                                <p class="text-xs text-gray-500 mt-2"><i class="fas fa-calendar mr-1"></i>Actualizada: ${rateDate}</p>
                             </div>
-                        `,
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonText: 'Aplicar Tasa',
-                        cancelButtonText: 'Cancelar',
-                        reverseButtons: true
+                            <div class="bg-yellow-50 rounded-lg p-3">
+                                <p class="text-xs text-gray-700"><i class="fas fa-info-circle mr-1"></i>Tasa actual en el sistema: <strong>Bs. ${this.exchangeRate.toFixed(2)}</strong></p>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Fuente: ${bcvData.source}</p>
+                        </div>`,
+                        icon: 'question', showCancelButton: true, confirmButtonText: 'Aplicar Tasa', cancelButtonText: 'Cancelar', reverseButtons: true
                     });
                     if (confirmed.isConfirmed) {
                         this.exchangeRate = newRate;
@@ -980,18 +719,19 @@
                 async loadCuentas() {
                     this.loading = true;
                     try {
-                        const { data, error } = await supabase
-                            .from('credit_accounts')
-                            .select('*')
-                            .eq('branch', this.userBranch || 'geminis')
-                            .order('created_at', { ascending: false });
+                        let query = supabase.from('credit_accounts').select('*').order('created_at', { ascending: false });
+                        
+                        // ✅ FILTRAR POR SUCURSAL SI NO ES 'all'
+                        if (this.selectedBranch !== 'all') {
+                            query = query.eq('branch', this.selectedBranch);
+                        }
 
+                        const { data, error } = await query;
                         if (error) throw error;
 
                         this.cuentas = data || [];
                         this.calculateStats();
                         this.filterCuentas();
-
                     } catch (err) {
                         console.error('Error cargando cuentas:', err);
                         showToast('Error al cargar cuentas: ' + err.message, 'error');
@@ -1003,27 +743,18 @@
                 calculateStats() {
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
-
                     this.stats.totalCredit = this.cuentas.reduce((sum, c) => sum + c.remaining_amount, 0);
                     this.stats.totalAccounts = this.cuentas.length;
-
                     this.stats.overdueAccounts = this.cuentas.filter(c => {
                         const paymentDate = new Date(c.payment_date);
                         return c.status !== 'paid' && paymentDate < today;
                     }).length;
-
-                    this.stats.overdueAmount = this.cuentas
-                        .filter(c => {
-                            const paymentDate = new Date(c.payment_date);
-                            return c.status !== 'paid' && paymentDate < today;
-                        })
-                        .reduce((sum, c) => sum + c.remaining_amount, 0);
-
+                    this.stats.overdueAmount = this.cuentas.filter(c => {
+                        const paymentDate = new Date(c.payment_date);
+                        return c.status !== 'paid' && paymentDate < today;
+                    }).reduce((sum, c) => sum + c.remaining_amount, 0);
                     this.stats.pendingAccounts = this.cuentas.filter(c => c.status === 'pending').length;
-                    this.stats.pendingAmount = this.cuentas
-                        .filter(c => c.status === 'pending')
-                        .reduce((sum, c) => sum + c.remaining_amount, 0);
-
+                    this.stats.pendingAmount = this.cuentas.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.remaining_amount, 0);
                     const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
                     this.stats.paidAccounts = this.cuentas.filter(c => {
                         const createdAt = new Date(c.created_at);
@@ -1033,21 +764,13 @@
 
                 filterCuentas() {
                     let filtered = [...this.cuentas];
-
-                    // Filtro de búsqueda
                     if (this.filters.search) {
                         const search = this.filters.search.toLowerCase();
-                        filtered = filtered.filter(c =>
-                            c.customer_name.toLowerCase().includes(search) ||
-                            (c.customer_id_card && c.customer_id_card.toLowerCase().includes(search))
-                        );
+                        filtered = filtered.filter(c => c.customer_name.toLowerCase().includes(search) || (c.customer_id_card && c.customer_id_card.toLowerCase().includes(search)));
                     }
-
-                    // Filtro de estado
                     if (this.filters.status) {
                         if (this.filters.status === 'overdue') {
-                            const today = new Date();
-                            today.setHours(0, 0, 0, 0);
+                            const today = new Date(); today.setHours(0, 0, 0, 0);
                             filtered = filtered.filter(c => {
                                 const paymentDate = new Date(c.payment_date);
                                 return c.status !== 'paid' && paymentDate < today;
@@ -1056,64 +779,35 @@
                             filtered = filtered.filter(c => c.status === this.filters.status);
                         }
                     }
-
-                    // Filtro de fecha
                     if (this.filters.dateFilter) {
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0);
-
+                        const today = new Date(); today.setHours(0, 0, 0, 0);
                         if (this.filters.dateFilter === 'overdue') {
                             filtered = filtered.filter(c => {
                                 const paymentDate = new Date(c.payment_date);
                                 return c.status !== 'paid' && paymentDate < today;
                             });
                         } else if (this.filters.dateFilter === 'today') {
-                            filtered = filtered.filter(c => {
-                                const paymentDate = new Date(c.payment_date);
-                                return paymentDate.toDateString() === today.toDateString();
-                            });
+                            filtered = filtered.filter(c => new Date(c.payment_date).toDateString() === today.toDateString());
                         } else if (this.filters.dateFilter === 'week') {
-                            const weekAgo = new Date(today);
-                            weekAgo.setDate(weekAgo.getDate() - 7);
-                            filtered = filtered.filter(c => {
-                                const paymentDate = new Date(c.payment_date);
-                                return paymentDate >= weekAgo;
-                            });
+                            const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
+                            filtered = filtered.filter(c => new Date(c.payment_date) >= weekAgo);
                         } else if (this.filters.dateFilter === 'month') {
                             const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-                            filtered = filtered.filter(c => {
-                                const paymentDate = new Date(c.payment_date);
-                                return paymentDate >= monthStart;
-                            });
+                            filtered = filtered.filter(c => new Date(c.payment_date) >= monthStart);
                         }
                     }
-
                     this.filteredCuentas = filtered;
                 },
 
                 resetFilters() {
-                    this.filters = {
-                        search: '',
-                        status: '',
-                        dateFilter: ''
-                    };
+                    this.filters = { search: '', status: '', dateFilter: '' };
                     this.filterCuentas();
                 },
 
                 isOverdue(account) {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
+                    const today = new Date(); today.setHours(0, 0, 0, 0);
                     const paymentDate = new Date(account.payment_date);
                     return account.status !== 'paid' && paymentDate < today;
-                },
-
-                getDaysOverdue(account) {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    const paymentDate = new Date(account.payment_date);
-                    const diffTime = Math.abs(today - paymentDate);
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    return diffDays;
                 },
 
                 getStatusText(account) {
@@ -1124,49 +818,23 @@
                     return account.status;
                 },
 
-                // ✅ USAR DateUtils para formatear fechas
-                formatDate(dateString) {
-                    return DateUtils.formatDate(dateString);
-                },
-
-                formatDateTime(dateString) {
-                    return DateUtils.formatDateTime(dateString);
-                },
-
-                getInitials(name) {
-                    if (!name) return '??';
-                    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-                },
+                formatDate(dateString) { return DateUtils.formatDate(dateString); },
+                formatDateTime(dateString) { return DateUtils.formatDateTime(dateString); },
+                getInitials(name) { if (!name) return '??'; return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(); },
 
                 async viewAccount(account) {
                     this.selectedAccount = account;
-
-                    // Cargar pagos
                     try {
-                        const { data, error } = await supabase
-                            .from('credit_payments')
-                            .select('*')
-                            .eq('credit_account_id', account.id)
-                            .order('payment_date', { ascending: false });
-
+                        const { data, error } = await supabase.from('credit_payments').select('*').eq('credit_account_id', account.id).order('payment_date', { ascending: false });
                         if (error) throw error;
                         this.accountPayments = data || [];
-
-                    } catch (err) {
-                        console.error('Error cargando pagos:', err);
-                    }
-
+                    } catch (err) { console.error('Error cargando pagos:', err); }
                     this.showViewModal = true;
                 },
 
                 openPaymentModal(account) {
                     this.selectedAccount = account;
-                    this.paymentForm = {
-                        amount: 0,
-                        payment_method: 'efectivo',
-                        reference: '',
-                        notes: ''
-                    };
+                    this.paymentForm = { amount: 0, payment_method: 'efectivo', reference: '', notes: '' };
                     this.showPaymentModal = true;
                 },
 
@@ -1186,48 +854,33 @@
                         showToast('Ingrese un monto válido', 'error');
                         return;
                     }
-
                     const confirmed = await Swal.fire({
                         title: 'Confirmar Pago',
-                        html: `
-                            <div class="text-center space-y-2">
-                                <p class="text-gray-600">¿Registrar pago de:</p>
-                                <p class="text-3xl font-bold text-blue-600">$${this.paymentForm.amount.toFixed(2)}</p>
-                                <p class="text-sm text-gray-500">Método: ${this.paymentForm.payment_method}</p>
-                            </div>
-                        `,
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonText: 'Sí, Registrar',
-                        cancelButtonText: 'Cancelar',
-                        reverseButtons: true
+                        html: `<div class="text-center space-y-2">
+                            <p class="text-gray-600">¿Registrar pago de:</p>
+                            <p class="text-3xl font-bold text-blue-600">$${this.paymentForm.amount.toFixed(2)}</p>
+                            <p class="text-sm text-gray-500">Método: ${this.paymentForm.payment_method}</p>
+                        </div>`,
+                        icon: 'question', showCancelButton: true, confirmButtonText: 'Sí, Registrar', cancelButtonText: 'Cancelar', reverseButtons: true
                     });
-
                     if (!confirmed.isConfirmed) return;
 
                     this.processing = true;
-
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
-
-                        // Registrar pago
-                        const { error: paymentError } = await supabase
-                            .from('credit_payments')
-                            .insert({
-                                credit_account_id: this.selectedAccount.id,
-                                amount: this.paymentForm.amount,
-                                payment_method: this.paymentForm.payment_method,
-                                reference: this.paymentForm.reference,
-                                notes: this.paymentForm.notes,
-                                created_by: session.user.id
-                            });
-
+                        const { error: paymentError } = await supabase.from('credit_payments').insert({
+                            credit_account_id: this.selectedAccount.id,
+                            amount: this.paymentForm.amount,
+                            payment_method: this.paymentForm.payment_method,
+                            reference: this.paymentForm.reference,
+                            notes: this.paymentForm.notes,
+                            created_by: session.user.id
+                        });
                         if (paymentError) throw paymentError;
 
                         showToast('Pago registrado exitosamente', 'success');
                         this.closePaymentModal();
                         await this.loadCuentas();
-
                     } catch (err) {
                         console.error('Error registrando pago:', err);
                         showToast('Error: ' + err.message, 'error');
@@ -1239,5 +892,4 @@
         }
     </script>
 </body>
-
 </html>
