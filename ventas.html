@@ -1481,9 +1481,13 @@
             return result.isConfirmed;
         }
 
+        // ============================================
+        // CORRECCIÓN: TRUNCAR A 2 DECIMALES EN LUGAR DE REDONDEAR
+        // ============================================
         function round2(num) {
             if (num === null || num === undefined || isNaN(num)) return 0;
-            return Math.round(parseFloat(num) * 100) / 100;
+            // Math.floor trunca los decimales, evitando que 723.999 se convierta en 724.00
+            return Math.floor(parseFloat(num) * 100) / 100;
         }
 
         function ensureValidRate(rate) {
@@ -1989,7 +1993,7 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                                     .eq('product_id', capProduct.id)
                                     .eq('branch', this.userBranch);
                                 if (updateCapError) {
-                                    console.warn('️ Error actualizando tapas:', updateCapError.message);
+                                    console.warn('⚠️ Error actualizando tapas:', updateCapError.message);
                                 } else {
                                     console.log(`✅ ${totalCapsNeeded} tapas descontadas del inventario`);
                                 }
