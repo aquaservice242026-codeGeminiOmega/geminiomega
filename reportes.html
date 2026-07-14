@@ -271,10 +271,21 @@
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800">Reportes y Cierre Contable</h2>
                     <p class="text-sm text-gray-500"
-                        x-text="'Generación de reportes profesionales - ' + DateUtils.formatDateLong(new Date())"></p>
+                        x-text="'Generación de reportes profesionales - ' + formatDateLong(new Date())"></p>
                 </div>
             </div>
             <div class="flex items-center space-x-3">
+                <!-- Dropdown de Sucursales (Solo Admin) -->
+                <div x-show="userRole === 'admin'" class="hidden md:block">
+                    <select x-model="selectedBranch" @change="generateReport()"
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white">
+                        <option value="all">Todas las Sucursales</option>
+                        <template x-for="branch in availableBranches" :key="branch">
+                            <option :value="branch"
+                                x-text="branch.charAt(0).toUpperCase() + branch.slice(1)"></option>
+                        </template>
+                    </select>
+                </div>
                 <button @click="exportToPDF()"
                     class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
                     <i class="fas fa-file-pdf"></i>
@@ -479,7 +490,7 @@
                                             </td>
                                             <td class="px-6 py-4">
                                                 <span class="text-sm text-gray-900"
-                                                    x-text="DateUtils.formatDateTime(sale.created_at)"></span>
+                                                    x-text="formatDateTime(sale.created_at)"></span>
                                             </td>
                                             <td class="px-6 py-4">
                                                 <span class="text-sm text-gray-900"
@@ -566,7 +577,7 @@
                                 <i class="fas fa-cash-register mr-2"></i>Cierre de Caja
                             </h3>
                             <span class="text-sm text-gray-500"
-                                x-text="'Período: ' + DateUtils.formatDate(filters.startDate) + ' - ' + DateUtils.formatDate(filters.endDate)"></span>
+                                x-text="'Período: ' + formatDate(filters.startDate) + ' - ' + formatDate(filters.endDate)"></span>
                         </div>
 
                         <!-- Resumen por Método de Pago -->
@@ -668,7 +679,7 @@
                             </div>
                             <div class="text-center mt-6">
                                 <p class="text-xs text-gray-500"
-                                    x-text="'Generado el ' + DateUtils.formatDateTime(new Date())"></p>
+                                    x-text="'Generado el ' + formatDateTime(new Date())"></p>
                             </div>
                         </div>
                     </div>
@@ -685,7 +696,6 @@
             TIMEZONE: 'America/Caracas',
             LOCALE: 'es-VE',
 
-            // Obtener fecha actual en formato YYYY-MM-DD (para input type="date")
             getCurrentDateInput() {
                 const now = new Date();
                 const caracasString = now.toLocaleString('en-US', { timeZone: this.TIMEZONE });
@@ -693,7 +703,6 @@
                 return caracasDate.toISOString().split('T')[0];
             },
 
-            // Formatear como DD/MM/AAAA
             formatDate(dateString) {
                 if (!dateString) return 'N/A';
                 const date = new Date(dateString);
@@ -705,7 +714,6 @@
                 }).format(date);
             },
 
-            // Formatear como DD/MM/AAAA HH:MM
             formatDateTime(dateString) {
                 if (!dateString) return 'N/A';
                 const date = new Date(dateString);
@@ -720,7 +728,6 @@
                 }).format(date);
             },
 
-            // Formatear fecha larga: "14 de julio de 2026"
             formatDateLong(dateString) {
                 if (!dateString) return 'N/A';
                 const date = new Date(dateString);
@@ -732,21 +739,13 @@
                 }).format(date);
             },
 
-            // Inicio del día en Caracas (00:00:00) - CORREGIDO PARA ZONA HORARIA
             getStartOfDay(dateString) {
-                if (!dateString) {
-                    const today = this.getCurrentDateInput();
-                    return today + 'T00:00:00-04:00'; // Caracas es UTC-4
-                }
+                if (!dateString) return this.getCurrentDateInput() + 'T00:00:00-04:00';
                 return dateString + 'T00:00:00-04:00';
             },
 
-            // Fin del día en Caracas (23:59:59) - CORREGIDO PARA ZONA HORARIA
             getEndOfDay(dateString) {
-                if (!dateString) {
-                    const today = this.getCurrentDateInput();
-                    return today + 'T23:59:59-04:00'; // Caracas es UTC-4
-                }
+                if (!dateString) return this.getCurrentDateInput() + 'T23:59:59-04:00';
                 return dateString + 'T23:59:59-04:00';
             }
         };
@@ -792,11 +791,12 @@
                 activeTab: 'resumen',
                 userName: '',
                 userRole: '',
-                userBranch: 'geminis',
+                userBranch: '',
                 userInitials: '??',
                 exchangeRate: 700.22,
+                selectedBranch: '',
+                availableBranches: [],
 
-                // ✅ Fechas iniciales = fecha actual de Caracas
                 filters: {
                     startDate: DateUtils.getCurrentDateInput(),
                     endDate: DateUtils.getCurrentDateInput(),
@@ -833,7 +833,13 @@
                             this.userName = profile.full_name;
                             this.userRole = profile.role;
                             this.userBranch = profile.branch || 'geminis';
+                            this.selectedBranch = profile.branch;
                             this.userInitials = this.getInitials(profile.full_name);
+                        }
+
+                        // Cargar sucursales disponibles si es admin
+                        if (this.userRole === 'admin') {
+                            await this.loadAvailableBranches();
                         }
 
                         const { data: rateData } = await supabase.rpc('get_active_exchange_rate');
@@ -848,7 +854,22 @@
                     }
                 },
 
-                // ✅ Cambiar tipo de reporte y actualizar fechas
+                async loadAvailableBranches() {
+                    try {
+                        const { data, error } = await supabase
+                            .from('sales')
+                            .select('branch')
+                            .not('branch', 'is', null);
+
+                        if (!error && data) {
+                            const uniqueBranches = [...new Set(data.map(s => s.branch))];
+                            this.availableBranches = uniqueBranches;
+                        }
+                    } catch (err) {
+                        console.error('Error cargando sucursales:', err);
+                    }
+                },
+
                 onReportTypeChange() {
                     const today = DateUtils.getCurrentDateInput();
 
@@ -870,7 +891,6 @@
                         this.filters.startDate = monthAgo.toISOString().split('T')[0];
                         this.filters.endDate = today;
                     }
-                    // 'custom' no cambia las fechas
                 },
 
                 async generateReport() {
@@ -891,39 +911,39 @@
                 },
 
                 async loadSales() {
-                    if (!this.userBranch) return;
-
-                    console.log(' Buscando ventas desde:', DateUtils.getStartOfDay(this.filters.startDate));
-                    console.log(' Buscando ventas hasta:', DateUtils.getEndOfDay(this.filters.endDate));
-                    console.log('🔍 Sucursal:', this.userBranch);
-
-                    const { data, error } = await supabase
+                    let query = supabase
                         .from('sales')
                         .select('*')
-                        .eq('branch', this.userBranch)
                         .gte('created_at', DateUtils.getStartOfDay(this.filters.startDate))
                         .lte('created_at', DateUtils.getEndOfDay(this.filters.endDate))
                         .order('created_at', { ascending: false });
 
+                    if (this.selectedBranch !== 'all') {
+                        query = query.eq('branch', this.selectedBranch);
+                    }
+
+                    const { data, error } = await query;
+
                     if (error) {
-                        console.error('❌ Error cargando ventas:', error);
+                        console.error('Error cargando ventas:', error);
                         this.sales = [];
                         return;
                     }
-                    
-                    console.log('✅ Ventas encontradas:', data ? data.length : 0);
                     this.sales = data || [];
                 },
 
                 async loadStats() {
-                    if (!this.userBranch) return;
-
-                    const { data: sales, error } = await supabase
+                    let query = supabase
                         .from('sales')
                         .select('*')
-                        .eq('branch', this.userBranch)
                         .gte('created_at', DateUtils.getStartOfDay(this.filters.startDate))
                         .lte('created_at', DateUtils.getEndOfDay(this.filters.endDate));
+
+                    if (this.selectedBranch !== 'all') {
+                        query = query.eq('branch', this.selectedBranch);
+                    }
+
+                    const { data: sales, error } = await query;
 
                     if (error) {
                         console.error('Error cargando estadísticas:', error);
@@ -1003,14 +1023,17 @@
                 },
 
                 async loadTopProducts() {
-                    if (!this.userBranch) return;
-
-                    const { data: sales } = await supabase
+                    let query = supabase
                         .from('sales')
                         .select('id')
-                        .eq('branch', this.userBranch)
                         .gte('created_at', DateUtils.getStartOfDay(this.filters.startDate))
                         .lte('created_at', DateUtils.getEndOfDay(this.filters.endDate));
+
+                    if (this.selectedBranch !== 'all') {
+                        query = query.eq('branch', this.selectedBranch);
+                    }
+
+                    const { data: sales } = await query;
 
                     if (!sales || sales.length === 0) {
                         this.topProducts = [];
@@ -1089,6 +1112,18 @@
                 getInitials(name) {
                     if (!name) return '??';
                     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                },
+
+                formatDate(dateString) {
+                    return DateUtils.formatDate(dateString);
+                },
+
+                formatDateTime(dateString) {
+                    return DateUtils.formatDateTime(dateString);
+                },
+
+                formatDateLong(dateString) {
+                    return DateUtils.formatDateLong(dateString);
                 },
 
                 exportToPDF() {
