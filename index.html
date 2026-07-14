@@ -9,8 +9,6 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- UTILIDADES DE FECHA - ZONA HORARIA CARACAS -->
-    <script src="date-utils.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
@@ -165,10 +163,20 @@
                 </button>
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
-                    <p class="text-sm text-gray-500" x-text="'Resumen del ' + DateUtils.formatDateLong(new Date())"></p>
+                    <p class="text-sm text-gray-500" x-text="'Resumen del ' + formatDateLong(new Date())"></p>
                 </div>
             </div>
             <div class="flex items-center space-x-4">
+                <!-- Dropdown de Sucursales (Solo Admin) -->
+                <div x-show="userRole === 'admin'" class="hidden md:block">
+                    <select x-model="selectedBranch" @change="refreshDashboard()"
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white">
+                        <option value="all">Todas las Sucursales</option>
+                        <template x-for="branch in availableBranches" :key="branch">
+                            <option :value="branch" x-text="branch.charAt(0).toUpperCase() + branch.slice(1)"></option>
+                        </template>
+                    </select>
+                </div>
                 <div class="hidden md:flex items-center bg-blue-50 px-4 py-2 rounded-lg">
                     <i class="fas fa-dollar-sign text-green-600 mr-2"></i>
                     <span class="text-sm text-gray-600">Tasa: </span>
@@ -408,6 +416,34 @@
             return parsed;
         }
 
+        // ============================================
+        // UTILIDADES DE FECHA - ZONA HORARIA CARACAS
+        // ============================================
+        const DateUtils = {
+            TIMEZONE: 'America/Caracas',
+
+            getStartOfDay(date) {
+                const caracasDate = new Date(date.toLocaleString('en-US', { timeZone: this.TIMEZONE }));
+                caracasDate.setHours(0, 0, 0, 0);
+                return caracasDate.toISOString();
+            },
+
+            getEndOfDay(date) {
+                const caracasDate = new Date(date.toLocaleString('en-US', { timeZone: this.TIMEZONE }));
+                caracasDate.setHours(23, 59, 59, 999);
+                return caracasDate.toISOString();
+            },
+
+            formatDateLong(date) {
+                return new Intl.DateTimeFormat('es-VE', {
+                    timeZone: this.TIMEZONE,
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                }).format(date);
+            }
+        };
+
         function dashboardApp() {
             return {
                 mobileMenuOpen: false,
@@ -420,6 +456,8 @@
                 exchangeRate: 700.22,
                 salesChart: null,
                 productChart: null,
+                selectedBranch: '',
+                availableBranches: [],
 
                 stats: {
                     todaySales: 0,
@@ -463,26 +501,52 @@
                             this.userName = profile.full_name;
                             this.userRole = profile.role;
                             this.userBranch = profile.branch;
+                            this.selectedBranch = profile.branch;
                             this.userInitials = this.getInitials(profile.full_name);
                         }
 
-                        await this.loadExchangeRate();
-                        await Promise.all([
-                            this.loadTodayStats(),
-                            this.loadWeeklySales(),
-                            this.loadProductDistribution(),
-                            this.loadCreditAccounts(),
-                            this.loadRecentActivity(),
-                            this.loadTanks()
-                        ]);
+                        // Cargar sucursales disponibles si es admin
+                        if (this.userRole === 'admin') {
+                            await this.loadAvailableBranches();
+                        }
 
-                        this.$nextTick(() => { this.initCharts(); });
+                        await this.loadExchangeRate();
+                        await this.refreshDashboard();
 
                     } catch (err) {
                         console.error('Error inicializando dashboard:', err);
                     } finally {
                         this.loading = false;
                     }
+                },
+
+                async loadAvailableBranches() {
+                    try {
+                        const { data, error } = await supabase
+                            .from('sales')
+                            .select('branch')
+                            .not('branch', 'is', null);
+
+                        if (!error && data) {
+                            const uniqueBranches = [...new Set(data.map(s => s.branch))];
+                            this.availableBranches = uniqueBranches;
+                        }
+                    } catch (err) {
+                        console.error('Error cargando sucursales:', err);
+                    }
+                },
+
+                async refreshDashboard() {
+                    await Promise.all([
+                        this.loadTodayStats(),
+                        this.loadWeeklySales(),
+                        this.loadProductDistribution(),
+                        this.loadCreditAccounts(),
+                        this.loadRecentActivity(),
+                        this.loadTanks()
+                    ]);
+
+                    this.$nextTick(() => { this.initCharts(); });
                 },
 
                 async loadExchangeRate() {
@@ -505,24 +569,34 @@
 
                 async loadTodayStats() {
                     try {
-                        // ✅ USAR DateUtils para obtener fechas en zona horaria Caracas
                         const todayStr = DateUtils.getStartOfDay(new Date());
                         const yesterday = new Date();
                         yesterday.setDate(yesterday.getDate() - 1);
                         const yesterdayStr = DateUtils.getStartOfDay(yesterday);
 
-                        const { data: todaySales } = await supabase
+                        let query = supabase
                             .from('sales')
                             .select('total, status, payment_method')
-                            .eq('branch', this.userBranch)
                             .gte('created_at', todayStr);
 
-                        const { data: yesterdaySales } = await supabase
+                        // Filtrar por sucursal si no es "all"
+                        if (this.selectedBranch !== 'all') {
+                            query = query.eq('branch', this.selectedBranch);
+                        }
+
+                        const { data: todaySales } = await query;
+
+                        let yesterdayQuery = supabase
                             .from('sales')
                             .select('total')
-                            .eq('branch', this.userBranch)
                             .gte('created_at', yesterdayStr)
                             .lt('created_at', todayStr);
+
+                        if (this.selectedBranch !== 'all') {
+                            yesterdayQuery = yesterdayQuery.eq('branch', this.selectedBranch);
+                        }
+
+                        const { data: yesterdaySales } = await yesterdayQuery;
 
                         this.stats.todaySales = todaySales?.length || 0;
                         this.stats.yesterdaySales = yesterdaySales?.length || 0;
@@ -530,14 +604,20 @@
                             ?.filter(s => s.status === 'completed')
                             .reduce((sum, s) => sum + s.total, 0) || 0;
 
-                        const { data: saleItems } = await supabase
+                        let itemsQuery = supabase
                             .from('sale_items')
                             .select(`quantity, products!inner(size_liters), sales!inner(branch, created_at)`)
-                            .eq('sales.branch', this.userBranch)
                             .gte('sales.created_at', todayStr);
+
+                        if (this.selectedBranch !== 'all') {
+                            itemsQuery = itemsQuery.eq('sales.branch', this.selectedBranch);
+                        }
+
+                        const { data: saleItems } = await itemsQuery;
 
                         this.stats.totalBottlesSold = saleItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
+                        this.stats.bottlesBySize = { 5: 0, 13: 0, 20: 0 };
                         saleItems?.forEach(item => {
                             const size = item.products.size_liters;
                             if (this.stats.bottlesBySize[size] !== undefined) {
@@ -558,12 +638,17 @@
                         monday.setDate(today.getDate() - dayOfWeek + 1);
                         monday.setHours(0, 0, 0, 0);
 
-                        const { data: sales } = await supabase
+                        let query = supabase
                             .from('sales')
                             .select('total, created_at')
-                            .eq('branch', this.userBranch)
                             .gte('created_at', monday.toISOString())
                             .eq('status', 'completed');
+
+                        if (this.selectedBranch !== 'all') {
+                            query = query.eq('branch', this.selectedBranch);
+                        }
+
+                        const { data: sales } = await query;
 
                         const dailySales = [0, 0, 0, 0, 0, 0, 0];
 
@@ -584,11 +669,16 @@
                     try {
                         const todayStr = DateUtils.getStartOfDay(new Date());
 
-                        const { data: items } = await supabase
+                        let query = supabase
                             .from('sale_items')
                             .select(`quantity, products!inner(size_liters), sales!inner(branch, created_at)`)
-                            .eq('sales.branch', this.userBranch)
                             .gte('sales.created_at', todayStr);
+
+                        if (this.selectedBranch !== 'all') {
+                            query = query.eq('sales.branch', this.selectedBranch);
+                        }
+
+                        const { data: items } = await query;
 
                         const distribution = { 5: 0, 13: 0, 20: 0 };
 
@@ -608,12 +698,17 @@
 
                 async loadCreditAccounts() {
                     try {
-                        const { data: creditSales } = await supabase
+                        let query = supabase
                             .from('sales')
                             .select('total, customer_id')
-                            .eq('branch', this.userBranch)
                             .eq('payment_method', 'credito')
                             .eq('status', 'pending');
+
+                        if (this.selectedBranch !== 'all') {
+                            query = query.eq('branch', this.selectedBranch);
+                        }
+
+                        const { data: creditSales } = await query;
 
                         this.stats.creditAccounts = creditSales?.reduce((sum, s) => sum + s.total, 0) || 0;
 
@@ -627,12 +722,17 @@
 
                 async loadRecentActivity() {
                     try {
-                        const { data: sales } = await supabase
+                        let query = supabase
                             .from('sales')
                             .select(`id, created_at, total, customer_name, sale_items!inner(quantity, products!inner(name))`)
-                            .eq('branch', this.userBranch)
                             .order('created_at', { ascending: false })
                             .limit(5);
+
+                        if (this.selectedBranch !== 'all') {
+                            query = query.eq('branch', this.selectedBranch);
+                        }
+
+                        const { data: sales } = await query;
 
                         this.recentActivity = sales?.map(sale => ({
                             id: sale.id,
@@ -650,11 +750,16 @@
 
                 async loadTanks() {
                     try {
-                        const { data: tanks } = await supabase
+                        let query = supabase
                             .from('tanks')
                             .select('*')
-                            .eq('branch', this.userBranch)
                             .order('name');
+
+                        if (this.selectedBranch !== 'all') {
+                            query = query.eq('branch', this.selectedBranch);
+                        }
+
+                        const { data: tanks } = await query;
 
                         this.tanks = tanks?.map(tank => ({
                             ...tank,
@@ -669,6 +774,9 @@
                 initCharts() {
                     const salesCtx = document.getElementById('salesChart');
                     if (salesCtx) {
+                        if (this.salesChart) {
+                            this.salesChart.destroy();
+                        }
                         this.salesChart = new Chart(salesCtx, {
                             type: 'line',
                             data: {
@@ -703,6 +811,9 @@
 
                     const productCtx = document.getElementById('productChart');
                     if (productCtx) {
+                        if (this.productChart) {
+                            this.productChart.destroy();
+                        }
                         this.productChart = new Chart(productCtx, {
                             type: 'doughnut',
                             data: {
@@ -738,7 +849,6 @@
                     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
                 },
 
-                // ✅ USAR DateUtils para calcular tiempo transcurrido
                 getTimeAgo(dateString) {
                     const diffMins = Math.floor((new Date() - new Date(dateString)) / 60000);
                     const diffHours = Math.floor(diffMins / 60);
@@ -765,6 +875,10 @@
                 getBottlesBreakdown() {
                     const { 5: five, 13: thirteen, 20: twenty } = this.stats.bottlesBySize;
                     return `5L: ${five} | 13L: ${thirteen} | 20L: ${twenty}`;
+                },
+
+                formatDateLong(date) {
+                    return DateUtils.formatDateLong(date);
                 }
             }
         }
