@@ -16,70 +16,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        [x-cloak] {
-            display: none !important;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-
-        .gradient-bg {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-        }
-
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-        }
-
-        .card-hover {
-            transition: all 0.3s ease;
-        }
-
-        .card-hover:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-
-        .sidebar-mobile {
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .sidebar-mobile.open {
-            transform: translateX(0);
-        }
-
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 39;
-        }
-
-        .sidebar-overlay.show {
-            display: block;
-        }
-
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 50; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+        .sidebar-mobile { transform: translateX(-100%); transition: transform 0.3s ease-in-out; }
+        .sidebar-mobile.open { transform: translateX(0); }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 39; }
+        .sidebar-overlay.show { display: block; }
         @media (min-width: 1024px) {
-            .sidebar-mobile {
-                transform: translateX(0) !important;
-            }
-
-            .sidebar-overlay {
-                display: none !important;
-            }
-
-            .menu-toggle {
-                display: none !important;
-            }
+            .sidebar-mobile { transform: translateX(0) !important; }
+            .sidebar-overlay { display: none !important; }
+            .menu-toggle { display: none !important; }
         }
     </style>
 </head>
@@ -90,8 +40,7 @@
     <div class="sidebar-overlay" :class="{ 'show': mobileMenuOpen }" @click="mobileMenuOpen = false"></div>
 
     <!-- Sidebar -->
-    <aside class="sidebar-mobile fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 lg:block"
-        :class="{ 'open': mobileMenuOpen }">
+    <aside class="sidebar-mobile fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 lg:block" :class="{ 'open': mobileMenuOpen }">
         <div class="p-6">
             <div class="mb-6">
                 <div class="flex items-center space-x-3 mb-3">
@@ -107,44 +56,35 @@
                 </div>
             </div>
             <nav class="space-y-2">
-                <a href="index.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition bg-white bg-opacity-20">
+                <a href="index.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition bg-white bg-opacity-20">
                     <i class="fas fa-home w-5"></i><span>Dashboard</span>
                 </a>
-                <a href="ventas.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
+                <a href="ventas.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
                     <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
                 </a>
-                <a href="cuentas-cobrar.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
+                <a href="cuentas-cobrar.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
                     <i class="fas fa-file-invoice-dollar w-5"></i><span>Cuentas por Cobrar</span>
                 </a>
-                <a href="clientes.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
+                <a href="clientes.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
                     <i class="fas fa-users w-5"></i><span>Clientes</span>
                 </a>
-                <a href="inventario.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
+                <a href="inventario.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
                     <i class="fas fa-boxes w-5"></i><span>Inventario</span>
                 </a>
-                <a href="usuarios.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
+                <a href="usuarios.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
                     <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
                 </a>
-                <a href="reportes.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
+                <a href="reportes.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
                     <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
                 </a>
-                <a href="resumen-diario.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="resumen-diario.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-file-alt w-5"></i><span>Resumen Diario</span>
                 </a>
             </nav>
         </div>
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
-                    x-text="userInitials"></div>
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold" x-text="userInitials"></div>
                 <div>
                     <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
                     <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
@@ -157,38 +97,37 @@
     <div class="lg:ml-64 min-h-screen flex flex-col">
         <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-4">
-                <button @click="mobileMenuOpen = !mobileMenuOpen"
-                    class="menu-toggle lg:hidden text-gray-600 hover:text-gray-800">
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="menu-toggle lg:hidden text-gray-600 hover:text-gray-800">
                     <i class="fas fa-bars text-2xl"></i>
                 </button>
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
+                    <!-- Fecha actual siempre en formato Caracas -->
                     <p class="text-sm text-gray-500" x-text="'Resumen del ' + formatDateLong(new Date())"></p>
                 </div>
             </div>
             <div class="flex items-center space-x-4">
-                <!-- Dropdown de Sucursales (Solo Admin) -->
+                <!-- Dropdown de Sucursales (SOLO ADMIN) -->
                 <div x-show="userRole === 'admin'" class="hidden md:block">
                     <select x-model="selectedBranch" @change="refreshDashboard()"
-                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white">
-                        <option value="all">Todas las Sucursales</option>
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white text-sm">
+                        <option value="all">🌐 Todas las Sucursales (Consolidado)</option>
                         <template x-for="branch in availableBranches" :key="branch">
                             <option :value="branch" x-text="branch.charAt(0).toUpperCase() + branch.slice(1)"></option>
                         </template>
                     </select>
                 </div>
+                
                 <div class="hidden md:flex items-center bg-blue-50 px-4 py-2 rounded-lg">
                     <i class="fas fa-dollar-sign text-green-600 mr-2"></i>
                     <span class="text-sm text-gray-600">Tasa: </span>
-                    <span class="text-sm font-bold text-blue-600 ml-1"
-                        x-text="'Bs. ' + (parseFloat(exchangeRate) || 700.22).toFixed(2)"></span>
+                    <span class="text-sm font-bold text-blue-600 ml-1" x-text="'Bs. ' + (parseFloat(exchangeRate) || 700.22).toFixed(2)"></span>
                 </div>
                 <button class="relative p-2 text-gray-400 hover:text-gray-600">
                     <i class="fas fa-bell text-xl"></i>
                     <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                 </button>
-                <button onclick="logout()"
-                    class="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition shadow-sm">
+                <button onclick="logout()" class="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition shadow-sm">
                     <i class="fas fa-sign-out-alt"></i>
                     <span class="font-medium">Salir</span>
                 </button>
@@ -224,11 +163,9 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm text-gray-600 mb-1">Ingresos Hoy</p>
-                                <p class="text-3xl font-bold text-gray-900"
-                                    x-text="'$' + stats.todayRevenue.toFixed(2)"></p>
+                                <p class="text-3xl font-bold text-gray-900" x-text="'$' + stats.todayRevenue.toFixed(2)"></p>
                                 <p class="text-xs text-gray-500 mt-2">
-                                    <span
-                                        x-text="'Bs. ' + (stats.todayRevenue * (parseFloat(exchangeRate) || 700.22)).toFixed(2)"></span>
+                                    <span x-text="'Bs. ' + (stats.todayRevenue * (parseFloat(exchangeRate) || 700.22)).toFixed(2)"></span>
                                 </p>
                             </div>
                             <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
@@ -254,8 +191,7 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm text-gray-600 mb-1">Cuentas por Cobrar</p>
-                                <p class="text-3xl font-bold text-gray-900"
-                                    x-text="'$' + stats.creditAccounts.toFixed(2)"></p>
+                                <p class="text-3xl font-bold text-gray-900" x-text="'$' + stats.creditAccounts.toFixed(2)"></p>
                                 <p class="text-xs text-red-600 mt-2">
                                     <i class="fas fa-exclamation-circle"></i>
                                     <span x-text="stats.creditCustomers + ' clientes'"></span>
@@ -343,9 +279,7 @@
                                     <div class="flex justify-between items-start mb-3">
                                         <div>
                                             <h4 class="font-semibold text-gray-800" x-text="tank.name"></h4>
-                                            <p class="text-sm text-gray-500"
-                                                x-text="'Capacidad: ' + tank.capacity_liters.toLocaleString() + 'L'">
-                                            </p>
+                                            <p class="text-sm text-gray-500" x-text="'Capacidad: ' + tank.capacity_liters.toLocaleString() + 'L'"></p>
                                         </div>
                                         <span class="px-3 py-1 rounded-full text-xs font-semibold" :class="{
                                                 'bg-green-100 text-green-800': tank.percentage > 70,
@@ -361,17 +295,14 @@
                                             }" :style="'width: ' + tank.percentage + '%'"></div>
                                     </div>
                                     <div class="flex justify-between text-sm">
-                                        <span class="text-gray-600"
-                                            x-text="tank.current_liters.toLocaleString() + 'L disponibles'"></span>
+                                        <span class="text-gray-600" x-text="tank.current_liters.toLocaleString() + 'L disponibles'"></span>
                                         <span class="font-semibold" :class="{
                                                 'text-blue-600': tank.percentage > 70,
                                                 'text-yellow-600': tank.percentage > 40 && tank.percentage <= 70,
                                                 'text-red-600': tank.percentage <= 40
-                                            }"
-                                            x-text="(tank.capacity_liters - tank.current_liters).toLocaleString() + 'L usados'"></span>
+                                            }" x-text="(tank.capacity_liters - tank.current_liters).toLocaleString() + 'L usados'"></span>
                                     </div>
-                                    <div x-show="tank.current_liters < tank.min_level"
-                                        class="mt-2 text-xs text-red-600">
+                                    <div x-show="tank.current_liters < tank.min_level" class="mt-2 text-xs text-red-600">
                                         <i class="fas fa-exclamation-triangle mr-1"></i>
                                         Nivel bajo - Mínimo: <span x-text="tank.min_level + 'L'"></span>
                                     </div>
@@ -456,7 +387,9 @@
                 exchangeRate: 700.22,
                 salesChart: null,
                 productChart: null,
-                selectedBranch: '',
+                
+                // Control de sucursales
+                selectedBranch: 'all', 
                 availableBranches: [],
 
                 stats: {
@@ -501,8 +434,10 @@
                             this.userName = profile.full_name;
                             this.userRole = profile.role;
                             this.userBranch = profile.branch;
-                            this.selectedBranch = profile.branch;
                             this.userInitials = this.getInitials(profile.full_name);
+                            
+                            // ✅ CONSOLIDADO POR DEFECTO PARA ADMIN, SUCURSAL PARA VENDEDORES
+                            this.selectedBranch = (profile.role === 'admin') ? 'all' : profile.branch;
                         }
 
                         // Cargar sucursales disponibles si es admin
@@ -522,13 +457,14 @@
 
                 async loadAvailableBranches() {
                     try {
+                        // Consultamos profiles para obtener las sucursales registradas en el sistema
                         const { data, error } = await supabase
-                            .from('sales')
+                            .from('profiles')
                             .select('branch')
                             .not('branch', 'is', null);
 
                         if (!error && data) {
-                            const uniqueBranches = [...new Set(data.map(s => s.branch))];
+                            const uniqueBranches = [...new Set(data.map(p => p.branch))];
                             this.availableBranches = uniqueBranches;
                         }
                     } catch (err) {
@@ -551,73 +487,51 @@
 
                 async loadExchangeRate() {
                     try {
-                        console.log('🔄 Consultando tasa centralizada de Supabase');
                         const { data, error } = await supabase.rpc('get_active_exchange_rate');
                         if (!error && data) {
                             const rate = ensureValidRate(data);
                             this.exchangeRate = rate;
-                            console.log('✅ Tasa cargada desde Supabase:', this.exchangeRate);
                         } else {
-                            console.warn('⚠️ No se encontró tasa en BD, usando 700.22');
                             this.exchangeRate = 700.22;
                         }
                     } catch (err) {
-                        console.error('❌ Error cargando tasa:', err);
                         this.exchangeRate = 700.22;
                     }
                 },
 
                 async loadTodayStats() {
                     try {
+                        // Fechas calculadas en zona horaria Caracas
                         const todayStr = DateUtils.getStartOfDay(new Date());
                         const yesterday = new Date();
                         yesterday.setDate(yesterday.getDate() - 1);
                         const yesterdayStr = DateUtils.getStartOfDay(yesterday);
 
-                        let query = supabase
-                            .from('sales')
-                            .select('total, status, payment_method')
-                            .gte('created_at', todayStr);
-
-                        // Filtrar por sucursal si no es "all"
+                        let query = supabase.from('sales').select('total, status, payment_method').gte('created_at', todayStr);
                         if (this.selectedBranch !== 'all') {
                             query = query.eq('branch', this.selectedBranch);
                         }
-
                         const { data: todaySales } = await query;
 
-                        let yesterdayQuery = supabase
-                            .from('sales')
-                            .select('total')
-                            .gte('created_at', yesterdayStr)
-                            .lt('created_at', todayStr);
-
+                        let yesterdayQuery = supabase.from('sales').select('total').gte('created_at', yesterdayStr).lt('created_at', todayStr);
                         if (this.selectedBranch !== 'all') {
                             yesterdayQuery = yesterdayQuery.eq('branch', this.selectedBranch);
                         }
-
                         const { data: yesterdaySales } = await yesterdayQuery;
 
                         this.stats.todaySales = todaySales?.length || 0;
                         this.stats.yesterdaySales = yesterdaySales?.length || 0;
-                        this.stats.todayRevenue = todaySales
-                            ?.filter(s => s.status === 'completed')
-                            .reduce((sum, s) => sum + s.total, 0) || 0;
+                        this.stats.todayRevenue = todaySales?.filter(s => s.status === 'completed').reduce((sum, s) => sum + s.total, 0) || 0;
 
-                        let itemsQuery = supabase
-                            .from('sale_items')
-                            .select(`quantity, products!inner(size_liters), sales!inner(branch, created_at)`)
-                            .gte('sales.created_at', todayStr);
-
+                        let itemsQuery = supabase.from('sale_items').select(`quantity, products!inner(size_liters), sales!inner(branch, created_at)`).gte('sales.created_at', todayStr);
                         if (this.selectedBranch !== 'all') {
                             itemsQuery = itemsQuery.eq('sales.branch', this.selectedBranch);
                         }
-
                         const { data: saleItems } = await itemsQuery;
 
                         this.stats.totalBottlesSold = saleItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-
                         this.stats.bottlesBySize = { 5: 0, 13: 0, 20: 0 };
+                        
                         saleItems?.forEach(item => {
                             const size = item.products.size_liters;
                             if (this.stats.bottlesBySize[size] !== undefined) {
@@ -632,29 +546,28 @@
 
                 async loadWeeklySales() {
                     try {
-                        const today = new Date();
-                        const dayOfWeek = today.getDay() || 7;
-                        const monday = new Date(today);
-                        monday.setDate(today.getDate() - dayOfWeek + 1);
+                        // Calcular el lunes de la semana actual en hora Caracas
+                        const now = new Date();
+                        const caracasTimeStr = now.toLocaleString('en-US', { timeZone: 'America/Caracas' });
+                        const caracasDate = new Date(caracasTimeStr);
+                        
+                        const dayOfWeek = caracasDate.getDay() || 7; // 1 = Lunes, 7 = Domingo
+                        const monday = new Date(caracasDate);
+                        monday.setDate(caracasDate.getDate() - dayOfWeek + 1);
                         monday.setHours(0, 0, 0, 0);
 
-                        let query = supabase
-                            .from('sales')
-                            .select('total, created_at')
-                            .gte('created_at', monday.toISOString())
-                            .eq('status', 'completed');
-
+                        let query = supabase.from('sales').select('total, created_at').gte('created_at', monday.toISOString()).eq('status', 'completed');
                         if (this.selectedBranch !== 'all') {
                             query = query.eq('branch', this.selectedBranch);
                         }
 
                         const { data: sales } = await query;
-
                         const dailySales = [0, 0, 0, 0, 0, 0, 0];
 
                         sales?.forEach(sale => {
-                            const saleDate = new Date(sale.created_at);
-                            const dayIndex = saleDate.getDay() || 7;
+                            // Ajustar la fecha de la venta a Caracas para asignar el día correcto de la semana
+                            const saleDateCaracas = new Date(new Date(sale.created_at).toLocaleString('en-US', { timeZone: 'America/Caracas' }));
+                            const dayIndex = saleDateCaracas.getDay() || 7;
                             dailySales[dayIndex - 1] += sale.total;
                         });
 
@@ -668,18 +581,13 @@
                 async loadProductDistribution() {
                     try {
                         const todayStr = DateUtils.getStartOfDay(new Date());
-
-                        let query = supabase
-                            .from('sale_items')
-                            .select(`quantity, products!inner(size_liters), sales!inner(branch, created_at)`)
-                            .gte('sales.created_at', todayStr);
-
+                        let query = supabase.from('sale_items').select(`quantity, products!inner(size_liters), sales!inner(branch, created_at)`).gte('sales.created_at', todayStr);
+                        
                         if (this.selectedBranch !== 'all') {
                             query = query.eq('sales.branch', this.selectedBranch);
                         }
 
                         const { data: items } = await query;
-
                         const distribution = { 5: 0, 13: 0, 20: 0 };
 
                         items?.forEach(item => {
@@ -698,20 +606,13 @@
 
                 async loadCreditAccounts() {
                     try {
-                        let query = supabase
-                            .from('sales')
-                            .select('total, customer_id')
-                            .eq('payment_method', 'credito')
-                            .eq('status', 'pending');
-
+                        let query = supabase.from('sales').select('total, customer_id').eq('payment_method', 'credito').eq('status', 'pending');
                         if (this.selectedBranch !== 'all') {
                             query = query.eq('branch', this.selectedBranch);
                         }
 
                         const { data: creditSales } = await query;
-
                         this.stats.creditAccounts = creditSales?.reduce((sum, s) => sum + s.total, 0) || 0;
-
                         const uniqueCustomers = new Set(creditSales?.map(s => s.customer_id));
                         this.stats.creditCustomers = uniqueCustomers.size;
 
@@ -722,18 +623,12 @@
 
                 async loadRecentActivity() {
                     try {
-                        let query = supabase
-                            .from('sales')
-                            .select(`id, created_at, total, customer_name, sale_items!inner(quantity, products!inner(name))`)
-                            .order('created_at', { ascending: false })
-                            .limit(5);
-
+                        let query = supabase.from('sales').select(`id, created_at, total, customer_name, sale_items!inner(quantity, products!inner(name))`).order('created_at', { ascending: false }).limit(5);
                         if (this.selectedBranch !== 'all') {
                             query = query.eq('branch', this.selectedBranch);
                         }
 
                         const { data: sales } = await query;
-
                         this.recentActivity = sales?.map(sale => ({
                             id: sale.id,
                             type: 'sale',
@@ -750,17 +645,12 @@
 
                 async loadTanks() {
                     try {
-                        let query = supabase
-                            .from('tanks')
-                            .select('*')
-                            .order('name');
-
+                        let query = supabase.from('tanks').select('*').order('name');
                         if (this.selectedBranch !== 'all') {
                             query = query.eq('branch', this.selectedBranch);
                         }
 
                         const { data: tanks } = await query;
-
                         this.tanks = tanks?.map(tank => ({
                             ...tank,
                             percentage: Math.round((tank.current_liters / tank.capacity_liters) * 100)
@@ -774,9 +664,7 @@
                 initCharts() {
                     const salesCtx = document.getElementById('salesChart');
                     if (salesCtx) {
-                        if (this.salesChart) {
-                            this.salesChart.destroy();
-                        }
+                        if (this.salesChart) this.salesChart.destroy();
                         this.salesChart = new Chart(salesCtx, {
                             type: 'line',
                             data: {
@@ -786,23 +674,14 @@
                                     data: this.weeklySales.data,
                                     borderColor: '#0ea5e9',
                                     backgroundColor: 'rgba(14, 165, 233, 0.1)',
-                                    tension: 0.4,
-                                    fill: true,
-                                    borderWidth: 2,
-                                    pointRadius: 3,
-                                    pointHoverRadius: 5
+                                    tension: 0.4, fill: true, borderWidth: 2, pointRadius: 3, pointHoverRadius: 5
                                 }]
                             },
                             options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
+                                responsive: true, maintainAspectRatio: false,
                                 plugins: { legend: { display: false } },
                                 scales: {
-                                    y: {
-                                        beginAtZero: true,
-                                        ticks: { callback: function (value) { return '$' + value; } },
-                                        grid: { color: 'rgba(0, 0, 0, 0.05)' }
-                                    },
+                                    y: { beginAtZero: true, ticks: { callback: function (value) { return '$' + value; } }, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
                                     x: { grid: { display: false } }
                                 }
                             }
@@ -811,9 +690,7 @@
 
                     const productCtx = document.getElementById('productChart');
                     if (productCtx) {
-                        if (this.productChart) {
-                            this.productChart.destroy();
-                        }
+                        if (this.productChart) this.productChart.destroy();
                         this.productChart = new Chart(productCtx, {
                             type: 'doughnut',
                             data: {
@@ -821,24 +698,12 @@
                                 datasets: [{
                                     data: this.productDistribution.data,
                                     backgroundColor: ['#06b6d4', '#0ea5e9', '#0284c7'],
-                                    borderWidth: 0,
-                                    cutout: '70%'
+                                    borderWidth: 0, cutout: '70%'
                                 }]
                             },
                             options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: {
-                                        position: 'bottom',
-                                        labels: {
-                                            padding: 15,
-                                            usePointStyle: true,
-                                            pointStyle: 'circle',
-                                            font: { size: 11 }
-                                        }
-                                    }
-                                }
+                                responsive: true, maintainAspectRatio: false,
+                                plugins: { legend: { position: 'bottom', labels: { padding: 15, usePointStyle: true, pointStyle: 'circle', font: { size: 11 } } } }
                             }
                         });
                     }
@@ -853,7 +718,6 @@
                     const diffMins = Math.floor((new Date() - new Date(dateString)) / 60000);
                     const diffHours = Math.floor(diffMins / 60);
                     const diffDays = Math.floor(diffHours / 24);
-
                     if (diffMins < 1) return 'Justo ahora';
                     if (diffMins < 60) return `Hace ${diffMins} min`;
                     if (diffHours < 24) return `Hace ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
@@ -884,5 +748,4 @@
         }
     </script>
 </body>
-
 </html>
