@@ -25,168 +25,51 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        [x-cloak] {
-            display: none !important;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-
-        .gradient-bg {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-        }
-
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-        }
-
-        /* Menú móvil */
-        .sidebar-mobile {
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .sidebar-mobile.open {
-            transform: translateX(0);
-        }
-
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 39;
-        }
-
-        .sidebar-overlay.show {
-            display: block;
-        }
-
-        /* Mostrar sidebar en pantallas grandes */
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 50; }
+        .sidebar-mobile { transform: translateX(-100%); transition: transform 0.3s ease-in-out; }
+        .sidebar-mobile.open { transform: translateX(0); }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 39; }
+        .sidebar-overlay.show { display: block; }
         @media (min-width: 1024px) {
-            .sidebar-mobile {
-                transform: translateX(0) !important;
-            }
-
-            .sidebar-overlay {
-                display: none !important;
-            }
-
-            .menu-toggle {
-                display: none !important;
-            }
+            .sidebar-mobile { transform: translateX(0) !important; }
+            .sidebar-overlay { display: none !important; }
+            .menu-toggle { display: none !important; }
         }
-
-        /* Toastify personalizado */
         .toastify {
-            font-family: 'Inter', sans-serif !important;
-            font-weight: 500 !important;
-            border-radius: 12px !important;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
-            padding: 14px 20px !important;
-            min-width: 280px;
-            font-size: 14px !important;
-            color: white !important;
-            display: flex !important;
-            align-items: center !important;
+            font-family: 'Inter', sans-serif !important; font-weight: 500 !important;
+            border-radius: 12px !important; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
+            padding: 14px 20px !important; min-width: 280px; font-size: 14px !important;
+            color: white !important; display: flex !important; align-items: center !important;
         }
-
-        .toastify-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-        }
-
-        .toastify-error {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
-        }
-
-        .toastify-warning {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-        }
-
-        .toastify-info {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-        }
-
-        /* SweetAlert2 personalizado */
-        .swal2-popup {
-            font-family: 'Inter', sans-serif !important;
-            border-radius: 16px !important;
-            padding: 2rem !important;
-        }
-
-        .swal2-title {
-            font-size: 1.5rem !important;
-            font-weight: 700 !important;
-            color: #1f2937 !important;
-        }
-
-        .swal2-html-container {
-            font-size: 0.95rem !important;
-            color: #4b5563 !important;
-        }
-
+        .toastify-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; }
+        .toastify-error { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important; }
+        .toastify-warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important; }
+        .toastify-info { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+        .swal2-popup { font-family: 'Inter', sans-serif !important; border-radius: 16px !important; padding: 2rem !important; }
+        .swal2-title { font-size: 1.5rem !important; font-weight: 700 !important; color: #1f2937 !important; }
+        .swal2-html-container { font-size: 0.95rem !important; color: #4b5563 !important; }
         .swal2-confirm {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%) !important;
-            border: none !important;
-            border-radius: 12px !important;
-            padding: 0.75rem 2rem !important;
-            font-weight: 600 !important;
-            font-size: 1rem !important;
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3) !important;
-            transition: all 0.2s !important;
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%) !important; border: none !important;
+            border-radius: 12px !important; padding: 0.75rem 2rem !important; font-weight: 600 !important;
+            font-size: 1rem !important; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3) !important; transition: all 0.2s !important;
         }
-
-        .swal2-confirm:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4) !important;
-        }
-
+        .swal2-confirm:hover { transform: translateY(-2px) !important; box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4) !important; }
         .swal2-cancel {
-            background: #f3f4f6 !important;
-            color: #4b5563 !important;
-            border: none !important;
-            border-radius: 12px !important;
-            padding: 0.75rem 2rem !important;
-            font-weight: 600 !important;
-            font-size: 1rem !important;
-            transition: all 0.2s !important;
+            background: #f3f4f6 !important; color: #4b5563 !important; border: none !important;
+            border-radius: 12px !important; padding: 0.75rem 2rem !important; font-weight: 600 !important;
+            font-size: 1rem !important; transition: all 0.2s !important;
         }
-
-        .swal2-cancel:hover {
-            background: #e5e7eb !important;
-            transform: translateY(-2px) !important;
-        }
-
+        .swal2-cancel:hover { background: #e5e7eb !important; transform: translateY(-2px) !important; }
         @keyframes bounce-in {
-            0% {
-                transform: scale(0.3);
-                opacity: 0;
-            }
-
-            50% {
-                transform: scale(1.05);
-            }
-
-            70% {
-                transform: scale(0.9);
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
         }
-
-        .animate-bounce-in {
-            animation: bounce-in 0.4s ease-out;
-        }
+        .animate-bounce-in { animation: bounce-in 0.4s ease-out; }
     </style>
 </head>
 
@@ -196,8 +79,7 @@
     <div class="sidebar-overlay" :class="{ 'show': mobileMenuOpen }" @click="mobileMenuOpen = false"></div>
 
     <!-- Sidebar -->
-    <aside class="sidebar-mobile fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 lg:block"
-        :class="{ 'open': mobileMenuOpen }">
+    <aside class="sidebar-mobile fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 lg:block" :class="{ 'open': mobileMenuOpen }">
         <div class="p-6">
             <div class="mb-6">
                 <div class="flex items-center space-x-3 mb-3">
@@ -214,32 +96,25 @@
             </div>
 
             <nav class="space-y-2">
-                <a href="index.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="index.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-home w-5"></i><span>Dashboard</span>
                 </a>
-                <a href="ventas.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="ventas.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
                 </a>
-                <a href="cuentas-cobrar.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="cuentas-cobrar.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-file-invoice-dollar w-5"></i><span>Cuentas por Cobrar</span>
                 </a>
-                <a href="clientes.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="clientes.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-users w-5"></i><span>Clientes</span>
                 </a>
-                <a href="inventario.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
+                <a href="inventario.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
                     <i class="fas fa-boxes w-5"></i><span class="font-medium">Inventario</span>
                 </a>
-                <a href="usuarios.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="usuarios.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
                 </a>
-                <a href="reportes.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="reportes.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
                 </a>
             </nav>
@@ -247,8 +122,7 @@
 
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
-                    x-text="userInitials"></div>
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold" x-text="userInitials"></div>
                 <div>
                     <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
                     <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
@@ -262,27 +136,31 @@
         <!-- Header -->
         <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-4">
-                <!-- Botón Menú Móvil -->
-                <button @click="mobileMenuOpen = !mobileMenuOpen"
-                    class="menu-toggle lg:hidden text-gray-600 hover:text-gray-800">
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="menu-toggle lg:hidden text-gray-600 hover:text-gray-800">
                     <i class="fas fa-bars text-2xl"></i>
                 </button>
-
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800">Inventario</h2>
-                    <p class="text-sm text-gray-500"
-                        x-text="'Control basado en capacidad de tanques - ' + userBranch + ' | ' + formatDateLong(new Date())">
-                    </p>
+                    <p class="text-sm text-gray-500" x-text="'Control basado en capacidad de tanques - ' + (selectedBranch === 'all' ? 'Consolidado' : userBranch) + ' | ' + DateUtils.formatDateLong(new Date())"></p>
                 </div>
             </div>
             <div class="flex items-center space-x-2">
-                <button @click="openRefillTankModal()"
-                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                <!-- Dropdown de Sucursales (Solo Admin) -->
+                <div x-show="userRole === 'admin'" class="hidden md:block mr-2">
+                    <select x-model="selectedBranch" @change="refreshInventory()"
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white text-sm">
+                        <option value="all">🌐 Todas las Sucursales (Consolidado)</option>
+                        <template x-for="branch in availableBranches" :key="branch">
+                            <option :value="branch" x-text="branch.charAt(0).toUpperCase() + branch.slice(1)"></option>
+                        </template>
+                    </select>
+                </div>
+
+                <button @click="openRefillTankModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
                     <i class="fas fa-plus"></i>
                     <span class="hidden sm:inline">Recargar Tanque</span>
                 </button>
-                <button @click="openFillBottlesModal()"
-                    class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                <button @click="openFillBottlesModal()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
                     <i class="fas fa-tint"></i>
                     <span class="hidden sm:inline">Llenar Botellones</span>
                 </button>
@@ -294,7 +172,6 @@
 
         <!-- Content -->
         <main class="p-6">
-            <!-- Loading -->
             <div x-show="loading" class="text-center py-12">
                 <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500"></i>
                 <p class="mt-4 text-gray-600">Cargando inventario...</p>
@@ -333,8 +210,7 @@
                                     <i :class="item.product_type === 'cap' ? 'fas fa-circle text-purple-600 text-3xl' : 'fas fa-tint text-3xl'"
                                         :style="{color: item.size_liters === 5 ? '#0891b2' : item.size_liters === 13 ? '#3b82f6' : item.size_liters === 20 ? '#1d4ed8' : '#9333ea'}"></i>
                                 </div>
-                                <span
-                                    class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">Disponible</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">Disponible</span>
                             </div>
                             <h3 class="text-lg font-semibold text-gray-800" x-text="item.product_name"></h3>
                             <p class="text-4xl font-bold text-gray-900 mt-2" x-text="item.virtual_stock"></p>
@@ -346,13 +222,11 @@
                                 </div>
                                 <div class="flex justify-between text-sm mt-1">
                                     <span class="text-gray-600">Valor total:</span>
-                                    <span class="font-semibold text-green-600"
-                                        x-text="'$' + parseFloat(item.total_value).toFixed(2)"></span>
+                                    <span class="font-semibold text-green-600" x-text="'$' + parseFloat(item.total_value).toFixed(2)"></span>
                                 </div>
                                 <div class="flex justify-between text-sm mt-1">
                                     <span class="text-gray-600">Agua asignada:</span>
-                                    <span class="font-semibold text-blue-600"
-                                        x-text="((item.virtual_stock * (item.size_liters || 0)) || 0).toLocaleString() + 'L'"></span>
+                                    <span class="font-semibold text-blue-600" x-text="((item.virtual_stock * (item.size_liters || 0)) || 0).toLocaleString() + 'L'"></span>
                                 </div>
                             </div>
                         </div>
@@ -366,8 +240,7 @@
                             <i class="fas fa-database text-blue-500 mr-2"></i>
                             Tanques de Almacenamiento
                         </span>
-                        <button @click="openRefillTankModal()"
-                            class="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg">
+                        <button @click="openRefillTankModal()" class="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg">
                             <i class="fas fa-plus mr-1"></i>Recargar
                         </button>
                     </h3>
@@ -377,34 +250,29 @@
                                 <div class="flex justify-between items-start mb-3">
                                     <div>
                                         <h4 class="font-semibold text-gray-800" x-text="tank.name"></h4>
-                                        <p class="text-sm text-gray-500"
-                                            x-text="'Capacidad: ' + tank.capacity_liters.toLocaleString() + 'L'"></p>
+                                        <p class="text-sm text-gray-500" x-text="'Capacidad: ' + tank.capacity_liters.toLocaleString() + 'L'"></p>
                                     </div>
                                     <span class="px-3 py-1 rounded-full text-xs font-semibold" :class="{
                                             'bg-green-100 text-green-800': (tank.current_liters / tank.capacity_liters) > 0.7,
                                             'bg-yellow-100 text-yellow-800': (tank.current_liters / tank.capacity_liters) > 0.4 && (tank.current_liters / tank.capacity_liters) <= 0.7,
                                             'bg-red-100 text-red-800': (tank.current_liters / tank.capacity_liters) <= 0.4
-                                        }"
-                                        x-text="Math.round((tank.current_liters / tank.capacity_liters) * 100) + '%'"></span>
+                                        }" x-text="Math.round((tank.current_liters / tank.capacity_liters) * 100) + '%'"></span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
                                     <div class="h-4 rounded-full transition-all duration-500" :class="{
                                             'bg-gradient-to-r from-blue-400 to-blue-600': (tank.current_liters / tank.capacity_liters) > 0.7,
                                             'bg-gradient-to-r from-yellow-400 to-yellow-600': (tank.current_liters / tank.capacity_liters) > 0.4 && (tank.current_liters / tank.capacity_liters) <= 0.7,
                                             'bg-gradient-to-r from-red-400 to-red-600': (tank.current_liters / tank.capacity_liters) <= 0.4
-                                        }"
-                                        :style="'width: ' + ((tank.current_liters / tank.capacity_liters) * 100) + '%'">
+                                        }" :style="'width: ' + ((tank.current_liters / tank.capacity_liters) * 100) + '%'">
                                     </div>
                                 </div>
                                 <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600"
-                                        x-text="tank.current_liters.toLocaleString() + 'L disponibles'"></span>
+                                    <span class="text-gray-600" x-text="tank.current_liters.toLocaleString() + 'L disponibles'"></span>
                                     <span class="font-semibold" :class="{
                                             'text-blue-600': (tank.current_liters / tank.capacity_liters) > 0.7,
                                             'text-yellow-600': (tank.current_liters / tank.capacity_liters) > 0.4 && (tank.current_liters / tank.capacity_liters) <= 0.7,
                                             'text-red-600': (tank.current_liters / tank.capacity_liters) <= 0.4
-                                        }"
-                                        x-text="(tank.capacity_liters - tank.current_liters).toLocaleString() + 'L usados'"></span>
+                                        }" x-text="(tank.capacity_liters - tank.current_liters).toLocaleString() + 'L usados'"></span>
                                 </div>
                                 <div class="mt-2 text-xs text-gray-500" x-show="tank.current_liters < tank.min_level">
                                     <i class="fas fa-exclamation-triangle text-red-500 mr-1"></i>
@@ -415,7 +283,7 @@
 
                         <div x-show="tanks.length === 0" class="col-span-full text-center py-8 text-gray-400">
                             <i class="fas fa-database text-4xl mb-2"></i>
-                            <p>No hay tanques registrados para esta sucursal</p>
+                            <p>No hay tanques registrados</p>
                         </div>
                     </div>
                 </div>
@@ -432,8 +300,7 @@
                             <p class="text-sm text-blue-700">
                                 <span x-text="Math.round(totalWater * 0.70).toLocaleString()"></span>L disponibles
                             </p>
-                            <p class="text-2xl font-bold text-blue-900 mt-2"
-                                x-text="Math.round((totalWater * 0.70) / 20) + ' botellones'"></p>
+                            <p class="text-2xl font-bold text-blue-900 mt-2" x-text="Math.round((totalWater * 0.70) / 20) + ' botellones'"></p>
                         </div>
 
                         <div class="bg-cyan-50 rounded-xl p-4 border-2 border-cyan-200">
@@ -444,8 +311,7 @@
                             <p class="text-sm text-cyan-700">
                                 <span x-text="Math.round(totalWater * 0.20).toLocaleString()"></span>L disponibles
                             </p>
-                            <p class="text-2xl font-bold text-cyan-900 mt-2"
-                                x-text="Math.round((totalWater * 0.20) / 5) + ' botellones'"></p>
+                            <p class="text-2xl font-bold text-cyan-900 mt-2" x-text="Math.round((totalWater * 0.20) / 5) + ' botellones'"></p>
                         </div>
 
                         <div class="bg-indigo-50 rounded-xl p-4 border-2 border-indigo-200">
@@ -456,8 +322,7 @@
                             <p class="text-sm text-indigo-700">
                                 <span x-text="Math.round(totalWater * 0.10).toLocaleString()"></span>L disponibles
                             </p>
-                            <p class="text-2xl font-bold text-indigo-900 mt-2"
-                                x-text="Math.round((totalWater * 0.10) / 13) + ' botellones'"></p>
+                            <p class="text-2xl font-bold text-indigo-900 mt-2" x-text="Math.round((totalWater * 0.10) / 13) + ' botellones'"></p>
                         </div>
                     </div>
                 </div>
@@ -466,11 +331,8 @@
     </div>
 
     <!-- Modal Recargar Tanque -->
-    <div x-show="showRefillTankModal" x-cloak
-        class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-        @click.self="closeRefillTankModal()">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-bounce-in"
-            @click.stop>
+    <div x-show="showRefillTankModal" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="closeRefillTankModal()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-bounce-in" @click.stop>
             <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white">
                 <h3 class="text-xl font-bold text-gray-800">
                     <i class="fas fa-plus-circle text-blue-600 mr-2"></i>Recargar Tanque
@@ -483,13 +345,10 @@
             <div class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Tanque *</label>
-                    <select x-model="refillForm.tankId"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500">
+                    <select x-model="refillForm.tankId" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500">
                         <option value="">Seleccionar tanque...</option>
                         <template x-for="tank in tanks" :key="tank.id">
-                            <option :value="tank.id"
-                                x-text="tank.name + ' (' + tank.current_liters + 'L / ' + tank.capacity_liters + 'L)'">
-                            </option>
+                            <option :value="tank.id" x-text="tank.name + ' (' + tank.current_liters + 'L / ' + tank.capacity_liters + 'L)'"></option>
                         </template>
                     </select>
                 </div>
@@ -517,18 +376,15 @@
                     <div class="space-y-1 text-sm">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Nivel actual:</span>
-                            <span class="font-semibold"
-                                x-text="(getCurrentTankLevel() || 0).toLocaleString() + 'L'"></span>
+                            <span class="font-semibold" x-text="(getCurrentTankLevel() || 0).toLocaleString() + 'L'"></span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">A agregar:</span>
-                            <span class="font-semibold text-blue-600"
-                                x-text="(refillForm.liters || 0).toLocaleString() + 'L'"></span>
+                            <span class="font-semibold text-blue-600" x-text="(refillForm.liters || 0).toLocaleString() + 'L'"></span>
                         </div>
                         <div class="flex justify-between pt-2 border-t border-blue-200">
                             <span class="text-gray-800 font-semibold">Nuevo nivel:</span>
-                            <span class="font-bold text-green-600"
-                                x-text="(getCurrentTankLevel() + (refillForm.liters || 0)).toLocaleString() + 'L'"></span>
+                            <span class="font-bold text-green-600" x-text="(getCurrentTankLevel() + (refillForm.liters || 0)).toLocaleString() + 'L'"></span>
                         </div>
                     </div>
                 </div>
@@ -547,11 +403,8 @@
     </div>
 
     <!-- Modal Llenar Botellones -->
-    <div x-show="showFillBottlesModal" x-cloak
-        class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-        @click.self="closeFillBottlesModal()">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-bounce-in"
-            @click.stop>
+    <div x-show="showFillBottlesModal" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="closeFillBottlesModal()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-bounce-in" @click.stop>
             <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white">
                 <h3 class="text-xl font-bold text-gray-800">
                     <i class="fas fa-tint text-cyan-600 mr-2"></i>Llenar Botellones
@@ -564,8 +417,7 @@
             <div class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Botellón *</label>
-                    <select x-model="fillForm.sizeLiters"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500">
+                    <select x-model="fillForm.sizeLiters" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500">
                         <option value="">Seleccionar...</option>
                         <option value="5">Botellón 5 Litros</option>
                         <option value="13">Botellón 13 Litros</option>
@@ -582,12 +434,10 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Tanque de Origen *</label>
-                    <select x-model="fillForm.tankId"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500">
+                    <select x-model="fillForm.tankId" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500">
                         <option value="">Seleccionar tanque...</option>
                         <template x-for="tank in tanks" :key="tank.id">
-                            <option :value="tank.id" x-text="tank.name + ' (' + tank.current_liters + 'L disponibles)'">
-                            </option>
+                            <option :value="tank.id" x-text="tank.name + ' (' + tank.current_liters + 'L disponibles)'"></option>
                         </template>
                     </select>
                 </div>
@@ -605,8 +455,7 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Agua requerida:</span>
-                            <span class="font-semibold text-cyan-600"
-                                x-text="((fillForm.quantity || 0) * (fillForm.sizeLiters || 0)).toLocaleString() + 'L'"></span>
+                            <span class="font-semibold text-cyan-600" x-text="((fillForm.quantity || 0) * (fillForm.sizeLiters || 0)).toLocaleString() + 'L'"></span>
                         </div>
                     </div>
                 </div>
@@ -635,9 +484,6 @@
             window.location.href = 'login.html';
         }
 
-        // ============================================
-        // NOTIFICACIONES TOASTIFY (IGUAL A VENTAS)
-        // ============================================
         function showToast(message, type = 'success') {
             const gradients = {
                 success: 'linear-gradient(to right, #10b981, #059669)',
@@ -646,37 +492,21 @@
                 info: 'linear-gradient(to right, #3b82f6, #2563eb)'
             };
             const icons = { success: '✓', error: '✗', warning: '⚠', info: 'ℹ' };
-
             Toastify({
                 text: `${icons[type]} ${message}`,
-                duration: 3000,
-                close: true,
-                gravity: 'top',
-                position: 'right',
-                stopOnFocus: true,
+                duration: 3000, close: true, gravity: 'top', position: 'right', stopOnFocus: true,
                 style: {
-                    background: gradients[type],
-                    borderRadius: '12px',
-                    fontFamily: 'Inter, sans-serif',
-                    fontWeight: '500',
-                    fontSize: '14px',
-                    padding: '14px 20px',
-                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
-                    minWidth: '280px'
+                    background: gradients[type], borderRadius: '12px', fontFamily: 'Inter, sans-serif',
+                    fontWeight: '500', fontSize: '14px', padding: '14px 20px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15)', minWidth: '280px'
                 }
             }).showToast();
         }
 
         async function showConfirm(title, html, confirmText = 'Confirmar', cancelText = 'Cancelar') {
             const result = await Swal.fire({
-                title: title,
-                html: html,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: confirmText,
-                cancelButtonText: cancelText,
-                reverseButtons: true,
-                focusCancel: true,
+                title: title, html: html, icon: 'question', showCancelButton: true,
+                confirmButtonText: confirmText, cancelButtonText: cancelText, reverseButtons: true, focusCancel: true,
                 customClass: {
                     popup: 'rounded-2xl',
                     confirmButton: 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-xl font-semibold',
@@ -687,105 +517,114 @@
             return result.isConfirmed;
         }
 
+        // ============================================
+        // TRUNCAR A 2 DECIMALES (Evita que 723.999 se convierta en 724.00)
+        // ============================================
+        function round2(num) {
+            if (num === null || num === undefined || isNaN(num)) return 0;
+            return Math.floor(parseFloat(num) * 100) / 100;
+        }
+
         function inventarioApp() {
             return {
-                // Variables del menú responsive
                 mobileMenuOpen: false,
                 currentPage: 'inventario',
-
                 loading: true,
                 processing: false,
                 virtualInventory: [],
                 tanks: [],
                 totalWater: 0,
-
-                // User info
                 userName: '',
                 userRole: '',
                 userBranch: '',
                 userInitials: '??',
+                
+                // ✅ Control de sucursales (Consolidado para admin)
+                selectedBranch: 'all',
+                availableBranches: [],
 
-                // Modales
                 showRefillTankModal: false,
                 showFillBottlesModal: false,
-
-                // Formularios
-                refillForm: {
-                    tankId: '',
-                    liters: 0,
-                    notes: ''
-                },
-
-                fillForm: {
-                    sizeLiters: '',
-                    quantity: 0,
-                    tankId: ''
-                },
+                refillForm: { tankId: '', liters: 0, notes: '' },
+                fillForm: { sizeLiters: '', quantity: 0, tankId: '' },
 
                 async initInventario() {
-                    // Verificar autenticación
                     const { data: { session } } = await supabase.auth.getSession();
-                    if (!session) {
-                        window.location.href = 'login.html';
-                        return;
-                    }
+                    if (!session) { window.location.href = 'login.html'; return; }
 
-                    // Obtener perfil del usuario
                     try {
-                        const { data: profile } = await supabase
-                            .from('profiles')
-                            .select('full_name, role, branch')
-                            .eq('id', session.user.id)
-                            .single();
-
+                        const { data: profile } = await supabase.from('profiles').select('full_name, role, branch').eq('id', session.user.id).single();
                         if (profile) {
                             this.userName = profile.full_name;
                             this.userRole = profile.role;
                             this.userBranch = profile.branch;
                             this.userInitials = this.getInitials(profile.full_name);
+                            
+                            // ✅ CONSOLIDADO POR DEFECTO PARA ADMIN, SUCURSAL PARA VENDEDORES
+                            this.selectedBranch = (profile.role === 'admin') ? 'all' : profile.branch;
                         }
+
+                        if (this.userRole === 'admin') {
+                            await this.loadAvailableBranches();
+                        }
+
+                        await this.loadVirtualInventory();
+                        await this.loadTanks();
                     } catch (err) {
-                        console.error('Error obteniendo perfil:', err);
-                    }
-
-                    // Cargar datos
-                    await this.loadVirtualInventory();
-                    await this.loadTanks();
-                },
-
-                async loadVirtualInventory() {
-                    this.loading = true;
-                    try {
-                        const { data, error } = await supabase
-                            .rpc('calculate_virtual_inventory', {
-                                branch_param: this.userBranch
-                            });
-
-                        if (error) throw error;
-                        this.virtualInventory = data || [];
-
-                    } catch (err) {
-                        console.error('Error cargando inventario virtual:', err);
-                        showToast('Error al cargar inventario: ' + err.message, 'error');
+                        console.error('Error inicializando:', err);
                     } finally {
                         this.loading = false;
                     }
                 },
 
-                async loadTanks() {
+                async loadAvailableBranches() {
                     try {
-                        const { data, error } = await supabase
-                            .from('tanks')
-                            .select('*')
-                            .eq('branch', this.userBranch)
-                            .order('name');
+                        const { data, error } = await supabase.from('profiles').select('branch').not('branch', 'is', null);
+                        if (!error && data) {
+                            this.availableBranches = [...new Set(data.map(p => p.branch))];
+                        }
+                    } catch (err) {
+                        console.error('Error cargando sucursales:', err);
+                    }
+                },
+
+                async refreshInventory() {
+                    this.loading = true;
+                    await Promise.all([this.loadVirtualInventory(), this.loadTanks()]);
+                    this.loading = false;
+                },
+
+                async loadVirtualInventory() {
+                    try {
+                        // Nota: Si el RPC no maneja 'null' para 'all', se podría necesitar ajustar el RPC en Supabase 
+                        // para que ignore el filtro cuando branch_param es NULL.
+                        const branchParam = this.selectedBranch === 'all' ? null : this.selectedBranch;
+                        
+                        const { data, error } = await supabase.rpc('calculate_virtual_inventory', { 
+                            branch_param: branchParam 
+                        });
 
                         if (error) throw error;
+                        this.virtualInventory = data || [];
+                    } catch (err) {
+                        console.error('Error cargando inventario virtual:', err);
+                        showToast('Error al cargar inventario: ' + err.message, 'error');
+                    }
+                },
+
+                async loadTanks() {
+                    try {
+                        let query = supabase.from('tanks').select('*').order('name');
+                        
+                        if (this.selectedBranch !== 'all') {
+                            query = query.eq('branch', this.selectedBranch);
+                        }
+
+                        const { data, error } = await query;
+                        if (error) throw error;
+                        
                         this.tanks = data || [];
-
-                        // Calcular total de agua
                         this.totalWater = this.tanks.reduce((sum, tank) => sum + tank.current_liters, 0);
-
                     } catch (err) {
                         console.error('Error cargando tanques:', err);
                         showToast('Error al cargar tanques', 'error');
@@ -797,51 +636,23 @@
                     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
                 },
 
-                // ============================================
-                // FUNCIONES DE FECHA CON DateUtils
-                // ============================================
-                formatDate(dateString) {
-                    return DateUtils.formatDate(dateString);
-                },
+                formatDate(dateString) { return DateUtils.formatDate(dateString); },
+                formatDateTime(dateString) { return DateUtils.formatDateTime(dateString); },
+                formatDateLong(dateString) { return DateUtils.formatDateLong(dateString); },
 
-                formatDateTime(dateString) {
-                    return DateUtils.formatDateTime(dateString);
-                },
-
-                formatDateLong(dateString) {
-                    return DateUtils.formatDateLong(dateString);
-                },
-
-                // ============================================
-                // MODAL RECARGAR TANQUE
-                // ============================================
                 openRefillTankModal() {
-                    this.refillForm = {
-                        tankId: '',
-                        liters: 0,
-                        notes: ''
-                    };
+                    this.refillForm = { tankId: '', liters: 0, notes: '' };
                     this.showRefillTankModal = true;
                 },
-
-                closeRefillTankModal() {
-                    this.showRefillTankModal = false;
-                },
-
+                closeRefillTankModal() { this.showRefillTankModal = false; },
                 getCurrentTankLevel() {
                     const tank = this.tanks.find(t => t.id === this.refillForm.tankId);
                     return tank ? tank.current_liters : 0;
                 },
 
                 async refillTank() {
-                    if (!this.refillForm.tankId) {
-                        showToast('Seleccione un tanque', 'warning');
-                        return;
-                    }
-                    if (!this.refillForm.liters || this.refillForm.liters <= 0) {
-                        showToast('Ingrese una cantidad válida de litros', 'warning');
-                        return;
-                    }
+                    if (!this.refillForm.tankId) { showToast('Seleccione un tanque', 'warning'); return; }
+                    if (!this.refillForm.liters || this.refillForm.liters <= 0) { showToast('Ingrese una cantidad válida de litros', 'warning'); return; }
 
                     const tank = this.tanks.find(t => t.id === this.refillForm.tankId);
                     const newLevel = tank.current_liters + this.refillForm.liters;
@@ -851,9 +662,7 @@
                         return;
                     }
 
-                    const confirmed = await showConfirm(
-                        'Confirmar Recarga',
-                        `
+                    const confirmed = await showConfirm('Confirmar Recarga', `
                         <div class="text-left space-y-2">
                             <p><strong>Tanque:</strong> ${tank.name}</p>
                             <p><strong>Nivel actual:</strong> ${tank.current_liters.toLocaleString()}L</p>
@@ -861,49 +670,28 @@
                             <div class="bg-green-50 p-3 rounded-lg mt-2">
                                 <p class="font-bold text-green-600">Nuevo nivel: ${newLevel.toLocaleString()}L</p>
                             </div>
-                        </div>
-                        `,
-                        'Confirmar Recarga',
-                        'Cancelar'
-                    );
+                        </div>`, 'Confirmar Recarga', 'Cancelar');
 
                     if (!confirmed) return;
 
                     this.processing = true;
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
-
-                        // Actualizar tanque
-                        const { error: updateError } = await supabase
-                            .from('tanks')
-                            .update({
-                                current_liters: newLevel,
-                                updated_at: new Date().toISOString()
-                            })
-                            .eq('id', this.refillForm.tankId);
-
+                        const { error: updateError } = await supabase.from('tanks').update({
+                            current_liters: newLevel, updated_at: new Date().toISOString()
+                        }).eq('id', this.refillForm.tankId);
                         if (updateError) throw updateError;
 
-                        // Registrar en tank_logs
-                        const { error: logError } = await supabase
-                            .from('tank_logs')
-                            .insert({
-                                tank_id: this.refillForm.tankId,
-                                change_type: 'refill',
-                                liters_changed: this.refillForm.liters,
-                                previous_level: tank.current_liters,
-                                new_level: newLevel,
-                                notes: this.refillForm.notes || 'Recarga de tanque',
-                                created_by: session.user.id
-                            });
-
+                        const { error: logError } = await supabase.from('tank_logs').insert({
+                            tank_id: this.refillForm.tankId, change_type: 'refill', liters_changed: this.refillForm.liters,
+                            previous_level: tank.current_liters, new_level: newLevel,
+                            notes: this.refillForm.notes || 'Recarga de tanque', created_by: session.user.id
+                        });
                         if (logError) console.warn('Error registrando log:', logError);
 
                         showToast(`Tanque recargado: ${newLevel.toLocaleString()}L`, 'success');
                         this.closeRefillTankModal();
-                        await this.loadTanks();
-                        await this.loadVirtualInventory();
-
+                        await this.refreshInventory();
                     } catch (err) {
                         console.error('Error recargando tanque:', err);
                         showToast('Error al recargar tanque: ' + err.message, 'error');
@@ -912,44 +700,20 @@
                     }
                 },
 
-                // ============================================
-                // MODAL LLENAR BOTELLONES
-                // ============================================
                 openFillBottlesModal() {
-                    this.fillForm = {
-                        sizeLiters: '',
-                        quantity: 0,
-                        tankId: ''
-                    };
+                    this.fillForm = { sizeLiters: '', quantity: 0, tankId: '' };
                     this.showFillBottlesModal = true;
                 },
-
-                closeFillBottlesModal() {
-                    this.showFillBottlesModal = false;
-                },
-
+                closeFillBottlesModal() { this.showFillBottlesModal = false; },
                 getFillFormSizeName() {
-                    const sizes = {
-                        '5': '5 Litros',
-                        '13': '13 Litros',
-                        '20': '20 Litros'
-                    };
+                    const sizes = { '5': '5 Litros', '13': '13 Litros', '20': '20 Litros' };
                     return sizes[this.fillForm.sizeLiters] || '';
                 },
 
                 async fillBottles() {
-                    if (!this.fillForm.sizeLiters) {
-                        showToast('Seleccione el tipo de botellón', 'warning');
-                        return;
-                    }
-                    if (!this.fillForm.quantity || this.fillForm.quantity <= 0) {
-                        showToast('Ingrese una cantidad válida', 'warning');
-                        return;
-                    }
-                    if (!this.fillForm.tankId) {
-                        showToast('Seleccione un tanque de origen', 'warning');
-                        return;
-                    }
+                    if (!this.fillForm.sizeLiters) { showToast('Seleccione el tipo de botellón', 'warning'); return; }
+                    if (!this.fillForm.quantity || this.fillForm.quantity <= 0) { showToast('Ingrese una cantidad válida', 'warning'); return; }
+                    if (!this.fillForm.tankId) { showToast('Seleccione un tanque de origen', 'warning'); return; }
 
                     const tank = this.tanks.find(t => t.id === this.fillForm.tankId);
                     const waterNeeded = this.fillForm.quantity * parseInt(this.fillForm.sizeLiters);
@@ -960,10 +724,7 @@
                     }
 
                     const newLevel = tank.current_liters - waterNeeded;
-
-                    const confirmed = await showConfirm(
-                        'Confirmar Llenado',
-                        `
+                    const confirmed = await showConfirm('Confirmar Llenado', `
                         <div class="text-left space-y-2">
                             <p><strong>Botellones:</strong> ${this.fillForm.quantity} x ${this.fillForm.sizeLiters}L</p>
                             <p><strong>Agua requerida:</strong> ${waterNeeded.toLocaleString()}L</p>
@@ -971,63 +732,35 @@
                             <div class="bg-yellow-50 p-3 rounded-lg mt-2">
                                 <p class="font-bold text-yellow-600">Nuevo nivel: ${newLevel.toLocaleString()}L</p>
                             </div>
-                        </div>
-                        `,
-                        'Confirmar Llenado',
-                        'Cancelar'
-                    );
+                        </div>`, 'Confirmar Llenado', 'Cancelar');
 
                     if (!confirmed) return;
 
                     this.processing = true;
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
-
-                        // Actualizar tanque
-                        const { error: updateError } = await supabase
-                            .from('tanks')
-                            .update({
-                                current_liters: newLevel,
-                                updated_at: new Date().toISOString()
-                            })
-                            .eq('id', this.fillForm.tankId);
-
+                        const { error: updateError } = await supabase.from('tanks').update({
+                            current_liters: newLevel, updated_at: new Date().toISOString()
+                        }).eq('id', this.fillForm.tankId);
                         if (updateError) throw updateError;
 
-                        // Registrar en tank_logs
-                        const { error: logError } = await supabase
-                            .from('tank_logs')
-                            .insert({
-                                tank_id: this.fillForm.tankId,
-                                change_type: 'bottle_filling',
-                                liters_changed: -waterNeeded,
-                                previous_level: tank.current_liters,
-                                new_level: newLevel,
-                                notes: `Llenado de ${this.fillForm.quantity} botellones de ${this.fillForm.sizeLiters}L`,
-                                created_by: session.user.id
-                            });
-
+                        const { error: logError } = await supabase.from('tank_logs').insert({
+                            tank_id: this.fillForm.tankId, change_type: 'bottle_filling', liters_changed: -waterNeeded,
+                            previous_level: tank.current_liters, new_level: newLevel,
+                            notes: `Llenado de ${this.fillForm.quantity} botellones de ${this.fillForm.sizeLiters}L`, created_by: session.user.id
+                        });
                         if (logError) console.warn('Error registrando log:', logError);
 
-                        // Registrar en bottle_filling
-                        const { error: fillingError } = await supabase
-                            .from('bottle_filling')
-                            .insert({
-                                branch: this.userBranch,
-                                product_id: null, // Se puede obtener de products si existe
-                                quantity_filled: this.fillForm.quantity,
-                                water_used_liters: waterNeeded,
-                                tank_id: this.fillForm.tankId,
-                                filled_by: session.user.id
-                            });
-
+                        const { error: fillingError } = await supabase.from('bottle_filling').insert({
+                            branch: this.selectedBranch === 'all' ? this.userBranch : this.selectedBranch,
+                            product_id: null, quantity_filled: this.fillForm.quantity,
+                            water_used_liters: waterNeeded, tank_id: this.fillForm.tankId, filled_by: session.user.id
+                        });
                         if (fillingError) console.warn('Error registrando llenado:', fillingError);
 
                         showToast(`${this.fillForm.quantity} botellones de ${this.fillForm.sizeLiters}L llenados`, 'success');
                         this.closeFillBottlesModal();
-                        await this.loadTanks();
-                        await this.loadVirtualInventory();
-
+                        await this.refreshInventory();
                     } catch (err) {
                         console.error('Error llenando botellones:', err);
                         showToast('Error al llenar botellones: ' + err.message, 'error');
@@ -1039,5 +772,4 @@
         }
     </script>
 </body>
-
 </html>
