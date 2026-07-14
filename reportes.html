@@ -9,13 +9,6 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
 
-    <!-- Flatpickr CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/light.css">
-    <!-- Flatpickr JS -->
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
-
     <!-- Toastify CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <!-- Toastify JS -->
@@ -147,6 +140,7 @@
             }
         }
 
+        /* Estilos para impresión */
         @media print {
             .no-print {
                 display: none !important;
@@ -179,25 +173,21 @@
             color: white;
         }
 
-        /* Flatpickr custom styles */
-        .flatpickr-calendar {
-            border-radius: 12px !important;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
+        /* Input date personalizado */
+        input[type="date"] {
+            appearance: none;
+            -webkit-appearance: none;
+            position: relative;
         }
 
-        .flatpickr-day.selected {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%) !important;
-            border-color: transparent !important;
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
         }
 
-        .flatpickr-day.selected:hover {
-            background: linear-gradient(135deg, #0284c7 0%, #0891b2 100%) !important;
-        }
-
-        .flatpickr-day.today {
-            border-color: #0ea5e9 !important;
-            color: #0ea5e9 !important;
-            font-weight: 600;
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
         }
     </style>
 </head>
@@ -313,15 +303,13 @@
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Inicio</label>
-                            <input type="text" x-ref="startDateInput" id="startDate"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="DD/MM/AAAA">
+                            <input type="date" x-model="filters.startDate" lang="es-VE"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Fin</label>
-                            <input type="text" x-ref="endDateInput" id="endDate"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="DD/MM/AAAA">
+                            <input type="date" x-model="filters.endDate" lang="es-VE"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Reporte</label>
@@ -697,6 +685,7 @@
             TIMEZONE: 'America/Caracas',
             LOCALE: 'es-VE',
 
+            // Obtener fecha actual en formato YYYY-MM-DD (para input type="date")
             getCurrentDateInput() {
                 const now = new Date();
                 const caracasString = now.toLocaleString('en-US', { timeZone: this.TIMEZONE });
@@ -704,6 +693,7 @@
                 return caracasDate.toISOString().split('T')[0];
             },
 
+            // Formatear como DD/MM/AAAA
             formatDate(dateString) {
                 if (!dateString) return 'N/A';
                 const date = new Date(dateString);
@@ -715,6 +705,7 @@
                 }).format(date);
             },
 
+            // Formatear como DD/MM/AAAA HH:MM
             formatDateTime(dateString) {
                 if (!dateString) return 'N/A';
                 const date = new Date(dateString);
@@ -729,6 +720,7 @@
                 }).format(date);
             },
 
+            // Formatear fecha larga: "14 de julio de 2026"
             formatDateLong(dateString) {
                 if (!dateString) return 'N/A';
                 const date = new Date(dateString);
@@ -740,13 +732,15 @@
                 }).format(date);
             },
 
+            // Inicio del día (00:00:00)
             getStartOfDay(dateString) {
-                if (!dateString) return new Date().toISOString().split('T')[0] + 'T00:00:00';
+                if (!dateString) return this.getCurrentDateInput() + 'T00:00:00';
                 return dateString + 'T00:00:00';
             },
 
+            // Fin del día (23:59:59)
             getEndOfDay(dateString) {
-                if (!dateString) return new Date().toISOString().split('T')[0] + 'T23:59:59';
+                if (!dateString) return this.getCurrentDateInput() + 'T23:59:59';
                 return dateString + 'T23:59:59';
             }
         };
@@ -768,7 +762,7 @@
                 warning: 'linear-gradient(to right, #f59e0b, #d97706)',
                 info: 'linear-gradient(to right, #3b82f6, #2563eb)'
             };
-            const icons = { success: '✓', error: '✗', warning: '', info: 'ℹ' };
+            const icons = { success: '✓', error: '✗', warning: '⚠', info: '' };
             Toastify({
                 text: `${icons[type]} ${message}`,
                 duration: 3000, close: true, gravity: 'top', position: 'right', stopOnFocus: true,
@@ -795,9 +789,8 @@
                 userBranch: 'geminis',
                 userInitials: '??',
                 exchangeRate: 700.22,
-                startDatePicker: null,
-                endDatePicker: null,
 
+                // ✅ Fechas iniciales = fecha actual de Caracas
                 filters: {
                     startDate: DateUtils.getCurrentDateInput(),
                     endDate: DateUtils.getCurrentDateInput(),
@@ -819,81 +812,9 @@
                 digitalSummary: { pagoMovil: 0, transferencia: 0, puntoVenta: 0 },
                 chartInstance: null,
 
-                initReportes() {
-                    this.$nextTick(() => {
-                        this.initDatePickers();
-                    });
-                    this.initApp();
-                },
-
-                initDatePickers() {
-                    const today = new Date();
-                    const caracasToday = new Date(today.toLocaleString('en-US', { timeZone: 'America/Caracas' }));
-                    const defaultDate = caracasToday.toISOString().split('T')[0];
-
-                    // Configurar Flatpickr para fecha inicio
-                    this.startDatePicker = flatpickr(this.$refs.startDateInput, {
-                        dateFormat: 'd/m/Y',
-                        locale: 'es',
-                        defaultDate: defaultDate,
-                        maxDate: 'today',
-                        onChange: (selectedDates, dateStr) => {
-                            if (selectedDates.length > 0) {
-                                const date = selectedDates[0];
-                                this.filters.startDate = date.toISOString().split('T')[0];
-                            }
-                        }
-                    });
-
-                    // Configurar Flatpickr para fecha fin
-                    this.endDatePicker = flatpickr(this.$refs.endDateInput, {
-                        dateFormat: 'd/m/Y',
-                        locale: 'es',
-                        defaultDate: defaultDate,
-                        maxDate: 'today',
-                        onChange: (selectedDates, dateStr) => {
-                            if (selectedDates.length > 0) {
-                                const date = selectedDates[0];
-                                this.filters.endDate = date.toISOString().split('T')[0];
-                            }
-                        }
-                    });
-                },
-
-                onReportTypeChange() {
-                    const today = new Date();
-                    const caracasToday = new Date(today.toLocaleString('en-US', { timeZone: 'America/Caracas' }));
-
-                    if (this.filters.reportType === 'daily') {
-                        this.filters.startDate = caracasToday.toISOString().split('T')[0];
-                        this.filters.endDate = caracasToday.toISOString().split('T')[0];
-                    } else if (this.filters.reportType === 'weekly') {
-                        const weekAgo = new Date(caracasToday);
-                        weekAgo.setDate(weekAgo.getDate() - 7);
-                        this.filters.startDate = weekAgo.toISOString().split('T')[0];
-                        this.filters.endDate = caracasToday.toISOString().split('T')[0];
-                    } else if (this.filters.reportType === 'monthly') {
-                        const monthAgo = new Date(caracasToday);
-                        monthAgo.setMonth(monthAgo.getMonth() - 1);
-                        this.filters.startDate = monthAgo.toISOString().split('T')[0];
-                        this.filters.endDate = caracasToday.toISOString().split('T')[0];
-                    }
-
-                    // Actualizar datepickers
-                    if (this.startDatePicker) {
-                        this.startDatePicker.setDate(this.filters.startDate);
-                    }
-                    if (this.endDatePicker) {
-                        this.endDatePicker.setDate(this.filters.endDate);
-                    }
-                },
-
-                async initApp() {
+                async initReportes() {
                     const { data: { session } } = await supabase.auth.getSession();
-                    if (!session) {
-                        window.location.href = 'login.html';
-                        return;
-                    }
+                    if (!session) { window.location.href = 'login.html'; return; }
 
                     try {
                         const { data: profile } = await supabase
@@ -919,6 +840,31 @@
                     } finally {
                         this.loading = false;
                     }
+                },
+
+                // ✅ Cambiar tipo de reporte y actualizar fechas
+                onReportTypeChange() {
+                    const today = DateUtils.getCurrentDateInput();
+
+                    if (this.filters.reportType === 'daily') {
+                        this.filters.startDate = today;
+                        this.filters.endDate = today;
+                    } else if (this.filters.reportType === 'weekly') {
+                        const now = new Date();
+                        const caracasNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/Caracas' }));
+                        const weekAgo = new Date(caracasNow);
+                        weekAgo.setDate(weekAgo.getDate() - 7);
+                        this.filters.startDate = weekAgo.toISOString().split('T')[0];
+                        this.filters.endDate = today;
+                    } else if (this.filters.reportType === 'monthly') {
+                        const now = new Date();
+                        const caracasNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/Caracas' }));
+                        const monthAgo = new Date(caracasNow);
+                        monthAgo.setMonth(monthAgo.getMonth() - 1);
+                        this.filters.startDate = monthAgo.toISOString().split('T')[0];
+                        this.filters.endDate = today;
+                    }
+                    // 'custom' no cambia las fechas
                 },
 
                 async generateReport() {
