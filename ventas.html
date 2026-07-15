@@ -1558,7 +1558,7 @@
                 const rate = round2(parseFloat(data.promedio));
                 if (isNaN(rate) || rate <= 0) throw new Error('Tasa inválida recibida de la API');
                 console.log('✅ Tasa BCV obtenida:', rate);
-                console.log('📅 Fecha actualización:', data.fechaActualizacion);
+                console.log(' Fecha actualización:', data.fechaActualizacion);
                 return { rate: rate, date: data.fechaActualizacion, source: 'BCV Oficial' };
             } catch (err) {
                 console.error('❌ Error obteniendo tasa BCV:', err);
@@ -1688,7 +1688,7 @@
                             this.exchangeRate = rate;
                             console.log('✅ Tasa cargada desde Supabase:', this.exchangeRate);
                         } else {
-                            console.warn('⚠️ No se encontró tasa en BD, usando 700.22');
+                            console.warn('️ No se encontró tasa en BD, usando 700.22');
                             this.exchangeRate = 700.22;
                         }
                     } catch (err) {
