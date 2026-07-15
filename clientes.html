@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
+    <!-- SheetJS para exportar Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -70,6 +72,48 @@
             .menu-toggle {
                 display: none !important;
             }
+        }
+
+        /* Animación suave para acordeón */
+        .customer-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .customer-card.expanded {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-content.expanded {
+            max-height: 500px;
+        }
+
+        .rotate-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .rotate-icon.expanded {
+            transform: rotate(180deg);
+        }
+
+        /* Hover effects */
+        .customer-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Badge animations */
+        .badge {
+            transition: all 0.2s ease;
+        }
+
+        .badge:hover {
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -158,15 +202,34 @@
                             x-text="userBranch"></span></p>
                 </div>
             </div>
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-3">
+                <!-- Dropdown de Sucursales (Solo Admin) -->
+                <div x-show="userRole === 'admin'" class="hidden md:block">
+                    <select x-model="selectedBranch" @change="loadCustomers()"
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white text-sm">
+                        <option value="all">🌐 Todas las Sucursales</option>
+                        <template x-for="branch in availableBranches" :key="branch">
+                            <option :value="branch" x-text="branch.charAt(0).toUpperCase() + branch.slice(1)"></option>
+                        </template>
+                    </select>
+                </div>
+
                 <!-- Buscador -->
                 <div class="relative">
                     <input type="text" x-model="searchQuery" @input="filterCustomers()" placeholder="Buscar cliente..."
                         class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
                     <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                 </div>
+
+                <!-- Botón Exportar Excel (Solo Admin) -->
+                <button x-show="userRole === 'admin'" @click="exportToExcel()"
+                    class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition flex items-center space-x-2">
+                    <i class="fas fa-file-excel"></i>
+                    <span class="hidden sm:inline">Exportar Excel</span>
+                </button>
+
                 <button @click="openCreateModal()"
-                    class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
                     <i class="fas fa-user-plus mr-2"></i>Nuevo Cliente
                 </button>
                 <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
@@ -208,54 +271,83 @@
 
             <!-- Customers Grid -->
             <div x-show="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <template x-for="customer in filteredCustomers" :key="customer.id">
-                    <div class="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-shadow">
-                        <div class="flex items-start justify-between mb-4">
-                            <div
-                                class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center text-white font-bold text-xl">
-                                <span x-text="getInitials(customer.full_name)"></span>
-                            </div>
-                            <span class="px-3 py-1 rounded-full text-xs font-semibold"
-                                :class="customer.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                                x-text="customer.is_active ? 'Activo' : 'Inactivo'"></span>
-                        </div>
-
-                        <h3 class="text-lg font-semibold text-gray-900" x-text="customer.full_name"></h3>
-                        <p class="text-sm text-gray-500 mb-4" x-text="customer.email || 'Sin email'"></p>
-
-                        <div class="space-y-2 mb-4">
-                            <div class="flex items-center text-sm" x-show="customer.phone">
-                                <i class="fas fa-phone w-5 text-gray-400"></i>
-                                <span class="text-gray-700" x-text="customer.phone || 'Sin teléfono'"></span>
-                            </div>
-                            <div class="flex items-center text-sm" x-show="customer.address">
-                                <i class="fas fa-map-marker-alt w-5 text-gray-400"></i>
-                                <span class="text-gray-700 truncate"
-                                    x-text="customer.address || 'Sin dirección'"></span>
-                            </div>
-                            <div class="flex items-center text-sm" x-show="customer.recommended_by">
-                                <i class="fas fa-user-check w-5 text-green-400"></i>
-                                <span class="text-gray-700">Recomendado por: <span class="font-medium"
-                                        x-text="customer.recommended_by"></span></span>
+                <template x-for="(customer, index) in filteredCustomers" :key="customer.id">
+                    <div class="customer-card bg-white rounded-2xl shadow-sm overflow-hidden"
+                        :class="{ 'expanded': expandedCards[customer.id] }"
+                        @click="toggleCard(customer.id)">
+                        <!-- Header de la tarjeta (siempre visible) -->
+                        <div class="p-6 cursor-pointer">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div
+                                        class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center text-white font-bold text-lg">
+                                        <span x-text="getInitials(customer.full_name)"></span>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900" x-text="customer.full_name">
+                                        </h3>
+                                        <p class="text-sm text-gray-600" x-text="customer.phone || 'Sin teléfono'">
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="badge px-3 py-1 rounded-full text-xs font-semibold"
+                                        :class="customer.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                                        x-text="customer.is_active ? 'Activo' : 'Inactivo'"></span>
+                                    <i class="fas fa-chevron-down rotate-icon text-gray-400 text-sm"
+                                        :class="{ 'expanded': expandedCards[customer.id] }"></i>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="text-xs text-gray-400 mb-4">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            Registrado: <span x-text="formatDate(customer.created_at)"></span>
-                        </div>
+                        <!-- Contenido expandible -->
+                        <div class="card-content px-6 pb-6" :class="{ 'expanded': expandedCards[customer.id] }">
+                            <div class="border-t pt-4 space-y-3">
+                                <!-- Email -->
+                                <div class="flex items-center text-sm" x-show="customer.email">
+                                    <i class="fas fa-envelope w-5 text-gray-400"></i>
+                                    <span class="text-gray-700" x-text="customer.email"></span>
+                                </div>
 
-                        <div class="flex space-x-2 pt-4 border-t">
-                            <button @click="editCustomer(customer)"
-                                class="flex-1 bg-blue-50 text-blue-600 py-2 rounded-lg hover:bg-blue-100 text-sm font-medium">
-                                <i class="fas fa-edit mr-1"></i>Editar
-                            </button>
-                            <button @click="toggleStatus(customer)"
-                                :class="customer.is_active ? 'bg-gray-50 text-gray-600 hover:bg-gray-100' : 'bg-green-50 text-green-600 hover:bg-green-100'"
-                                class="flex-1 py-2 rounded-lg text-sm font-medium">
-                                <i class="fas fa-power-off mr-1"></i>
-                                <span x-text="customer.is_active ? 'Desactivar' : 'Activar'"></span>
-                            </button>
+                                <!-- Dirección -->
+                                <div class="flex items-center text-sm" x-show="customer.address">
+                                    <i class="fas fa-map-marker-alt w-5 text-gray-400"></i>
+                                    <span class="text-gray-700" x-text="customer.address"></span>
+                                </div>
+
+                                <!-- Recomendado -->
+                                <div class="flex items-center text-sm" x-show="customer.recommended_by">
+                                    <i class="fas fa-user-check w-5 text-green-400"></i>
+                                    <span class="text-gray-700">Recomendado por: <span class="font-medium"
+                                            x-text="customer.recommended_by"></span></span>
+                                </div>
+
+                                <!-- Sucursal (solo visible si es admin y hay múltiples sucursales) -->
+                                <div class="flex items-center text-sm" x-show="userRole === 'admin'">
+                                    <i class="fas fa-building w-5 text-blue-400"></i>
+                                    <span class="text-gray-700 capitalize" x-text="customer.branch"></span>
+                                </div>
+
+                                <!-- Fecha de registro -->
+                                <div class="flex items-center text-xs text-gray-400 pt-2 border-t">
+                                    <i class="fas fa-calendar-alt mr-2"></i>
+                                    Registrado: <span class="ml-1" x-text="formatDate(customer.created_at)"></span>
+                                </div>
+
+                                <!-- Botones de acción -->
+                                <div class="flex space-x-2 pt-3">
+                                    <button @click.stop="editCustomer(customer)"
+                                        class="flex-1 bg-blue-50 text-blue-600 py-2 rounded-lg hover:bg-blue-100 text-sm font-medium transition">
+                                        <i class="fas fa-edit mr-1"></i>Editar
+                                    </button>
+                                    <button @click.stop="toggleStatus(customer)"
+                                        :class="customer.is_active ? 'bg-gray-50 text-gray-600 hover:bg-gray-100' : 'bg-green-50 text-green-600 hover:bg-green-100'"
+                                        class="flex-1 py-2 rounded-lg text-sm font-medium transition">
+                                        <i class="fas fa-power-off mr-1"></i>
+                                        <span x-text="customer.is_active ? 'Desactivar' : 'Activar'"></span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </template>
@@ -265,7 +357,8 @@
                     <i class="fas fa-users text-6xl text-gray-300 mb-4"></i>
                     <p class="text-gray-500 mb-2">No hay clientes registrados</p>
                     <p class="text-sm text-gray-400" x-show="searchQuery">Intenta con otra búsqueda</p>
-                    <p class="text-sm text-gray-400" x-show="!searchQuery">Haz clic en "Nuevo Cliente" para comenzar</p>
+                    <p class="text-sm text-gray-400" x-show="!searchQuery">Haz clic en "Nuevo Cliente" para comenzar
+                    </p>
                 </div>
             </div>
         </main>
@@ -273,7 +366,7 @@
 
     <!-- Modal Crear/Editar Cliente -->
     <div x-show="showModal" x-cloak class="modal-overlay" @click.self="closeModal()">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4" @click.stop>
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 animate-bounce-in" @click.stop>
             <div class="px-6 py-4 border-b flex justify-between items-center">
                 <h3 class="text-xl font-bold text-gray-800"
                     x-text="editingCustomer ? 'Editar Cliente' : 'Nuevo Cliente'"></h3>
@@ -377,12 +470,17 @@
                 showModal: false,
                 editingCustomer: null,
                 searchQuery: '',
+                expandedCards: {}, // Control de tarjetas expandidas
 
                 // User info
                 userName: '',
                 userRole: '',
                 userBranch: '',
                 userInitials: '??',
+
+                // Admin features
+                selectedBranch: 'all',
+                availableBranches: [],
 
                 // Form data
                 formData: {
@@ -419,6 +517,11 @@
                             this.userRole = profile.role;
                             this.userBranch = profile.branch;
                             this.userInitials = this.getInitials(profile.full_name);
+
+                            // Si es admin, cargar sucursales disponibles
+                            if (profile.role === 'admin') {
+                                await this.loadAvailableBranches();
+                            }
                         }
                     } catch (err) {
                         console.error('Error obteniendo perfil:', err);
@@ -428,19 +531,42 @@
                     await this.loadCustomers();
                 },
 
-                async loadCustomers() {
-                    this.loading = true;
+                async loadAvailableBranches() {
                     try {
                         const { data, error } = await supabase
                             .from('customers')
+                            .select('branch')
+                            .not('branch', 'is', null);
+
+                        if (!error && data) {
+                            const uniqueBranches = [...new Set(data.map(c => c.branch))];
+                            this.availableBranches = uniqueBranches;
+                        }
+                    } catch (err) {
+                        console.error('Error cargando sucursales:', err);
+                    }
+                },
+
+                async loadCustomers() {
+                    this.loading = true;
+                    try {
+                        let query = supabase
+                            .from('customers')
                             .select('*')
-                            .eq('branch', this.userBranch)
-                            .order('created_at', { ascending: false });
+                            .order('full_name', { ascending: true });
+
+                        // Filtrar por sucursal si no es 'all'
+                        if (this.selectedBranch !== 'all') {
+                            query = query.eq('branch', this.selectedBranch);
+                        }
+
+                        const { data, error } = await query;
 
                         if (error) throw error;
 
                         this.customers = data || [];
                         this.filteredCustomers = [...this.customers];
+                        this.expandedCards = {}; // Resetear tarjetas expandidas
 
                     } catch (err) {
                         console.error('Error cargando clientes:', err);
@@ -463,6 +589,13 @@
                         c.email?.toLowerCase().includes(query) ||
                         c.recommended_by?.toLowerCase().includes(query)
                     );
+                },
+
+                toggleCard(customerId) {
+                    this.expandedCards = {
+                        ...this.expandedCards,
+                        [customerId]: !this.expandedCards[customerId]
+                    };
                 },
 
                 getInitials(name) {
@@ -570,7 +703,7 @@
                                     address: this.formData.address,
                                     recommended_by: this.formData.recommended_by,
                                     notes: this.formData.notes,
-                                    branch: this.userBranch
+                                    branch: this.selectedBranch === 'all' ? this.userBranch : this.selectedBranch
                                 })
                                 .select()
                                 .single();
@@ -613,6 +746,99 @@
                     } catch (err) {
                         console.error('Error:', err);
                         notify('Error al cambiar estado: ' + err.message, 'error');
+                    }
+                },
+
+                async exportToExcel() {
+                    try {
+                        // Preparar datos ordenados por nombre
+                        const sortedCustomers = [...this.filteredCustomers].sort((a, b) =>
+                            a.full_name.localeCompare(b.full_name)
+                        );
+
+                        // Agrupar por sucursal si es admin y hay múltiples sucursales
+                        let dataToExport = [];
+                        
+                        if (this.userRole === 'admin' && this.selectedBranch === 'all') {
+                            // Agrupar por sucursal
+                            const byBranch = {};
+                            sortedCustomers.forEach(customer => {
+                                if (!byBranch[customer.branch]) {
+                                    byBranch[customer.branch] = [];
+                                }
+                                byBranch[customer.branch].push(customer);
+                            });
+
+                            // Crear array de datos con separadores por sucursal
+                            Object.keys(byBranch).sort().forEach(branch => {
+                                // Agregar fila de título de sucursal
+                                dataToExport.push({
+                                    'Nro': '',
+                                    'Nombre Completo': `=== ${branch.toUpperCase()} ===`,
+                                    'Teléfono': '',
+                                    'Correo': '',
+                                    'Dirección': '',
+                                    'Sucursal': ''
+                                });
+
+                                // Agregar clientes de esta sucursal
+                                byBranch[branch].forEach((customer, index) => {
+                                    dataToExport.push({
+                                        'Nro': index + 1,
+                                        'Nombre Completo': customer.full_name,
+                                        'Teléfono': customer.phone || '',
+                                        'Correo': customer.email || '',
+                                        'Dirección': customer.address || '',
+                                        'Sucursal': customer.branch
+                                    });
+                                });
+
+                                // Espacio entre sucursales
+                                dataToExport.push({});
+                            });
+                        } else {
+                            // Solo una sucursal - lista simple
+                            sortedCustomers.forEach((customer, index) => {
+                                dataToExport.push({
+                                    'Nro': index + 1,
+                                    'Nombre Completo': customer.full_name,
+                                    'Teléfono': customer.phone || '',
+                                    'Correo': customer.email || '',
+                                    'Dirección': customer.address || '',
+                                    'Sucursal': customer.branch
+                                });
+                            });
+                        }
+
+                        // Crear workbook y worksheet
+                        const wb = XLSX.utils.book_new();
+                        const ws = XLSX.utils.json_to_sheet(dataToExport);
+
+                        // Ajustar ancho de columnas
+                        ws['!cols'] = [
+                            { wch: 5 },  // Nro
+                            { wch: 30 }, // Nombre
+                            { wch: 15 }, // Teléfono
+                            { wch: 30 }, // Correo
+                            { wch: 35 }, // Dirección
+                            { wch: 20 }  // Sucursal
+                        ];
+
+                        // Agregar worksheet al workbook
+                        XLSX.utils.book_append_sheet(wb, ws, 'Clientes');
+
+                        // Generar nombre de archivo con fecha
+                        const date = new Date().toISOString().split('T')[0];
+                        const fileName = `Clientes_${date}.xlsx`;
+
+                        // Descargar archivo
+                        XLSX.writeFile(wb, fileName);
+
+                        notify('Excel exportado exitosamente');
+
+                    } catch (err) {
+                        console.error('Error exportando Excel:', err);
+                        notify('Error al exportar: ' + err.message, 'error');
                     }
                 }
             }
