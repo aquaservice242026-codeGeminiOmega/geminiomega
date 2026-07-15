@@ -278,8 +278,8 @@
                 <!-- Dropdown de Sucursales (Solo Admin) -->
                 <div x-show="userRole === 'admin'" class="hidden md:block">
                     <select x-model="selectedBranch" @change="generateReport()"
-                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white text-sm">
-                        <option value="all">🌐 Todas las Sucursales (Consolidado)</option>
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white">
+                        <option value="all">Todas las Sucursales</option>
                         <template x-for="branch in availableBranches" :key="branch">
                             <option :value="branch"
                                 x-text="branch.charAt(0).toUpperCase() + branch.slice(1)"></option>
@@ -767,7 +767,7 @@
                 warning: 'linear-gradient(to right, #f59e0b, #d97706)',
                 info: 'linear-gradient(to right, #3b82f6, #2563eb)'
             };
-            const icons = { success: '✓', error: '✗', warning: '⚠', info: 'ℹ' };
+            const icons = { success: '✓', error: '✗', warning: '⚠', info: '' };
             Toastify({
                 text: `${icons[type]} ${message}`,
                 duration: 3000, close: true, gravity: 'top', position: 'right', stopOnFocus: true,
@@ -779,12 +779,9 @@
             }).showToast();
         }
 
-        // ============================================
-        // TRUNCAR A 2 DECIMALES (Evita que 723.999 se convierta en 724.00)
-        // ============================================
         function round2(num) {
             if (num === null || num === undefined || isNaN(num)) return 0;
-            return Math.floor(parseFloat(num) * 100) / 100;
+            return Math.round(parseFloat(num) * 100) / 100;
         }
 
         function reportesApp() {
@@ -797,7 +794,7 @@
                 userBranch: '',
                 userInitials: '??',
                 exchangeRate: 700.22,
-                selectedBranch: 'all', // Por defecto 'all', se ajustará en initReportes
+                selectedBranch: '',
                 availableBranches: [],
 
                 filters: {
@@ -836,10 +833,8 @@
                             this.userName = profile.full_name;
                             this.userRole = profile.role;
                             this.userBranch = profile.branch || 'geminis';
+                            this.selectedBranch = profile.branch;
                             this.userInitials = this.getInitials(profile.full_name);
-                            
-                            // ✅ CONSOLIDADO POR DEFECTO PARA ADMIN, SUCURSAL PARA VENDEDORES
-                            this.selectedBranch = (profile.role === 'admin') ? 'all' : this.userBranch;
                         }
 
                         // Cargar sucursales disponibles si es admin
@@ -862,12 +857,12 @@
                 async loadAvailableBranches() {
                     try {
                         const { data, error } = await supabase
-                            .from('profiles')
+                            .from('sales')
                             .select('branch')
                             .not('branch', 'is', null);
 
                         if (!error && data) {
-                            const uniqueBranches = [...new Set(data.map(p => p.branch))];
+                            const uniqueBranches = [...new Set(data.map(s => s.branch))];
                             this.availableBranches = uniqueBranches;
                         }
                     } catch (err) {
