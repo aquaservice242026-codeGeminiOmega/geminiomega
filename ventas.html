@@ -1999,27 +1999,26 @@ if (totalCapsNeeded > 0) {
             const newQuantity = capInventory.quantity - totalCapsNeeded;
             console.log('🔍 Nuevo stock será:', newQuantity);
             
-            // ✅ CAMBIO CLAVE: Agregar .select() para ver si se actualizó
-            const { data: updateData, error: updateCapError } = await supabase
-                .from('inventory')
-                .update({
-                    quantity: newQuantity,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('product_id', capProduct.id)
-                .eq('branch', this.userBranch)
-                .select(); // ← ESTO ES LO QUE FALTABA
-            
-            console.log('🔍 updateData:', updateData);
-            console.log('🔍 updateCapError:', updateCapError);
-            
-            if (updateCapError) {
-                console.error('❌ ERROR actualizando tapas:', updateCapError);
-                showToast('️ Error al actualizar stock de tapas', 'warning');
-            } else if (updateData && updateData.length > 0) {
-                console.log(`✅ ${totalCapsNeeded} tapas descontadas. Nuevo stock: ${newQuantity}`);
-                showToast(`✅ ${totalCapsNeeded} tapa(s) descontada(s)`, 'success');
-            } else {
+const { error: updateCapError } = await supabase
+    .from('inventory')
+    .update({
+        quantity: newQuantity,
+        updated_at: new Date().toISOString()
+    })
+    .eq('product_id', capProduct.id)
+    .eq('branch', this.userBranch);
+    //  QUITAR el .select() que causaba el problema
+
+console.log('🔍 updateCapError:', updateCapError);
+
+if (updateCapError) {
+    console.error('❌ ERROR actualizando tapas:', updateCapError);
+    showToast('⚠️ Error al actualizar stock de tapas', 'warning');
+} else {
+    // ✅ Si no hay error, asumimos que se actualizó
+    console.log(`✅ ${totalCapsNeeded} tapas descontadas. Nuevo stock: ${newQuantity}`);
+    showToast(`✅ ${totalCapsNeeded} tapa(s) descontada(s)`, 'success');
+} else {
                 console.error('❌ ERROR: No se actualizó ningún registro');
                 console.error('❌ Verifica que existan políticas RLS correctas');
                 showToast('⚠️ No se pudo actualizar el inventario', 'error');
