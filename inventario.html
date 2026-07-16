@@ -824,35 +824,46 @@
                         this.virtualInventory = [];
                     }
                 },
-
+                
                 async loadAllProducts() {
                     try {
-                        console.log('📦 Cargando todos los productos...');
+                        console.log('📦 Cargando todos los productos para:', this.selectedBranch);
+                        
                         let query = supabase.from('inventory')
                             .select(`
                                 id,
                                 product_id,
                                 quantity,
                                 min_stock,
-                                products (
+                                products!inner (
                                     id,
                                     name,
                                     size_liters,
                                     product_type,
-                                    price,
                                     description
+                                ),
+                                product_prices!inner (
+                                    price_usd
                                 )
                             `)
+                            .eq('product_prices.branch', this.selectedBranch === 'all' ? this.userBranch : this.selectedBranch)
+                            .eq('product_prices.is_active', true)
                             .order('products(name)', { ascending: true });
                         
                         if (this.selectedBranch !== 'all') {
                             query = query.eq('branch', this.selectedBranch);
                         }
-
+                
                         const { data, error } = await query;
-                        if (error) throw error;
+                        
+                        if (error) {
+                            console.error(' Error cargando productos:', error);
+                            throw new Error('Error al cargar productos: ' + error.message);
+                        }
                         
                         console.log('✅ Productos cargados:', data?.length);
+                        console.log('📊 Datos:', data);
+                        
                         this.allProducts = (data || []).map(item => ({
                             id: item.id,
                             product_id: item.product_id,
@@ -861,9 +872,10 @@
                             product_type: item.products?.product_type || 'bottle',
                             quantity: item.quantity,
                             min_stock: item.min_stock,
-                            price: parseFloat(item.products?.price) || 0,
+                            price: parseFloat(item.product_prices?.[0]?.price_usd) || 0,
                             description: item.products?.description || ''
                         }));
+                        
                     } catch (err) {
                         console.error('❌ Error en loadAllProducts:', err);
                         showToast('Error al cargar productos: ' + err.message, 'error');
