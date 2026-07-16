@@ -596,19 +596,163 @@
 
                 async loadVirtualInventory() {
                     try {
-                        // Nota: Si el RPC no maneja 'null' para 'all', se podría necesitar ajustar el RPC en Supabase 
-                        // para que ignore el filtro cuando branch_param es NULL.
-                        const branchParam = this.selectedBranch === 'all' ? null : this.selectedBranch;
+                        console.log('🔍 ========== INICIO CARGA INVENTARIO ==========');
+                        console.log('📍 Sucursal seleccionada:', this.selectedBranch);
+                        console.log('📍 Sucursal del usuario:', this.userBranch);
                         
-                        const { data, error } = await supabase.rpc('calculate_virtual_inventory', { 
+                        const branchParam = this.selectedBranch === 'all' ? null : this.selectedBranch;
+                        console.log('📍 Parámetro branch para RPC:', branchParam);
+                        
+                        // 1. Consultar RPC actual (inventario virtual basado en tanques)
+                        console.log('📡 Consultando RPC calculate_virtual_inventory...');
+                        const { data: rpcData, error: rpcError } = await supabase.rpc('calculate_virtual_inventory', { 
                             branch_param: branchParam 
                         });
 
-                        if (error) throw error;
-                        this.virtualInventory = data || [];
+                        if (rpcError) {
+                            console.error('❌ Error en RPC:', rpcError);
+                            throw rpcError;
+                        }
+                        
+                        console.log('✅ Datos del RPC (inventario virtual):', rpcData);
+                        console.log('📦 Total productos del RPC:', rpcData?.length);
+                        
+                        // 2. Consultar tabla inventory directamente
+                        console.log('\n📡 Consultando tabla inventory directamente...');
+                        let inventoryQuery = supabase.from('inventory').select(`
+                            id,
+                            product_id,
+                            quantity,
+                            min_stock,
+                            branch,
+                            products!inner (
+                                id,
+                                name,
+                                size_liters,
+                                product_type,
+                                description
+                            )
+                        `);
+                        
+                        if (this.selectedBranch !== 'all') {
+                            inventoryQuery = inventoryQuery.eq('branch', this.selectedBranch);
+                            console.log('🔍 Filtrando inventory por branch:', this.selectedBranch);
+                        }
+                        
+                        const { data: inventoryData, error: inventoryError } = await inventoryQuery;
+                        
+                        if (inventoryError) {
+                            console.error('❌ Error consultando inventory:', inventoryError);
+                        } else {
+                            console.log('✅ Datos de tabla inventory:', inventoryData);
+                            console.log('📦 Total registros en inventory:', inventoryData?.length);
+                            
+                            // Mostrar específicamente botellones vacíos
+                            const emptyBottles = inventoryData?.filter(item => 
+                                item.products.product_type === 'empty_bottle' || 
+                                (item.products.size_liters === 125 && item.products.product_type === 'cap')
+                            );
+                            console.log('🧴 Botellones/Tapas encontrados en inventory:', emptyBottles);
+                            
+                            emptyBottles?.forEach(item => {
+                                console.log(`  - ${item.products.name}: ${item.quantity} unidades (branch: ${item.branch})`);
+                            });
+                        }
+                        
+                        // 3. Consultar product_prices
+                        console.log('\n📡 Consultando tabla product_prices...');
+                        let pricesQuery = supabase.from('product_prices').select(`
+                            id,
+                            product_id,
+                            price_usd,
+                            branch,
+                            is_active,
+                            products!inner (
+                                id,
+                                name,
+                                size_liters,
+                                product_type
+                            )
+                        `);
+                        
+                        if (this.selectedBranch !== 'all') {
+                            pricesQuery = pricesQuery.eq('branch', this.selectedBranch);
+                        }
+                        
+                        const { data: pricesData, error: pricesError } = await pricesQuery.eq('is_active', true);
+                        
+                        if (pricesError) {
+                            console.error('❌ Error consultando product_prices:', pricesError);
+                        } else {
+                            console.log('✅ Datos de product_prices:', pricesData);
+                            console.log('📦 Total precios activos:', pricesData?.length);
+                            
+                            // Mostrar precios de botellones vacíos
+                            const emptyBottlePrices = pricesData?.filter(item => 
+                                item.products.product_type === 'empty_bottle' ||
+                                item.products.size_liters === 125
+                            );
+                            console.log('💰 Precios de botellones vacíos/tapas:', emptyBottlePrices);
+                            
+                            emptyBottlePrices?.forEach(item => {
+                                console.log(`  - ${item.products.name}: $${item.price_usd} (branch: ${item.branch})`);
+                            });
+                        }
+                        
+                        // 4. Combinar datos: usar inventory para cantidades reales
+                        console.log('\n🔄 Combinando datos...');
+                        
+                        if (inventoryData && inventoryData.length > 0) {
+                            // Crear mapa de precios por product_id y branch
+                            const priceMap = {};
+                            (pricesData || []).forEach(price => {
+                                const key = `${price.product_id}_${price.branch}`;
+                                priceMap[key] = price.price_usd;
+                            });
+                            
+                            console.log('📊 Mapa de precios creado:', Object.keys(priceMap).length, 'entradas');
+                            
+                            // Transformar inventory al formato esperado
+                            const combinedData = inventoryData.map(item => {
+                                const priceKey = `${item.product_id}_${item.branch}`;
+                                const price = priceMap[priceKey] || 0;
+                                
+                                console.log(`\n Producto: ${item.products.name}`);
+                                console.log(`   - product_id: ${item.product_id}`);
+                                console.log(`   - branch: ${item.branch}`);
+                                console.log(`   - quantity (inventory): ${item.quantity}`);
+                                console.log(`   - price: $${price}`);
+                                console.log(`   - type: ${item.products.product_type}`);
+                                console.log(`   - size_liters: ${item.products.size_liters}`);
+                                
+                                return {
+                                    product_id: item.product_id,
+                                    product_name: item.products.name,
+                                    size_liters: item.products.size_liters,
+                                    product_type: item.products.product_type,
+                                    price: price,
+                                    virtual_stock: item.quantity, // Usar cantidad real de inventory
+                                    total_value: round2(item.quantity * price)
+                                };
+                            });
+                            
+                            console.log('\n✅ Datos combinados finales:', combinedData);
+                            this.virtualInventory = combinedData;
+                        } else {
+                            console.log('⚠️ No hay datos en inventory, usando RPC');
+                            this.virtualInventory = rpcData || [];
+                        }
+                        
+                        console.log('\n🏁 ========== FIN CARGA INVENTARIO ==========');
+                        console.log('📦 Total items en virtualInventory:', this.virtualInventory.length);
+                        this.virtualInventory.forEach(item => {
+                            console.log(`  - ${item.product_name}: ${item.virtual_stock} unidades @ $${item.price}`);
+                        });
+                        
                     } catch (err) {
-                        console.error('Error cargando inventario virtual:', err);
+                        console.error('❌ Error cargando inventario virtual:', err);
                         showToast('Error al cargar inventario: ' + err.message, 'error');
+                        this.virtualInventory = [];
                     }
                 },
 
