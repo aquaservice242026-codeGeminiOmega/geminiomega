@@ -70,7 +70,6 @@
             100% { transform: scale(1); opacity: 1; }
         }
         .animate-bounce-in { animation: bounce-in 0.4s ease-out; }
-        .tab-active { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); color: white; }
     </style>
 </head>
 
@@ -142,7 +141,7 @@
                 </button>
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800">Inventario</h2>
-                    <p class="text-sm text-gray-500" x-text="'Control de productos y tanques - ' + (selectedBranch === 'all' ? 'Consolidado' : userBranch) + ' | ' + formatDateLong(new Date())"></p>
+                    <p class="text-sm text-gray-500" x-text="'Control basado en capacidad de tanques - ' + (selectedBranch === 'all' ? 'Consolidado' : userBranch) + ' | ' + DateUtils.formatDateLong(new Date())"></p>
                 </div>
             </div>
             <div class="flex items-center space-x-2">
@@ -157,10 +156,6 @@
                     </select>
                 </div>
 
-                <button @click="openProductModal()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
-                    <i class="fas fa-plus"></i>
-                    <span class="hidden sm:inline">Producto</span>
-                </button>
                 <button @click="openRefillTankModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
                     <i class="fas fa-plus"></i>
                     <span class="hidden sm:inline">Recargar Tanque</span>
@@ -183,330 +178,156 @@
             </div>
 
             <div x-show="!loading">
-                <!-- Tabs -->
-                <div class="bg-white rounded-2xl shadow-sm mb-6">
-                    <div class="flex space-x-1 p-2">
-                        <button @click="activeTab = 'virtual'" :class="activeTab === 'virtual' ? 'tab-active' : 'text-gray-600 hover:bg-gray-100'" class="flex-1 px-4 py-3 rounded-lg font-medium transition">
-                            <i class="fas fa-boxes mr-2"></i>Inventario Virtual
-                        </button>
-                        <button @click="activeTab = 'products'" :class="activeTab === 'products' ? 'tab-active' : 'text-gray-600 hover:bg-gray-100'" class="flex-1 px-4 py-3 rounded-lg font-medium transition">
-                            <i class="fas fa-list mr-2"></i>Productos
-                        </button>
-                        <button @click="activeTab = 'tanks'" :class="activeTab === 'tanks' ? 'tab-active' : 'text-gray-600 hover:bg-gray-100'" class="flex-1 px-4 py-3 rounded-lg font-medium transition">
-                            <i class="fas fa-database mr-2"></i>Tanques
-                        </button>
+                <!-- Info Box -->
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
+                        <div>
+                            <h4 class="font-semibold text-blue-900">Inventario Virtual</h4>
+                            <p class="text-sm text-blue-700 mt-1">
+                                El inventario se calcula automáticamente basado en el agua disponible en los tanques,
+                                distribuida: 70% para 20L, 20% para 5L, 10% para 13L.
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- TAB: INVENTARIO VIRTUAL -->
-                <div x-show="activeTab === 'virtual'">
-                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-                        <div class="flex items-start">
-                            <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
-                            <div>
-                                <h4 class="font-semibold text-blue-900">Inventario Virtual</h4>
-                                <p class="text-sm text-blue-700 mt-1">
-                                    El inventario de botellones se calcula automáticamente basado en el agua disponible en los tanques.
-                                    Las tapas se descuentan automáticamente al vender botellones de 13L y 20L.
-                                </p>
+                <!-- Virtual Inventory Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <template x-for="item in virtualInventory" :key="item.size_liters || item.product_type">
+                        <div class="bg-white rounded-2xl shadow-sm p-6 border-t-4" :class="{
+                                'border-cyan-500': item.size_liters === 5,
+                                'border-blue-500': item.size_liters === 13,
+                                'border-blue-700': item.size_liters === 20,
+                                'border-purple-500': item.product_type === 'cap'
+                            }">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-16 h-16 rounded-full flex items-center justify-center" :class="{
+                                        'bg-cyan-100': item.size_liters === 5,
+                                        'bg-blue-100': item.size_liters === 13 || item.size_liters === 20,
+                                        'bg-purple-100': item.product_type === 'cap'
+                                    }">
+                                    <i :class="item.product_type === 'cap' ? 'fas fa-circle text-purple-600 text-3xl' : 'fas fa-tint text-3xl'"
+                                        :style="{color: item.size_liters === 5 ? '#0891b2' : item.size_liters === 13 ? '#3b82f6' : item.size_liters === 20 ? '#1d4ed8' : '#9333ea'}"></i>
+                                </div>
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">Disponible</span>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-800" x-text="item.product_name"></h3>
+                            <p class="text-4xl font-bold text-gray-900 mt-2" x-text="item.virtual_stock"></p>
+                            <p class="text-sm text-gray-500 mt-1">botellones disponibles</p>
+                            <div class="mt-4 pt-4 border-t">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Precio:</span>
+                                    <span class="font-semibold" x-text="'$' + parseFloat(item.price).toFixed(2)"></span>
+                                </div>
+                                <div class="flex justify-between text-sm mt-1">
+                                    <span class="text-gray-600">Valor total:</span>
+                                    <span class="font-semibold text-green-600" x-text="'$' + parseFloat(item.total_value).toFixed(2)"></span>
+                                </div>
+                                <div class="flex justify-between text-sm mt-1">
+                                    <span class="text-gray-600">Agua asignada:</span>
+                                    <span class="font-semibold text-blue-600" x-text="((item.virtual_stock * (item.size_liters || 0)) || 0).toLocaleString() + 'L'"></span>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </template>
+                </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <template x-for="item in virtualInventory" :key="item.size_liters || item.product_type">
-                            <div class="bg-white rounded-2xl shadow-sm p-6 border-t-4" :class="{
-                                    'border-cyan-500': item.size_liters === 5,
-                                    'border-blue-500': item.size_liters === 13,
-                                    'border-blue-700': item.size_liters === 20,
-                                    'border-purple-500': item.product_type === 'cap'
-                                }">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="w-16 h-16 rounded-full flex items-center justify-center" :class="{
-                                            'bg-cyan-100': item.size_liters === 5,
-                                            'bg-blue-100': item.size_liters === 13 || item.size_liters === 20,
-                                            'bg-purple-100': item.product_type === 'cap'
-                                        }">
-                                        <i :class="item.product_type === 'cap' ? 'fas fa-circle text-purple-600 text-3xl' : 'fas fa-tint text-3xl'"
-                                            :style="{color: item.size_liters === 5 ? '#0891b2' : item.size_liters === 13 ? '#3b82f6' : item.size_liters === 20 ? '#1d4ed8' : '#9333ea'}"></i>
+                <!-- Water Tanks -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center justify-between">
+                        <span class="flex items-center">
+                            <i class="fas fa-database text-blue-500 mr-2"></i>
+                            Tanques de Almacenamiento
+                        </span>
+                        <button @click="openRefillTankModal()" class="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg">
+                            <i class="fas fa-plus mr-1"></i>Recargar
+                        </button>
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <template x-for="tank in tanks" :key="tank.id">
+                            <div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800" x-text="tank.name"></h4>
+                                        <p class="text-sm text-gray-500" x-text="'Capacidad: ' + tank.capacity_liters.toLocaleString() + 'L'"></p>
                                     </div>
-                                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">Disponible</span>
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold" :class="{
+                                            'bg-green-100 text-green-800': (tank.current_liters / tank.capacity_liters) > 0.7,
+                                            'bg-yellow-100 text-yellow-800': (tank.current_liters / tank.capacity_liters) > 0.4 && (tank.current_liters / tank.capacity_liters) <= 0.7,
+                                            'bg-red-100 text-red-800': (tank.current_liters / tank.capacity_liters) <= 0.4
+                                        }" x-text="Math.round((tank.current_liters / tank.capacity_liters) * 100) + '%'"></span>
                                 </div>
-                                <h3 class="text-lg font-semibold text-gray-800" x-text="item.product_name"></h3>
-                                <p class="text-4xl font-bold text-gray-900 mt-2" x-text="item.virtual_stock"></p>
-                                <p class="text-sm text-gray-500 mt-1">unidades disponibles</p>
-                                <div class="mt-4 pt-4 border-t">
-                                    <div class="flex justify-between text-sm">
-                                        <span class="text-gray-600">Precio:</span>
-                                        <span class="font-semibold" x-text="'$' + parseFloat(item.price).toFixed(2)"></span>
-                                    </div>
-                                    <div class="flex justify-between text-sm mt-1">
-                                        <span class="text-gray-600">Valor total:</span>
-                                        <span class="font-semibold text-green-600" x-text="'$' + parseFloat(item.total_value).toFixed(2)"></span>
-                                    </div>
-                                    <div class="flex justify-between text-sm mt-1" x-show="item.size_liters">
-                                        <span class="text-gray-600">Agua asignada:</span>
-                                        <span class="font-semibold text-blue-600" x-text="((item.virtual_stock * (item.size_liters || 0)) || 0).toLocaleString() + 'L'"></span>
-                                    </div>
-                                    <div class="flex justify-between text-sm mt-1" x-show="item.product_type === 'cap'">
-                                        <span class="text-gray-600">Nota:</span>
-                                        <span class="font-semibold text-purple-600 text-xs">Se descuentan en ventas 13L/20L</span>
+                                <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+                                    <div class="h-4 rounded-full transition-all duration-500" :class="{
+                                            'bg-gradient-to-r from-blue-400 to-blue-600': (tank.current_liters / tank.capacity_liters) > 0.7,
+                                            'bg-gradient-to-r from-yellow-400 to-yellow-600': (tank.current_liters / tank.capacity_liters) > 0.4 && (tank.current_liters / tank.capacity_liters) <= 0.7,
+                                            'bg-gradient-to-r from-red-400 to-red-600': (tank.current_liters / tank.capacity_liters) <= 0.4
+                                        }" :style="'width: ' + ((tank.current_liters / tank.capacity_liters) * 100) + '%'">
                                     </div>
                                 </div>
-                                <div class="mt-4">
-                                    <button @click="editProduct(item)" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm">
-                                        <i class="fas fa-edit mr-1"></i>Editar
-                                    </button>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600" x-text="tank.current_liters.toLocaleString() + 'L disponibles'"></span>
+                                    <span class="font-semibold" :class="{
+                                            'text-blue-600': (tank.current_liters / tank.capacity_liters) > 0.7,
+                                            'text-yellow-600': (tank.current_liters / tank.capacity_liters) > 0.4 && (tank.current_liters / tank.capacity_liters) <= 0.7,
+                                            'text-red-600': (tank.current_liters / tank.capacity_liters) <= 0.4
+                                        }" x-text="(tank.capacity_liters - tank.current_liters).toLocaleString() + 'L usados'"></span>
+                                </div>
+                                <div class="mt-2 text-xs text-gray-500" x-show="tank.current_liters < tank.min_level">
+                                    <i class="fas fa-exclamation-triangle text-red-500 mr-1"></i>
+                                    Nivel bajo - Mínimo recomendado: <span x-text="tank.min_level + 'L'"></span>
                                 </div>
                             </div>
                         </template>
-                    </div>
-                </div>
 
-                <!-- TAB: PRODUCTOS -->
-                <div x-show="activeTab === 'products'">
-                    <div class="bg-white rounded-2xl shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Todos los Productos</h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead class="bg-gray-50 border-b border-gray-200">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Stock</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Precio</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Valor Total</th>
-                                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200">
-                                    <template x-for="item in allProducts" :key="item.id">
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-6 py-4">
-                                                <div class="flex items-center">
-                                                    <i class="fas fa-tint text-cyan-500 mr-3" x-show="item.product_type === 'bottle'"></i>
-                                                    <i class="fas fa-circle text-purple-500 mr-3" x-show="item.product_type === 'cap'"></i>
-                                                    <span class="font-medium text-gray-900" x-text="item.name"></span>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                <span class="px-2 py-1 text-xs rounded-full" :class="{
-                                                    'bg-blue-100 text-blue-800': item.product_type === 'bottle',
-                                                    'bg-purple-100 text-purple-800': item.product_type === 'cap'
-                                                }" x-text="item.product_type === 'bottle' ? 'Botellón ' + item.size_liters + 'L' : 'Tapa'"></span>
-                                            </td>
-                                            <td class="px-6 py-4 text-right">
-                                                <span class="font-semibold" x-text="item.quantity"></span>
-                                            </td>
-                                            <td class="px-6 py-4 text-right">
-                                                <span class="font-semibold" x-text="'$' + parseFloat(item.price).toFixed(2)"></span>
-                                            </td>
-                                            <td class="px-6 py-4 text-right">
-                                                <span class="font-semibold text-green-600" x-text="'$' + (item.quantity * item.price).toFixed(2)"></span>
-                                            </td>
-                                            <td class="px-6 py-4 text-center">
-                                                <button @click="editProduct(item)" class="text-blue-600 hover:text-blue-800 mr-2">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </template>
-                                    <tr x-show="allProducts.length === 0">
-                                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
-                                            <i class="fas fa-box-open text-4xl mb-2"></i>
-                                            <p>No hay productos registrados</p>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div x-show="tanks.length === 0" class="col-span-full text-center py-8 text-gray-400">
+                            <i class="fas fa-database text-4xl mb-2"></i>
+                            <p>No hay tanques registrados</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- TAB: TANQUES -->
-                <div x-show="activeTab === 'tanks'">
-                    <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center justify-between">
-                            <span class="flex items-center">
-                                <i class="fas fa-database text-blue-500 mr-2"></i>
-                                Tanques de Almacenamiento
-                            </span>
-                            <button @click="openRefillTankModal()" class="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg">
-                                <i class="fas fa-plus mr-1"></i>Recargar
-                            </button>
-                        </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <template x-for="tank in tanks" :key="tank.id">
-                                <div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
-                                    <div class="flex justify-between items-start mb-3">
-                                        <div>
-                                            <h4 class="font-semibold text-gray-800" x-text="tank.name"></h4>
-                                            <p class="text-sm text-gray-500" x-text="'Capacidad: ' + tank.capacity_liters.toLocaleString() + 'L'"></p>
-                                        </div>
-                                        <span class="px-3 py-1 rounded-full text-xs font-semibold" :class="{
-                                                'bg-green-100 text-green-800': (tank.current_liters / tank.capacity_liters) > 0.7,
-                                                'bg-yellow-100 text-yellow-800': (tank.current_liters / tank.capacity_liters) > 0.4 && (tank.current_liters / tank.capacity_liters) <= 0.7,
-                                                'bg-red-100 text-red-800': (tank.current_liters / tank.capacity_liters) <= 0.4
-                                            }" x-text="Math.round((tank.current_liters / tank.capacity_liters) * 100) + '%'"></span>
-                                    </div>
-                                    <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
-                                        <div class="h-4 rounded-full transition-all duration-500" :class="{
-                                                'bg-gradient-to-r from-blue-400 to-blue-600': (tank.current_liters / tank.capacity_liters) > 0.7,
-                                                'bg-gradient-to-r from-yellow-400 to-yellow-600': (tank.current_liters / tank.capacity_liters) > 0.4 && (tank.current_liters / tank.capacity_liters) <= 0.7,
-                                                'bg-gradient-to-r from-red-400 to-red-600': (tank.current_liters / tank.capacity_liters) <= 0.4
-                                            }" :style="'width: ' + ((tank.current_liters / tank.capacity_liters) * 100) + '%'">
-                                        </div>
-                                    </div>
-                                    <div class="flex justify-between text-sm">
-                                        <span class="text-gray-600" x-text="tank.current_liters.toLocaleString() + 'L disponibles'"></span>
-                                        <span class="font-semibold" :class="{
-                                                'text-blue-600': (tank.current_liters / tank.capacity_liters) > 0.7,
-                                                'text-yellow-600': (tank.current_liters / tank.capacity_liters) > 0.4 && (tank.current_liters / tank.capacity_liters) <= 0.7,
-                                                'text-red-600': (tank.current_liters / tank.capacity_liters) <= 0.4
-                                            }" x-text="(tank.capacity_liters - tank.current_liters).toLocaleString() + 'L usados'"></span>
-                                    </div>
-                                    <div class="mt-2 text-xs text-gray-500" x-show="tank.current_liters < tank.min_level">
-                                        <i class="fas fa-exclamation-triangle text-red-500 mr-1"></i>
-                                        Nivel bajo - Mínimo recomendado: <span x-text="tank.min_level + 'L'"></span>
-                                    </div>
-                                </div>
-                            </template>
-                            <div x-show="tanks.length === 0" class="col-span-full text-center py-8 text-gray-400">
-                                <i class="fas fa-database text-4xl mb-2"></i>
-                                <p>No hay tanques registrados</p>
+                <!-- Distribution Info -->
+                <div class="bg-white rounded-2xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Distribución del Agua</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-blue-50 rounded-xl p-4 border-2 border-blue-200">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-semibold text-blue-900">20 Litros</h4>
+                                <span class="text-2xl font-bold text-blue-600">70%</span>
                             </div>
+                            <p class="text-sm text-blue-700">
+                                <span x-text="Math.round(totalWater * 0.70).toLocaleString()"></span>L disponibles
+                            </p>
+                            <p class="text-2xl font-bold text-blue-900 mt-2" x-text="Math.round((totalWater * 0.70) / 20) + ' botellones'"></p>
                         </div>
-                    </div>
 
-                    <div class="bg-white rounded-2xl shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Distribución del Agua</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="bg-blue-50 rounded-xl p-4 border-2 border-blue-200">
-                                <div class="flex items-center justify-between mb-2">
-                                    <h4 class="font-semibold text-blue-900">20 Litros</h4>
-                                    <span class="text-2xl font-bold text-blue-600">70%</span>
-                                </div>
-                                <p class="text-sm text-blue-700">
-                                    <span x-text="Math.round(totalWater * 0.70).toLocaleString()"></span>L disponibles
-                                </p>
-                                <p class="text-2xl font-bold text-blue-900 mt-2" x-text="Math.round((totalWater * 0.70) / 20) + ' botellones'"></p>
+                        <div class="bg-cyan-50 rounded-xl p-4 border-2 border-cyan-200">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-semibold text-cyan-900">5 Litros</h4>
+                                <span class="text-2xl font-bold text-cyan-600">20%</span>
                             </div>
-                            <div class="bg-cyan-50 rounded-xl p-4 border-2 border-cyan-200">
-                                <div class="flex items-center justify-between mb-2">
-                                    <h4 class="font-semibold text-cyan-900">5 Litros</h4>
-                                    <span class="text-2xl font-bold text-cyan-600">20%</span>
-                                </div>
-                                <p class="text-sm text-cyan-700">
-                                    <span x-text="Math.round(totalWater * 0.20).toLocaleString()"></span>L disponibles
-                                </p>
-                                <p class="text-2xl font-bold text-cyan-900 mt-2" x-text="Math.round((totalWater * 0.20) / 5) + ' botellones'"></p>
+                            <p class="text-sm text-cyan-700">
+                                <span x-text="Math.round(totalWater * 0.20).toLocaleString()"></span>L disponibles
+                            </p>
+                            <p class="text-2xl font-bold text-cyan-900 mt-2" x-text="Math.round((totalWater * 0.20) / 5) + ' botellones'"></p>
+                        </div>
+
+                        <div class="bg-indigo-50 rounded-xl p-4 border-2 border-indigo-200">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-semibold text-indigo-900">13 Litros</h4>
+                                <span class="text-2xl font-bold text-indigo-600">10%</span>
                             </div>
-                            <div class="bg-indigo-50 rounded-xl p-4 border-2 border-indigo-200">
-                                <div class="flex items-center justify-between mb-2">
-                                    <h4 class="font-semibold text-indigo-900">13 Litros</h4>
-                                    <span class="text-2xl font-bold text-indigo-600">10%</span>
-                                </div>
-                                <p class="text-sm text-indigo-700">
-                                    <span x-text="Math.round(totalWater * 0.10).toLocaleString()"></span>L disponibles
-                                </p>
-                                <p class="text-2xl font-bold text-indigo-900 mt-2" x-text="Math.round((totalWater * 0.10) / 13) + ' botellones'"></p>
-                            </div>
+                            <p class="text-sm text-indigo-700">
+                                <span x-text="Math.round(totalWater * 0.10).toLocaleString()"></span>L disponibles
+                            </p>
+                            <p class="text-2xl font-bold text-indigo-900 mt-2" x-text="Math.round((totalWater * 0.10) / 13) + ' botellones'"></p>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
-    </div>
-
-    <!-- Modal Producto (Agregar/Editar) -->
-    <div x-show="showProductModal" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="closeProductModal()">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-bounce-in" @click.stop>
-            <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white">
-                <h3 class="text-xl font-bold text-gray-800">
-                    <i class="fas fa-box text-purple-600 mr-2"></i><span x-text="editingProduct ? 'Editar Producto' : 'Nuevo Producto'"></span>
-                </h3>
-                <button @click="closeProductModal()" class="text-gray-400 hover:text-gray-600 touch-btn p-2">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-
-            <div class="p-6 space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Producto *</label>
-                    <select x-model="productForm.product_type" @change="onProductTypeChange()" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-purple-500">
-                        <option value="bottle">Botellón con Agua</option>
-                        <option value="cap">Tapa para Botellón</option>
-                    </select>
-                </div>
-
-                <div x-show="productForm.product_type === 'bottle'">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tamaño (Litros) *</label>
-                    <select x-model="productForm.size_liters" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-purple-500">
-                        <option value="5">5 Litros</option>
-                        <option value="13">13 Litros</option>
-                        <option value="20">20 Litros</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Producto *</label>
-                    <input type="text" x-model="productForm.name" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-purple-500" placeholder="Ej: Botellón 20 Litros">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Cantidad en Inventario *</label>
-                    <input type="number" x-model.number="productForm.quantity" step="1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-purple-500" placeholder="Ej: 100">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Precio de Venta (USD) *</label>
-                    <input type="number" x-model.number="productForm.price" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-purple-500" placeholder="Ej: 1.50">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Stock Mínimo</label>
-                    <input type="number" x-model.number="productForm.min_stock" step="1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-purple-500" placeholder="Ej: 10">
-                    <p class="text-xs text-gray-500 mt-1">Alerta cuando el stock sea menor a este valor</p>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
-                    <textarea x-model="productForm.description" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-purple-500" placeholder="Descripción del producto"></textarea>
-                </div>
-
-                <div class="bg-purple-50 rounded-lg p-4">
-                    <h4 class="font-semibold text-purple-900 mb-2">Resumen</h4>
-                    <div class="space-y-1 text-sm">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Producto:</span>
-                            <span class="font-semibold" x-text="productForm.name || 'Sin nombre'"></span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Cantidad:</span>
-                            <span class="font-semibold" x-text="(productForm.quantity || 0) + ' unidades'"></span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Precio:</span>
-                            <span class="font-semibold text-purple-600" x-text="'$' + (productForm.price || 0).toFixed(2)"></span>
-                        </div>
-                        <div class="flex justify-between pt-2 border-t border-purple-200">
-                            <span class="text-gray-800 font-semibold">Valor Total:</span>
-                            <span class="font-bold text-green-600" x-text="'$' + ((productForm.quantity || 0) * (productForm.price || 0)).toFixed(2)"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3 sticky bottom-0">
-                <button @click="closeProductModal()" class="px-4 py-2 text-gray-600 touch-btn">Cancelar</button>
-                <button @click="saveProduct()" :disabled="processing"
-                    class="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 touch-btn flex items-center space-x-2">
-                    <i class="fas fa-circle-notch fa-spin" x-show="processing"></i>
-                    <i class="fas fa-save" x-show="!processing"></i>
-                    <span x-text="processing ? 'Guardando...' : 'Guardar'"></span>
-                </button>
-            </div>
-        </div>
     </div>
 
     <!-- Modal Recargar Tanque -->
@@ -704,24 +525,13 @@
             return Math.floor(parseFloat(num) * 100) / 100;
         }
 
-        function formatDateLong(dateString) {
-            if (!dateString) return 'N/A';
-            return new Intl.DateTimeFormat('es-VE', {
-                timeZone: 'America/Caracas',
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-            }).format(new Date(dateString));
-        }
-
         function inventarioApp() {
             return {
                 mobileMenuOpen: false,
+                currentPage: 'inventario',
                 loading: true,
                 processing: false,
-                activeTab: 'virtual',
                 virtualInventory: [],
-                allProducts: [],
                 tanks: [],
                 totalWater: 0,
                 userName: '',
@@ -729,25 +539,14 @@
                 userBranch: '',
                 userInitials: '??',
                 
+                // ✅ Control de sucursales (Consolidado para admin)
                 selectedBranch: 'all',
                 availableBranches: [],
 
                 showRefillTankModal: false,
                 showFillBottlesModal: false,
-                showProductModal: false,
-                editingProduct: null,
-                
                 refillForm: { tankId: '', liters: 0, notes: '' },
                 fillForm: { sizeLiters: '', quantity: 0, tankId: '' },
-                productForm: {
-                    product_type: 'bottle',
-                    size_liters: '20',
-                    name: '',
-                    quantity: 0,
-                    price: 0,
-                    min_stock: 10,
-                    description: ''
-                },
 
                 async initInventario() {
                     const { data: { session } } = await supabase.auth.getSession();
@@ -760,6 +559,8 @@
                             this.userRole = profile.role;
                             this.userBranch = profile.branch;
                             this.userInitials = this.getInitials(profile.full_name);
+                            
+                            // ✅ CONSOLIDADO POR DEFECTO PARA ADMIN, SUCURSAL PARA VENDEDORES
                             this.selectedBranch = (profile.role === 'admin') ? 'all' : profile.branch;
                         }
 
@@ -767,10 +568,10 @@
                             await this.loadAvailableBranches();
                         }
 
-                        await this.refreshInventory();
+                        await this.loadVirtualInventory();
+                        await this.loadTanks();
                     } catch (err) {
                         console.error('Error inicializando:', err);
-                        showToast('Error al cargar datos iniciales', 'error');
                     } finally {
                         this.loading = false;
                     }
@@ -789,106 +590,36 @@
 
                 async refreshInventory() {
                     this.loading = true;
-                    try {
-                        await Promise.all([
-                            this.loadVirtualInventory(),
-                            this.loadAllProducts(),
-                            this.loadTanks()
-                        ]);
-                    } catch (err) {
-                        console.error('Error refrescando inventario:', err);
-                    } finally {
-                        this.loading = false;
-                    }
+                    await Promise.all([this.loadVirtualInventory(), this.loadTanks()]);
+                    this.loading = false;
                 },
 
                 async loadVirtualInventory() {
                     try {
-                        console.log('📦 Cargando inventario virtual para:', this.selectedBranch);
+                        // Nota: Si el RPC no maneja 'null' para 'all', se podría necesitar ajustar el RPC en Supabase 
+                        // para que ignore el filtro cuando branch_param es NULL.
                         const branchParam = this.selectedBranch === 'all' ? null : this.selectedBranch;
                         
                         const { data, error } = await supabase.rpc('calculate_virtual_inventory', { 
                             branch_param: branchParam 
                         });
 
-                        if (error) {
-                            console.error('❌ Error en RPC calculate_virtual_inventory:', error);
-                            throw error;
-                        }
-                        
-                        console.log('✅ Inventario virtual cargado:', data?.length, 'productos');
+                        if (error) throw error;
                         this.virtualInventory = data || [];
                     } catch (err) {
-                        console.error('❌ Error en loadVirtualInventory:', err);
-                        showToast('Error al cargar inventario virtual. Revisa la consola (F12) para más detalles.', 'error');
-                        this.virtualInventory = [];
-                    }
-                },
-                
-                async loadAllProducts() {
-                    try {
-                        console.log('📦 Cargando todos los productos para:', this.selectedBranch);
-                        
-                        let query = supabase.from('inventory')
-                            .select(`
-                                id,
-                                product_id,
-                                quantity,
-                                min_stock,
-                                products!inner (
-                                    id,
-                                    name,
-                                    size_liters,
-                                    product_type,
-                                    description
-                                ),
-                                product_prices!inner (
-                                    price_usd
-                                )
-                            `)
-                            .eq('product_prices.branch', this.selectedBranch === 'all' ? this.userBranch : this.selectedBranch)
-                            .eq('product_prices.is_active', true)
-                            .order('products(name)', { ascending: true });
-                        
-                        if (this.selectedBranch !== 'all') {
-                            query = query.eq('branch', this.selectedBranch);
-                        }
-                
-                        const { data, error } = await query;
-                        
-                        if (error) {
-                            console.error(' Error cargando productos:', error);
-                            throw new Error('Error al cargar productos: ' + error.message);
-                        }
-                        
-                        console.log('✅ Productos cargados:', data?.length);
-                        console.log('📊 Datos:', data);
-                        
-                        this.allProducts = (data || []).map(item => ({
-                            id: item.id,
-                            product_id: item.product_id,
-                            name: item.products?.name || 'Sin nombre',
-                            size_liters: item.products?.size_liters,
-                            product_type: item.products?.product_type || 'bottle',
-                            quantity: item.quantity,
-                            min_stock: item.min_stock,
-                            price: parseFloat(item.product_prices?.[0]?.price_usd) || 0,
-                            description: item.products?.description || ''
-                        }));
-                        
-                    } catch (err) {
-                        console.error('❌ Error en loadAllProducts:', err);
-                        showToast('Error al cargar productos: ' + err.message, 'error');
-                        this.allProducts = [];
+                        console.error('Error cargando inventario virtual:', err);
+                        showToast('Error al cargar inventario: ' + err.message, 'error');
                     }
                 },
 
                 async loadTanks() {
                     try {
                         let query = supabase.from('tanks').select('*').order('name');
+                        
                         if (this.selectedBranch !== 'all') {
                             query = query.eq('branch', this.selectedBranch);
                         }
+
                         const { data, error } = await query;
                         if (error) throw error;
                         
@@ -907,114 +638,8 @@
 
                 formatDate(dateString) { return DateUtils.formatDate(dateString); },
                 formatDateTime(dateString) { return DateUtils.formatDateTime(dateString); },
+                formatDateLong(dateString) { return DateUtils.formatDateLong(dateString); },
 
-                // --- Modal Producto ---
-                openProductModal() {
-                    this.editingProduct = null;
-                    this.productForm = {
-                        product_type: 'bottle',
-                        size_liters: '20',
-                        name: '',
-                        quantity: 0,
-                        price: 0,
-                        min_stock: 10,
-                        description: ''
-                    };
-                    this.showProductModal = true;
-                },
-
-                editProduct(product) {
-                    this.editingProduct = product;
-                    this.productForm = {
-                        product_type: product.product_type || 'bottle',
-                        size_liters: product.size_liters ? product.size_liters.toString() : '20',
-                        name: product.name,
-                        quantity: product.quantity,
-                        price: product.price,
-                        min_stock: product.min_stock || 10,
-                        description: product.description || ''
-                    };
-                    this.showProductModal = true;
-                },
-
-                closeProductModal() {
-                    this.showProductModal = false;
-                    this.editingProduct = null;
-                },
-
-                onProductTypeChange() {
-                    if (this.productForm.product_type === 'cap') {
-                        this.productForm.name = 'Tapa para Botellón';
-                    }
-                },
-
-                async saveProduct() {
-                    if (!this.productForm.name) { showToast('Ingrese el nombre del producto', 'warning'); return; }
-                    if (this.productForm.quantity < 0) { showToast('Cantidad inválida', 'warning'); return; }
-                    if (this.productForm.price < 0) { showToast('Precio inválido', 'warning'); return; }
-
-                    const confirmed = await showConfirm(
-                        this.editingProduct ? 'Confirmar Edición' : 'Confirmar Creación',
-                        `¿Está seguro de ${this.editingProduct ? 'editar' : 'crear'} el producto "${this.productForm.name}"?`,
-                        'Confirmar',
-                        'Cancelar'
-                    );
-
-                    if (!confirmed) return;
-
-                    this.processing = true;
-                    try {
-                        const { data: { session } } = await supabase.auth.getSession();
-                        
-                        if (this.editingProduct) {
-                            const { error: invError } = await supabase.from('inventory').update({
-                                quantity: this.productForm.quantity,
-                                min_stock: this.productForm.min_stock,
-                                updated_at: new Date().toISOString()
-                            }).eq('id', this.editingProduct.id);
-                            if (invError) throw invError;
-                            
-                            if (this.productForm.price !== this.editingProduct.price || this.productForm.description !== this.editingProduct.description) {
-                                await supabase.from('products').update({
-                                    price: this.productForm.price,
-                                    description: this.productForm.description
-                                }).eq('id', this.editingProduct.product_id);
-                            }
-                            showToast('Producto actualizado correctamente', 'success');
-                        } else {
-                            const { data: productData, error: productError } = await supabase.from('products').insert({
-                                name: this.productForm.name,
-                                size_liters: this.productForm.product_type === 'bottle' ? parseInt(this.productForm.size_liters) : null,
-                                product_type: this.productForm.product_type,
-                                price: this.productForm.price,
-                                description: this.productForm.description,
-                                is_active: true
-                            }).select().single();
-                            
-                            if (productError) throw productError;
-                            
-                            const { error: invError } = await supabase.from('inventory').insert({
-                                product_id: productData.id,
-                                branch: this.selectedBranch === 'all' ? this.userBranch : this.selectedBranch,
-                                quantity: this.productForm.quantity,
-                                min_stock: this.productForm.min_stock
-                            });
-                            if (invError) throw invError;
-                            
-                            showToast('Producto creado correctamente', 'success');
-                        }
-                        
-                        this.closeProductModal();
-                        await this.refreshInventory();
-                    } catch (err) {
-                        console.error('Error guardando producto:', err);
-                        showToast('Error al guardar producto: ' + err.message, 'error');
-                    } finally {
-                        this.processing = false;
-                    }
-                },
-
-                // --- Modal Tanque ---
                 openRefillTankModal() {
                     this.refillForm = { tankId: '', liters: 0, notes: '' };
                     this.showRefillTankModal = true;
@@ -1075,7 +700,6 @@
                     }
                 },
 
-                // --- Modal Llenar Botellones ---
                 openFillBottlesModal() {
                     this.fillForm = { sizeLiters: '', quantity: 0, tankId: '' };
                     this.showFillBottlesModal = true;
