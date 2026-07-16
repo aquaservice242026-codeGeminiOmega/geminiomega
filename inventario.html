@@ -601,7 +601,7 @@
                         const branchParam = this.selectedBranch === 'all' ? null : this.selectedBranch;
                         
                         // 1. Consultar tabla inventory directamente
-                        console.log('📡 Consultando tabla inventory...');
+                        console.log(' Consultando tabla inventory...');
                         let inventoryQuery = supabase.from('inventory')
                             .select(`
                                 id,
@@ -661,7 +661,7 @@
                             priceMap[key] = price.price_usd;
                         });
                         
-                        // 4. Transformar datos - SEPARAR botellones de tapas
+                        // 4. Transformar datos - MOSTRAR TODO (botellones y tapas)
                         const combinedData = inventoryData.map(item => {
                             const priceKey = `${item.product_id}_${item.branch}`;
                             const price = priceMap[priceKey] || 0;
@@ -676,7 +676,7 @@
                             return {
                                 product_id: item.product_id,
                                 product_name: item.products.name,
-                                size_liters: isCap ? null : item.products.size_liters, // Las tapas NO tienen size_liters
+                                size_liters: isCap ? null : item.products.size_liters,
                                 product_type: item.products.product_type,
                                 price: price,
                                 virtual_stock: item.quantity,
@@ -685,34 +685,26 @@
                             };
                         });
                         
-                        // 5. Filtrar: mostrar SOLO botellones con agua en el inventario virtual
-                        // Esto elimina las tapas de la vista principal para que no resten litraje ni confundan
-                        this.virtualInventory = combinedData.filter(item => 
-                            item.product_type === 'bottle' && item.size_liters !== null
-                        );
-                        
-                        // 6. Guardar tapas por separado (para futura gestión o pestaña dedicada)
-                        this.capsInventory = combinedData.filter(item => item.product_type === 'cap');
+                        // 5. MOSTRAR TODO en inventario (botellones + tapas)
+                        this.virtualInventory = combinedData;
                         
                         console.log('\n📊 RESUMEN FINAL:');
-                        console.log('🚰 Botellones con agua:', this.virtualInventory.length);
-                        console.log('🧢 Tapas:', this.capsInventory.length);
+                        console.log(' Total items en inventario:', this.virtualInventory.length);
                         
                         this.virtualInventory.forEach(item => {
-                            console.log(`  - ${item.product_name}: ${item.virtual_stock} unidades @ $${item.price} (${item.water_assigned}L)`);
-                        });
-                        
-                        this.capsInventory.forEach(item => {
-                            console.log(`  - ${item.product_name}: ${item.virtual_stock} unidades @ $${item.price} (SIN AGUA)`);
+                            if (item.product_type === 'cap') {
+                                console.log(`  - ${item.product_name}: ${item.virtual_stock} unidades @ $${item.price} (TAPA - SIN AGUA)`);
+                            } else {
+                                console.log(`  - ${item.product_name}: ${item.virtual_stock} unidades @ $${item.price} (${item.water_assigned}L)`);
+                            }
                         });
                         
                         console.log('\n🏁 ========== FIN CARGA INVENTARIO ==========');
                         
                     } catch (err) {
-                        console.error('❌ Error cargando inventario virtual:', err);
+                        console.error(' Error cargando inventario virtual:', err);
                         showToast('Error al cargar inventario: ' + err.message, 'error');
                         this.virtualInventory = [];
-                        this.capsInventory = [];
                     }
                 },
 
