@@ -1686,6 +1686,8 @@
                     this.loading = true;
                     try {
                         const { data: virtualInventory, error } = await supabase.rpc('calculate_virtual_inventory', { branch_param: this.userBranch });
+                        console.log('📦 Productos cargados:', virtualInventory); // DEBUG
+                        console.log('❌ Error:', error); // DEBUG
                         if (error) throw error;
                         if (!virtualInventory || virtualInventory.length === 0) { this.products = []; return; }
                         const bottlesOnly = virtualInventory.filter(item => item.virtual_stock > 0 && item.size_liters !== null && item.size_liters > 0);
