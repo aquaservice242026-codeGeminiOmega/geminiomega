@@ -829,7 +829,6 @@
                     try {
                         console.log('📦 Cargando todos los productos para:', this.selectedBranch);
                         
-                        // 1. Primero cargar inventario con datos de productos
                         let query = supabase.from('inventory')
                             .select(`
                                 id,
@@ -842,55 +841,30 @@
                                     size_liters,
                                     product_type,
                                     description
+                                ),
+                                product_prices!inner (
+                                    price_usd
                                 )
                             `)
+                            .eq('product_prices.branch', this.selectedBranch === 'all' ? this.userBranch : this.selectedBranch)
+                            .eq('product_prices.is_active', true)
                             .order('products(name)', { ascending: true });
                         
                         if (this.selectedBranch !== 'all') {
                             query = query.eq('branch', this.selectedBranch);
                         }
                 
-                        const { data: inventoryData, error: invError } = await query;
+                        const { data, error } = await query;
                         
-                        if (invError) {
-                            console.error('❌ Error cargando inventario:', invError);
-                            throw new Error('Error al cargar inventario: ' + invError.message);
+                        if (error) {
+                            console.error(' Error cargando productos:', error);
+                            throw new Error('Error al cargar productos: ' + error.message);
                         }
                         
-                        console.log('✅ Inventario cargado:', inventoryData?.length, 'registros');
+                        console.log('✅ Productos cargados:', data?.length);
+                        console.log('📊 Datos:', data);
                         
-                        if (!inventoryData || inventoryData.length === 0) {
-                            this.allProducts = [];
-                            return;
-                        }
-                
-                        // 2. Obtener los product_ids para consultar precios
-                        const productIds = inventoryData.map(item => item.product_id);
-                        const branch = this.selectedBranch === 'all' ? this.userBranch : this.selectedBranch;
-                
-                        // 3. Consultar product_prices filtrando por product_id y branch
-                        const { data: pricesData, error: priceError } = await supabase
-                            .from('product_prices')
-                            .select('product_id, price_usd')
-                            .in('product_id', productIds)
-                            .eq('branch', branch)
-                            .eq('is_active', true);
-                
-                        if (priceError) {
-                            console.error('❌ Error cargando precios:', priceError);
-                            throw new Error('Error al cargar precios: ' + priceError.message);
-                        }
-                
-                        console.log('✅ Precios cargados:', pricesData?.length, 'registros');
-                
-                        // 4. Crear un mapa de precios por product_id
-                        const priceMap = {};
-                        (pricesData || []).forEach(price => {
-                            priceMap[price.product_id] = price.price_usd;
-                        });
-                
-                        // 5. Mapear los datos finales
-                        this.allProducts = inventoryData.map(item => ({
+                        this.allProducts = (data || []).map(item => ({
                             id: item.id,
                             product_id: item.product_id,
                             name: item.products?.name || 'Sin nombre',
@@ -898,11 +872,9 @@
                             product_type: item.products?.product_type || 'bottle',
                             quantity: item.quantity,
                             min_stock: item.min_stock,
-                            price: parseFloat(priceMap[item.product_id]) || 0,
+                            price: parseFloat(item.product_prices?.[0]?.price_usd) || 0,
                             description: item.products?.description || ''
                         }));
-                
-                        console.log('✅ Productos finales:', this.allProducts);
                         
                     } catch (err) {
                         console.error('❌ Error en loadAllProducts:', err);
@@ -910,6 +882,7 @@
                         this.allProducts = [];
                     }
                 },
+
                 async loadTanks() {
                     try {
                         let query = supabase.from('tanks').select('*').order('name');
