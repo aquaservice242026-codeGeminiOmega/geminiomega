@@ -1961,79 +1961,83 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                                 totalCapsNeeded += item.quantity;
                             }
                         }
-                                    // 🔍 DEBUG TAPAS - Inicio
-                                    console.log('🔍 ========== DEBUG DESCUENTO DE TAPAS ==========');
-                                    console.log('🔍 totalCapsNeeded:', totalCapsNeeded);
-                                    console.log('🔍 capProduct:', capProduct);
-                                    console.log('🔍 userBranch:', this.userBranch);
-                                    
-                                    if (totalCapsNeeded > 0) {
-                                        if (!capProduct) {
-                                            console.error('❌ ERROR: capProduct es undefined - No existe producto tipo cap en la tabla products');
-                                            showToast('⚠️ No se encontró producto de tapas en la base de datos', 'warning');
-                                        } else {
-                                            console.log('🔍 capProduct.id:', capProduct.id);
-                                            console.log(' Buscando en inventory con product_id:', capProduct.id, 'y branch:', this.userBranch);
-                                            
-                                            const { data: capInventory, error: capInventoryError } = await supabase
-                                                .from('inventory')
-                                                .select('id, quantity, product_id, branch')
-                                                .eq('product_id', capProduct.id)
-                                                .eq('branch', this.userBranch)
-                                                .maybeSingle(); // ← CAMBIO CLAVE: maybeSingle en lugar de single
-                                            
-                                            console.log('🔍 capInventory:', capInventory);
-                                            console.log('🔍 capInventoryError:', capInventoryError);
-                                            
-                                            if (capInventoryError) {
-                                                console.error('❌ ERROR consultando inventory:', capInventoryError);
-                                                showToast('⚠️ Error al consultar stock de tapas', 'warning');
-                                            } else if (capInventory) {
-                                                console.log('🔍 Stock actual de tapas:', capInventory.quantity);
-                                                console.log('🔍 Tapas necesarias:', totalCapsNeeded);
-                                                
-                                                if (capInventory.quantity < totalCapsNeeded) {
-                                                    showToast(`️ Stock bajo: ${capInventory.quantity} disponibles, se necesitan ${totalCapsNeeded}`, 'warning');
-                                                }
-                                                
-                                                const newQuantity = capInventory.quantity - totalCapsNeeded;
-                                                console.log(' Nuevo stock será:', newQuantity);
-                                                
-                                                const { data: updateData, error: updateCapError } = await supabase
-                                                    .from('inventory')
-                                                    .update({
-                                                        quantity: newQuantity,
-                                                        updated_at: new Date().toISOString()
-                                                    })
-                                                    .eq('product_id', capProduct.id)
-                                                    .eq('branch', this.userBranch)
-                                                    .select(); // ← Agregamos .select() para ver el resultado
-                                                
-                                                console.log('🔍 updateData:', updateData);
-                                                console.log('🔍 updateCapError:', updateCapError);
-                                                
-                                                if (updateCapError) {
-                                                    console.error('❌ ERROR actualizando tapas:', updateCapError);
-                                                    showToast('⚠️ Error al actualizar stock de tapas', 'warning');
-                                                } else {
-                                                    console.log(`✅ ${totalCapsNeeded} tapas descontadas. Nuevo stock: ${newQuantity}`);
-                                                    showToast(`✅ ${totalCapsNeeded} tapa(s) descontada(s)`, 'success');
-                                                }
-                                            } else {
-                                                console.error('❌ ERROR: No existe registro en inventory para tapas en esta sucursal');
-                                                console.error('❌ Necesitas crear un registro en la tabla inventory con:');
-                                                console.error('   - product_id:', capProduct.id);
-                                                console.error('   - branch:', this.userBranch);
-                                                console.error('   - quantity: 100 (o el stock que tengas)');
-                                                showToast('⚠️ No hay registro de inventario de tapas para esta sucursal', 'warning');
-                                            }
-                                        }
-                                    } else {
-                                        console.log('🔍 No se necesitan tapas para esta venta');
-                                    }
-                                    console.log('🔍 ========== FIN DEBUG TAPAS ==========');
-                                    // 🔍 DEBUG TAPAS - Fin
-                      
+// 🔍 DEBUG TAPAS - Inicio
+console.log('🔍 ========== DEBUG DESCUENTO DE TAPAS ==========');
+console.log(' totalCapsNeeded:', totalCapsNeeded);
+console.log('🔍 capProduct:', capProduct);
+console.log('🔍 userBranch:', this.userBranch);
+
+if (totalCapsNeeded > 0) {
+    if (!capProduct) {
+        console.error('❌ ERROR: capProduct es undefined - No existe producto tipo cap en la tabla products');
+        showToast('⚠️ No se encontró producto de tapas en la base de datos', 'warning');
+    } else {
+        console.log('🔍 capProduct.id:', capProduct.id);
+        console.log('🔍 Buscando en inventory con product_id:', capProduct.id, 'y branch:', this.userBranch);
+        
+        const { data: capInventory, error: capInventoryError } = await supabase
+            .from('inventory')
+            .select('id, quantity, product_id, branch')
+            .eq('product_id', capProduct.id)
+            .eq('branch', this.userBranch)
+            .maybeSingle();
+        
+        console.log('🔍 capInventory:', capInventory);
+        console.log(' capInventoryError:', capInventoryError);
+        
+        if (capInventoryError) {
+            console.error('❌ ERROR consultando inventory:', capInventoryError);
+            showToast('⚠️ Error al consultar stock de tapas', 'warning');
+        } else if (capInventory) {
+            console.log('🔍 Stock actual de tapas:', capInventory.quantity);
+            console.log('🔍 Tapas necesarias:', totalCapsNeeded);
+            
+            if (capInventory.quantity < totalCapsNeeded) {
+                showToast(`⚠️ Stock bajo: ${capInventory.quantity} disponibles, se necesitan ${totalCapsNeeded}`, 'warning');
+            }
+            
+            const newQuantity = capInventory.quantity - totalCapsNeeded;
+            console.log('🔍 Nuevo stock será:', newQuantity);
+            
+            // ✅ CAMBIO CLAVE: Agregar .select() para ver si se actualizó
+            const { data: updateData, error: updateCapError } = await supabase
+                .from('inventory')
+                .update({
+                    quantity: newQuantity,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('product_id', capProduct.id)
+                .eq('branch', this.userBranch)
+                .select(); // ← ESTO ES LO QUE FALTABA
+            
+            console.log('🔍 updateData:', updateData);
+            console.log('🔍 updateCapError:', updateCapError);
+            
+            if (updateCapError) {
+                console.error('❌ ERROR actualizando tapas:', updateCapError);
+                showToast('️ Error al actualizar stock de tapas', 'warning');
+            } else if (updateData && updateData.length > 0) {
+                console.log(`✅ ${totalCapsNeeded} tapas descontadas. Nuevo stock: ${newQuantity}`);
+                showToast(`✅ ${totalCapsNeeded} tapa(s) descontada(s)`, 'success');
+            } else {
+                console.error('❌ ERROR: No se actualizó ningún registro');
+                console.error('❌ Verifica que existan políticas RLS correctas');
+                showToast('⚠️ No se pudo actualizar el inventario', 'error');
+            }
+        } else {
+            console.error('❌ ERROR: No existe registro en inventory para tapas en esta sucursal');
+            console.error(' Necesitas crear un registro en la tabla inventory con:');
+            console.error('   - product_id:', capProduct.id);
+            console.error('   - branch:', this.userBranch);
+            console.error('   - quantity: 100 (o el stock que tengas)');
+            showToast('⚠️ No hay registro de inventario de tapas para esta sucursal', 'warning');
+        }
+    }
+} else {
+    console.log('🔍 No se necesitan tapas para esta venta');
+}
+console.log('🔍 ========== FIN DEBUG TAPAS ==========');
+// 🔍 DEBUG TAPAS - Fin                      
                       let successDetails = '';
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             successDetails = `
