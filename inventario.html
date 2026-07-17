@@ -294,41 +294,44 @@
                     </div>
                 </div>
 
-                <!-- Distribution Info -->
+                <!-- Distribution Info - PORCENTAJES FIJOS 70/20/10 -->
                 <div class="bg-white rounded-2xl shadow-sm p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Distribución del Agua</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- 20 Litros - 70% -->
                         <div class="bg-blue-50 rounded-xl p-4 border-2 border-blue-200">
                             <div class="flex items-center justify-between mb-2">
                                 <h4 class="font-semibold text-blue-900">20 Litros</h4>
                                 <span class="text-2xl font-bold text-blue-600">70%</span>
                             </div>
                             <p class="text-sm text-blue-700">
-                                <span x-text="Math.round(totalWater * 0.70).toLocaleString()"></span>L disponibles
+                                <span x-text="getWaterForSize(20).toLocaleString()"></span>L disponibles
                             </p>
-                            <p class="text-2xl font-bold text-blue-900 mt-2" x-text="Math.round((totalWater * 0.70) / 20) + ' botellones'"></p>
+                            <p class="text-2xl font-bold text-blue-900 mt-2" x-text="getBottlesForSize(20) + ' botellones'"></p>
                         </div>
 
+                        <!-- 5 Litros - 20% -->
                         <div class="bg-cyan-50 rounded-xl p-4 border-2 border-cyan-200">
                             <div class="flex items-center justify-between mb-2">
                                 <h4 class="font-semibold text-cyan-900">5 Litros</h4>
                                 <span class="text-2xl font-bold text-cyan-600">20%</span>
                             </div>
                             <p class="text-sm text-cyan-700">
-                                <span x-text="Math.round(totalWater * 0.20).toLocaleString()"></span>L disponibles
+                                <span x-text="getWaterForSize(5).toLocaleString()"></span>L disponibles
                             </p>
-                            <p class="text-2xl font-bold text-cyan-900 mt-2" x-text="Math.round((totalWater * 0.20) / 5) + ' botellones'"></p>
+                            <p class="text-2xl font-bold text-cyan-900 mt-2" x-text="getBottlesForSize(5) + ' botellones'"></p>
                         </div>
 
+                        <!-- 13 Litros - 10% -->
                         <div class="bg-indigo-50 rounded-xl p-4 border-2 border-indigo-200">
                             <div class="flex items-center justify-between mb-2">
                                 <h4 class="font-semibold text-indigo-900">13 Litros</h4>
                                 <span class="text-2xl font-bold text-indigo-600">10%</span>
                             </div>
                             <p class="text-sm text-indigo-700">
-                                <span x-text="Math.round(totalWater * 0.10).toLocaleString()"></span>L disponibles
+                                <span x-text="getWaterForSize(13).toLocaleString()"></span>L disponibles
                             </p>
-                            <p class="text-2xl font-bold text-indigo-900 mt-2" x-text="Math.round((totalWater * 0.10) / 13) + ' botellones'"></p>
+                            <p class="text-2xl font-bold text-indigo-900 mt-2" x-text="getBottlesForSize(13) + ' botellones'"></p>
                         </div>
                     </div>
                 </div>
@@ -497,7 +500,7 @@
                 warning: 'linear-gradient(to right, #f59e0b, #d97706)',
                 info: 'linear-gradient(to right, #3b82f6, #2563eb)'
             };
-            const icons = { success: '✓', error: '✗', warning: '⚠', info: 'ℹ' };
+            const icons = { success: '✓', error: '✗', warning: '⚠', info: '' };
             Toastify({
                 text: `${icons[type]} ${message}`,
                 duration: 3000, close: true, gravity: 'top', position: 'right', stopOnFocus: true,
@@ -521,14 +524,6 @@
                 buttonsStyling: false
             });
             return result.isConfirmed;
-        }
-
-        // ============================================
-        // TRUNCAR A 2 DECIMALES (Evita que 723.999 se convierta en 724.00)
-        // ============================================
-        function round2(num) {
-            if (num === null || num === undefined || isNaN(num)) return 0;
-            return Math.floor(parseFloat(num) * 100) / 100;
         }
 
         function inventarioApp() {
@@ -733,6 +728,22 @@
                         console.error('Error cargando tanques:', err);
                         showToast('Error al cargar tanques', 'error');
                     }
+                },
+
+                // ✅ CÁLCULOS CON PORCENTAJES FIJOS 70/20/10
+                getWaterForSize(sizeLiters) {
+                    const percentages = {
+                        20: 0.70,  // 70%
+                        5: 0.20,   // 20%
+                        13: 0.10   // 10%
+                    };
+                    const percentage = percentages[sizeLiters] || 0;
+                    return Math.round(this.totalWater * percentage);
+                },
+
+                getBottlesForSize(sizeLiters) {
+                    const water = this.getWaterForSize(sizeLiters);
+                    return Math.floor(water / sizeLiters);
                 },
 
                 getInitials(name) {
