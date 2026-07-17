@@ -526,6 +526,31 @@
             return result.isConfirmed;
         }
 
+        // ============================================
+// FUNCIONES UTILITARIAS
+// ============================================
+
+/**
+* Redondea a 2 decimales evitando errores de punto flotante
+*/
+function round2(num) {
+    if (num === null || num === undefined || isNaN(num)) return 0;
+    return Math.round((parseFloat(num) + Number.EPSILON) * 100) / 100;
+}
+
+/**
+* Asegura que la tasa de cambio sea válida
+*/
+function ensureValidRate(rate) {
+    const parsed = parseFloat(rate);
+    if (isNaN(parsed) || parsed <= 0) {
+        console.warn('⚠️ Tasa inválida detectada, usando valor por defecto 700.22');
+        return 700.22;
+    }
+    return round2(parsed);
+}
+        
+       
         function inventarioApp() {
             return {
                 mobileMenuOpen: false,
