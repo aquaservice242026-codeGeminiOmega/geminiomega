@@ -1492,40 +1492,64 @@
                     }
                 },
 
-                async loadProducts() {
-                    this.loading = true;
-                    try {
-                        const { data: virtualInventory, error } = await supabase.rpc('calculate_virtual_inventory', { branch_param: this.userBranch });
-                        if (error) throw error;
-                        if (!virtualInventory || virtualInventory.length === 0) {
-                            this.products = [];
-                            return;
-                        }
-                        const bottlesOnly = virtualInventory.filter(item => {
-                            const hasStock = item.virtual_stock > 0;
-                            const hasValidSize = item.size_liters !== null && item.size_liters > 0;
-                            const isNotCap = item.product_type !== 'cap';
-                            const isNotEmpty = item.product_type !== 'empty_bottle';
-                            return hasStock && hasValidSize && isNotCap && isNotEmpty;
-                        });
-                        this.products = bottlesOnly.map(item => ({
-                            id: 'size_' + item.size_liters,
-                            product_id: item.product_id,
-                            name: item.product_name,
-                            size_liters: item.size_liters,
-                            product_type: item.product_type,
-                            price: round2(parseFloat(item.price) || 0),
-                            stock: parseInt(item.virtual_stock) || 0
-                        }));
-                        console.log('✅ Productos filtrados:', this.products);
-                    } catch (err) {
-                        console.error('Error cargando productos:', err);
-                        showToast('Error al cargar productos', 'error');
-                        this.products = [];
-                    } finally {
-                        this.loading = false;
-                    }
-                },
+async loadProducts() {
+    this.loading = true;
+    try {
+        console.log('🔄 Cargando productos para sucursal:', this.userBranch);
+        
+        const { data: virtualInventory, error } = await supabase.rpc('calculate_virtual_inventory', { branch_param: this.userBranch });
+        
+        if (error) {
+            console.error('❌ Error en calculate_virtual_inventory:', error);
+            throw error;
+        }
+        
+        console.log('📦 Datos recibidos de inventory:', virtualInventory);
+        
+        if (!virtualInventory || virtualInventory.length === 0) {
+            console.warn('⚠️ No hay inventario disponible');
+            this.products = [];
+            return;
+        }
+        
+        // Filtrar solo botellones con agua (excluir tapas y vacíos)
+        const bottlesOnly = virtualInventory.filter(item => {
+            console.log('Evaluando producto:', {
+                name: item.product_name,
+                stock: item.virtual_stock,
+                size: item.size_liters,
+                type: item.product_type
+            });
+            
+            const hasStock = item.virtual_stock > 0;
+            const hasValidSize = item.size_liters !== null && item.size_liters > 0;
+            const isBottle = item.product_type === 'bottle';
+            
+            return hasStock && hasValidSize && isBottle;
+        });
+        
+        console.log('✅ Botellones filtrados:', bottlesOnly.length);
+        
+        this.products = bottlesOnly.map(item => ({
+            id: 'size_' + item.size_liters,
+            product_id: item.product_id,
+            name: item.product_name,
+            size_liters: item.size_liters,
+            product_type: item.product_type,
+            price: round2(parseFloat(item.price) || 0),
+            stock: parseInt(item.virtual_stock) || 0
+        }));
+        
+        console.log(' Productos finales:', this.products);
+        
+    } catch (err) {
+        console.error('❌ Error cargando productos:', err);
+        showToast('Error al cargar productos: ' + err.message, 'error');
+        this.products = [];
+    } finally {
+        this.loading = false;
+    }
+},
 
                 async loadCustomers() {
                     try {
