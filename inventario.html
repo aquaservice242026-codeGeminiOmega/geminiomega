@@ -141,7 +141,7 @@
                 </button>
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800">Inventario</h2>
-                    <p class="text-sm text-gray-500" x-text="'Control basado en capacidad de tanques - ' + (selectedBranch === 'all' ? 'Consolidado' : userBranch) + ' | ' + DateUtils.formatDateLong(new Date())"></p>
+                    <p class="text-sm text-gray-500" x-text="'Control de productos y tanques - ' + (selectedBranch === 'all' ? 'Consolidado' : userBranch) + ' | ' + DateUtils.formatDateLong(new Date())"></p>
                 </div>
             </div>
             <div class="flex items-center space-x-2">
@@ -183,10 +183,10 @@
                     <div class="flex items-start">
                         <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
                         <div>
-                            <h4 class="font-semibold text-blue-900">Inventario Virtual</h4>
+                            <h4 class="font-semibold text-blue-900">Inventario Virtual y Físico</h4>
                             <p class="text-sm text-blue-700 mt-1">
-                                El inventario de botellones se calcula automáticamente basado en el agua disponible en los tanques,
-                                distribuida: 70% para 20L, 20% para 5L, 10% para 13L.
+                                El inventario de botellones con agua se calcula automáticamente basado en el agua disponible en los tanques.
+                                Los botellones vacíos y tapas se gestionan por stock físico real.
                             </p>
                         </div>
                     </div>
@@ -194,25 +194,39 @@
 
                 <!-- Virtual Inventory Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <template x-for="item in virtualInventory" :key="item.size_liters || item.product_type">
+                    <template x-for="item in virtualInventory" :key="item.product_id + '_' + item.branch">
                         <div class="bg-white rounded-2xl shadow-sm p-6 border-t-4" :class="{
                                 'border-cyan-500': item.size_liters === 5,
                                 'border-blue-500': item.size_liters === 13,
-                                'border-blue-700': item.size_liters === 20
+                                'border-blue-700': item.size_liters === 20,
+                                'border-amber-500': item.product_type === 'empty_bottle' && item.size_liters === 15,
+                                'border-orange-500': item.product_type === 'empty_bottle' && item.size_liters === 20,
+                                'border-purple-500': item.product_type === 'cap'
                             }">
                             <div class="flex items-center justify-between mb-4">
                                 <div class="w-16 h-16 rounded-full flex items-center justify-center" :class="{
                                         'bg-cyan-100': item.size_liters === 5,
-                                        'bg-blue-100': item.size_liters === 13 || item.size_liters === 20
+                                        'bg-blue-100': item.size_liters === 13 || item.size_liters === 20,
+                                        'bg-amber-100': item.product_type === 'empty_bottle' && item.size_liters === 15,
+                                        'bg-orange-100': item.product_type === 'empty_bottle' && item.size_liters === 20,
+                                        'bg-purple-100': item.product_type === 'cap'
                                     }">
-                                    <i class="fas fa-tint text-3xl"
-                                        :style="{color: item.size_liters === 5 ? '#0891b2' : item.size_liters === 13 ? '#3b82f6' : '#1d4ed8'}"></i>
+                                    <i class="fas text-3xl" :class="{
+                                        'fa-tint': item.size_liters === 5 || item.size_liters === 13 || item.size_liters === 20,
+                                        'fa-box': item.product_type === 'empty_bottle',
+                                        'fa-circle': item.product_type === 'cap'
+                                    }" :style="{
+                                        color: item.size_liters === 5 ? '#0891b2' : 
+                                               item.size_liters === 13 ? '#3b82f6' : 
+                                               item.size_liters === 20 ? '#1d4ed8' : 
+                                               item.product_type === 'cap' ? '#9333ea' : '#d97706'
+                                    }"></i>
                                 </div>
                                 <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">Disponible</span>
                             </div>
                             <h3 class="text-lg font-semibold text-gray-800" x-text="item.product_name"></h3>
                             <p class="text-4xl font-bold text-gray-900 mt-2" x-text="item.virtual_stock"></p>
-                            <p class="text-sm text-gray-500 mt-1">botellones disponibles</p>
+                            <p class="text-sm text-gray-500 mt-1" x-text="item.product_type === 'cap' || item.product_type === 'empty_bottle' ? 'unidades disponibles' : 'botellones disponibles'"></p>
                             <div class="mt-4 pt-4 border-t">
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-600">Precio:</span>
@@ -222,9 +236,13 @@
                                     <span class="text-gray-600">Valor total:</span>
                                     <span class="font-semibold text-green-600" x-text="'$' + parseFloat(item.total_value).toFixed(2)"></span>
                                 </div>
-                                <div class="flex justify-between text-sm mt-1">
+                                <div class="flex justify-between text-sm mt-1" x-show="item.water_assigned > 0">
                                     <span class="text-gray-600">Agua asignada:</span>
-                                    <span class="font-semibold text-blue-600" x-text="((item.virtual_stock * (item.size_liters || 0)) || 0).toLocaleString() + 'L'"></span>
+                                    <span class="font-semibold text-blue-600" x-text="item.water_assigned.toLocaleString() + 'L'"></span>
+                                </div>
+                                <div class="flex justify-between text-sm mt-1" x-show="item.product_type === 'cap' || item.product_type === 'empty_bottle'">
+                                    <span class="text-gray-600">Nota:</span>
+                                    <span class="font-semibold text-gray-600 text-xs" x-text="item.product_type === 'cap' ? 'Se descuentan en ventas 13L/20L' : 'No descuenta agua del tanque'"></span>
                                 </div>
                             </div>
                         </div>
@@ -515,9 +533,6 @@
             return result.isConfirmed;
         }
 
-        // ============================================
-        // TRUNCAR A 2 DECIMALES (Evita que 723.999 se convierta en 724.00)
-        // ============================================
         function round2(num) {
             if (num === null || num === undefined || isNaN(num)) return 0;
             return Math.floor(parseFloat(num) * 100) / 100;
@@ -530,7 +545,6 @@
                 loading: true,
                 processing: false,
                 virtualInventory: [],
-                capsInventory: [], // Array separado para las tapas
                 tanks: [],
                 totalWater: 0,
                 userName: '',
@@ -538,7 +552,6 @@
                 userBranch: '',
                 userInitials: '??',
                 
-                // ✅ Control de sucursales (Consolidado para admin)
                 selectedBranch: 'all',
                 availableBranches: [],
 
@@ -558,8 +571,6 @@
                             this.userRole = profile.role;
                             this.userBranch = profile.branch;
                             this.userInitials = this.getInitials(profile.full_name);
-                            
-                            // ✅ CONSOLIDADO POR DEFECTO PARA ADMIN, SUCURSAL PARA VENDEDORES
                             this.selectedBranch = (profile.role === 'admin') ? 'all' : profile.branch;
                         }
 
@@ -598,10 +609,6 @@
                         console.log('🔍 ========== INICIO CARGA INVENTARIO ==========');
                         console.log('📍 Sucursal seleccionada:', this.selectedBranch);
                         
-                        const branchParam = this.selectedBranch === 'all' ? null : this.selectedBranch;
-                        
-                        // 1. Consultar tabla inventory directamente
-                        console.log(' Consultando tabla inventory...');
                         let inventoryQuery = supabase.from('inventory')
                             .select(`
                                 id,
@@ -629,18 +636,8 @@
                             throw inventoryError;
                         }
                         
-                        console.log('✅ Datos de inventory:', inventoryData?.length, 'registros');
-                        
-                        // 2. Consultar product_prices
-                        console.log('📡 Consultando tabla product_prices...');
                         let pricesQuery = supabase.from('product_prices')
-                            .select(`
-                                id,
-                                product_id,
-                                price_usd,
-                                branch,
-                                is_active
-                            `);
+                            .select(`id, product_id, price_usd, branch, is_active`);
                         
                         if (this.selectedBranch !== 'all') {
                             pricesQuery = pricesQuery.eq('branch', this.selectedBranch);
@@ -648,61 +645,35 @@
                         
                         const { data: pricesData, error: pricesError } = await pricesQuery.eq('is_active', true);
                         
-                        if (pricesError) {
-                            console.error('❌ Error consultando product_prices:', pricesError);
-                        } else {
-                            console.log('✅ Precios cargados:', pricesData?.length, 'registros');
-                        }
-                        
-                        // 3. Crear mapa de precios
                         const priceMap = {};
                         (pricesData || []).forEach(price => {
                             const key = `${price.product_id}_${price.branch}`;
                             priceMap[key] = price.price_usd;
                         });
                         
-                        // 4. Transformar datos - MOSTRAR TODO (botellones y tapas)
                         const combinedData = inventoryData.map(item => {
                             const priceKey = `${item.product_id}_${item.branch}`;
                             const price = priceMap[priceKey] || 0;
                             const isCap = item.products.product_type === 'cap';
-                            
-                            console.log(`\n📦 Producto: ${item.products.name}`);
-                            console.log(`   - Tipo: ${item.products.product_type}`);
-                            console.log(`   - Quantity: ${item.quantity}`);
-                            console.log(`   - Price: $${price}`);
-                            console.log(`   - Size liters: ${item.products.size_liters}`);
+                            const isEmptyBottle = item.products.product_type === 'empty_bottle';
                             
                             return {
                                 product_id: item.product_id,
                                 product_name: item.products.name,
+                                // ✅ CORRECCIÓN: Mantener size_liters para empty_bottle (15 o 20), solo null para caps
                                 size_liters: isCap ? null : item.products.size_liters,
                                 product_type: item.products.product_type,
                                 price: price,
                                 virtual_stock: item.quantity,
                                 total_value: round2(item.quantity * price),
-                                water_assigned: isCap ? 0 : (item.quantity * (item.products.size_liters || 0))
+                                water_assigned: (isCap || isEmptyBottle) ? 0 : (item.quantity * (item.products.size_liters || 0))
                             };
                         });
                         
-                        // 5. MOSTRAR TODO en inventario (botellones + tapas)
                         this.virtualInventory = combinedData;
                         
-                        console.log('\n📊 RESUMEN FINAL:');
-                        console.log(' Total items en inventario:', this.virtualInventory.length);
-                        
-                        this.virtualInventory.forEach(item => {
-                            if (item.product_type === 'cap') {
-                                console.log(`  - ${item.product_name}: ${item.virtual_stock} unidades @ $${item.price} (TAPA - SIN AGUA)`);
-                            } else {
-                                console.log(`  - ${item.product_name}: ${item.virtual_stock} unidades @ $${item.price} (${item.water_assigned}L)`);
-                            }
-                        });
-                        
-                        console.log('\n🏁 ========== FIN CARGA INVENTARIO ==========');
-                        
                     } catch (err) {
-                        console.error(' Error cargando inventario virtual:', err);
+                        console.error('❌ Error cargando inventario virtual:', err);
                         showToast('Error al cargar inventario: ' + err.message, 'error');
                         this.virtualInventory = [];
                     }
