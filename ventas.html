@@ -446,12 +446,14 @@
                     <div class="grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-4">
                         <template x-for="product in filteredProducts" :key="product.id">
                             <button @click="addProduct(product)" class="product-card rounded-xl text-white p-3 lg:p-6 relative overflow-hidden" :class="{
-                                'bg-gradient-to-br from-cyan-400 to-cyan-600': product.size_liters === 5,
-                                'bg-gradient-to-br from-blue-400 to-blue-600': product.size_liters === 13,
-                                'bg-gradient-to-br from-indigo-500 to-indigo-700': product.size_liters === 20,
-                                'low-stock': product.stock <= 10 && product.stock > 0,
-                                'opacity-50': product.stock === 0
-                            }">
+                                  'bg-gradient-to-br from-cyan-400 to-cyan-600': product.size_liters === 5,
+                                  'bg-gradient-to-br from-blue-400 to-blue-600': product.size_liters === 13,
+                                  'bg-gradient-to-br from-indigo-500 to-indigo-700': product.size_liters === 20,
+                                  'bg-gradient-to-br from-amber-600 to-amber-800': product.product_type === 'empty_bottle' && product.size_liters === 15,
+                                  'bg-gradient-to-br from-orange-600 to-orange-800': product.product_type === 'empty_bottle' && product.size_liters === 20,
+                                  'low-stock': product.stock <= 10 && product.stock > 0,
+                                  'opacity-50': product.stock === 0
+                                }">
                                 <div class="absolute top-2 right-2 bg-white/20 backdrop-blur px-1.5 py-0.5 rounded text-[10px] font-bold">
                                     <span x-text="product.stock"></span>
                                 </div>
