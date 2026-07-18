@@ -1992,44 +1992,63 @@ if (itemsError) throw itemsError;
 
 let totalCapsNeeded = 0;
 
-// Procesar TODOS los items del carrito (con agua y vacíos)
+// Crear mapa de productos vacíos por tamaño
+const emptyBottleProducts = productsFromDB.filter(p => p.product_type === 'empty_bottle');
+
+// Procesar cada item del carrito
 for (const item of this.cart) {
     const isEmptyBottle = item.product_type === 'empty_bottle';
     
     if (isEmptyBottle) {
-        // BOTELLÓN VACÍO: Descuenta agua del tanque (se llenará) + tapa
-        console.log(`🔵 Procesando botellón vacío ${item.size_liters}L - Cantidad: ${item.quantity}`);
+        // ===== BOTELLÓN VACÍO: Descontar del inventario físico =====
+        console.log(`💧 Procesando botellón vacío ${item.size_liters}L - Cantidad: ${item.quantity}`);
         
-        // 1. Descuentar agua del tanque (como si se llenara)
-        const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
-            branch_param: this.userBranch,
-            product_id_param: item.product_id,
-            quantity_param: item.quantity,
-            user_id_param: session.user.id
-        });
+        const emptyProduct = emptyBottleProducts.find(p => p.size_liters === item.size_liters);
         
-        if (tankError) {
-            console.error('❌ Error descontando agua para botellón vacío:', tankError);
-            throw new Error(`Error al descontar agua del tanque para botellón vacío ${item.size_liters}L`);
+        if (emptyProduct) {
+            // Descontar del inventario físico
+            const { data: emptyInventory, error: emptyInvError } = await supabase
+                .from('inventory')
+                .select('quantity')
+                .eq('product_id', emptyProduct.id)
+                .eq('branch', this.userBranch)
+                .single();
+            
+            if (emptyInvError) {
+                console.warn('⚠️ Error consultando inventario de botellón vacío:', emptyInvError.message);
+            } else if (emptyInventory) {
+                if (emptyInventory.quantity < item.quantity) {
+                    showToast(`⚠️ Stock bajo de botellón vacío ${item.size_liters}L: ${emptyInventory.quantity} disponibles`, 'warning');
+                }
+                
+                const { error: updateEmptyError } = await supabase
+                    .from('inventory')
+                    .update({
+                        quantity: emptyInventory.quantity - item.quantity,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('product_id', emptyProduct.id)
+                    .eq('branch', this.userBranch);
+                
+                if (updateEmptyError) {
+                    console.warn('⚠️ Error actualizando botellón vacío:', updateEmptyError.message);
+                } else {
+                    console.log(`✅ ${item.quantity} botellón(es) vacío(s) ${item.size_liters}L descontado(s)`);
+                }
+            }
         }
         
-        if (!tankResult || !tankResult.success) {
-            throw new Error(`Agua insuficiente en el tanque para llenar ${item.quantity} botellón(es) vacío(s) de ${item.size_liters}L`);
-        }
-        
-        console.log(`✅ Agua descontada del tanque para ${item.quantity} botellón(es) vacío(s) ${item.size_liters}L`);
-        
-        // 2. Contar tapas para botellones vacíos de 15L y 20L
+        // Contar tapas para botellones vacíos de 15L y 20L
         if (item.size_liters === 15 || item.size_liters === 20) {
             totalCapsNeeded += item.quantity;
             console.log(`🔴 Contando ${item.quantity} tapa(s) para botellón vacío ${item.size_liters}L`);
         }
     } else {
-        // BOTELLÓN CON AGUA: Lógica existente
+        // ===== BOTELLÓN CON AGUA: Usar RPC existente =====
+        console.log(`💧 Procesando botellón con agua ${item.size_liters}L - Cantidad: ${item.quantity}`);
+        
         const realProductId = sizeToProductId[item.size_liters];
         if (!realProductId) continue;
-        
-        console.log(`💧 Procesando botellón con agua ${item.size_liters}L - Cantidad: ${item.quantity}`);
         
         const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
             branch_param: this.userBranch,
@@ -2085,6 +2104,7 @@ if (totalCapsNeeded > 0 && capProduct) {
         }
     }
 }
+                        
                         let successDetails = '';
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             successDetails = `
