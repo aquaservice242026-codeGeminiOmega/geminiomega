@@ -1506,48 +1506,61 @@ async loadProducts() {
         
         console.log('📦 Datos recibidos de inventory:', virtualInventory);
         
-        if (!virtualInventory || virtualInventory.length === 0) {
+        if (!virtualInventory || virtualInventory.length === 0) { 
             console.warn('⚠️ No hay inventario disponible');
-            this.products = [];
-            return;
+            this.products = []; 
+            return; 
         }
         
-        // Filtrar solo botellones con agua (excluir tapas y vacíos)
+        // ✅ FILTRO MEJORADO: Maneja ambos formatos de datos
         const bottlesOnly = virtualInventory.filter(item => {
+            // Soporta ambos formatos: virtual_stock o stock, size_liters o size
+            const stock = item.virtual_stock || item.stock || 0;
+            const size = item.size_liters || item.size;
+            const productType = item.product_type || item.type;
+            
             console.log('Evaluando producto:', {
-                name: item.product_name,
-                stock: item.virtual_stock,
-                size: item.size_liters,
-                type: item.product_type
+                name: item.product_name || item.name,
+                stock: stock,
+                size: size,
+                type: productType
             });
             
-            const hasStock = item.virtual_stock > 0;
-            const hasValidSize = item.size_liters !== null && item.size_liters > 0;
-            const isBottle = item.product_type === 'bottle';
+            const hasStock = stock > 0;
+            const hasValidSize = size !== null && size !== undefined && size > 0;
+            const isNotCap = productType !== 'cap';
+            const isNotEmpty = productType !== 'empty_bottle';
             
-            return hasStock && hasValidSize && isBottle;
+            console.log('  - hasStock:', hasStock, 'hasValidSize:', hasValidSize, 'isNotCap:', isNotCap, 'isNotEmpty:', isNotEmpty);
+            
+            return hasStock && hasValidSize && isNotCap && isNotEmpty;
         });
         
         console.log('✅ Botellones filtrados:', bottlesOnly.length);
         
-        this.products = bottlesOnly.map(item => ({
-            id: 'size_' + item.size_liters,
-            product_id: item.product_id,
-            name: item.product_name,
-            size_liters: item.size_liters,
-            product_type: item.product_type,
-            price: round2(parseFloat(item.price) || 0),
-            stock: parseInt(item.virtual_stock) || 0
-        }));
+        this.products = bottlesOnly.map(item => {
+            const stock = item.virtual_stock || item.stock || 0;
+            const size = item.size_liters || item.size;
+            
+            return {
+                id: 'size_' + size,
+                product_id: item.product_id,
+                name: item.product_name || item.name,
+                size_liters: size,
+                product_type: item.product_type || item.type,
+                price: round2(parseFloat(item.price) || 0),
+                stock: parseInt(stock) || 0
+            };
+        });
         
-        console.log(' Productos finales:', this.products);
+        console.log('✅ Productos finales:', this.products);
         
-    } catch (err) {
-        console.error('❌ Error cargando productos:', err);
-        showToast('Error al cargar productos: ' + err.message, 'error');
-        this.products = [];
-    } finally {
-        this.loading = false;
+    } catch (err) { 
+        console.error('Error cargando productos:', err); 
+        showToast('Error al cargar productos', 'error'); 
+        this.products = []; 
+    } finally { 
+        this.loading = false; 
     }
 },
 
