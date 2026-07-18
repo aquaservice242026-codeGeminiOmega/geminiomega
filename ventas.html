@@ -74,6 +74,7 @@
     </style>
 </head>
 <body class="bg-gray-50" x-data="ventasApp()" x-init="initVentas()">
+
     <!-- Sidebar (Desktop) -->
     <aside class="hidden lg:block fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40">
         <div class="p-6">
@@ -257,8 +258,16 @@
                                 </button>
                             </div>
                         </div>
-                        <div x-show="deliveryType === 'delivery'" class="mt-3">
-                            <textarea x-model="deliveryAddress" placeholder="Dirección de entrega..." class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"></textarea>
+                        <div x-show="deliveryType === 'delivery'" class="mt-3 space-y-3">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Dirección de entrega *</label>
+                                <textarea x-model="deliveryAddress" placeholder="Dirección completa..." class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500" rows="2"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Coordenadas GPS (opcional)</label>
+                                <input type="text" x-model="deliveryCoordinates" placeholder="Ej: 10.5038,-66.9146" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500">
+                                <p class="text-[10px] text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>Formato: latitud,longitud</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -311,10 +320,7 @@
                         <span class="text-gray-600">Subtotal:</span>
                         <span class="font-medium" x-text="'$' + subtotal.toFixed(2)"></span>
                     </div>
-                    <div x-show="deliveryType === 'delivery'" class="flex justify-between text-sm">
-                        <span class="text-gray-600">Delivery:</span>
-                        <span class="font-medium">$1.00</span>
-                    </div>
+                    <!-- ✅ DELIVERY GRATIS - Sin costo adicional -->
                     <div class="flex justify-between text-lg font-bold border-t pt-2">
                         <span class="text-gray-800">Total USD:</span>
                         <span class="text-cyan-600" x-text="'$' + totalUSD.toFixed(2)"></span>
@@ -594,10 +600,7 @@
                     <span class="text-gray-600">Subtotal:</span>
                     <span class="font-medium" x-text="'$' + subtotal.toFixed(2)"></span>
                 </div>
-                <div x-show="deliveryType === 'delivery'" class="flex justify-between text-sm">
-                    <span class="text-gray-600">Delivery:</span>
-                    <span class="font-medium">$1.00</span>
-                </div>
+                <!-- ✅ DELIVERY GRATIS - Sin costo adicional -->
                 <div class="flex justify-between text-lg font-bold border-t pt-2">
                     <span class="text-gray-800">Total USD:</span>
                     <span class="text-cyan-600" x-text="'$' + totalUSD.toFixed(2)"></span>
@@ -617,8 +620,15 @@
                         <i class="fas fa-truck mr-1"></i>Delivery
                     </button>
                 </div>
-                <div x-show="deliveryType === 'delivery'" class="mt-2">
-                    <textarea x-model="deliveryAddress" placeholder="Dirección de entrega..." class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500"></textarea>
+                <div x-show="deliveryType === 'delivery'" class="mt-2 space-y-2">
+                    <div>
+                        <label class="block text-[10px] font-medium text-gray-700 mb-1">Dirección de entrega *</label>
+                        <textarea x-model="deliveryAddress" placeholder="Dirección completa..." class="w-full px-2 py-1 text-xs border border-gray-300 rounded bg-white" rows="2"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-medium text-gray-700 mb-1">Coordenadas GPS (opcional)</label>
+                        <input type="text" x-model="deliveryCoordinates" placeholder="Ej: 10.5038,-66.9146" class="w-full px-2 py-1 text-xs border border-gray-300 rounded bg-white">
+                    </div>
                 </div>
             </div>
             <div class="mb-3">
@@ -1015,7 +1025,7 @@
                 console.log('✅ Tasa BCV obtenida:', rate);
                 return { rate: rate, date: data.fechaActualizacion, source: 'BCV Oficial' };
             } catch (err) {
-                console.error(' Error obteniendo tasa BCV:', err);
+                console.error('❌ Error obteniendo tasa BCV:', err);
                 return null;
             }
         }
@@ -1035,13 +1045,14 @@
                 customers: [],
                 deliveryType: 'pickup',
                 deliveryAddress: '',
+                deliveryCoordinates: '', // ✅ NUEVO: Campo para coordenadas GPS
                 selectedCustomer: '',
                 paymentMethod: 'efectivo_bs',
                 paymentReference: '',
                 amountReceivedBs: 0,
                 amountReceivedUsd: 0,
                 exchangeRate: 700.22,
-                deliveryCost: 1.00,
+                deliveryCost: 0, // ✅ DELIVERY GRATIS
                 userName: '',
                 userRole: '',
                 userBranch: '',
@@ -1063,9 +1074,8 @@
                 },
 
                 get totalUSD() {
-                    let total = this.subtotal;
-                    if (this.deliveryType === 'delivery') total += this.deliveryCost;
-                    return round2(total);
+                    // ✅ DELIVERY GRATIS - No se suma deliveryCost
+                    return round2(this.subtotal);
                 },
 
                 get totalBs() {
@@ -1201,7 +1211,7 @@
 
                 async loadExchangeRate() {
                     try {
-                        console.log('🔄 Consultando tasa centralizada de Supabase');
+                        console.log(' Consultando tasa centralizada de Supabase');
                         const { data, error } = await supabase.rpc('get_active_exchange_rate');
                         if (!error && data) {
                             const rate = ensureValidRate(data);
@@ -1212,7 +1222,7 @@
                             this.exchangeRate = 700.22;
                         }
                     } catch (err) {
-                        console.error('❌ Error cargando tasa:', err);
+                        console.error(' Error cargando tasa:', err);
                         this.exchangeRate = 700.22;
                     }
                 },
@@ -1274,9 +1284,9 @@
                             console.error('❌ Error en calculate_virtual_inventory:', error);
                             throw error;
                         }
-                        console.log(' Datos recibidos de inventory:', virtualInventory);
+                        console.log('📦 Datos recibidos de inventory:', virtualInventory);
                         if (!virtualInventory || virtualInventory.length === 0) {
-                            console.warn('️ No hay inventario disponible');
+                            console.warn('⚠️ No hay inventario disponible');
                             this.products = [];
                             return;
                         }
@@ -1634,7 +1644,6 @@
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
                         let notes = [];
-                        if (this.deliveryType === 'delivery') notes.push(`Delivery: ${this.deliveryAddress}`);
                         notes.push(`Tasa aplicada: Bs. ${this.exchangeRate.toFixed(2)}`);
                         let payment_method = this.paymentMethod;
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
@@ -1657,6 +1666,7 @@
                                 notes.push(`Cambio USD: $${(round2(this.amountReceivedUsd) - this.totalUSD).toFixed(2)}`);
                             }
                         }
+                        // ✅ GUARDAR EN CAMPOS DEDICADOS
                         const { data: sale, error: saleError } = await supabase.from('sales').insert({
                             branch: this.userBranch,
                             customer_id: this.selectedCustomer || null,
@@ -1666,6 +1676,9 @@
                             total: this.totalUSD,
                             payment_method: payment_method,
                             status: payment_method === 'credito' ? 'pending' : 'completed',
+                            delivery_type: this.deliveryType, // ✅ Campo delivery_type
+                            delivery_address: this.deliveryType === 'delivery' ? this.deliveryAddress : null, // ✅ Campo delivery_address
+                            delivery_coordinates: this.deliveryType === 'delivery' ? this.deliveryCoordinates : null, // ✅ Campo delivery_coordinates
                             notes: notes.join('\n') || null,
                             exchange_rate_used: this.exchangeRate,
                             rate_date: new Date().toISOString().split('T')[0],
@@ -1711,7 +1724,7 @@
                         if (paymentsToInsert.length > 0) {
                             const { error: paymentsError } = await supabase.from('sale_payments').insert(paymentsToInsert);
                             if (paymentsError) {
-                                console.warn('️ No se pudo guardar en sale_payments:', paymentsError.message);
+                                console.warn('⚠️ No se pudo guardar en sale_payments:', paymentsError.message);
                             }
                         }
                         const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters, product_type').eq('is_active', true);
@@ -1729,122 +1742,41 @@
                         }));
                         const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
                         if (itemsError) throw itemsError;
-let totalCapsNeeded = 0;
-
-// Crear mapa de productos vacíos por tamaño
-const emptyBottleProducts = productsFromDB.filter(p => p.product_type === 'empty_bottle');
-
-// Procesar botellones con agua (5L, 13L, 20L)
-for (const item of this.cart) {
-    if (item.product_type !== 'empty_bottle') {
-        const realProductId = sizeToProductId[item.size_liters];
-        if (!realProductId) continue;
-        
-        console.log(`💧 Procesando botellón con agua ${item.size_liters}L - Cantidad: ${item.quantity}`);
-        
-        const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
-            branch_param: this.userBranch,
-            product_id_param: realProductId,
-            quantity_param: item.quantity,
-            user_id_param: session.user.id
-        });
-        
-        if (tankError) throw tankError;
-        if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
-        
-        // Contar tapas para 13L y 20L con agua
-        if (item.size_liters === 13 || item.size_liters === 20) {
-            totalCapsNeeded += item.quantity;
-            console.log(`🔴 Contando ${item.quantity} tapa(s) para botellón con agua ${item.size_liters}L`);
-        }
-    }
-}
-
-// Procesar botellones vacíos (15L y 20L) - Descontar del inventario físico
-for (const item of this.cart) {
-    if (item.product_type === 'empty_bottle') {
-        const emptyProduct = emptyBottleProducts.find(p => p.size_liters === item.size_liters);
-        if (!emptyProduct) continue;
-        
-        console.log(`💧 Procesando botellón vacío ${item.size_liters}L - Cantidad: ${item.quantity}`);
-        
-        // Descontar del inventario físico
-        const { data: emptyInventory, error: emptyInvError } = await supabase
-            .from('inventory')
-            .select('quantity')
-            .eq('product_id', emptyProduct.id)
-            .eq('branch', this.userBranch)
-            .single();
-        
-        if (emptyInvError) {
-            console.warn('️ Error consultando inventario de botellón vacío:', emptyInvError.message);
-        } else if (emptyInventory) {
-            if (emptyInventory.quantity < item.quantity) {
-                showToast(`⚠️ Stock bajo de botellón vacío ${item.size_liters}L: ${emptyInventory.quantity} disponibles`, 'warning');
-            }
-            
-            const { error: updateEmptyError } = await supabase
-                .from('inventory')
-                .update({
-                    quantity: emptyInventory.quantity - item.quantity,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('product_id', emptyProduct.id)
-                .eq('branch', this.userBranch);
-            
-            if (updateEmptyError) {
-                console.warn('️ Error actualizando botellón vacío:', updateEmptyError.message);
-            } else {
-                console.log(`✅ ${item.quantity} botellón(es) vacío(s) ${item.size_liters}L descontado(s)`);
-            }
-        }
-        
-        // Contar tapas para botellones vacíos de 15L y 20L
-        if (item.size_liters === 15 || item.size_liters === 20) {
-            totalCapsNeeded += item.quantity;
-            console.log(`🔴 Contando ${item.quantity} tapa(s) para botellón vacío ${item.size_liters}L`);
-        }
-    }
-}
-
-console.log(`🔴 Total de tapas necesarias: ${totalCapsNeeded}`);
-
-// Descontar tapas (para 13L, 15L y 20L - tanto llenos como vacíos)
-if (totalCapsNeeded > 0 && capProduct) {
-    console.log(` Descontando ${totalCapsNeeded} tapas del inventario`);
-    
-    const { data: capInventory, error: capInventoryError } = await supabase
-        .from('inventory')
-        .select('quantity, product_id')
-        .eq('product_id', capProduct.id)
-        .eq('branch', this.userBranch)
-        .single();
-    
-    if (capInventoryError) {
-        console.warn('⚠️ Error consultando inventario de tapas:', capInventoryError.message);
-    } else if (capInventory) {
-        if (capInventory.quantity < totalCapsNeeded) {
-            showToast(`⚠️ Stock de tapas bajo: ${capInventory.quantity} disponibles, se necesitan ${totalCapsNeeded}`, 'warning');
-        }
-        
-        const { error: updateCapError } = await supabase
-            .from('inventory')
-            .update({
-                quantity: capInventory.quantity - totalCapsNeeded,
-                updated_at: new Date().toISOString()
-            })
-            .eq('product_id', capProduct.id)
-            .eq('branch', this.userBranch);
-        
-        if (updateCapError) {
-            console.warn('⚠️ Error actualizando tapas:', updateCapError.message);
-        } else {
-            console.log(`✅ ${totalCapsNeeded} tapas descontadas del inventario`);
-        }
-    }
-}
-
-                        
+                        let totalCapsNeeded = 0;
+                        for (const item of this.cart) {
+                            const realProductId = sizeToProductId[item.size_liters];
+                            if (!realProductId) continue;
+                            const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
+                                branch_param: this.userBranch,
+                                product_id_param: realProductId,
+                                quantity_param: item.quantity,
+                                user_id_param: session.user.id
+                            });
+                            if (tankError) throw tankError;
+                            if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
+                            if (item.size_liters === 13 || item.size_liters === 20) {
+                                totalCapsNeeded += item.quantity;
+                            }
+                        }
+                        if (totalCapsNeeded > 0 && capProduct) {
+                            const { data: capInventory, error: capInventoryError } = await supabase.from('inventory').select('quantity, product_id').eq('product_id', capProduct.id).eq('branch', this.userBranch).single();
+                            if (capInventoryError) {
+                                console.warn('⚠️ Error consultando inventario de tapas:', capInventoryError.message);
+                            } else if (capInventory) {
+                                if (capInventory.quantity < totalCapsNeeded) {
+                                    showToast(`⚠️ Stock de tapas bajo: ${capInventory.quantity} disponibles, se necesitan ${totalCapsNeeded}`, 'warning');
+                                }
+                                const { error: updateCapError } = await supabase.from('inventory').update({
+                                    quantity: capInventory.quantity - totalCapsNeeded,
+                                    updated_at: new Date().toISOString()
+                                }).eq('product_id', capProduct.id).eq('branch', this.userBranch);
+                                if (updateCapError) {
+                                    console.warn('⚠️ Error actualizando tapas:', updateCapError.message);
+                                } else {
+                                    console.log(`✅ ${totalCapsNeeded} tapas descontadas del inventario`);
+                                }
+                            }
+                        }
                         let successDetails = '';
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             successDetails = `
@@ -1885,6 +1817,7 @@ if (totalCapsNeeded > 0 && capProduct) {
                         });
                         this.cart = [];
                         this.deliveryAddress = '';
+                        this.deliveryCoordinates = '';
                         this.selectedCustomer = '';
                         this.paymentReference = '';
                         this.amountReceivedBs = 0;
