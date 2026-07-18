@@ -1985,43 +1985,110 @@ async loadProducts() {
                         const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
                         if (itemsError) throw itemsError;
 
-                        let totalCapsNeeded = 0;
-                        for (const item of this.cart) {
-                            const realProductId = sizeToProductId[item.size_liters];
-                            if (!realProductId) continue;
-                            const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
-                                branch_param: this.userBranch,
-                                product_id_param: realProductId,
-                                quantity_param: item.quantity,
-                                user_id_param: session.user.id
-                            });
-                            if (tankError) throw tankError;
-                            if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
-                            if (item.size_liters === 13 || item.size_liters === 20) {
-                                totalCapsNeeded += item.quantity;
-                            }
-                        }
+let totalCapsNeeded = 0;
+const emptyBottleProducts = productsFromDB.filter(p => p.product_type === 'empty_bottle');
 
-                        if (totalCapsNeeded > 0 && capProduct) {
-                            const { data: capInventory, error: capInventoryError } = await supabase.from('inventory').select('quantity, product_id').eq('product_id', capProduct.id).eq('branch', this.userBranch).single();
-                            if (capInventoryError) {
-                                console.warn('⚠️ Error consultando inventario de tapas:', capInventoryError.message);
-                            } else if (capInventory) {
-                                if (capInventory.quantity < totalCapsNeeded) {
-                                    showToast(`⚠️ Stock de tapas bajo: ${capInventory.quantity} disponibles, se necesitan ${totalCapsNeeded}`, 'warning');
-                                }
-                                const { error: updateCapError } = await supabase.from('inventory').update({
-                                    quantity: capInventory.quantity - totalCapsNeeded,
-                                    updated_at: new Date().toISOString()
-                                }).eq('product_id', capProduct.id).eq('branch', this.userBranch);
-                                if (updateCapError) {
-                                    console.warn('⚠️ Error actualizando tapas:', updateCapError.message);
-                                } else {
-                                    console.log(`✅ ${totalCapsNeeded} tapas descontadas del inventario`);
-                                }
-                            }
-                        }
+// Procesar cada item del carrito
+for (const item of this.cart) {
+    // Verificar si es un botellón vacío
+    const isEmptyBottle = item.product_type === 'empty_bottle';
+    
+    if (isEmptyBottle) {
+        // Descontar botellón vacío del inventario físico
+        const emptyProduct = emptyBottleProducts.find(p => 
+            p.size_liters === item.size_liters && p.product_type === 'empty_bottle'
+        );
+        
+        if (emptyProduct) {
+            const { data: emptyInventory, error: emptyInvError } = await supabase
+                .from('inventory')
+                .select('quantity')
+                .eq('product_id', emptyProduct.id)
+                .eq('branch', this.userBranch)
+                .single();
+            
+            if (emptyInvError) {
+                console.warn('⚠️ Error consultando inventario de botellón vacío:', emptyInvError.message);
+            } else if (emptyInventory) {
+                if (emptyInventory.quantity < item.quantity) {
+                    showToast(`⚠️ Stock bajo de botellón vacío ${item.size_liters}L: ${emptyInventory.quantity} disponibles`, 'warning');
+                }
+                
+                const { error: updateEmptyError } = await supabase
+                    .from('inventory')
+                    .update({
+                        quantity: emptyInventory.quantity - item.quantity,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('product_id', emptyProduct.id)
+                    .eq('branch', this.userBranch);
+                
+                if (updateEmptyError) {
+                    console.warn('⚠️ Error actualizando botellón vacío:', updateEmptyError.message);
+                } else {
+                    console.log(`✅ ${item.quantity} botellón(es) vacío(s) ${item.size_liters}L descontado(s)`);
+                }
+            }
+        }
+        
+        // Los botellones vacíos de 15L y 20L también necesitan tapa
+        if (item.size_liters === 15 || item.size_liters === 20) {
+            totalCapsNeeded += item.quantity;
+        }
+    } else {
+        // Botellón con agua - usar RPC existente
+        const realProductId = sizeToProductId[item.size_liters];
+        if (!realProductId) continue;
+        
+        const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
+            branch_param: this.userBranch,
+            product_id_param: realProductId,
+            quantity_param: item.quantity,
+            user_id_param: session.user.id
+        });
+        
+        if (tankError) throw tankError;
+        if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
+        
+        // Botellones de 13L y 20L con agua necesitan tapa
+        if (item.size_liters === 13 || item.size_liters === 20) {
+            totalCapsNeeded += item.quantity;
+        }
+    }
+}
 
+// Descontar tapas (para todos los botellones que las necesiten)
+if (totalCapsNeeded > 0 && capProduct) {
+    const { data: capInventory, error: capInventoryError } = await supabase
+        .from('inventory')
+        .select('quantity')
+        .eq('product_id', capProduct.id)
+        .eq('branch', this.userBranch)
+        .single();
+    
+    if (capInventoryError) {
+        console.warn('⚠️ Error consultando inventario de tapas:', capInventoryError.message);
+    } else if (capInventory) {
+        if (capInventory.quantity < totalCapsNeeded) {
+            showToast(`️ Stock de tapas bajo: ${capInventory.quantity} disponibles, se necesitan ${totalCapsNeeded}`, 'warning');
+        }
+        
+        const { error: updateCapError } = await supabase
+            .from('inventory')
+            .update({
+                quantity: capInventory.quantity - totalCapsNeeded,
+                updated_at: new Date().toISOString()
+            })
+            .eq('product_id', capProduct.id)
+            .eq('branch', this.userBranch);
+        
+        if (updateCapError) {
+            console.warn('⚠️ Error actualizando tapas:', updateCapError.message);
+        } else {
+            console.log(`✅ ${totalCapsNeeded} tapas descontadas del inventario`);
+        }
+    }
+}
                         let successDetails = '';
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             successDetails = `
