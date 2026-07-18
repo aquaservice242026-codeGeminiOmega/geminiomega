@@ -1022,7 +1022,7 @@
 
         async function fetchBCVRate() {
             try {
-                console.log('️ Consultando tasa BCV desde API oficial...');
+                console.log('🏛️ Consultando tasa BCV desde API oficial...');
                 const response = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
@@ -1031,7 +1031,7 @@
                 console.log('✅ Tasa BCV obtenida:', rate);
                 return { rate: rate, date: data.fechaActualizacion, source: 'BCV Oficial' };
             } catch (err) {
-                console.error('❌ Error obteniendo tasa BCV:', err);
+                console.error(' Error obteniendo tasa BCV:', err);
                 return null;
             }
         }
@@ -1058,7 +1058,7 @@
                 amountReceivedBs: 0,
                 amountReceivedUsd: 0,
                 exchangeRate: 700.22,
-                deliveryCost: 0,
+                deliveryCost: 0, // ✅ DELIVERY GRATIS
                 userName: '',
                 userRole: '',
                 userBranch: '',
@@ -1080,6 +1080,7 @@
                 },
 
                 get totalUSD() {
+                    // ✅ DELIVERY GRATIS - No se suma deliveryCost
                     return round2(this.subtotal);
                 },
 
@@ -1179,7 +1180,18 @@
                         const customer = this.customers.find(c => c.id === this.selectedCustomer);
                         if (customer && customer.address) {
                             this.deliveryAddress = customer.address.toUpperCase();
-                            console.log('📍 Dirección autocompletada del cliente:', this.deliveryAddress);
+                            console.log(' Dirección autocompletada del cliente:', this.deliveryAddress);
+                        }
+                    }
+                },
+
+                // ✅ NUEVO: Watcher para deliveryType - autocompletar cuando se activa delivery
+                watchDeliveryType() {
+                    if (this.deliveryType === 'delivery' && this.selectedCustomer) {
+                        const customer = this.customers.find(c => c.id === this.selectedCustomer);
+                        if (customer && customer.address) {
+                            this.deliveryAddress = customer.address.toUpperCase();
+                            console.log(' Dirección autocompletada al activar delivery:', this.deliveryAddress);
                         }
                     }
                 },
@@ -1227,6 +1239,11 @@
                     await this.loadExchangeRate();
                     await this.loadProducts();
                     await this.loadCustomers();
+                    
+                    // ✅ NUEVO: Watchers para autocompletar dirección de delivery
+                    this.$watch('selectedCustomer', () => this.onCustomerChange());
+                    this.$watch('deliveryType', () => this.watchDeliveryType());
+                    
                     document.addEventListener('keydown', (e) => {
                         if (e.key === 'Escape') {
                             this.closeCart();
@@ -1250,7 +1267,7 @@
 
                 async loadExchangeRate() {
                     try {
-                        console.log(' Consultando tasa centralizada de Supabase');
+                        console.log('🔄 Consultando tasa centralizada de Supabase');
                         const { data, error } = await supabase.rpc('get_active_exchange_rate');
                         if (!error && data) {
                             const rate = ensureValidRate(data);
@@ -1261,7 +1278,7 @@
                             this.exchangeRate = 700.22;
                         }
                     } catch (err) {
-                        console.error(' Error cargando tasa:', err);
+                        console.error('❌ Error cargando tasa:', err);
                         this.exchangeRate = 700.22;
                     }
                 },
@@ -1317,13 +1334,13 @@
                 async loadProducts() {
                     this.loading = true;
                     try {
-                        console.log(' Cargando productos para sucursal:', this.userBranch);
+                        console.log('🔄 Cargando productos para sucursal:', this.userBranch);
                         const { data: virtualInventory, error } = await supabase.rpc('calculate_virtual_inventory', { branch_param: this.userBranch });
                         if (error) {
-                            console.error(' Error en calculate_virtual_inventory:', error);
+                            console.error('❌ Error en calculate_virtual_inventory:', error);
                             throw error;
                         }
-                        console.log(' Datos recibidos de inventory:', virtualInventory);
+                        console.log('📦 Datos recibidos de inventory:', virtualInventory);
                         if (!virtualInventory || virtualInventory.length === 0) {
                             console.warn('⚠️ No hay inventario disponible');
                             this.products = [];
@@ -1830,7 +1847,7 @@
                                         .eq('product_id', emptyProduct.id)
                                         .eq('branch', this.userBranch);
                                     if (updateEmptyError) {
-                                        console.warn('⚠️ Error actualizando botellón vacío:', updateEmptyError.message);
+                                        console.warn('️ Error actualizando botellón vacío:', updateEmptyError.message);
                                     } else {
                                         console.log(`✅ ${item.quantity} botellón(es) vacío(s) ${item.size_liters}L descontado(s)`);
                                     }
@@ -1851,7 +1868,7 @@
                                 console.warn('⚠️ Error consultando inventario de tapas:', capInventoryError.message);
                             } else if (capInventory) {
                                 if (capInventory.quantity < totalCapsNeeded) {
-                                    showToast(`⚠️ Stock de tapas bajo: ${capInventory.quantity} disponibles, se necesitan ${totalCapsNeeded}`, 'warning');
+                                    showToast(`️ Stock de tapas bajo: ${capInventory.quantity} disponibles, se necesitan ${totalCapsNeeded}`, 'warning');
                                 }
                                 const { error: updateCapError } = await supabase
                                     .from('inventory')
