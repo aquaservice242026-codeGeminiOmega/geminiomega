@@ -14,292 +14,63 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        [x-cloak] {
-            display: none !important;
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .gradient-bg {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-        }
-        .toastify {
-            font-family: 'Inter', sans-serif !important;
-            font-weight: 500 !important;
-            border-radius: 12px !important;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
-            padding: 14px 20px !important;
-            min-width: 280px;
-            font-size: 14px !important;
-            color: white !important;
-            display: flex !important;
-            align-items: center !important;
-        }
-        .toastify-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-        }
-        .toastify-error {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
-        }
-        .toastify-warning {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-        }
-        .toastify-info {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-        }
-        .swal2-popup {
-            font-family: 'Inter', sans-serif !important;
-            border-radius: 16px !important;
-            padding: 2rem !important;
-        }
-        .swal2-title {
-            font-size: 1.5rem !important;
-            font-weight: 700 !important;
-            color: #1f2937 !important;
-        }
-        .swal2-html-container {
-            font-size: 0.95rem !important;
-            color: #4b5563 !important;
-        }
-        .swal2-confirm {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%) !important;
-            border: none !important;
-            border-radius: 12px !important;
-            padding: 0.75rem 2rem !important;
-            font-weight: 600 !important;
-            font-size: 1rem !important;
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3) !important;
-            transition: all 0.2s !important;
-        }
-        .swal2-confirm:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4) !important;
-        }
-        .swal2-cancel {
-            background: #f3f4f6 !important;
-            color: #4b5563 !important;
-            border: none !important;
-            border-radius: 12px !important;
-            padding: 0.75rem 2rem !important;
-            font-weight: 600 !important;
-            font-size: 1rem !important;
-            transition: all 0.2s !important;
-        }
-        .swal2-cancel:hover {
-            background: #e5e7eb !important;
-            transform: translateY(-2px) !important;
-        }
-        @keyframes bounce-in {
-            0% {
-                transform: scale(0.3);
-                opacity: 0;
-            }
-            50% {
-                transform: scale(1.05);
-            }
-            70% {
-                transform: scale(0.9);
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-        .animate-bounce-in {
-            animation: bounce-in 0.4s ease-out;
-        }
-        .product-card {
-            transition: all 0.2s ease;
-            touch-action: manipulation;
-        }
-        .product-card:active {
-            transform: scale(0.95);
-        }
-        .product-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-        .touch-btn {
-            min-height: 44px;
-            min-width: 44px;
-            touch-action: manipulation;
-        }
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-        .cart-drawer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            max-height: 90vh;
-            background: white;
-            border-radius: 24px 24px 0 0;
-            z-index: 40;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
-            overflow-y: auto;
-        }
-        .cart-drawer.open {
-            transform: translateY(0);
-        }
-        .cart-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 39;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-        .cart-overlay.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .total-bar {
-            position: sticky;
-            bottom: 0;
-            z-index: 30;
-        }
-        .quick-add-btn {
-            transition: all 0.15s;
-        }
-        .quick-add-btn:active {
-            transform: scale(0.9);
-        }
-        .low-stock {
-            position: relative;
-        }
-        .low-stock::after {
-            content: 'Stock Bajo';
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: #ef4444;
-            color: white;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-weight: 600;
-        }
-        .branch-badge-geminis {
-            background: linear-gradient(135deg, #06b6d4, #0891b2);
-        }
-        .branch-badge-omega {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-        }
-        .total-bs-clickable {
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .total-bs-clickable:hover {
-            background-color: rgba(34, 197, 94, 0.1);
-            transform: scale(1.02);
-        }
-        .total-bs-clickable:active {
-            transform: scale(0.98);
-        }
-        .compact-mode .product-card {
-            padding: 12px;
-        }
-        .compact-mode .product-card .fa-tint {
-            font-size: 1.5rem !important;
-        }
-        .compact-mode .product-card p.font-bold {
-            font-size: 0.9rem !important;
-        }
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 28px;
-        }
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #cbd5e1;
-            transition: .3s;
-            border-radius: 28px;
-        }
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        input:checked+.toggle-slider {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-        }
-        input:checked+.toggle-slider:before {
-            transform: translateX(22px);
-        }
-        .payment-card {
-            transition: all 0.2s ease;
-            border: 2px solid transparent;
-        }
-        .payment-card:hover {
-            border-color: #0ea5e9;
-            transform: translateY(-1px);
-        }
-        @keyframes pulse-bcv {
-            0%, 100% {
-                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
-            }
-            50% {
-                box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
-            }
-        }
-        .btn-bcv-pulse {
-            animation: pulse-bcv 2s infinite;
-        }
-        .cart-item-compact {
-            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%) !important;
-            padding: 8px 12px !important;
-            margin-bottom: 8px !important;
-        }
-        .cart-item-compact h4 {
-            font-size: 0.85rem !important;
-            line-height: 1.2 !important;
-        }
-        .cart-item-compact .text-xs {
-            font-size: 0.7rem !important;
-        }
-        .cart-item-compact .touch-btn {
-            width: 28px !important;
-            height: 28px !important;
-            min-height: 28px !important;
-            min-width: 28px !important;
-        }
-        .cart-item-compact .font-bold.text-lg {
-            font-size: 1rem !important;
-        }
-        .cart-item-compact .font-bold.text-cyan-600 {
-            font-size: 0.875rem !important;
-        }
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
+        .toastify { font-family: 'Inter', sans-serif !important; font-weight: 500 !important; border-radius: 12px !important; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important; padding: 14px 20px !important; min-width: 280px; font-size: 14px !important; color: white !important; display: flex !important; align-items: center !important; }
+        .toastify-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; }
+        .toastify-error { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important; }
+        .toastify-warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important; }
+        .toastify-info { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+        .swal2-popup { font-family: 'Inter', sans-serif !important; border-radius: 16px !important; padding: 2rem !important; }
+        .swal2-title { font-size: 1.5rem !important; font-weight: 700 !important; color: #1f2937 !important; }
+        .swal2-html-container { font-size: 0.95rem !important; color: #4b5563 !important; }
+        .swal2-confirm { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%) !important; border: none !important; border-radius: 12px !important; padding: 0.75rem 2rem !important; font-weight: 600 !important; font-size: 1rem !important; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3) !important; transition: all 0.2s !important; }
+        .swal2-confirm:hover { transform: translateY(-2px) !important; box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4) !important; }
+        .swal2-cancel { background: #f3f4f6 !important; color: #4b5563 !important; border: none !important; border-radius: 12px !important; padding: 0.75rem 2rem !important; font-weight: 600 !important; font-size: 1rem !important; transition: all 0.2s !important; }
+        .swal2-cancel:hover { background: #e5e7eb !important; transform: translateY(-2px) !important; }
+        @keyframes bounce-in { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { transform: scale(1); opacity: 1; } }
+        .animate-bounce-in { animation: bounce-in 0.4s ease-out; }
+        .product-card { transition: all 0.2s ease; touch-action: manipulation; }
+        .product-card:active { transform: scale(0.95); }
+        .product-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+        .touch-btn { min-height: 44px; min-width: 44px; touch-action: manipulation; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .cart-drawer { position: fixed; bottom: 0; left: 0; right: 0; max-height: 90vh; background: white; border-radius: 24px 24px 0 0; z-index: 40; transform: translateY(100%); transition: transform 0.3s ease; overflow-y: auto; }
+        .cart-drawer.open { transform: translateY(0); }
+        .cart-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 39; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .cart-overlay.show { opacity: 1; pointer-events: auto; }
+        .total-bar { position: sticky; bottom: 0; z-index: 30; }
+        .quick-add-btn { transition: all 0.15s; }
+        .quick-add-btn:active { transform: scale(0.9); }
+        .low-stock { position: relative; }
+        .low-stock::after { content: 'Stock Bajo'; position: absolute; top: 8px; right: 8px; background: #ef4444; color: white; font-size: 10px; padding: 2px 6px; border-radius: 8px; font-weight: 600; }
+        .branch-badge-geminis { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .branch-badge-omega { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .total-bs-clickable { cursor: pointer; transition: all 0.2s; }
+        .total-bs-clickable:hover { background-color: rgba(34, 197, 94, 0.1); transform: scale(1.02); }
+        .total-bs-clickable:active { transform: scale(0.98); }
+        .compact-mode .product-card { padding: 12px; }
+        .compact-mode .product-card .fa-tint { font-size: 1.5rem !important; }
+        .compact-mode .product-card p.font-bold { font-size: 0.9rem !important; }
+        .toggle-switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 28px; }
+        .toggle-slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
+        input:checked+.toggle-slider { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
+        input:checked+.toggle-slider:before { transform: translateX(22px); }
+        .payment-card { transition: all 0.2s ease; border: 2px solid transparent; }
+        .payment-card:hover { border-color: #0ea5e9; transform: translateY(-1px); }
+        @keyframes pulse-bcv { 0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); } 50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); } }
+        .btn-bcv-pulse { animation: pulse-bcv 2s infinite; }
+        .cart-item-compact { background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%) !important; padding: 8px 12px !important; margin-bottom: 8px !important; }
+        .cart-item-compact h4 { font-size: 0.85rem !important; line-height: 1.2 !important; }
+        .cart-item-compact .text-xs { font-size: 0.7rem !important; }
+        .cart-item-compact .touch-btn { width: 28px !important; height: 28px !important; min-height: 28px !important; min-width: 28px !important; }
+        .cart-item-compact .font-bold.text-lg { font-size: 1rem !important; }
+        .cart-item-compact .font-bold.text-cyan-600 { font-size: 0.875rem !important; }
     </style>
 </head>
 <body class="bg-gray-50" x-data="ventasApp()" x-init="initVentas()">
@@ -446,14 +217,14 @@
                     <div class="grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-4">
                         <template x-for="product in filteredProducts" :key="product.id">
                             <button @click="addProduct(product)" class="product-card rounded-xl text-white p-3 lg:p-6 relative overflow-hidden" :class="{
-                                  'bg-gradient-to-br from-cyan-400 to-cyan-600': product.size_liters === 5,
-                                  'bg-gradient-to-br from-blue-400 to-blue-600': product.size_liters === 13,
-                                  'bg-gradient-to-br from-indigo-500 to-indigo-700': product.size_liters === 20,
-                                  'bg-gradient-to-br from-amber-600 to-amber-800': product.product_type === 'empty_bottle' && product.size_liters === 15,
-                                  'bg-gradient-to-br from-orange-600 to-orange-800': product.product_type === 'empty_bottle' && product.size_liters === 20,
-                                  'low-stock': product.stock <= 10 && product.stock > 0,
-                                  'opacity-50': product.stock === 0
-                                }">
+                                'bg-gradient-to-br from-cyan-400 to-cyan-600': product.size_liters === 5,
+                                'bg-gradient-to-br from-blue-400 to-blue-600': product.size_liters === 13,
+                                'bg-gradient-to-br from-indigo-500 to-indigo-700': product.size_liters === 20,
+                                'bg-gradient-to-br from-amber-600 to-amber-800': product.product_type === 'empty_bottle' && product.size_liters === 15,
+                                'bg-gradient-to-br from-orange-600 to-orange-800': product.product_type === 'empty_bottle' && product.size_liters === 20,
+                                'low-stock': product.stock <= 10 && product.stock > 0,
+                                'opacity-50': product.stock === 0
+                            }">
                                 <div class="absolute top-2 right-2 bg-white/20 backdrop-blur px-1.5 py-0.5 rounded text-[10px] font-bold">
                                     <span x-text="product.stock"></span>
                                 </div>
@@ -1244,7 +1015,7 @@
                 console.log('✅ Tasa BCV obtenida:', rate);
                 return { rate: rate, date: data.fechaActualizacion, source: 'BCV Oficial' };
             } catch (err) {
-                console.error('❌ Error obteniendo tasa BCV:', err);
+                console.error(' Error obteniendo tasa BCV:', err);
                 return null;
             }
         }
@@ -1494,79 +1265,64 @@
                     }
                 },
 
-async loadProducts() {
-    this.loading = true;
-    try {
-        console.log('🔄 Cargando productos para sucursal:', this.userBranch);
-        
-        const { data: virtualInventory, error } = await supabase.rpc('calculate_virtual_inventory', { branch_param: this.userBranch });
-        
-        if (error) {
-            console.error(' Error en calculate_virtual_inventory:', error);
-            throw error;
-        }
-        
-        console.log('📦 Datos recibidos de inventory:', virtualInventory);
-        
-        if (!virtualInventory || virtualInventory.length === 0) {
-            console.warn('️ No hay inventario disponible');
-            this.products = [];
-            return;
-        }
-        
-        // ✅ FILTRO PARA MOSTRAR: Botellones con agua (5,13,20L) Y Botellones vacíos (15,20L)
-        const productsToShow = virtualInventory.filter(item => {
-            const stock = item.virtual_stock || item.stock || 0;
-            const size = item.size_liters || item.size;
-            const productType = item.product_type || item.type;
-            
-            console.log('Evaluando producto:', {
-                name: item.product_name || item.name,
-                stock: stock,
-                size: size,
-                type: productType
-            });
-            
-            const hasStock = stock > 0;
-            const hasValidSize = size !== null && size !== undefined && size > 0;
-            const isNotCap = productType !== 'cap';
-            
-            // ✅ ACEPTAR: Botellones con agua (type='bottle') O Botellones vacíos (type='empty_bottle')
-            const isValidProduct = (productType === 'bottle' || productType === 'empty_bottle');
-            
-            console.log('  - hasStock:', hasStock, 'hasValidSize:', hasValidSize, 'isNotCap:', isNotCap, 'isValidProduct:', isValidProduct);
-            
-            return hasStock && hasValidSize && isNotCap && isValidProduct;
-        });
-        
-        console.log('✅ Productos filtrados:', productsToShow.length);
-        
-        this.products = productsToShow.map(item => {
-            const stock = item.virtual_stock || item.stock || 0;
-            const size = item.size_liters || item.size;
-            const productType = item.product_type || item.type;
-            
-            return {
-                id: productType === 'empty_bottle' ? 'empty_' + size : 'size_' + size,
-                product_id: item.product_id,
-                name: item.product_name || item.name,
-                size_liters: size,
-                product_type: productType,
-                price: round2(parseFloat(item.price) || 0),
-                stock: parseInt(stock) || 0
-            };
-        });
-        
-        console.log('✅ Productos finales:', this.products);
-        
-    } catch (err) {
-        console.error('Error cargando productos:', err);
-        showToast('Error al cargar productos', 'error');
-        this.products = [];
-    } finally {
-        this.loading = false;
-    }
-},
+                async loadProducts() {
+                    this.loading = true;
+                    try {
+                        console.log('🔄 Cargando productos para sucursal:', this.userBranch);
+                        const { data: virtualInventory, error } = await supabase.rpc('calculate_virtual_inventory', { branch_param: this.userBranch });
+                        if (error) {
+                            console.error('❌ Error en calculate_virtual_inventory:', error);
+                            throw error;
+                        }
+                        console.log(' Datos recibidos de inventory:', virtualInventory);
+                        if (!virtualInventory || virtualInventory.length === 0) {
+                            console.warn('️ No hay inventario disponible');
+                            this.products = [];
+                            return;
+                        }
+                        // ✅ FILTRO PARA MOSTRAR: Botellones con agua (5,13,20L) Y Botellones vacíos (15,20L)
+                        const productsToShow = virtualInventory.filter(item => {
+                            const stock = item.virtual_stock || item.stock || 0;
+                            const size = item.size_liters || item.size;
+                            const productType = item.product_type || item.type;
+                            console.log('Evaluando producto:', {
+                                name: item.product_name || item.name,
+                                stock: stock,
+                                size: size,
+                                type: productType
+                            });
+                            const hasStock = stock > 0;
+                            const hasValidSize = size !== null && size !== undefined && size > 0;
+                            const isNotCap = productType !== 'cap';
+                            // ✅ ACEPTAR: Botellones con agua (type='bottle') O Botellones vacíos (type='empty_bottle')
+                            const isValidProduct = (productType === 'bottle' || productType === 'empty_bottle');
+                            console.log('  - hasStock:', hasStock, 'hasValidSize:', hasValidSize, 'isNotCap:', isNotCap, 'isValidProduct:', isValidProduct);
+                            return hasStock && hasValidSize && isNotCap && isValidProduct;
+                        });
+                        console.log('✅ Productos filtrados:', productsToShow.length);
+                        this.products = productsToShow.map(item => {
+                            const stock = item.virtual_stock || item.stock || 0;
+                            const size = item.size_liters || item.size;
+                            const productType = item.product_type || item.type;
+                            return {
+                                id: productType === 'empty_bottle' ? 'empty_' + size : 'size_' + size,
+                                product_id: item.product_id,
+                                name: item.product_name || item.name,
+                                size_liters: size,
+                                product_type: productType,
+                                price: round2(parseFloat(item.price) || 0),
+                                stock: parseInt(stock) || 0
+                            };
+                        });
+                        console.log('✅ Productos finales:', this.products);
+                    } catch (err) {
+                        console.error('Error cargando productos:', err);
+                        showToast('Error al cargar productos', 'error');
+                        this.products = [];
+                    } finally {
+                        this.loading = false;
+                    }
+                },
 
                 async loadCustomers() {
                     try {
@@ -1765,7 +1521,6 @@ async loadProducts() {
                     const customerName = customer?.full_name || 'Cliente no registrado';
                     let modalHtml = '';
                     let confirmText = 'Procesar Venta';
-
                     if (this.useMultiplePayments) {
                         if (this.multiplePayments.length === 0) {
                             showToast('Debe agregar al menos un pago', 'error');
@@ -1873,17 +1628,14 @@ async loadProducts() {
                             </div>
                         `;
                     }
-
                     const confirmed = await showConfirm(this.useMultiplePayments ? 'Confirmar Venta - Pago Múltiple' : 'Confirmar Venta', modalHtml, confirmText, 'Cancelar');
                     if (!confirmed) return;
-
                     this.processing = true;
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
                         let notes = [];
                         if (this.deliveryType === 'delivery') notes.push(`Delivery: ${this.deliveryAddress}`);
                         notes.push(`Tasa aplicada: Bs. ${this.exchangeRate.toFixed(2)}`);
-
                         let payment_method = this.paymentMethod;
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             payment_method = 'multiple';
@@ -1905,7 +1657,6 @@ async loadProducts() {
                                 notes.push(`Cambio USD: $${(round2(this.amountReceivedUsd) - this.totalUSD).toFixed(2)}`);
                             }
                         }
-
                         const { data: sale, error: saleError } = await supabase.from('sales').insert({
                             branch: this.userBranch,
                             customer_id: this.selectedCustomer || null,
@@ -1920,9 +1671,7 @@ async loadProducts() {
                             rate_date: new Date().toISOString().split('T')[0],
                             created_by: session.user.id
                         }).select().single();
-
                         if (saleError) throw saleError;
-
                         const paymentsToInsert = [];
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             this.multiplePayments.forEach((p, i) => {
@@ -1959,152 +1708,62 @@ async loadProducts() {
                                 created_by: session.user.id
                             });
                         }
-
                         if (paymentsToInsert.length > 0) {
                             const { error: paymentsError } = await supabase.from('sale_payments').insert(paymentsToInsert);
                             if (paymentsError) {
-                                console.warn('⚠️ No se pudo guardar en sale_payments:', paymentsError.message);
+                                console.warn('️ No se pudo guardar en sale_payments:', paymentsError.message);
                             }
                         }
-
-const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters, product_type').eq('is_active', true);
-const sizeToProductId = {};
-productsFromDB.forEach(p => {
-    if (p.size_liters) sizeToProductId[p.size_liters] = p.id;
-});
-const capProduct = productsFromDB.find(p => p.product_type === 'cap');
-
-// Crear mapa de productos vacíos por tamaño
-const emptyBottleProducts = productsFromDB.filter(p => p.product_type === 'empty_bottle');
-
-const saleItems = this.cart.map(item => ({
-    sale_id: sale.id,
-    product_id: item.product_type === 'empty_bottle' ? 
-        emptyBottleProducts.find(p => p.size_liters === item.size_liters)?.id || null : 
-        sizeToProductId[item.size_liters],
-    quantity: item.quantity,
-    unit_price: item.price,
-    total: round2(item.price * item.quantity)
-}));
-
-const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
-if (itemsError) throw itemsError;
-
-let totalCapsNeeded = 0;
-
-// Crear mapa de productos vacíos por tamaño
-const emptyBottleProducts = productsFromDB.filter(p => p.product_type === 'empty_bottle');
-
-// Procesar cada item del carrito
-for (const item of this.cart) {
-    const isEmptyBottle = item.product_type === 'empty_bottle';
-    
-    if (isEmptyBottle) {
-        // ===== BOTELLÓN VACÍO: Descontar del inventario físico =====
-        console.log(`💧 Procesando botellón vacío ${item.size_liters}L - Cantidad: ${item.quantity}`);
-        
-        const emptyProduct = emptyBottleProducts.find(p => p.size_liters === item.size_liters);
-        
-        if (emptyProduct) {
-            // Descontar del inventario físico
-            const { data: emptyInventory, error: emptyInvError } = await supabase
-                .from('inventory')
-                .select('quantity')
-                .eq('product_id', emptyProduct.id)
-                .eq('branch', this.userBranch)
-                .single();
-            
-            if (emptyInvError) {
-                console.warn('⚠️ Error consultando inventario de botellón vacío:', emptyInvError.message);
-            } else if (emptyInventory) {
-                if (emptyInventory.quantity < item.quantity) {
-                    showToast(`⚠️ Stock bajo de botellón vacío ${item.size_liters}L: ${emptyInventory.quantity} disponibles`, 'warning');
-                }
-                
-                const { error: updateEmptyError } = await supabase
-                    .from('inventory')
-                    .update({
-                        quantity: emptyInventory.quantity - item.quantity,
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('product_id', emptyProduct.id)
-                    .eq('branch', this.userBranch);
-                
-                if (updateEmptyError) {
-                    console.warn('⚠️ Error actualizando botellón vacío:', updateEmptyError.message);
-                } else {
-                    console.log(`✅ ${item.quantity} botellón(es) vacío(s) ${item.size_liters}L descontado(s)`);
-                }
-            }
-        }
-        
-        // Contar tapas para botellones vacíos de 15L y 20L
-        if (item.size_liters === 15 || item.size_liters === 20) {
-            totalCapsNeeded += item.quantity;
-            console.log(`🔴 Contando ${item.quantity} tapa(s) para botellón vacío ${item.size_liters}L`);
-        }
-    } else {
-        // ===== BOTELLÓN CON AGUA: Usar RPC existente =====
-        console.log(`💧 Procesando botellón con agua ${item.size_liters}L - Cantidad: ${item.quantity}`);
-        
-        const realProductId = sizeToProductId[item.size_liters];
-        if (!realProductId) continue;
-        
-        const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
-            branch_param: this.userBranch,
-            product_id_param: realProductId,
-            quantity_param: item.quantity,
-            user_id_param: session.user.id
-        });
-        
-        if (tankError) throw tankError;
-        if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
-        
-        // Contar tapas para 13L y 20L con agua
-        if (item.size_liters === 13 || item.size_liters === 20) {
-            totalCapsNeeded += item.quantity;
-            console.log(`🔴 Contando ${item.quantity} tapa(s) para botellón con agua ${item.size_liters}L`);
-        }
-    }
-}
-
-console.log(`🔴 Total de tapas necesarias: ${totalCapsNeeded}`);
-
-// Descontar tapas (para 13L, 15L y 20L - tanto llenos como vacíos)
-if (totalCapsNeeded > 0 && capProduct) {
-    console.log(`🔴 Descontando ${totalCapsNeeded} tapas del inventario`);
-    
-    const { data: capInventory, error: capInventoryError } = await supabase
-        .from('inventory')
-        .select('quantity, product_id')
-        .eq('product_id', capProduct.id)
-        .eq('branch', this.userBranch)
-        .single();
-    
-    if (capInventoryError) {
-        console.warn('⚠️ Error consultando inventario de tapas:', capInventoryError.message);
-    } else if (capInventory) {
-        if (capInventory.quantity < totalCapsNeeded) {
-            showToast(`⚠️ Stock de tapas bajo: ${capInventory.quantity} disponibles, se necesitan ${totalCapsNeeded}`, 'warning');
-        }
-        
-        const { error: updateCapError } = await supabase
-            .from('inventory')
-            .update({
-                quantity: capInventory.quantity - totalCapsNeeded,
-                updated_at: new Date().toISOString()
-            })
-            .eq('product_id', capProduct.id)
-            .eq('branch', this.userBranch);
-        
-        if (updateCapError) {
-            console.warn('⚠️ Error actualizando tapas:', updateCapError.message);
-        } else {
-            console.log(`✅ ${totalCapsNeeded} tapas descontadas del inventario`);
-        }
-    }
-}
-                        
+                        const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters, product_type').eq('is_active', true);
+                        const sizeToProductId = {};
+                        productsFromDB.forEach(p => {
+                            if (p.size_liters) sizeToProductId[p.size_liters] = p.id;
+                        });
+                        const capProduct = productsFromDB.find(p => p.product_type === 'cap');
+                        const saleItems = this.cart.map(item => ({
+                            sale_id: sale.id,
+                            product_id: sizeToProductId[item.size_liters],
+                            quantity: item.quantity,
+                            unit_price: item.price,
+                            total: round2(item.price * item.quantity)
+                        }));
+                        const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
+                        if (itemsError) throw itemsError;
+                        let totalCapsNeeded = 0;
+                        for (const item of this.cart) {
+                            const realProductId = sizeToProductId[item.size_liters];
+                            if (!realProductId) continue;
+                            const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
+                                branch_param: this.userBranch,
+                                product_id_param: realProductId,
+                                quantity_param: item.quantity,
+                                user_id_param: session.user.id
+                            });
+                            if (tankError) throw tankError;
+                            if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
+                            if (item.size_liters === 13 || item.size_liters === 20) {
+                                totalCapsNeeded += item.quantity;
+                            }
+                        }
+                        if (totalCapsNeeded > 0 && capProduct) {
+                            const { data: capInventory, error: capInventoryError } = await supabase.from('inventory').select('quantity, product_id').eq('product_id', capProduct.id).eq('branch', this.userBranch).single();
+                            if (capInventoryError) {
+                                console.warn('⚠️ Error consultando inventario de tapas:', capInventoryError.message);
+                            } else if (capInventory) {
+                                if (capInventory.quantity < totalCapsNeeded) {
+                                    showToast(`⚠️ Stock de tapas bajo: ${capInventory.quantity} disponibles, se necesitan ${totalCapsNeeded}`, 'warning');
+                                }
+                                const { error: updateCapError } = await supabase.from('inventory').update({
+                                    quantity: capInventory.quantity - totalCapsNeeded,
+                                    updated_at: new Date().toISOString()
+                                }).eq('product_id', capProduct.id).eq('branch', this.userBranch);
+                                if (updateCapError) {
+                                    console.warn('⚠️ Error actualizando tapas:', updateCapError.message);
+                                } else {
+                                    console.log(`✅ ${totalCapsNeeded} tapas descontadas del inventario`);
+                                }
+                            }
+                        }
                         let successDetails = '';
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             successDetails = `
@@ -2121,7 +1780,6 @@ if (totalCapsNeeded > 0 && capProduct) {
                                 </div>
                             `;
                         }
-
                         Swal.fire({
                             icon: 'success',
                             title: '¡Venta Exitosa!',
@@ -2144,7 +1802,6 @@ if (totalCapsNeeded > 0 && capProduct) {
                             timer: 3500,
                             showConfirmButton: false
                         });
-
                         this.cart = [];
                         this.deliveryAddress = '';
                         this.selectedCustomer = '';
@@ -2210,7 +1867,6 @@ if (totalCapsNeeded > 0 && capProduct) {
                         </div>
                     `, 'Confirmar Crédito', 'Cancelar');
                     if (!confirmed) return;
-
                     this.processing = true;
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
@@ -2229,12 +1885,10 @@ if (totalCapsNeeded > 0 && capProduct) {
                             created_by: session.user.id
                         }).select().single();
                         if (saleError) throw saleError;
-
                         const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters, product_type').eq('is_active', true);
                         const sizeToProductId = {};
                         productsFromDB.forEach(p => { if (p.size_liters) sizeToProductId[p.size_liters] = p.id; });
                         const capProduct = productsFromDB.find(p => p.product_type === 'cap');
-
                         const saleItems = this.cart.map(item => ({
                             sale_id: sale.id,
                             product_id: sizeToProductId[item.size_liters],
@@ -2242,10 +1896,8 @@ if (totalCapsNeeded > 0 && capProduct) {
                             unit_price: item.price,
                             total: round2(item.price * item.quantity)
                         }));
-
                         const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
                         if (itemsError) throw itemsError;
-
                         let totalCapsNeeded = 0;
                         for (const item of this.cart) {
                             const realProductId = sizeToProductId[item.size_liters];
@@ -2261,7 +1913,6 @@ if (totalCapsNeeded > 0 && capProduct) {
                                 totalCapsNeeded += item.quantity;
                             }
                         }
-
                         if (totalCapsNeeded > 0 && capProduct) {
                             const { data: capInventory } = await supabase.from('inventory').select('quantity').eq('product_id', capProduct.id).eq('branch', this.userBranch).single();
                             if (capInventory) {
@@ -2271,7 +1922,6 @@ if (totalCapsNeeded > 0 && capProduct) {
                                 }).eq('product_id', capProduct.id).eq('branch', this.userBranch);
                             }
                         }
-
                         if (creditAmount > 0) {
                             await supabase.from('credit_accounts').insert({
                                 sale_id: sale.id,
@@ -2302,7 +1952,6 @@ if (totalCapsNeeded > 0 && capProduct) {
                                 }
                             }
                         }
-
                         Swal.fire({
                             icon: 'success',
                             title: '¡Crédito Registrado!',
@@ -2318,7 +1967,6 @@ if (totalCapsNeeded > 0 && capProduct) {
                             timer: 2500,
                             showConfirmButton: false
                         });
-
                         this.cart = [];
                         this.closeCreditModal();
                         this.closeCart();
