@@ -1991,7 +1991,6 @@ const { error: itemsError } = await supabase.from('sale_items').insert(saleItems
 if (itemsError) throw itemsError;
 
 let totalCapsNeeded = 0;
-const emptyBottleProducts = productsFromDB.filter(p => p.product_type === 'empty_bottle');
 
 // Procesar botellones con agua (5L, 13L, 20L)
 for (const item of this.cart) {
@@ -2059,6 +2058,7 @@ for (const item of this.cart) {
         }
     }
 }
+
 // Descontar tapas (para 13L, 15L y 20L - tanto llenos como vacíos)
 if (totalCapsNeeded > 0 && capProduct) {
     const { data: capInventory, error: capInventoryError } = await supabase
