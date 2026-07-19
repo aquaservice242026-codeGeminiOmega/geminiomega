@@ -2,270 +2,626 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cierre de Caja - Servicios Agua Potable</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
         @media print {
             .no-print { display: none !important; }
-            body { 
-                -webkit-print-color-adjust: exact; 
-                print-color-adjust: exact;
-                margin: 0;
-                padding: 0;
-            }
-            @page {
-                size: letter;
-                margin: 2cm 2cm 2cm 2cm;
-            }
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
+            @page { size: letter; margin: 2cm 2cm 2cm 2cm; }
         }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .info-box {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        /* Ajustes para que quepa en hoja carta */
-        .report-container {
-            max-width: 17.59cm; /* 21.59cm - 4cm (márgenes laterales) */
-            margin: 0 auto;
-        }
-        table {
-            font-size: 0.85rem;
-        }
-        th, td {
-            padding: 0.4rem 0.5rem;
-        }
+        .info-box { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .report-container { max-width: 17.59cm; margin: 0 auto; }
+        table { font-size: 0.85rem; }
+        th, td { padding: 0.4rem 0.5rem; }
     </style>
 </head>
-<body class="bg-gray-100 p-6">
+<body class="bg-gray-100 p-6" x-data="reporteDiarioApp()" x-init="initReporte()">
     <div class="report-container bg-white shadow-lg rounded-lg p-6">
-        <!-- Header -->
-        <div class="text-center mb-4 border-b-2 border-blue-500 pb-3">
-            <h1 class="text-2xl font-bold text-gray-800">SERVICIOS AGUA POTABLE</h1>
-            <p class="text-lg font-semibold text-blue-600">CIERRE DE CAJA POR TURNOS</p>
-            <p class="text-sm text-gray-600 mt-2">
-                Fecha: <strong>17/07/2024</strong> | Sucursal: <strong>Geminis</strong> | 
-                Tasa del día: <strong>Bs. 736,93 por $</strong>
-            </p>
+        <!-- Loading -->
+        <div x-show="loading" class="text-center py-12">
+            <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500"></i>
+            <p class="mt-4 text-gray-600">Cargando datos del reporte...</p>
         </div>
 
-        <!-- SECCIÓN DE DELIVERY -->
-        <div class="mb-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-300 rounded-lg p-3 info-box">
-            <h2 class="text-base font-bold text-indigo-800 mb-2 flex items-center">
-                <i class="fas fa-truck mr-2"></i>
-                DELIVERY REALIZADOS
-            </h2>
-            <div class="flex items-center space-x-4">
-                <div class="bg-white rounded-lg p-2 border-2 border-indigo-400 text-center flex-1">
-                    <p class="text-xs text-gray-600 mb-1">Total de Deliverys:</p>
-                    <p class="text-3xl font-bold text-indigo-600">12</p>
+        <div x-show="!loading">
+            <!-- Header -->
+            <div class="text-center mb-6 border-b-2 border-blue-500 pb-4">
+                <h1 class="text-2xl font-bold text-gray-800">SERVICIOS AGUA POTABLE</h1>
+                <p class="text-lg font-semibold text-blue-600">CIERRE DE CAJA POR TURNOS</p>
+                <p class="text-sm text-gray-600 mt-2">
+                    Fecha: <strong x-text="formatDate(filters.startDate)"></strong> | 
+                    Sucursal: <strong class="capitalize" x-text="userBranch"></strong> | 
+                    Tasa del día: <strong>Bs. <span x-text="exchangeRate.toFixed(2)"></span> por $</strong>
+                </p>
+            </div>
+
+            <!-- SECCIÓN DE DELIVERY -->
+            <div class="mb-6 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-300 rounded-lg p-4 info-box">
+                <h2 class="text-lg font-bold text-indigo-800 mb-2 flex items-center">
+                    <i class="fas fa-truck mr-2"></i>
+                    DELIVERY REALIZADOS
+                </h2>
+                <div class="flex items-center space-x-4">
+                    <div class="bg-white rounded-lg p-3 border-2 border-indigo-400 text-center flex-1">
+                        <p class="text-sm text-gray-600 mb-1">Total de Deliverys:</p>
+                        <p class="text-3xl font-bold text-indigo-600" x-text="stats.totalDeliverys"></p>
+                    </div>
+                    <div class="bg-white rounded-lg p-3 border-2 border-indigo-400 text-center flex-1">
+                        <p class="text-sm text-gray-600 mb-1">Monto Total Delivery:</p>
+                        <p class="text-2xl font-bold text-indigo-600" x-text="'$' + stats.deliveryAmount.toFixed(2)"></p>
+                        <p class="text-xs text-gray-500" x-text="'Bs. ' + (stats.deliveryAmount * exchangeRate).toFixed(2)"></p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Turno Mañana -->
-        <div class="mb-4 border-2 border-gray-300 rounded-lg overflow-hidden info-box">
-            <div class="bg-blue-50 px-3 py-2 font-bold text-blue-800 flex items-center justify-between text-sm">
-                <span class="flex items-center">
-                    <i class="fas fa-sun mr-2 text-yellow-500"></i>
-                    TURNO MAÑANA (06:00 AM - 02:00 PM)
-                </span>
-                <span class="text-xs font-normal">Vendedor: Ana Martínez</span>
+            <!-- Turno Mañana -->
+            <div class="mb-6 border-2 border-gray-300 rounded-lg overflow-hidden info-box">
+                <div class="bg-blue-50 px-4 py-3 font-bold text-blue-800 flex items-center justify-between text-sm">
+                    <span class="flex items-center">
+                        <i class="fas fa-sun mr-2 text-yellow-500"></i>
+                        TURNO MAÑANA (06:00 AM - 02:00 PM)
+                    </span>
+                    <span class="text-xs font-normal">Vendedor: <span x-text="userName || 'N/A'"></span></span>
+                </div>
+                <table class="w-full text-xs">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-2 py-1 text-left">Producto</th>
+                            <th class="px-2 py-1 text-center">Cant.</th>
+                            <th class="px-2 py-1 text-right">Pago Móvil</th>
+                            <th class="px-2 py-1 text-right">Punto</th>
+                            <th class="px-2 py-1 text-right">Efectivo $</th>
+                            <th class="px-2 py-1 text-right">Efectivo Bs</th>
+                            <th class="px-2 py-1 text-right">Total $</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="product in morningShift.products" :key="product.name">
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="px-2 py-1 font-medium" x-text="product.name"></td>
+                                <td class="px-2 py-1 text-center" x-text="product.quantity"></td>
+                                <td class="px-2 py-1 text-right" x-text="'$' + product.pagoMovil.toFixed(2)"></td>
+                                <td class="px-2 py-1 text-right" x-text="'$' + product.punto.toFixed(2)"></td>
+                                <td class="px-2 py-1 text-right" x-text="'$' + product.efectivoUsd.toFixed(2)"></td>
+                                <td class="px-2 py-1 text-right" x-text="'$' + product.efectivoBs.toFixed(2)"></td>
+                                <td class="px-2 py-1 text-right font-bold" x-text="'$' + product.total.toFixed(2)"></td>
+                            </tr>
+                        </template>
+                        <tr x-show="morningShift.products.length === 0">
+                            <td colspan="7" class="px-2 py-4 text-center text-gray-500">No hay ventas en este turno</td>
+                        </tr>
+                        <tr class="bg-gray-100 font-bold">
+                            <td class="px-2 py-1" colspan="2">SUBTOTAL TURNO:</td>
+                            <td class="px-2 py-1 text-right" x-text="'$' + morningShift.totals.pagoMovil.toFixed(2)"></td>
+                            <td class="px-2 py-1 text-right" x-text="'$' + morningShift.totals.punto.toFixed(2)"></td>
+                            <td class="px-2 py-1 text-right" x-text="'$' + morningShift.totals.efectivoUsd.toFixed(2)"></td>
+                            <td class="px-2 py-1 text-right" x-text="'$' + morningShift.totals.efectivoBs.toFixed(2)"></td>
+                            <td class="px-2 py-1 text-right" x-text="'$' + morningShift.totals.total.toFixed(2)"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="px-3 py-1 bg-gray-50 text-xs border-t">
+                    <strong>Total Bs:</strong> Bs. <span x-text="(morningShift.totals.total * exchangeRate).toFixed(2)"></span> (Tasa: <span x-text="exchangeRate.toFixed(2)"></span>)
+                </div>
             </div>
-            <table class="w-full text-xs">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="px-2 py-1 text-left">Producto</th>
-                        <th class="px-2 py-1 text-center">Cant.</th>
-                        <th class="px-2 py-1 text-right">Pago Móvil</th>
-                        <th class="px-2 py-1 text-right">Punto</th>
-                        <th class="px-2 py-1 text-right">Efectivo $</th>
-                        <th class="px-2 py-1 text-right">Efectivo Bs</th>
-                        <th class="px-2 py-1 text-right">Total $</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="px-2 py-1 font-medium">Botellón 20L</td>
-                        <td class="px-2 py-1 text-center">22</td>
-                        <td class="px-2 py-1 text-right">$24.50</td>
-                        <td class="px-2 py-1 text-right">$8.25</td>
-                        <td class="px-2 py-1 text-right">$0.00</td>
-                        <td class="px-2 py-1 text-right">$0.00</td>
-                        <td class="px-2 py-1 text-right font-bold">$33.00</td>
-                    </tr>
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="px-2 py-1 font-medium">Botellón 13L</td>
-                        <td class="px-2 py-1 text-center">15</td>
-                        <td class="px-2 py-1 text-right">$12.60</td>
-                        <td class="px-2 py-1 text-right">$5.40</td>
-                        <td class="px-2 py-1 text-right">$0.00</td>
-                        <td class="px-2 py-1 text-right">$0.00</td>
-                        <td class="px-2 py-1 text-right font-bold">$18.00</td>
-                    </tr>
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="px-2 py-1 font-medium">Botella 5L</td>
-                        <td class="px-2 py-1 text-center">25</td>
-                        <td class="px-2 py-1 text-right">$10.50</td>
-                        <td class="px-2 py-1 text-right">$7.00</td>
-                        <td class="px-2 py-1 text-right">$0.00</td>
-                        <td class="px-2 py-1 text-right">$0.00</td>
-                        <td class="px-2 py-1 text-right font-bold">$17.50</td>
-                    </tr>
-                    <tr class="bg-gray-100 font-bold">
-                        <td class="px-2 py-1" colspan="2">SUBTOTAL TURNO:</td>
-                        <td class="px-2 py-1 text-right">$47.60</td>
-                        <td class="px-2 py-1 text-right">$20.65</td>
-                        <td class="px-2 py-1 text-right">$0.00</td>
-                        <td class="px-2 py-1 text-right">$0.00</td>
-                        <td class="px-2 py-1 text-right">$68.50</td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="px-3 py-1 bg-gray-50 text-xs border-t">
-                <strong>Total Bs:</strong> Bs. 50,479.71 (Tasa: 736.93)
-            </div>
-        </div>
 
-        <!-- SECCIONES PRINCIPALES - Layout mejorado -->
-        <div class="grid grid-cols-2 gap-4 mb-4">
-            <!-- VENTAS POR MÉTODO DE PAGO (Izquierda) -->
-            <div class="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-400 rounded-lg p-3 info-box">
-                <h3 class="text-sm font-bold text-blue-800 mb-2 border-b border-blue-300 pb-1">
-                    VENTAS POR MÉTODO DE PAGO
+            <!-- SECCIONES PRINCIPALES - Layout mejorado -->
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <!-- VENTAS POR MÉTODO DE PAGO (Izquierda) -->
+                <div class="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-400 rounded-lg p-3 info-box">
+                    <h3 class="text-sm font-bold text-blue-800 mb-2 border-b border-blue-300 pb-1">
+                        VENTAS POR MÉTODO DE PAGO
+                    </h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center py-1 border-b border-blue-200">
+                            <span class="text-gray-700 font-medium text-xs">Pago Móvil:</span>
+                            <div class="text-right">
+                                <span class="font-bold text-blue-700 text-sm" x-text="'$' + stats.paymentMethods.pagoMovil.toFixed(2)"></span>
+                                <p class="text-[10px] text-gray-600" x-text="'(Bs. ' + (stats.paymentMethods.pagoMovil * exchangeRate).toFixed(2) + ')'"></p>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center py-1 border-b border-blue-200">
+                            <span class="text-gray-700 font-medium text-xs">Punto de Venta:</span>
+                            <div class="text-right">
+                                <span class="font-bold text-blue-700 text-sm" x-text="'$' + stats.paymentMethods.puntoVenta.toFixed(2)"></span>
+                                <p class="text-[10px] text-gray-600" x-text="'(Bs. ' + (stats.paymentMethods.puntoVenta * exchangeRate).toFixed(2) + ')'"></p>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center py-1 border-b border-blue-200">
+                            <span class="text-gray-700 font-medium text-xs">Efectivo $:</span>
+                            <div class="text-right">
+                                <span class="font-bold text-blue-700 text-sm" x-text="'$' + stats.paymentMethods.efectivoUsd.toFixed(2)"></span>
+                                <p class="text-[10px] text-gray-600">-</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center py-1">
+                            <span class="text-gray-700 font-medium text-xs">Efectivo Bs:</span>
+                            <div class="text-right">
+                                <span class="font-bold text-blue-700 text-sm" x-text="'$' + stats.paymentMethods.efectivoBs.toFixed(2)"></span>
+                                <p class="text-[10px] text-gray-600" x-text="'(Bs. ' + (stats.paymentMethods.efectivoBs * exchangeRate).toFixed(2) + ')'"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOTALES (Derecha) -->
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-500 rounded-lg p-3 info-box">
+                    <h3 class="text-sm font-bold text-green-800 mb-2 border-b border-green-300 pb-1">
+                        TOTALES
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center py-1">
+                            <span class="text-gray-700 font-medium text-xs">Total en $:</span>
+                            <span class="font-bold text-green-700 text-base" x-text="'$' + stats.totalSales.toFixed(2)"></span>
+                        </div>
+                        <div class="flex justify-between items-center py-1 border-b border-green-300">
+                            <span class="text-gray-700 font-medium text-xs">Total en Bs:</span>
+                            <span class="font-bold text-green-700 text-base" x-text="'Bs. ' + (stats.totalSales * exchangeRate).toFixed(2)"></span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 bg-green-100 rounded px-2">
+                            <span class="font-bold text-gray-800 text-sm">GRAN TOTAL:</span>
+                            <span class="font-bold text-green-800 text-lg" x-text="'$' + (stats.totalSales + (stats.totalSales * exchangeRate) / exchangeRate).toFixed(2)"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PORCENTAJES DE MÉTODOS DE PAGO -->
+            <div class="mb-4 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300 rounded-lg p-3 info-box">
+                <h3 class="text-sm font-bold text-purple-800 mb-3 text-center">
+                    DISTRIBUCIÓN POR MÉTODO DE PAGO
                 </h3>
-                <div class="space-y-2">
-                    <div class="flex justify-between items-center py-1 border-b border-blue-200">
-                        <span class="text-gray-700 font-medium text-xs">Pago Móvil:</span>
-                        <div class="text-right">
-                            <span class="font-bold text-blue-700 text-sm">$89.45</span>
-                            <p class="text-[10px] text-gray-600">(Bs. 65,920.18)</p>
-                        </div>
+                <div class="grid grid-cols-4 gap-3">
+                    <div class="bg-white rounded-lg p-2 border-2 border-purple-400 text-center">
+                        <p class="text-[10px] text-gray-600 mb-1 font-semibold">PAGO MÓVIL</p>
+                        <p class="text-xl font-bold text-purple-600" x-text="stats.percentages.pagoMovil + '%'"></p>
+                        <p class="text-[10px] text-gray-500 mt-1" x-text="'$' + stats.paymentMethods.pagoMovil.toFixed(2)"></p>
                     </div>
-                    <div class="flex justify-between items-center py-1 border-b border-blue-200">
-                        <span class="text-gray-700 font-medium text-xs">Punto de Venta:</span>
-                        <div class="text-right">
-                            <span class="font-bold text-blue-700 text-sm">$34.20</span>
-                            <p class="text-[10px] text-gray-600">(Bs. 25,203.01)</p>
-                        </div>
+                    <div class="bg-white rounded-lg p-2 border-2 border-orange-400 text-center">
+                        <p class="text-[10px] text-gray-600 mb-1 font-semibold">PUNTO</p>
+                        <p class="text-xl font-bold text-orange-600" x-text="stats.percentages.puntoVenta + '%'"></p>
+                        <p class="text-[10px] text-gray-500 mt-1" x-text="'$' + stats.paymentMethods.puntoVenta.toFixed(2)"></p>
                     </div>
-                    <div class="flex justify-between items-center py-1 border-b border-blue-200">
-                        <span class="text-gray-700 font-medium text-xs">Efectivo $:</span>
-                        <div class="text-right">
-                            <span class="font-bold text-blue-700 text-sm">$24.50</span>
-                            <p class="text-[10px] text-gray-600">-</p>
-                        </div>
+                    <div class="bg-white rounded-lg p-2 border-2 border-green-400 text-center">
+                        <p class="text-[10px] text-gray-600 mb-1 font-semibold">EFECTIVO $</p>
+                        <p class="text-xl font-bold text-green-600" x-text="stats.percentages.efectivoUsd + '%'"></p>
+                        <p class="text-[10px] text-gray-500 mt-1" x-text="'$' + stats.paymentMethods.efectivoUsd.toFixed(2)"></p>
                     </div>
-                    <div class="flex justify-between items-center py-1">
-                        <span class="text-gray-700 font-medium text-xs">Efectivo Bs:</span>
-                        <div class="text-right">
-                            <span class="font-bold text-blue-700 text-sm">$0.00</span>
-                            <p class="text-[10px] text-gray-600">(Bs. 0.00)</p>
-                        </div>
+                    <div class="bg-white rounded-lg p-2 border-2 border-gray-400 text-center">
+                        <p class="text-[10px] text-gray-600 mb-1 font-semibold">EFECTIVO Bs</p>
+                        <p class="text-xl font-bold text-gray-600" x-text="stats.percentages.efectivoBs + '%'"></p>
+                        <p class="text-[10px] text-gray-500 mt-1" x-text="'$' + stats.paymentMethods.efectivoBs.toFixed(2)"></p>
                     </div>
                 </div>
             </div>
 
-            <!-- TOTALES (Derecha) -->
-            <div class="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-500 rounded-lg p-3 info-box">
-                <h3 class="text-sm font-bold text-green-800 mb-2 border-b border-green-300 pb-1">
-                    TOTALES
-                </h3>
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center py-1">
-                        <span class="text-gray-700 font-medium text-xs">Total en $:</span>
-                        <span class="font-bold text-green-700 text-base">$148.15</span>
+            <!-- TARJETAS DE TOTALES AL FINAL -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-gradient-to-br from-blue-100 to-blue-200 border-2 border-blue-400 rounded-lg p-4 text-center info-box">
+                    <p class="text-xs text-gray-700 mb-1 font-semibold">TOTAL VENTAS DÓLARES</p>
+                    <p class="text-3xl font-bold text-blue-700 mb-1" x-text="'$' + stats.totalSales.toFixed(2)"></p>
+                    <p class="text-[10px] text-gray-600" x-text="stats.totalTransactions + ' transacciones'"></p>
+                </div>
+                <div class="bg-gradient-to-br from-green-100 to-green-200 border-2 border-green-400 rounded-lg p-4 text-center info-box">
+                    <p class="text-xs text-gray-700 mb-1 font-semibold">TOTAL VENTAS BOLÍVARES</p>
+                    <p class="text-3xl font-bold text-green-700 mb-1" x-text="'Bs. ' + (stats.totalSales * exchangeRate).toFixed(2)"></p>
+                    <p class="text-[10px] text-gray-600" x-text="'Tasa: Bs. ' + exchangeRate.toFixed(2) + '/$'"></p>
+                </div>
+            </div>
+
+            <!-- Firmas -->
+            <div class="grid grid-cols-3 gap-4 mt-6 pt-4 border-t-2 border-gray-300">
+                <div class="text-center">
+                    <div class="border-t border-gray-400 pt-2 mt-8">
+                        <p class="font-bold text-xs">Vendedor</p>
+                        <p class="text-[10px] text-gray-600 mt-1" x-text="userName || '_________________'"></p>
                     </div>
-                    <div class="flex justify-between items-center py-1 border-b border-green-300">
-                        <span class="text-gray-700 font-medium text-xs">Total en Bs:</span>
-                        <span class="font-bold text-green-700 text-base">Bs. 109,176.18</span>
-                    </div>
-                    <div class="flex justify-between items-center py-2 bg-green-100 rounded px-2">
-                        <span class="font-bold text-gray-800 text-sm">GRAN TOTAL:</span>
-                        <span class="font-bold text-green-800 text-lg">$297.33</span>
+                </div>
+                <div class="text-center">
+                    <div class="border-t border-gray-400 pt-2 mt-8">
+                        <p class="font-bold text-xs">Supervisor</p>
+                        <p class="text-[10px] text-gray-600 mt-1">_________________</p>
                     </div>
                 </div>
+                <div class="text-center">
+                    <div class="border-t border-gray-400 pt-2 mt-8">
+                        <p class="font-bold text-xs">Gerente</p>
+                        <p class="text-[10px] text-gray-600 mt-1">_________________</p>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <!-- ✅ PORCENTAJES DE MÉTODOS DE PAGO (ANTES DEL DETALLE) -->
-        <div class="mb-4 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300 rounded-lg p-3 info-box">
-            <h3 class="text-sm font-bold text-purple-800 mb-3 text-center">
-                DISTRIBUCIÓN POR MÉTODO DE PAGO
-            </h3>
-            <div class="grid grid-cols-4 gap-3">
-                <div class="bg-white rounded-lg p-2 border-2 border-purple-400 text-center">
-                    <p class="text-[10px] text-gray-600 mb-1 font-semibold">PAGO MÓVIL</p>
-                    <p class="text-xl font-bold text-purple-600">60.4%</p>
-                    <p class="text-[10px] text-gray-500 mt-1">$89.45</p>
-                </div>
-                <div class="bg-white rounded-lg p-2 border-2 border-orange-400 text-center">
-                    <p class="text-[10px] text-gray-600 mb-1 font-semibold">PUNTO</p>
-                    <p class="text-xl font-bold text-orange-600">23.1%</p>
-                    <p class="text-[10px] text-gray-500 mt-1">$34.20</p>
-                </div>
-                <div class="bg-white rounded-lg p-2 border-2 border-green-400 text-center">
-                    <p class="text-[10px] text-gray-600 mb-1 font-semibold">EFECTIVO $</p>
-                    <p class="text-xl font-bold text-green-600">16.5%</p>
-                    <p class="text-[10px] text-gray-500 mt-1">$24.50</p>
-                </div>
-                <div class="bg-white rounded-lg p-2 border-2 border-gray-400 text-center">
-                    <p class="text-[10px] text-gray-600 mb-1 font-semibold">EFECTIVO Bs</p>
-                    <p class="text-xl font-bold text-gray-600">0%</p>
-                    <p class="text-[10px] text-gray-500 mt-1">$0.00</p>
-                </div>
+            <div class="text-center text-[10px] text-gray-500 mt-4 pt-2 border-t">
+                Reporte generado el <span x-text="formatDateTime(new Date())"></span> | Tasa BCV: Bs. <span x-text="exchangeRate.toFixed(2)"></span>
             </div>
-        </div>
-
-        <!-- ✅ TARJETAS DE TOTALES AL FINAL -->
-        <div class="grid grid-cols-2 gap-4 mb-6">
-            <div class="bg-gradient-to-br from-blue-100 to-blue-200 border-2 border-blue-400 rounded-lg p-4 text-center info-box">
-                <p class="text-xs text-gray-700 mb-1 font-semibold">TOTAL VENTAS DÓLARES</p>
-                <p class="text-3xl font-bold text-blue-700 mb-1">$148.15</p>
-                <p class="text-[10px] text-gray-600">158 unidades vendidas</p>
-            </div>
-            <div class="bg-gradient-to-br from-green-100 to-green-200 border-2 border-green-400 rounded-lg p-4 text-center info-box">
-                <p class="text-xs text-gray-700 mb-1 font-semibold">TOTAL VENTAS BOLÍVARES</p>
-                <p class="text-3xl font-bold text-green-700 mb-1">Bs. 109,176.18</p>
-                <p class="text-[10px] text-gray-600">Tasa: Bs. 736.93/$</p>
-            </div>
-        </div>
-
-        <!-- Firmas -->
-        <div class="grid grid-cols-3 gap-4 mt-6 pt-4 border-t-2 border-gray-300">
-            <div class="text-center">
-                <div class="border-t border-gray-400 pt-2 mt-8">
-                    <p class="font-bold text-xs">Vendedor</p>
-                    <p class="text-[10px] text-gray-600 mt-1">Ana Martínez</p>
-                </div>
-            </div>
-            <div class="text-center">
-                <div class="border-t border-gray-400 pt-2 mt-8">
-                    <p class="font-bold text-xs">Supervisor</p>
-                    <p class="text-[10px] text-gray-600 mt-1">María González</p>
-                </div>
-            </div>
-            <div class="text-center">
-                <div class="border-t border-gray-400 pt-2 mt-8">
-                    <p class="font-bold text-xs">Gerente</p>
-                    <p class="text-[10px] text-gray-600 mt-1">Juan Rodríguez</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="text-center text-[10px] text-gray-500 mt-4 pt-2 border-t">
-            Reporte generado el 17/07/2024 a las 18:30 | Tasa BCV: Bs. 736.93
         </div>
     </div>
 
     <!-- Botón de Imprimir (no se imprime) -->
     <div class="no-print max-w-6xl mx-auto mt-4 text-center">
-        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-200">
+        <button @click="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-200">
             <i class="fas fa-print mr-2"></i>Imprimir Reporte
         </button>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script>
+        // ============================================
+        // UTILIDADES DE FECHA - ZONA HORARIA CARACAS
+        // ============================================
+        const DateUtils = {
+            TIMEZONE: 'America/Caracas',
+            LOCALE: 'es-VE',
+
+            getCurrentDateInput() {
+                return new Intl.DateTimeFormat('en-CA', {
+                    timeZone: this.TIMEZONE,
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                }).format(new Date());
+            },
+
+            formatDate(dateString) {
+                if (!dateString) return 'N/A';
+                return new Intl.DateTimeFormat(this.LOCALE, {
+                    timeZone: this.TIMEZONE,
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                }).format(new Date(dateString));
+            },
+
+            formatDateTime(dateString) {
+                if (!dateString) return 'N/A';
+                return new Intl.DateTimeFormat(this.LOCALE, {
+                    timeZone: this.TIMEZONE,
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                }).format(new Date(dateString));
+            },
+
+            getStartOfDay(dateString) {
+                return `${dateString}T00:00:00-04:00`;
+            },
+
+            getEndOfDay(dateString) {
+                return `${dateString}T23:59:59-04:00`;
+            }
+        };
+
+        const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        function round2(num) {
+            if (num === null || num === undefined || isNaN(num)) return 0;
+            return Math.floor(parseFloat(num) * 100) / 100;
+        }
+
+        function reporteDiarioApp() {
+            return {
+                loading: true,
+                userName: '',
+                userBranch: '',
+                exchangeRate: 736.93,
+                filters: {
+                    startDate: DateUtils.getCurrentDateInput(),
+                    endDate: DateUtils.getCurrentDateInput()
+                },
+                stats: {
+                    totalSales: 0,
+                    totalTransactions: 0,
+                    totalDeliverys: 0,
+                    deliveryAmount: 0,
+                    paymentMethods: {
+                        pagoMovil: 0,
+                        puntoVenta: 0,
+                        efectivoUsd: 0,
+                        efectivoBs: 0
+                    },
+                    percentages: {
+                        pagoMovil: 0,
+                        puntoVenta: 0,
+                        efectivoUsd: 0,
+                        efectivoBs: 0
+                    }
+                },
+                morningShift: {
+                    products: [],
+                    totals: {
+                        pagoMovil: 0,
+                        punto: 0,
+                        efectivoUsd: 0,
+                        efectivoBs: 0,
+                        total: 0
+                    }
+                },
+
+                async initReporte() {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (!session) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
+                    try {
+                        // Obtener perfil del usuario
+                        const { data: profile } = await supabase
+                            .from('profiles')
+                            .select('full_name, branch')
+                            .eq('id', session.user.id)
+                            .single();
+
+                        if (profile) {
+                            this.userName = profile.full_name;
+                            this.userBranch = profile.branch || 'geminis';
+                        }
+
+                        // Obtener tasa de cambio activa
+                        const { data: rateData } = await supabase.rpc('get_active_exchange_rate');
+                        if (rateData) {
+                            this.exchangeRate = parseFloat(rateData) || 736.93;
+                        }
+
+                        // Cargar datos del reporte
+                        await this.loadReportData();
+                    } catch (err) {
+                        console.error('Error inicializando:', err);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async loadReportData() {
+                    try {
+                        // Consultar ventas del día
+                        let query = supabase
+                            .from('sales')
+                            .select('*')
+                            .gte('created_at', DateUtils.getStartOfDay(this.filters.startDate))
+                            .lte('created_at', DateUtils.getEndOfDay(this.filters.endDate))
+                            .eq('branch', this.userBranch);
+
+                        const { data: sales, error } = await query;
+                        
+                        if (error) {
+                            console.error('Error cargando ventas:', error);
+                            return;
+                        }
+
+                        // Procesar ventas
+                        await this.processSales(sales || []);
+                    } catch (err) {
+                        console.error('Error cargando datos:', err);
+                    }
+                },
+
+                async processSales(sales) {
+                    // Resetear estadísticas
+                    this.stats = {
+                        totalSales: 0,
+                        totalTransactions: sales.length,
+                        totalDeliverys: 0,
+                        deliveryAmount: 0,
+                        paymentMethods: {
+                            pagoMovil: 0,
+                            puntoVenta: 0,
+                            efectivoUsd: 0,
+                            efectivoBs: 0
+                        },
+                        percentages: {
+                            pagoMovil: 0,
+                            puntoVenta: 0,
+                            efectivoUsd: 0,
+                            efectivoBs: 0
+                        }
+                    };
+
+                    this.morningShift = {
+                        products: [],
+                        totals: {
+                            pagoMovil: 0,
+                            punto: 0,
+                            efectivoUsd: 0,
+                            efectivoBs: 0,
+                            total: 0
+                        }
+                    };
+
+                    const productMap = {};
+                    const morningProducts = {};
+
+                    // Procesar cada venta
+                    for (const sale of sales) {
+                        this.stats.totalSales += (sale.total || 0);
+
+                        // Contar deliverys
+                        if (sale.delivery_type === 'delivery') {
+                            this.stats.totalDeliverys++;
+                            this.stats.deliveryAmount += (sale.total || 0);
+                        }
+
+                        // Obtener métodos de pago de la venta
+                        const { data: payments } = await supabase
+                            .from('sale_payments')
+                            .select('*')
+                            .eq('sale_id', sale.id);
+
+                        // Procesar pagos
+                        if (payments && payments.length > 0) {
+                            for (const payment of payments) {
+                                const amount = payment.amount_usd || 0;
+                                
+                                switch(payment.payment_method) {
+                                    case 'pago_movil':
+                                        this.stats.paymentMethods.pagoMovil += amount;
+                                        break;
+                                    case 'punto_venta':
+                                        this.stats.paymentMethods.puntoVenta += amount;
+                                        break;
+                                    case 'efectivo_divisas':
+                                        this.stats.paymentMethods.efectivoUsd += amount;
+                                        break;
+                                    case 'efectivo_bs':
+                                        this.stats.paymentMethods.efectivoBs += amount;
+                                        break;
+                                }
+
+                                // Clasificar por turno (mañana: antes de 2pm)
+                                const saleHour = new Date(sale.created_at).getHours();
+                                if (saleHour >= 6 && saleHour < 14) {
+                                    // Turno mañana
+                                    switch(payment.payment_method) {
+                                        case 'pago_movil':
+                                            this.morningShift.totals.pagoMovil += amount;
+                                            break;
+                                        case 'punto_venta':
+                                            this.morningShift.totals.punto += amount;
+                                            break;
+                                        case 'efectivo_divisas':
+                                            this.morningShift.totals.efectivoUsd += amount;
+                                            break;
+                                        case 'efectivo_bs':
+                                            this.morningShift.totals.efectivoBs += amount;
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Obtener items de la venta
+                        const { data: items } = await supabase
+                            .from('sale_items')
+                            .select('product_id, quantity, total')
+                            .eq('sale_id', sale.id);
+
+                        if (items) {
+                            for (const item of items) {
+                                const { data: product } = await supabase
+                                    .from('products')
+                                    .select('name, size_liters')
+                                    .eq('id', item.product_id)
+                                    .single();
+
+                                if (product) {
+                                    const productName = product.name || `Producto ${product.size_liters}L`;
+                                    
+                                    if (!productMap[productName]) {
+                                        productMap[productName] = {
+                                            name: productName,
+                                            quantity: 0,
+                                            pagoMovil: 0,
+                                            punto: 0,
+                                            efectivoUsd: 0,
+                                            efectivoBs: 0,
+                                            total: 0
+                                        };
+                                    }
+
+                                    productMap[productName].quantity += (item.quantity || 0);
+                                    productMap[productName].total += (item.total || 0);
+
+                                    // Distribuir el total proporcionalmente entre métodos de pago
+                                    const saleTotal = sale.total || 0;
+                                    if (saleTotal > 0) {
+                                        const ratio = (item.total || 0) / saleTotal;
+                                        
+                                        // Obtener pagos de esta venta para distribuir
+                                        if (payments) {
+                                            payments.forEach(payment => {
+                                                const paymentAmount = (payment.amount_usd || 0) * ratio;
+                                                switch(payment.payment_method) {
+                                                    case 'pago_movil':
+                                                        productMap[productName].pagoMovil += paymentAmount;
+                                                        break;
+                                                    case 'punto_venta':
+                                                        productMap[productName].punto += paymentAmount;
+                                                        break;
+                                                    case 'efectivo_divisas':
+                                                        productMap[productName].efectivoUsd += paymentAmount;
+                                                        break;
+                                                    case 'efectivo_bs':
+                                                        productMap[productName].efectivoBs += paymentAmount;
+                                                        break;
+                                                }
+                                            });
+                                        }
+                                    }
+
+                                    // Turno mañana
+                                    const saleHour = new Date(sale.created_at).getHours();
+                                    if (saleHour >= 6 && saleHour < 14) {
+                                        if (!morningProducts[productName]) {
+                                            morningProducts[productName] = {
+                                                name: productName,
+                                                quantity: 0,
+                                                pagoMovil: 0,
+                                                punto: 0,
+                                                efectivoUsd: 0,
+                                                efectivoBs: 0,
+                                                total: 0
+                                            };
+                                        }
+                                        morningProducts[productName].quantity += (item.quantity || 0);
+                                        morningProducts[productName].total += (item.total || 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Calcular totales del turno mañana
+                    this.morningShift.totals.total = 
+                        this.morningShift.totals.pagoMovil +
+                        this.morningShift.totals.punto +
+                        this.morningShift.totals.efectivoUsd +
+                        this.morningShift.totals.efectivoBs;
+
+                    // Convertir mapas a arrays
+                    this.morningShift.products = Object.values(morningProducts);
+
+                    // Calcular porcentajes
+                    if (this.stats.totalSales > 0) {
+                        this.stats.percentages.pagoMovil = round2((this.stats.paymentMethods.pagoMovil / this.stats.totalSales) * 100);
+                        this.stats.percentages.puntoVenta = round2((this.stats.paymentMethods.puntoVenta / this.stats.totalSales) * 100);
+                        this.stats.percentages.efectivoUsd = round2((this.stats.paymentMethods.efectivoUsd / this.stats.totalSales) * 100);
+                        this.stats.percentages.efectivoBs = round2((this.stats.paymentMethods.efectivoBs / this.stats.totalSales) * 100);
+                    }
+
+                    // Redondear todos los valores
+                    this.stats.totalSales = round2(this.stats.totalSales);
+                    this.stats.deliveryAmount = round2(this.stats.deliveryAmount);
+                    Object.keys(this.stats.paymentMethods).forEach(key => {
+                        this.stats.paymentMethods[key] = round2(this.stats.paymentMethods[key]);
+                    });
+                },
+
+                formatDate(dateString) {
+                    return DateUtils.formatDate(dateString);
+                },
+
+                formatDateTime(dateString) {
+                    return DateUtils.formatDateTime(dateString);
+                }
+            };
+        }
+    </script>
 </body>
 </html>
