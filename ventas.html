@@ -74,7 +74,6 @@
         input[type="text"], input[type="email"], input[type="tel"], textarea, select { text-transform: uppercase !important; }
     </style>
 </head>
-
 <body class="bg-gray-50" x-data="ventasApp()" x-init="initVentas()">
 
     <!-- Sidebar (Desktop) -->
@@ -93,7 +92,6 @@
                     <p class="font-semibold capitalize text-sm" x-text="userBranch || 'Cargando...'"></p>
                 </div>
             </div>
-
             <nav class="space-y-2">
                 <a href="index.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-home w-5"></i><span>Dashboard</span>
@@ -116,12 +114,11 @@
                 <a href="reportes.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
                 </a>
-                <a href="resumen-diario.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="resumen-diario.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-file-alt w-5"></i><span>Resumen Diario</span>
                 </a>
             </nav>
         </div>
-
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold" x-text="userInitials"></div>
@@ -1005,7 +1002,7 @@
                 warning: 'linear-gradient(to right, #f59e0b, #d97706)',
                 info: 'linear-gradient(to right, #3b82f6, #2563eb)'
             };
-            const icons = { success: '✓', error: '✗', warning: '⚠', info: '' };
+            const icons = { success: '✓', error: '✗', warning: '', info: '' };
             Toastify({
                 text: `${icons[type]} ${message}`,
                 duration: 3000,
@@ -1058,7 +1055,7 @@
         function ensureValidRate(rate) {
             const parsed = parseFloat(rate);
             if (isNaN(parsed) || parsed <= 0) {
-                console.warn('⚠️ Tasa inválida detectada, usando valor por defecto 700.22');
+                console.warn('️ Tasa inválida detectada, usando valor por defecto 700.22');
                 return 700.22;
             }
             return round2(parsed);
@@ -1102,7 +1099,7 @@
                 amountReceivedBs: 0,
                 amountReceivedUsd: 0,
                 exchangeRate: 700.22,
-                deliveryCost: 0, // ✅ DELIVERY GRATIS
+                deliveryCost: 0,
                 userName: '',
                 userRole: '',
                 userBranch: '',
@@ -1124,7 +1121,6 @@
                 },
 
                 get totalUSD() {
-                    // ✅ DELIVERY GRATIS - No se suma deliveryCost
                     return round2(this.subtotal);
                 },
 
@@ -1218,29 +1214,26 @@
                     return names[method] || method;
                 },
 
-                // ✅ NUEVO: Cuando cambia el cliente, autocompletar dirección si es delivery
                 onCustomerChange() {
                     if (this.deliveryType === 'delivery' && this.selectedCustomer) {
                         const customer = this.customers.find(c => c.id === this.selectedCustomer);
                         if (customer && customer.address) {
                             this.deliveryAddress = customer.address.toUpperCase();
-                            console.log(' Dirección autocompletada del cliente:', this.deliveryAddress);
+                            console.log('📍 Dirección autocompletada del cliente:', this.deliveryAddress);
                         }
                     }
                 },
 
-                // ✅ NUEVO: Watcher para deliveryType - autocompletar cuando se activa delivery
                 watchDeliveryType() {
                     if (this.deliveryType === 'delivery' && this.selectedCustomer) {
                         const customer = this.customers.find(c => c.id === this.selectedCustomer);
                         if (customer && customer.address) {
                             this.deliveryAddress = customer.address.toUpperCase();
-                            console.log('📍 Dirección autocompletada al activar delivery:', this.deliveryAddress);
+                            console.log(' Dirección autocompletada al activar delivery:', this.deliveryAddress);
                         }
                     }
                 },
 
-                // ✅ NUEVO: Actualizar dirección del cliente después de venta con delivery
                 async updateCustomerAddress() {
                     if (this.selectedCustomer && this.deliveryAddress && this.deliveryType === 'delivery') {
                         try {
@@ -1249,12 +1242,9 @@
                                 .update({ address: this.deliveryAddress })
                                 .eq('id', this.selectedCustomer);
                             if (!error) {
-                                // Actualizar en el array local
                                 const customer = this.customers.find(c => c.id === this.selectedCustomer);
                                 if (customer) customer.address = this.deliveryAddress;
                                 console.log('✅ Dirección del cliente actualizada:', this.deliveryAddress);
-                            } else {
-                                console.warn('️ Error actualizando dirección del cliente:', error.message);
                             }
                         } catch (err) {
                             console.error('Error actualizando dirección del cliente:', err);
@@ -1268,14 +1258,8 @@
                         window.location.href = 'login.html';
                         return;
                     }
-
                     try {
-                        const { data: profile } = await supabase
-                            .from('profiles')
-                            .select('full_name, role, branch')
-                            .eq('id', session.user.id)
-                            .single();
-
+                        const { data: profile } = await supabase.from('profiles').select('full_name, role, branch').eq('id', session.user.id).single();
                         if (profile) {
                             this.userName = profile.full_name;
                             this.userRole = profile.role;
@@ -1285,15 +1269,11 @@
                     } catch (err) {
                         console.error('Error obteniendo perfil:', err);
                     }
-
                     await this.loadExchangeRate();
                     await this.loadProducts();
                     await this.loadCustomers();
-
-                    // ✅ NUEVO: Watchers para autocompletar dirección de delivery
                     this.$watch('selectedCustomer', () => this.onCustomerChange());
                     this.$watch('deliveryType', () => this.watchDeliveryType());
-
                     document.addEventListener('keydown', (e) => {
                         if (e.key === 'Escape') {
                             this.closeCart();
@@ -1337,18 +1317,11 @@
                     showToast('Consultando tasa BCV oficial...', 'info');
                     const bcvData = await fetchBCVRate();
                     if (!bcvData) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'No se pudo obtener la tasa del BCV. Verifica tu conexión a internet.',
-                            confirmButtonText: 'Entendido'
-                        });
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo obtener la tasa del BCV. Verifica tu conexión a internet.', confirmButtonText: 'Entendido' });
                         return;
                     }
-
                     const newRate = round2(bcvData.rate);
                     const rateDate = new Date(bcvData.date).toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' });
-
                     const confirmed = await Swal.fire({
                         title: '🏛️ Tasa BCV Oficial',
                         html: `<div class="text-center space-y-3">
@@ -1368,7 +1341,6 @@
                         cancelButtonText: 'Cancelar',
                         reverseButtons: true
                     });
-
                     if (confirmed.isConfirmed) {
                         this.exchangeRate = newRate;
                         await this.updateExchangeRate();
@@ -1394,49 +1366,38 @@
                     try {
                         console.log('🔄 Cargando productos para sucursal:', this.userBranch);
                         const { data: virtualInventory, error } = await supabase.rpc('calculate_virtual_inventory', { branch_param: this.userBranch });
-
                         if (error) {
-                            console.error(' Error en calculate_virtual_inventory:', error);
+                            console.error('❌ Error en calculate_virtual_inventory:', error);
                             throw error;
                         }
-
                         console.log('📦 Datos recibidos de inventory:', virtualInventory);
-
                         if (!virtualInventory || virtualInventory.length === 0) {
-                            console.warn('⚠️ No hay inventario disponible');
+                            console.warn('️ No hay inventario disponible');
                             this.products = [];
                             return;
                         }
-
                         const productsToShow = virtualInventory.filter(item => {
                             const stock = item.virtual_stock || item.stock || 0;
                             const size = item.size_liters || item.size;
                             const productType = item.product_type || item.type;
-
                             console.log('Evaluando producto:', {
                                 name: item.product_name || item.name,
                                 stock: stock,
                                 size: size,
                                 type: productType
                             });
-
                             const hasStock = stock > 0;
                             const hasValidSize = size !== null && size !== undefined && size > 0;
                             const isNotCap = productType !== 'cap';
                             const isValidProduct = (productType === 'bottle' || productType === 'empty_bottle');
-
                             console.log('  - hasStock:', hasStock, 'hasValidSize:', hasValidSize, 'isNotCap:', isNotCap, 'isValidProduct:', isValidProduct);
-
                             return hasStock && hasValidSize && isNotCap && isValidProduct;
                         });
-
                         console.log('✅ Productos filtrados:', productsToShow.length);
-
                         this.products = productsToShow.map(item => {
                             const stock = item.virtual_stock || item.stock || 0;
                             const size = item.size_liters || item.size;
                             const productType = item.product_type || item.type;
-
                             return {
                                 id: productType === 'empty_bottle' ? 'empty_' + size : 'size_' + size,
                                 product_id: item.product_id,
@@ -1447,7 +1408,6 @@
                                 stock: parseInt(stock) || 0
                             };
                         });
-
                         console.log('✅ Productos finales:', this.products);
                     } catch (err) {
                         console.error('Error cargando productos:', err);
@@ -1460,13 +1420,7 @@
 
                 async loadCustomers() {
                     try {
-                        const { data, error } = await supabase
-                            .from('customers')
-                            .select('*')
-                            .eq('branch', this.userBranch)
-                            .eq('is_active', true)
-                            .order('full_name');
-
+                        const { data, error } = await supabase.from('customers').select('*').eq('branch', this.userBranch).eq('is_active', true).order('full_name');
                         if (error) throw error;
                         this.customers = data || [];
                     } catch (err) {
@@ -1484,9 +1438,7 @@
                         showToast('Producto sin stock', 'error');
                         return;
                     }
-
                     const existingItem = this.cart.find(item => item.id === product.id);
-
                     if (existingItem) {
                         if (existingItem.quantity < product.stock) {
                             existingItem.quantity++;
@@ -1500,6 +1452,7 @@
                             product_id: product.product_id,
                             name: product.name,
                             size_liters: product.size_liters,
+                            product_type: product.product_type,
                             price: product.price,
                             stock: product.stock,
                             quantity: 1
@@ -1513,9 +1466,7 @@
                         showToast(`Stock insuficiente para +${quantity}`, 'error');
                         return;
                     }
-
                     const existingItem = this.cart.find(item => item.id === product.id);
-
                     if (existingItem) {
                         if (existingItem.quantity + quantity <= product.stock) {
                             existingItem.quantity += quantity;
@@ -1529,6 +1480,7 @@
                             product_id: product.product_id,
                             name: product.name,
                             size_liters: product.size_liters,
+                            product_type: product.product_type,
                             price: product.price,
                             stock: product.stock,
                             quantity: quantity
@@ -1540,7 +1492,6 @@
                 updateQuantity(index, change) {
                     const item = this.cart[index];
                     const newQuantity = item.quantity + change;
-
                     if (newQuantity > 0 && newQuantity <= item.stock) {
                         item.quantity = newQuantity;
                     } else if (newQuantity <= 0) {
@@ -1599,24 +1550,17 @@
                         showToast('El nombre es obligatorio', 'error');
                         return;
                     }
-
                     this.savingCustomer = true;
                     try {
-                        const { data, error } = await supabase
-                            .from('customers')
-                            .insert({
-                                full_name: this.newCustomer.full_name.toUpperCase(),
-                                phone: this.newCustomer.phone,
-                                email: this.newCustomer.email,
-                                address: this.newCustomer.address ? this.newCustomer.address.toUpperCase() : null,
-                                recommended_by: this.newCustomer.recommended_by ? this.newCustomer.recommended_by.toUpperCase() : null,
-                                branch: this.userBranch
-                            })
-                            .select()
-                            .single();
-
+                        const { data, error } = await supabase.from('customers').insert({
+                            full_name: this.newCustomer.full_name.toUpperCase(),
+                            phone: this.newCustomer.phone,
+                            email: this.newCustomer.email,
+                            address: this.newCustomer.address ? this.newCustomer.address.toUpperCase() : null,
+                            recommended_by: this.newCustomer.recommended_by ? this.newCustomer.recommended_by.toUpperCase() : null,
+                            branch: this.userBranch
+                        }).select().single();
                         if (error) throw error;
-
                         showToast('Cliente creado', 'success');
                         this.customers.push(data);
                         this.selectedCustomer = data.id;
@@ -1634,7 +1578,6 @@
                         showToast('El carrito está vacío', 'error');
                         return;
                     }
-
                     const defaultDate = new Date();
                     defaultDate.setDate(defaultDate.getDate() + 30);
                     this.creditForm.payment_date = defaultDate.toISOString().split('T')[0];
@@ -1662,23 +1605,18 @@
 
                 async processSale() {
                     this.exchangeRate = ensureValidRate(this.exchangeRate);
-
                     if (this.cart.length === 0) {
                         showToast('El carrito está vacío', 'error');
                         return;
                     }
-
                     if (this.deliveryType === 'delivery' && !this.deliveryAddress) {
                         showToast('Debe ingresar la dirección', 'error');
                         return;
                     }
-
                     const customer = this.customers.find(c => c.id === this.selectedCustomer);
                     const customerName = customer?.full_name || 'Cliente no registrado';
-
                     let modalHtml = '';
                     let confirmText = 'Procesar Venta';
-
                     if (this.useMultiplePayments) {
                         if (this.multiplePayments.length === 0) {
                             showToast('Debe agregar al menos un pago', 'error');
@@ -1688,7 +1626,6 @@
                             showToast(`Falta completar: $${this.remainingAmount.toFixed(2)}`, 'error');
                             return;
                         }
-
                         modalHtml = `
                             <div class="text-left space-y-3">
                                 <div class="flex items-center space-x-2 text-gray-700">
@@ -1753,7 +1690,6 @@
                                 return;
                             }
                         }
-
                         modalHtml = `
                             <div class="text-left space-y-3">
                                 <div class="flex items-center space-x-2 text-gray-700">
@@ -1788,26 +1724,14 @@
                             </div>
                         `;
                     }
-
-                    const confirmed = await showConfirm(
-                        this.useMultiplePayments ? 'Confirmar Venta - Pago Múltiple' : 'Confirmar Venta',
-                        modalHtml,
-                        confirmText,
-                        'Cancelar'
-                    );
-
+                    const confirmed = await showConfirm(this.useMultiplePayments ? 'Confirmar Venta - Pago Múltiple' : 'Confirmar Venta', modalHtml, confirmText, 'Cancelar');
                     if (!confirmed) return;
-
                     this.processing = true;
-
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
-
                         let notes = [];
                         notes.push(`Tasa aplicada: Bs. ${this.exchangeRate.toFixed(2)}`);
-
                         let payment_method = this.paymentMethod;
-
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             payment_method = 'multiple';
                             notes.push('=== PAGO MÚLTIPLE ===');
@@ -1828,39 +1752,28 @@
                                 notes.push(`Cambio USD: $${(round2(this.amountReceivedUsd) - this.totalUSD).toFixed(2)}`);
                             }
                         }
-
-                        // ✅ GUARDAR EN CAMPOS DEDICADOS
-                        const { data: sale, error: saleError } = await supabase
-                            .from('sales')
-                            .insert({
-                                branch: this.userBranch,
-                                customer_id: this.selectedCustomer || null,
-                                customer_name: customerName,
-                                subtotal: this.subtotal,
-                                tax: 0,
-                                total: this.totalUSD,
-                                payment_method: payment_method,
-                                status: payment_method === 'credito' ? 'pending' : 'completed',
-                                delivery_type: this.deliveryType, // ✅ Campo delivery_type
-                                delivery_address: this.deliveryType === 'delivery' ? this.deliveryAddress : null, // ✅ Campo delivery_address
-                                delivery_coordinates: this.deliveryType === 'delivery' ? this.deliveryCoordinates : null, // ✅ Campo delivery_coordinates
-                                notes: notes.join('\n') || null,
-                                exchange_rate_used: this.exchangeRate,
-                                rate_date: new Date().toISOString().split('T')[0],
-                                created_by: session.user.id
-                            })
-                            .select()
-                            .single();
-
+                        const { data: sale, error: saleError } = await supabase.from('sales').insert({
+                            branch: this.userBranch,
+                            customer_id: this.selectedCustomer || null,
+                            customer_name: customerName,
+                            subtotal: this.subtotal,
+                            tax: 0,
+                            total: this.totalUSD,
+                            payment_method: payment_method,
+                            status: payment_method === 'credito' ? 'pending' : 'completed',
+                            delivery_type: this.deliveryType,
+                            delivery_address: this.deliveryType === 'delivery' ? this.deliveryAddress : null,
+                            delivery_coordinates: this.deliveryType === 'delivery' ? this.deliveryCoordinates : null,
+                            notes: notes.join('\n') || null,
+                            exchange_rate_used: this.exchangeRate,
+                            rate_date: new Date().toISOString().split('T')[0],
+                            created_by: session.user.id
+                        }).select().single();
                         if (saleError) throw saleError;
-
-                        // ✅ NUEVO: Actualizar dirección del cliente si es delivery
                         if (this.deliveryType === 'delivery' && this.selectedCustomer) {
                             await this.updateCustomerAddress();
                         }
-
                         const paymentsToInsert = [];
-
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             this.multiplePayments.forEach((p, i) => {
                                 paymentsToInsert.push({
@@ -1876,7 +1789,6 @@
                         } else {
                             let amountUsd = 0;
                             let amountBs = 0;
-
                             if (this.paymentMethod === 'efectivo_bs') {
                                 amountBs = round2(this.amountReceivedBs);
                                 amountUsd = round2(amountBs / this.exchangeRate);
@@ -1887,7 +1799,6 @@
                                 amountUsd = round2(this.totalUSD);
                                 amountBs = round2(this.totalBs);
                             }
-
                             paymentsToInsert.push({
                                 sale_id: sale.id,
                                 payment_method: this.paymentMethod,
@@ -1898,31 +1809,19 @@
                                 created_by: session.user.id
                             });
                         }
-
                         if (paymentsToInsert.length > 0) {
-                            const { error: paymentsError } = await supabase
-                                .from('sale_payments')
-                                .insert(paymentsToInsert);
-
+                            const { error: paymentsError } = await supabase.from('sale_payments').insert(paymentsToInsert);
                             if (paymentsError) {
                                 console.warn('⚠️ No se pudo guardar en sale_payments:', paymentsError.message);
                             }
                         }
-
-                        // ✅ DESCUENTO SIMPLE DE INVENTARIO - Igual que en el modal de inventario
-                        const { data: productsFromDB } = await supabase
-                            .from('products')
-                            .select('id, name, size_liters, product_type')
-                            .eq('is_active', true);
-
+                        const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters, product_type').eq('is_active', true);
                         const sizeToProductId = {};
                         productsFromDB.forEach(p => {
                             if (p.size_liters) sizeToProductId[p.size_liters] = p.id;
                         });
-
                         const capProduct = productsFromDB.find(p => p.product_type === 'cap');
                         const emptyBottleProducts = productsFromDB.filter(p => p.product_type === 'empty_bottle');
-
                         const saleItems = this.cart.map(item => ({
                             sale_id: sale.id,
                             product_id: item.product_type === 'empty_bottle' ?
@@ -1932,67 +1831,21 @@
                             unit_price: item.price,
                             total: round2(item.price * item.quantity)
                         }));
-
-                        const { error: itemsError } = await supabase
-                            .from('sale_items')
-                            .insert(saleItems);
-
+                        const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
                         if (itemsError) throw itemsError;
 
+                        // ✅ DESCUENTO DE INVENTARIO - Simplificado y directo
                         let totalCapsNeeded = 0;
 
-                        // ✅ PROCESAR BOTELLONES CON AGUA - Descuento simple directo
-                        for (const item of this.cart) {
-                            if (item.product_type !== 'empty_bottle') {
-                                // Consultar inventario actual
-                                const { data: inventory, error: invError } = await supabase
-                                    .from('inventory')
-                                    .select('quantity')
-                                    .eq('product_id', sizeToProductId[item.size_liters])
-                                    .eq('branch', this.userBranch)
-                                    .single();
-
-                                if (invError) {
-                                    console.warn('⚠️ Error consultando inventario:', invError.message);
-                                    continue;
-                                }
-
-                                if (!inventory || inventory.quantity < item.quantity) {
-                                    showToast(`⚠️ Stock insuficiente de ${item.name}`, 'warning');
-                                    continue;
-                                }
-
-                                // Descontar del inventario
-                                const newQuantity = inventory.quantity - item.quantity;
-                                const { error: updateError } = await supabase
-                                    .from('inventory')
-                                    .update({
-                                        quantity: newQuantity,
-                                        updated_at: new Date().toISOString()
-                                    })
-                                    .eq('product_id', sizeToProductId[item.size_liters])
-                                    .eq('branch', this.userBranch);
-
-                                if (updateError) {
-                                    console.warn('⚠️ Error actualizando inventario:', updateError.message);
-                                } else {
-                                    console.log(`✅ ${item.quantity} x ${item.name} descontado(s) (Stock: ${inventory.quantity} → ${newQuantity})`);
-                                }
-
-                                // Contar tapas
-                                if (item.size_liters === 13 || item.size_liters === 20) {
-                                    totalCapsNeeded += item.quantity;
-                                }
-                            }
-                        }
-
-                        // ✅ PROCESAR BOTELLONES VACÍOS - Descuento simple directo
+                        // Procesar cada item del carrito
                         for (const item of this.cart) {
                             if (item.product_type === 'empty_bottle') {
+                                // Botellón vacío: descontar del inventario físico
                                 const emptyProduct = emptyBottleProducts.find(p => p.size_liters === item.size_liters);
                                 if (!emptyProduct) continue;
 
-                                // Consultar inventario actual
+                                console.log(`💧 Procesando botellón vacío ${item.size_liters}L - Cantidad: ${item.quantity}`);
+
                                 const { data: emptyInventory, error: emptyInvError } = await supabase
                                     .from('inventory')
                                     .select('quantity')
@@ -2001,43 +1854,62 @@
                                     .single();
 
                                 if (emptyInvError) {
-                                    console.warn('⚠️ Error consultando inventario de botellón vacío:', emptyInvError.message);
-                                    continue;
+                                    console.warn('️ Error consultando inventario de botellón vacío:', emptyInvError.message);
+                                } else if (emptyInventory) {
+                                    if (emptyInventory.quantity < item.quantity) {
+                                        showToast(`️ Stock bajo de botellón vacío ${item.size_liters}L`, 'warning');
+                                    }
+                                    const { error: updateEmptyError } = await supabase
+                                        .from('inventory')
+                                        .update({
+                                            quantity: emptyInventory.quantity - item.quantity,
+                                            updated_at: new Date().toISOString()
+                                        })
+                                        .eq('product_id', emptyProduct.id)
+                                        .eq('branch', this.userBranch);
+
+                                    if (updateEmptyError) {
+                                        console.warn('⚠️ Error actualizando botellón vacío:', updateEmptyError.message);
+                                    } else {
+                                        console.log(`✅ ${item.quantity} botellón(es) vacío(s) ${item.size_liters}L descontado(s)`);
+                                    }
                                 }
 
-                                if (!emptyInventory || emptyInventory.quantity < item.quantity) {
-                                    showToast(`⚠️ Stock bajo de botellón vacío ${item.size_liters}L`, 'warning');
-                                    continue;
-                                }
-
-                                // Descontar del inventario
-                                const newQuantity = emptyInventory.quantity - item.quantity;
-                                const { error: updateEmptyError } = await supabase
-                                    .from('inventory')
-                                    .update({
-                                        quantity: newQuantity,
-                                        updated_at: new Date().toISOString()
-                                    })
-                                    .eq('product_id', emptyProduct.id)
-                                    .eq('branch', this.userBranch);
-
-                                if (updateEmptyError) {
-                                    console.warn('⚠️ Error actualizando botellón vacío:', updateEmptyError.message);
-                                } else {
-                                    console.log(`✅ ${item.quantity} botellón(es) vacío(s) ${item.size_liters}L descontado(s)`);
-                                }
-
-                                // Contar tapas
+                                // ✅ Contar tapas para botellones vacíos de 15L y 20L
                                 if (item.size_liters === 15 || item.size_liters === 20) {
                                     totalCapsNeeded += item.quantity;
+                                    console.log(`🔴 Contando ${item.quantity} tapa(s) para botellón vacío ${item.size_liters}L`);
+                                }
+                            } else {
+                                // Botellón con agua: descontar agua del tanque
+                                const realProductId = sizeToProductId[item.size_liters];
+                                if (!realProductId) continue;
+
+                                console.log(`💧 Procesando botellón con agua ${item.size_liters}L - Cantidad: ${item.quantity}`);
+
+                                const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
+                                    branch_param: this.userBranch,
+                                    product_id_param: realProductId,
+                                    quantity_param: item.quantity,
+                                    user_id_param: session.user.id
+                                });
+
+                                if (tankError) throw tankError;
+                                if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
+
+                                // Contar tapas para 13L y 20L con agua
+                                if (item.size_liters === 13 || item.size_liters === 20) {
+                                    totalCapsNeeded += item.quantity;
+                                    console.log(`🔴 Contando ${item.quantity} tapa(s) para botellón con agua ${item.size_liters}L`);
                                 }
                             }
                         }
 
-                        // ✅ DESCUENTO DE TAPAS - Simple y directo
-                        if (totalCapsNeeded > 0 && capProduct) {
-                            console.log(`🔴 Descontando ${totalCapsNeeded} tapas del inventario`);
+                        console.log(` Total de tapas necesarias: ${totalCapsNeeded}`);
 
+                        // Descontar tapas
+                        if (totalCapsNeeded > 0 && capProduct) {
+                            console.log(` Descontando ${totalCapsNeeded} tapas del inventario`);
                             const { data: capInventory, error: capInventoryError } = await supabase
                                 .from('inventory')
                                 .select('quantity, product_id')
@@ -2051,12 +1923,10 @@
                                 if (capInventory.quantity < totalCapsNeeded) {
                                     showToast(`⚠️ Stock de tapas bajo: ${capInventory.quantity} disponibles`, 'warning');
                                 }
-
-                                const newQuantity = capInventory.quantity - totalCapsNeeded;
                                 const { error: updateCapError } = await supabase
                                     .from('inventory')
                                     .update({
-                                        quantity: newQuantity,
+                                        quantity: capInventory.quantity - totalCapsNeeded,
                                         updated_at: new Date().toISOString()
                                     })
                                     .eq('product_id', capProduct.id)
@@ -2086,7 +1956,6 @@
                                 </div>
                             `;
                         }
-
                         Swal.fire({
                             icon: 'success',
                             title: '¡Venta Exitosa!',
@@ -2109,7 +1978,6 @@
                             timer: 3500,
                             showConfirmButton: false
                         });
-
                         this.cart = [];
                         this.deliveryAddress = '';
                         this.deliveryCoordinates = '';
@@ -2121,15 +1989,9 @@
                         this.useMultiplePayments = false;
                         this.closeCart();
                         await this.loadProducts();
-
                     } catch (err) {
                         console.error('Error:', err);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error al Procesar Venta',
-                            text: err.message,
-                            confirmButtonText: 'Entendido'
-                        });
+                        Swal.fire({ icon: 'error', title: 'Error al Procesar Venta', text: err.message, confirmButtonText: 'Entendido' });
                     } finally {
                         this.processing = false;
                     }
@@ -2140,7 +2002,6 @@
                         showToast('El carrito está vacío', 'error');
                         return;
                     }
-
                     this.paymentMethod = 'efectivo_bs';
                     this.amountReceivedBs = this.totalBs;
                     this.selectedCustomer = '';
@@ -2150,15 +2011,12 @@
 
                 async processCreditSale() {
                     this.exchangeRate = ensureValidRate(this.exchangeRate);
-
                     if (!this.canProcessCredit()) {
                         showToast('Complete los campos obligatorios', 'error');
                         return;
                     }
-
                     const customer = this.customers.find(c => c.id === this.creditForm.customer_id);
                     const creditAmount = round2(this.totalUSD - this.creditForm.initial_payment);
-
                     const confirmed = await showConfirm('Venta a Crédito', `
                         <div class="text-left space-y-3">
                             <div class="flex items-center space-x-2 text-gray-700">
@@ -2185,45 +2043,29 @@
                             </div>
                         </div>
                     `, 'Confirmar Crédito', 'Cancelar');
-
                     if (!confirmed) return;
-
                     this.processing = true;
-
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
-
-                        const { data: sale, error: saleError } = await supabase
-                            .from('sales')
-                            .insert({
-                                branch: this.userBranch,
-                                customer_id: this.creditForm.customer_id,
-                                customer_name: customer?.full_name,
-                                subtotal: this.subtotal,
-                                tax: 0,
-                                total: this.totalUSD,
-                                payment_method: 'credito',
-                                status: creditAmount > 0 ? 'pending' : 'completed',
-                                notes: `Crédito - Pago inicial: $${round2(this.creditForm.initial_payment).toFixed(2)}\n${this.creditForm.notes || ''}`,
-                                exchange_rate_used: this.exchangeRate,
-                                rate_date: new Date().toISOString().split('T')[0],
-                                created_by: session.user.id
-                            })
-                            .select()
-                            .single();
-
+                        const { data: sale, error: saleError } = await supabase.from('sales').insert({
+                            branch: this.userBranch,
+                            customer_id: this.creditForm.customer_id,
+                            customer_name: customer?.full_name,
+                            subtotal: this.subtotal,
+                            tax: 0,
+                            total: this.totalUSD,
+                            payment_method: 'credito',
+                            status: creditAmount > 0 ? 'pending' : 'completed',
+                            notes: `Crédito - Pago inicial: $${round2(this.creditForm.initial_payment).toFixed(2)}\n${this.creditForm.notes || ''}`,
+                            exchange_rate_used: this.exchangeRate,
+                            rate_date: new Date().toISOString().split('T')[0],
+                            created_by: session.user.id
+                        }).select().single();
                         if (saleError) throw saleError;
-
-                        const { data: productsFromDB } = await supabase
-                            .from('products')
-                            .select('id, name, size_liters, product_type')
-                            .eq('is_active', true);
-
+                        const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters, product_type').eq('is_active', true);
                         const sizeToProductId = {};
                         productsFromDB.forEach(p => { if (p.size_liters) sizeToProductId[p.size_liters] = p.id; });
-
                         const capProduct = productsFromDB.find(p => p.product_type === 'cap');
-
                         const saleItems = this.cart.map(item => ({
                             sale_id: sale.id,
                             product_id: sizeToProductId[item.size_liters],
@@ -2231,94 +2073,62 @@
                             unit_price: item.price,
                             total: round2(item.price * item.quantity)
                         }));
-
-                        const { error: itemsError } = await supabase
-                            .from('sale_items')
-                            .insert(saleItems);
-
+                        const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
                         if (itemsError) throw itemsError;
-
                         let totalCapsNeeded = 0;
-
                         for (const item of this.cart) {
                             const realProductId = sizeToProductId[item.size_liters];
                             if (!realProductId) continue;
-
                             const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
                                 branch_param: this.userBranch,
                                 product_id_param: realProductId,
                                 quantity_param: item.quantity,
                                 user_id_param: session.user.id
                             });
-
                             if (tankError) throw tankError;
-
                             if (item.size_liters === 13 || item.size_liters === 20) {
                                 totalCapsNeeded += item.quantity;
                             }
                         }
-
                         if (totalCapsNeeded > 0 && capProduct) {
-                            const { data: capInventory } = await supabase
-                                .from('inventory')
-                                .select('quantity')
-                                .eq('product_id', capProduct.id)
-                                .eq('branch', this.userBranch)
-                                .single();
-
+                            const { data: capInventory } = await supabase.from('inventory').select('quantity').eq('product_id', capProduct.id).eq('branch', this.userBranch).single();
                             if (capInventory) {
-                                await supabase
-                                    .from('inventory')
-                                    .update({
-                                        quantity: capInventory.quantity - totalCapsNeeded,
-                                        updated_at: new Date().toISOString()
-                                    })
-                                    .eq('product_id', capProduct.id)
-                                    .eq('branch', this.userBranch);
+                                await supabase.from('inventory').update({
+                                    quantity: capInventory.quantity - totalCapsNeeded,
+                                    updated_at: new Date().toISOString()
+                                }).eq('product_id', capProduct.id).eq('branch', this.userBranch);
                             }
                         }
-
                         if (creditAmount > 0) {
-                            await supabase
-                                .from('credit_accounts')
-                                .insert({
-                                    sale_id: sale.id,
-                                    customer_id: this.creditForm.customer_id,
-                                    customer_name: customer?.full_name,
-                                    customer_phone: customer?.phone,
-                                    customer_id_card: this.creditForm.customer_id_card,
-                                    total_amount: this.totalUSD,
-                                    paid_amount: round2(this.creditForm.initial_payment),
-                                    remaining_amount: creditAmount,
-                                    payment_date: this.creditForm.payment_date,
-                                    payment_terms: this.creditForm.payment_terms,
-                                    notes: this.creditForm.notes,
-                                    status: this.creditForm.initial_payment > 0 ? 'partial' : 'pending',
-                                    created_by: session.user.id,
-                                    branch: this.userBranch
-                                });
-
+                            await supabase.from('credit_accounts').insert({
+                                sale_id: sale.id,
+                                customer_id: this.creditForm.customer_id,
+                                customer_name: customer?.full_name,
+                                customer_phone: customer?.phone,
+                                customer_id_card: this.creditForm.customer_id_card,
+                                total_amount: this.totalUSD,
+                                paid_amount: round2(this.creditForm.initial_payment),
+                                remaining_amount: creditAmount,
+                                payment_date: this.creditForm.payment_date,
+                                payment_terms: this.creditForm.payment_terms,
+                                notes: this.creditForm.notes,
+                                status: this.creditForm.initial_payment > 0 ? 'partial' : 'pending',
+                                created_by: session.user.id,
+                                branch: this.userBranch
+                            });
                             if (this.creditForm.initial_payment > 0) {
-                                const { data: creditAccount } = await supabase
-                                    .from('credit_accounts')
-                                    .select('id')
-                                    .eq('sale_id', sale.id)
-                                    .single();
-
+                                const { data: creditAccount } = await supabase.from('credit_accounts').select('id').eq('sale_id', sale.id).single();
                                 if (creditAccount) {
-                                    await supabase
-                                        .from('credit_payments')
-                                        .insert({
-                                            credit_account_id: creditAccount.id,
-                                            amount: round2(this.creditForm.initial_payment),
-                                            payment_method: this.creditForm.initial_payment_method,
-                                            notes: 'Pago inicial',
-                                            created_by: session.user.id
-                                        });
+                                    await supabase.from('credit_payments').insert({
+                                        credit_account_id: creditAccount.id,
+                                        amount: round2(this.creditForm.initial_payment),
+                                        payment_method: this.creditForm.initial_payment_method,
+                                        notes: 'Pago inicial',
+                                        created_by: session.user.id
+                                    });
                                 }
                             }
                         }
-
                         Swal.fire({
                             icon: 'success',
                             title: '¡Crédito Registrado!',
@@ -2334,20 +2144,13 @@
                             timer: 2500,
                             showConfirmButton: false
                         });
-
                         this.cart = [];
                         this.closeCreditModal();
                         this.closeCart();
                         await this.loadProducts();
-
                     } catch (err) {
                         console.error('Error:', err);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: err.message,
-                            confirmButtonText: 'Entendido'
-                        });
+                        Swal.fire({ icon: 'error', title: 'Error', text: err.message, confirmButtonText: 'Entendido' });
                     } finally {
                         this.processing = false;
                     }
