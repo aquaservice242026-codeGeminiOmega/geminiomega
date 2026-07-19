@@ -69,7 +69,6 @@
                         <label class="block text-xs text-gray-600 mb-1">Fecha Fin</label>
                         <input type="date" x-model="filters.endDate" class="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
                     </div>
-                    <!-- Selector de Sucursal Dinámico -->
                     <div>
                         <label class="block text-xs text-gray-600 mb-1">Sucursal</label>
                         <select x-model="userBranch" @change="loadReportData()" class="px-3 py-2 border rounded-lg text-sm capitalize focus:ring-2 focus:ring-blue-500">
@@ -94,7 +93,7 @@
         </div>
 
         <!-- Report Content -->
-        <div x-show="!loading" class="print-container max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-6">
+        <div x-show="!loading" class="print-container max-w-5xl mx-auto bg-white rounded-lg shadow-sm p-6">
             <!-- Header del Reporte -->
             <div class="text-center mb-6 border-b-2 border-blue-500 pb-4">
                 <h1 class="text-2xl font-bold text-gray-800">SERVICIOS AGUA POTABLE</h1>
@@ -107,19 +106,15 @@
                 </p>
             </div>
 
-            <!-- Delivery Section -->
+            <!-- Delivery Section - SOLO CANTIDAD -->
             <div class="mb-6 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-300 rounded-lg p-4">
                 <h2 class="text-lg font-bold text-indigo-800 mb-2">
                     <i class="fas fa-truck mr-2"></i>DELIVERY REALIZADOS
                 </h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-white rounded-lg p-3 text-center border border-indigo-100">
-                        <p class="text-sm text-gray-600">Total Deliverys:</p>
-                        <p class="text-3xl font-bold text-indigo-600" x-text="stats.totalDeliverys"></p>
-                    </div>
-                    <div class="bg-white rounded-lg p-3 text-center border border-indigo-100">
-                        <p class="text-sm text-gray-600">Monto Total:</p>
-                        <p class="text-2xl font-bold text-indigo-600" x-text="'$' + stats.deliveryAmount.toFixed(2)"></p>
+                <div class="flex items-center justify-center">
+                    <div class="bg-white rounded-lg px-8 py-4 text-center border-2 border-indigo-200">
+                        <p class="text-sm text-gray-600 mb-1">Total Deliverys:</p>
+                        <p class="text-4xl font-bold text-indigo-600" x-text="stats.totalDeliverys"></p>
                     </div>
                 </div>
             </div>
@@ -135,9 +130,9 @@
                         <tr>
                             <th class="px-3 py-2 text-left">Producto</th>
                             <th class="px-3 py-2 text-center">Cant.</th>
-                            <th class="px-3 py-2 text-right">Pago Móvil</th>
-                            <th class="px-3 py-2 text-right">Punto</th>
-                            <th class="px-3 py-2 text-right">Efectivo $</th>
+                            <th class="px-3 py-2 text-right bg-blue-50">Pago Móvil</th>
+                            <th class="px-3 py-2 text-right bg-green-50">Punto</th>
+                            <th class="px-3 py-2 text-right bg-yellow-50">Efectivo $</th>
                             <th class="px-3 py-2 text-right">Total $</th>
                         </tr>
                     </thead>
@@ -145,10 +140,10 @@
                         <template x-for="product in morningShift.products" :key="product.name">
                             <tr class="border-b hover:bg-gray-50">
                                 <td class="px-3 py-2" x-text="product.name"></td>
-                                <td class="px-3 py-2 text-center" x-text="product.quantity"></td>
-                                <td class="px-3 py-2 text-right" x-text="'$' + product.pagoMovil.toFixed(2)"></td>
-                                <td class="px-3 py-2 text-right" x-text="'$' + product.punto.toFixed(2)"></td>
-                                <td class="px-3 py-2 text-right" x-text="'$' + product.efectivoUsd.toFixed(2)"></td>
+                                <td class="px-3 py-2 text-center font-semibold" x-text="product.quantity"></td>
+                                <td class="px-3 py-2 text-right bg-blue-50/30" x-text="'$' + product.pagoMovil.toFixed(2)"></td>
+                                <td class="px-3 py-2 text-right bg-green-50/30" x-text="'$' + product.punto.toFixed(2)"></td>
+                                <td class="px-3 py-2 text-right bg-yellow-50/30" x-text="'$' + product.efectivoUsd.toFixed(2)"></td>
                                 <td class="px-3 py-2 text-right font-bold" x-text="'$' + product.total.toFixed(2)"></td>
                             </tr>
                         </template>
@@ -157,9 +152,9 @@
                         </tr>
                         <tr class="bg-gray-100 font-bold border-t-2 border-gray-300">
                             <td class="px-3 py-2" colspan="2">SUBTOTAL:</td>
-                            <td class="px-3 py-2 text-right" x-text="'$' + morningShift.totals.pagoMovil.toFixed(2)"></td>
-                            <td class="px-3 py-2 text-right" x-text="'$' + morningShift.totals.punto.toFixed(2)"></td>
-                            <td class="px-3 py-2 text-right" x-text="'$' + morningShift.totals.efectivoUsd.toFixed(2)"></td>
+                            <td class="px-3 py-2 text-right bg-blue-50/30" x-text="'$' + morningShift.totals.pagoMovil.toFixed(2)"></td>
+                            <td class="px-3 py-2 text-right bg-green-50/30" x-text="'$' + morningShift.totals.punto.toFixed(2)"></td>
+                            <td class="px-3 py-2 text-right bg-yellow-50/30" x-text="'$' + morningShift.totals.efectivoUsd.toFixed(2)"></td>
                             <td class="px-3 py-2 text-right" x-text="'$' + morningShift.totals.total.toFixed(2)"></td>
                         </tr>
                     </tbody>
@@ -311,7 +306,7 @@
                 async initReporte() {
                     this.updateCurrentDateTime();
                     
-                    // ✅ 1. OBTENER SUCURSAL Y NOMBRE DEL USUARIO LOGUEADO
+                    // Obtener sucursal y nombre del usuario logueado
                     const { data: { session } } = await supabase.auth.getSession();
                     if (session) {
                         const { data: profile } = await supabase
@@ -330,7 +325,7 @@
                 },
 
                 updateCurrentDateTime() {
-                    // ✅ 2. FECHA Y HORA ACTUAL DE CARACAS, VENEZUELA
+                    // Fecha y hora actual de Caracas, Venezuela
                     const now = new Date();
                     this.currentDateTime = now.toLocaleString('es-VE', { 
                         timeZone: 'America/Caracas',
@@ -346,11 +341,11 @@
 
                 async loadReportData() {
                     this.loading = true;
-                    this.updateCurrentDateTime(); // Actualizar hora al buscar
+                    this.updateCurrentDateTime();
                     try {
                         this.resetStats();
 
-                        // ✅ 3. FILTRO POR SUCURSAL DINÁMICA
+                        // Filtro por sucursal dinámica
                         let query = supabase
                             .from('sales')
                             .select('*')
@@ -392,9 +387,9 @@
                         this.stats.totalSales += sale.total || 0;
                         this.stats.totalTransactions++;
 
+                        // Contar deliveries (SIN MONTO - solo cantidad)
                         if (sale.delivery_type === 'delivery') {
                             this.stats.totalDeliverys++;
-                            this.stats.deliveryAmount += sale.total || 0;
                         }
 
                         const { data: payments } = await supabase
@@ -416,45 +411,53 @@
                                 const saleDate = new Date(sale.created_at);
                                 const saleHour = saleDate.getHours();
                                 if (saleHour >= 6 && saleHour < 14) {
+                                    // Procesar items de la venta
+                                    const { data: items } = await supabase
+                                        .from('sale_items')
+                                        .select('product_id, quantity, total')
+                                        .eq('sale_id', sale.id);
+
+                                    if (items) {
+                                        for (const item of items) {
+                                            const { data: product } = await supabase
+                                                .from('products')
+                                                .select('name, size_liters')
+                                                .eq('id', item.product_id)
+                                                .single();
+
+                                            if (product) {
+                                                const name = product.name || `Botellón ${product.size_liters}L`;
+                                                
+                                                if (!morningProducts[name]) {
+                                                    morningProducts[name] = { 
+                                                        name, 
+                                                        quantity: 0, 
+                                                        pagoMovil: 0, 
+                                                        punto: 0, 
+                                                        efectivoUsd: 0, 
+                                                        total: 0 
+                                                    };
+                                                }
+                                                morningProducts[name].quantity += item.quantity || 0;
+                                                morningProducts[name].total += item.total || 0;
+
+                                                // Distribuir el monto según el método de pago proporcionalmente
+                                                const itemTotal = item.total || 0;
+                                                if (payment.payment_method === 'pago_movil') {
+                                                    morningProducts[name].pagoMovil += itemTotal;
+                                                } else if (payment.payment_method === 'punto_venta') {
+                                                    morningProducts[name].punto += itemTotal;
+                                                } else if (payment.payment_method === 'efectivo_divisas') {
+                                                    morningProducts[name].efectivoUsd += itemTotal;
+                                                }
+                                            }
+                                        }
+                                    }
+
                                     switch(payment.payment_method) {
                                         case 'pago_movil': this.morningShift.totals.pagoMovil += amount; break;
                                         case 'punto_venta': this.morningShift.totals.punto += amount; break;
                                         case 'efectivo_divisas': this.morningShift.totals.efectivoUsd += amount; break;
-                                    }
-                                }
-                            }
-                        }
-
-                        const { data: items } = await supabase
-                            .from('sale_items')
-                            .select('product_id, quantity, total')
-                            .eq('sale_id', sale.id);
-
-                        if (items) {
-                            for (const item of items) {
-                                const { data: product } = await supabase
-                                    .from('products')
-                                    .select('name, size_liters')
-                                    .eq('id', item.product_id)
-                                    .single();
-
-                                if (product) {
-                                    const name = product.name || `Botellón ${product.size_liters}L`;
-                                    
-                                    if (!productMap[name]) {
-                                        productMap[name] = { name, quantity: 0, pagoMovil: 0, punto: 0, efectivoUsd: 0, total: 0 };
-                                    }
-                                    productMap[name].quantity += item.quantity || 0;
-                                    productMap[name].total += item.total || 0;
-
-                                    const saleDate = new Date(sale.created_at);
-                                    const saleHour = saleDate.getHours();
-                                    if (saleHour >= 6 && saleHour < 14) {
-                                        if (!morningProducts[name]) {
-                                            morningProducts[name] = { name, quantity: 0, pagoMovil: 0, punto: 0, efectivoUsd: 0, total: 0 };
-                                        }
-                                        morningProducts[name].quantity += item.quantity || 0;
-                                        morningProducts[name].total += item.total || 0;
                                     }
                                 }
                             }
