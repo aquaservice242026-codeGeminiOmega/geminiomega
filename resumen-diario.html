@@ -1,869 +1,271 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Servicios Agua Potable - Resumen Diario</title>
+    <title>Cierre de Caja - Servicios Agua Potable</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
-
     <style>
-        [x-cloak] {
-            display: none !important;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-
-        .gradient-bg {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-        }
-
-        .sidebar-mobile {
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .sidebar-mobile.open {
-            transform: translateX(0);
-        }
-
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 39;
-        }
-
-        .sidebar-overlay.show {
-            display: block;
-        }
-
-        @media (min-width: 1024px) {
-            .sidebar-mobile {
-                transform: translateX(0) !important;
-            }
-
-            .sidebar-overlay {
-                display: none !important;
-            }
-
-            .menu-toggle {
-                display: none !important;
-            }
-        }
-
-        .print-area {
-            background: white;
-            padding: 20px;
-        }
-
         @media print {
-            .no-print {
-                display: none !important;
-            }
-
-            .print-area {
+            .no-print { display: none !important; }
+            body { 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact;
+                margin: 0;
                 padding: 0;
             }
+            @page {
+                size: letter;
+                margin: 2cm 2cm 2cm 2cm;
+            }
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .info-box {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        /* Ajustes para que quepa en hoja carta */
+        .report-container {
+            max-width: 17.59cm; /* 21.59cm - 4cm (márgenes laterales) */
+            margin: 0 auto;
+        }
+        table {
+            font-size: 0.85rem;
+        }
+        th, td {
+            padding: 0.4rem 0.5rem;
         }
     </style>
 </head>
-
-<body class="bg-gray-50" x-data="resumenApp()" x-init="initResumen()">
-
-    <div class="sidebar-overlay" :class="{ 'show': mobileMenuOpen }" @click="mobileMenuOpen = false"></div>
-
-    <aside class="sidebar-mobile fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 lg:block"
-        :class="{ 'open': mobileMenuOpen }">
-        <div class="p-6">
-            <div class="mb-6">
-                <div class="flex items-center space-x-3 mb-3">
-                    <i class="fas fa-tint text-3xl"></i>
-                    <div>
-                        <h1 class="text-xl font-bold">Servicios Agua Potable</h1>
-                        <p class="text-xs text-blue-200">Sistema de Gestión</p>
-                    </div>
-                </div>
-                <div class="bg-white bg-opacity-10 rounded-lg px-3 py-2">
-                    <p class="text-xs text-blue-200 mb-0.5">Sucursal</p>
-                    <p class="font-semibold capitalize text-sm" x-text="userBranch || 'Cargando...'"></p>
-                </div>
-            </div>
-            <nav class="space-y-2">
-                <a href="index.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-home w-5"></i><span>Dashboard</span>
-                </a>
-                <a href="ventas.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
-                </a>
-                <a href="cuentas-cobrar.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-file-invoice-dollar w-5"></i><span>Cuentas por Cobrar</span>
-                </a>
-                <a href="clientes.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-users w-5"></i><span>Clientes</span>
-                </a>
-                <a href="inventario.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-boxes w-5"></i><span>Inventario</span>
-                </a>
-                <a href="usuarios.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
-                </a>
-                <a href="resumen-diario.html" @click="mobileMenuOpen = false"
-                    class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
-                    <i class="fas fa-file-alt w-5"></i><span class="font-medium">Resumen Diario</span>
-                </a>
-            </nav>
+<body class="bg-gray-100 p-6">
+    <div class="report-container bg-white shadow-lg rounded-lg p-6">
+        <!-- Header -->
+        <div class="text-center mb-4 border-b-2 border-blue-500 pb-3">
+            <h1 class="text-2xl font-bold text-gray-800">SERVICIOS AGUA POTABLE</h1>
+            <p class="text-lg font-semibold text-blue-600">CIERRE DE CAJA POR TURNOS</p>
+            <p class="text-sm text-gray-600 mt-2">
+                Fecha: <strong>17/07/2024</strong> | Sucursal: <strong>Geminis</strong> | 
+                Tasa del día: <strong>Bs. 736,93 por $</strong>
+            </p>
         </div>
-        <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
-                    x-text="userInitials"></div>
-                <div>
-                    <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
-                    <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
+
+        <!-- SECCIÓN DE DELIVERY -->
+        <div class="mb-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-300 rounded-lg p-3 info-box">
+            <h2 class="text-base font-bold text-indigo-800 mb-2 flex items-center">
+                <i class="fas fa-truck mr-2"></i>
+                DELIVERY REALIZADOS
+            </h2>
+            <div class="flex items-center space-x-4">
+                <div class="bg-white rounded-lg p-2 border-2 border-indigo-400 text-center flex-1">
+                    <p class="text-xs text-gray-600 mb-1">Total de Deliverys:</p>
+                    <p class="text-3xl font-bold text-indigo-600">12</p>
                 </div>
             </div>
         </div>
-    </aside>
 
-    <div class="lg:ml-64 min-h-screen">
-        <header class="bg-white shadow-sm border-b px-6 py-4">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-                <div class="flex items-center space-x-4">
-                    <button @click="mobileMenuOpen = !mobileMenuOpen"
-                        class="menu-toggle lg:hidden text-gray-600 hover:text-gray-800">
-                        <i class="fas fa-bars text-2xl"></i>
-                    </button>
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800">Resumen de Venta Diario</h2>
-                        <p class="text-sm text-gray-500">Tabla dinámica de ventas por producto y método de pago</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-3 no-print">
-                    <button @click="generatePDF()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
-                        <i class="fas fa-file-pdf mr-2"></i>Generar PDF
-                    </button>
-                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
-                        <i class="fas fa-sign-out-alt mr-2"></i>Salir
-                    </button>
-                </div>
+        <!-- Turno Mañana -->
+        <div class="mb-4 border-2 border-gray-300 rounded-lg overflow-hidden info-box">
+            <div class="bg-blue-50 px-3 py-2 font-bold text-blue-800 flex items-center justify-between text-sm">
+                <span class="flex items-center">
+                    <i class="fas fa-sun mr-2 text-yellow-500"></i>
+                    TURNO MAÑANA (06:00 AM - 02:00 PM)
+                </span>
+                <span class="text-xs font-normal">Vendedor: Ana Martínez</span>
             </div>
-        </header>
-
-        <div class="bg-white shadow-sm border-b px-6 py-4 no-print">
-            <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-3 md:space-y-0">
-                <div class="flex-1">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Fecha del Reporte</label>
-                    <input type="date" x-model="selectedDate" @change="loadDailySummary()"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div class="flex-1">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Sucursal</label>
-                    <select x-model="selectedBranch" @change="loadDailySummary()"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        <option value="">Todas</option>
-                        <option value="geminis">Geminis</option>
-                        <option value="omega">Omega</option>
-                    </select>
-                </div>
-                <button @click="loadDailySummary()"
-                    class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
-                    <i class="fas fa-sync-alt mr-2"></i>Actualizar
-                </button>
+            <table class="w-full text-xs">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-2 py-1 text-left">Producto</th>
+                        <th class="px-2 py-1 text-center">Cant.</th>
+                        <th class="px-2 py-1 text-right">Pago Móvil</th>
+                        <th class="px-2 py-1 text-right">Punto</th>
+                        <th class="px-2 py-1 text-right">Efectivo $</th>
+                        <th class="px-2 py-1 text-right">Efectivo Bs</th>
+                        <th class="px-2 py-1 text-right">Total $</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-2 py-1 font-medium">Botellón 20L</td>
+                        <td class="px-2 py-1 text-center">22</td>
+                        <td class="px-2 py-1 text-right">$24.50</td>
+                        <td class="px-2 py-1 text-right">$8.25</td>
+                        <td class="px-2 py-1 text-right">$0.00</td>
+                        <td class="px-2 py-1 text-right">$0.00</td>
+                        <td class="px-2 py-1 text-right font-bold">$33.00</td>
+                    </tr>
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-2 py-1 font-medium">Botellón 13L</td>
+                        <td class="px-2 py-1 text-center">15</td>
+                        <td class="px-2 py-1 text-right">$12.60</td>
+                        <td class="px-2 py-1 text-right">$5.40</td>
+                        <td class="px-2 py-1 text-right">$0.00</td>
+                        <td class="px-2 py-1 text-right">$0.00</td>
+                        <td class="px-2 py-1 text-right font-bold">$18.00</td>
+                    </tr>
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-2 py-1 font-medium">Botella 5L</td>
+                        <td class="px-2 py-1 text-center">25</td>
+                        <td class="px-2 py-1 text-right">$10.50</td>
+                        <td class="px-2 py-1 text-right">$7.00</td>
+                        <td class="px-2 py-1 text-right">$0.00</td>
+                        <td class="px-2 py-1 text-right">$0.00</td>
+                        <td class="px-2 py-1 text-right font-bold">$17.50</td>
+                    </tr>
+                    <tr class="bg-gray-100 font-bold">
+                        <td class="px-2 py-1" colspan="2">SUBTOTAL TURNO:</td>
+                        <td class="px-2 py-1 text-right">$47.60</td>
+                        <td class="px-2 py-1 text-right">$20.65</td>
+                        <td class="px-2 py-1 text-right">$0.00</td>
+                        <td class="px-2 py-1 text-right">$0.00</td>
+                        <td class="px-2 py-1 text-right">$68.50</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="px-3 py-1 bg-gray-50 text-xs border-t">
+                <strong>Total Bs:</strong> Bs. 50,479.71 (Tasa: 736.93)
             </div>
         </div>
 
-        <main class="p-6 print-area">
-            <div x-show="loading" class="text-center py-12">
-                <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500"></i>
-                <p class="mt-4 text-gray-600">Generando resumen...</p>
-            </div>
-
-            <div x-show="!loading" class="space-y-6">
-                <!-- Header del Reporte -->
-                <div class="border-b-2 border-gray-800 pb-4">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h1 class="text-3xl font-bold text-gray-900">Servicios Agua Potable</h1>
-                            <p class="text-gray-600">Sistema de Gestión de Agua</p>
-                        </div>
+        <!-- SECCIONES PRINCIPALES - Layout mejorado -->
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <!-- VENTAS POR MÉTODO DE PAGO (Izquierda) -->
+            <div class="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-400 rounded-lg p-3 info-box">
+                <h3 class="text-sm font-bold text-blue-800 mb-2 border-b border-blue-300 pb-1">
+                    VENTAS POR MÉTODO DE PAGO
+                </h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center py-1 border-b border-blue-200">
+                        <span class="text-gray-700 font-medium text-xs">Pago Móvil:</span>
                         <div class="text-right">
-                            <h2 class="text-2xl font-bold text-gray-900">RESUMEN DE VENTA DIARIO</h2>
-                            <p class="text-gray-600">Fecha: <span class="font-semibold"
-                                    x-text="formatDate(selectedDate)"></span></p>
-                            <p class="text-gray-600">Sucursal: <span class="font-semibold capitalize"
-                                    x-text="selectedBranch || 'Todas'"></span></p>
+                            <span class="font-bold text-blue-700 text-sm">$89.45</span>
+                            <p class="text-[10px] text-gray-600">(Bs. 65,920.18)</p>
                         </div>
                     </div>
-                </div>
-
-                <!-- TABLA DINÁMICA PRINCIPAL (Unidades) -->
-                <div class="border-2 border-gray-800 rounded-lg overflow-hidden">
-                    <div class="bg-gray-800 text-white px-4 py-2">
-                        <h3 class="text-lg font-bold">VENTAS POR PRODUCTO Y MÉTODO DE PAGO (UNIDADES)</h3>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-blue-100">
-                                <tr>
-                                    <th
-                                        class="px-4 py-3 text-left text-sm font-bold text-gray-800 border-b-2 border-gray-800">
-                                        Tipo de Pago</th>
-                                    <th
-                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">
-                                        5 LITROS</th>
-                                    <th
-                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">
-                                        13 LITROS</th>
-                                    <th
-                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">
-                                        20 LITROS</th>
-                                    <th
-                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800 bg-blue-200">
-                                        TOTAL</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="border-b hover:bg-gray-50">
-                                    <td class="px-4 py-3 font-semibold text-gray-800">Efectivo</td>
-                                    <td class="px-4 py-3 text-center" x-text="pivot.units.efectivo[5]"></td>
-                                    <td class="px-4 py-3 text-center" x-text="pivot.units.efectivo[13]"></td>
-                                    <td class="px-4 py-3 text-center" x-text="pivot.units.efectivo[20]"></td>
-                                    <td class="px-4 py-3 text-center font-bold bg-blue-50"
-                                        x-text="pivot.units.efectivo.total"></td>
-                                </tr>
-                                <tr class="border-b hover:bg-gray-50">
-                                    <td class="px-4 py-3 font-semibold text-gray-800">Pago Móvil</td>
-                                    <td class="px-4 py-3 text-center" x-text="pivot.units.pago_movil[5]"></td>
-                                    <td class="px-4 py-3 text-center" x-text="pivot.units.pago_movil[13]"></td>
-                                    <td class="px-4 py-3 text-center" x-text="pivot.units.pago_movil[20]"></td>
-                                    <td class="px-4 py-3 text-center font-bold bg-blue-50"
-                                        x-text="pivot.units.pago_movil.total"></td>
-                                </tr>
-                                <tr class="border-b hover:bg-gray-50">
-                                    <td class="px-4 py-3 font-semibold text-gray-800">Punto</td>
-                                    <td class="px-4 py-3 text-center" x-text="pivot.units.punto[5]"></td>
-                                    <td class="px-4 py-3 text-center" x-text="pivot.units.punto[13]"></td>
-                                    <td class="px-4 py-3 text-center" x-text="pivot.units.punto[20]"></td>
-                                    <td class="px-4 py-3 text-center font-bold bg-blue-50"
-                                        x-text="pivot.units.punto.total"></td>
-                                </tr>
-                                <tr class="bg-gray-200 font-bold">
-                                    <td class="px-4 py-3 text-gray-900">TOTAL</td>
-                                    <td class="px-4 py-3 text-center text-gray-900" x-text="pivot.units.total[5]"></td>
-                                    <td class="px-4 py-3 text-center text-gray-900" x-text="pivot.units.total[13]"></td>
-                                    <td class="px-4 py-3 text-center text-gray-900" x-text="pivot.units.total[20]"></td>
-                                    <td class="px-4 py-3 text-center text-gray-900 bg-blue-300"
-                                        x-text="pivot.units.grandTotal"></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- TABLA DINÁMICA DE MONTOS ($) -->
-                <div class="border-2 border-gray-800 rounded-lg overflow-hidden">
-                    <div class="bg-green-800 text-white px-4 py-2">
-                        <h3 class="text-lg font-bold">VENTAS POR PRODUCTO Y MÉTODO DE PAGO (MONTOS EN USD)</h3>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-green-100">
-                                <tr>
-                                    <th
-                                        class="px-4 py-3 text-left text-sm font-bold text-gray-800 border-b-2 border-gray-800">
-                                        Tipo de Pago</th>
-                                    <th
-                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">
-                                        5 LITROS ($0.50)</th>
-                                    <th
-                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">
-                                        13 LITROS ($1.00)</th>
-                                    <th
-                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800">
-                                        20 LITROS ($1.50)</th>
-                                    <th
-                                        class="px-4 py-3 text-center text-sm font-bold text-gray-800 border-b-2 border-gray-800 bg-green-200">
-                                        TOTAL</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="border-b hover:bg-gray-50">
-                                    <td class="px-4 py-3 font-semibold text-gray-800">Efectivo</td>
-                                    <td class="px-4 py-3 text-center"
-                                        x-text="'$' + pivot.amounts.efectivo[5].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center"
-                                        x-text="'$' + pivot.amounts.efectivo[13].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center"
-                                        x-text="'$' + pivot.amounts.efectivo[20].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center font-bold bg-green-50"
-                                        x-text="'$' + pivot.amounts.efectivo.total.toFixed(2)"></td>
-                                </tr>
-                                <tr class="border-b hover:bg-gray-50">
-                                    <td class="px-4 py-3 font-semibold text-gray-800">Pago Móvil</td>
-                                    <td class="px-4 py-3 text-center"
-                                        x-text="'$' + pivot.amounts.pago_movil[5].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center"
-                                        x-text="'$' + pivot.amounts.pago_movil[13].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center"
-                                        x-text="'$' + pivot.amounts.pago_movil[20].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center font-bold bg-green-50"
-                                        x-text="'$' + pivot.amounts.pago_movil.total.toFixed(2)"></td>
-                                </tr>
-                                <tr class="border-b hover:bg-gray-50">
-                                    <td class="px-4 py-3 font-semibold text-gray-800">Punto</td>
-                                    <td class="px-4 py-3 text-center" x-text="'$' + pivot.amounts.punto[5].toFixed(2)">
-                                    </td>
-                                    <td class="px-4 py-3 text-center" x-text="'$' + pivot.amounts.punto[13].toFixed(2)">
-                                    </td>
-                                    <td class="px-4 py-3 text-center" x-text="'$' + pivot.amounts.punto[20].toFixed(2)">
-                                    </td>
-                                    <td class="px-4 py-3 text-center font-bold bg-green-50"
-                                        x-text="'$' + pivot.amounts.punto.total.toFixed(2)"></td>
-                                </tr>
-                                <tr class="bg-gray-200 font-bold">
-                                    <td class="px-4 py-3 text-gray-900">TOTAL</td>
-                                    <td class="px-4 py-3 text-center text-gray-900"
-                                        x-text="'$' + pivot.amounts.total[5].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center text-gray-900"
-                                        x-text="'$' + pivot.amounts.total[13].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center text-gray-900"
-                                        x-text="'$' + pivot.amounts.total[20].toFixed(2)"></td>
-                                    <td class="px-4 py-3 text-center text-gray-900 bg-green-300"
-                                        x-text="'$' + pivot.amounts.grandTotal.toFixed(2)"></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Resumen adicional -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <!-- Créditos -->
-                    <div class="border-2 border-red-300 rounded-lg p-4 bg-red-50">
-                        <h3 class="font-bold text-gray-900 mb-2">CUENTAS POR COBRAR</h3>
-                        <div class="flex justify-between py-1">
-                            <span>Pendiente:</span>
-                            <span class="font-bold text-red-600" x-text="'$' + summary.pending.toFixed(2)"></span>
-                        </div>
-                        <div class="flex justify-between py-1 border-t">
-                            <span class="font-bold">Cobrado:</span>
-                            <span class="font-bold text-green-600"
-                                x-text="'$' + (pivot.amounts.grandTotal - summary.pending).toFixed(2)"></span>
+                    <div class="flex justify-between items-center py-1 border-b border-blue-200">
+                        <span class="text-gray-700 font-medium text-xs">Punto de Venta:</span>
+                        <div class="text-right">
+                            <span class="font-bold text-blue-700 text-sm">$34.20</span>
+                            <p class="text-[10px] text-gray-600">(Bs. 25,203.01)</p>
                         </div>
                     </div>
-
-                    <!-- Comparativo -->
-                    <div class="border-2 border-blue-300 rounded-lg p-4 bg-blue-50">
-                        <h3 class="font-bold text-gray-900 mb-2">COMPARATIVO VS AYER</h3>
-                        <div class="flex justify-between py-1">
-                            <span>Ventas Ayer:</span>
-                            <span class="font-bold" x-text="'$' + comparison.yesterdayRevenue.toFixed(2)"></span>
-                        </div>
-                        <div class="flex justify-between py-1">
-                            <span>Ventas Hoy:</span>
-                            <span class="font-bold" x-text="'$' + pivot.amounts.grandTotal.toFixed(2)"></span>
-                        </div>
-                        <div class="flex justify-between py-1 border-t">
-                            <span class="font-bold">Crecimiento:</span>
-                            <span class="font-bold" :class="comparison.growth >= 0 ? 'text-green-600' : 'text-red-600'"
-                                x-text="(comparison.growth >= 0 ? '+' : '') + comparison.growth.toFixed(1) + '%'"></span>
+                    <div class="flex justify-between items-center py-1 border-b border-blue-200">
+                        <span class="text-gray-700 font-medium text-xs">Efectivo $:</span>
+                        <div class="text-right">
+                            <span class="font-bold text-blue-700 text-sm">$24.50</span>
+                            <p class="text-[10px] text-gray-600">-</p>
                         </div>
                     </div>
-
-                    <!-- Producto estrella -->
-                    <div class="border-2 border-yellow-300 rounded-lg p-4 bg-yellow-50">
-                        <h3 class="font-bold text-gray-900 mb-2">
-                            <i class="fas fa-trophy text-yellow-600 mr-1"></i>PRODUCTO ESTRELLA
-                        </h3>
-                        <p class="text-lg font-bold" x-text="summary.topProduct.name"></p>
-                        <p class="text-sm text-gray-600" x-text="summary.topProduct.units + ' unidades'"></p>
-                        <p class="text-xs text-gray-500"
-                            x-text="summary.topProduct.percentage.toFixed(1) + '% del total'"></p>
-                    </div>
-                </div>
-
-                <!-- Firmas -->
-                <div class="mt-8 pt-8 border-t-2 border-gray-400">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="text-center">
-                            <div class="border-b-2 border-gray-400 w-64 mx-auto mb-2"></div>
-                            <p class="font-semibold">Firma Vendedor</p>
-                            <p class="text-sm text-gray-500" x-text="userName"></p>
-                        </div>
-                        <div class="text-center">
-                            <div class="border-b-2 border-gray-400 w-64 mx-auto mb-2"></div>
-                            <p class="font-semibold">Firma Administrador</p>
-                            <p class="text-sm text-gray-500">_________________________</p>
+                    <div class="flex justify-between items-center py-1">
+                        <span class="text-gray-700 font-medium text-xs">Efectivo Bs:</span>
+                        <div class="text-right">
+                            <span class="font-bold text-blue-700 text-sm">$0.00</span>
+                            <p class="text-[10px] text-gray-600">(Bs. 0.00)</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
+
+            <!-- TOTALES (Derecha) -->
+            <div class="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-500 rounded-lg p-3 info-box">
+                <h3 class="text-sm font-bold text-green-800 mb-2 border-b border-green-300 pb-1">
+                    TOTALES
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center py-1">
+                        <span class="text-gray-700 font-medium text-xs">Total en $:</span>
+                        <span class="font-bold text-green-700 text-base">$148.15</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1 border-b border-green-300">
+                        <span class="text-gray-700 font-medium text-xs">Total en Bs:</span>
+                        <span class="font-bold text-green-700 text-base">Bs. 109,176.18</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 bg-green-100 rounded px-2">
+                        <span class="font-bold text-gray-800 text-sm">GRAN TOTAL:</span>
+                        <span class="font-bold text-green-800 text-lg">$297.33</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ✅ PORCENTAJES DE MÉTODOS DE PAGO (ANTES DEL DETALLE) -->
+        <div class="mb-4 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300 rounded-lg p-3 info-box">
+            <h3 class="text-sm font-bold text-purple-800 mb-3 text-center">
+                DISTRIBUCIÓN POR MÉTODO DE PAGO
+            </h3>
+            <div class="grid grid-cols-4 gap-3">
+                <div class="bg-white rounded-lg p-2 border-2 border-purple-400 text-center">
+                    <p class="text-[10px] text-gray-600 mb-1 font-semibold">PAGO MÓVIL</p>
+                    <p class="text-xl font-bold text-purple-600">60.4%</p>
+                    <p class="text-[10px] text-gray-500 mt-1">$89.45</p>
+                </div>
+                <div class="bg-white rounded-lg p-2 border-2 border-orange-400 text-center">
+                    <p class="text-[10px] text-gray-600 mb-1 font-semibold">PUNTO</p>
+                    <p class="text-xl font-bold text-orange-600">23.1%</p>
+                    <p class="text-[10px] text-gray-500 mt-1">$34.20</p>
+                </div>
+                <div class="bg-white rounded-lg p-2 border-2 border-green-400 text-center">
+                    <p class="text-[10px] text-gray-600 mb-1 font-semibold">EFECTIVO $</p>
+                    <p class="text-xl font-bold text-green-600">16.5%</p>
+                    <p class="text-[10px] text-gray-500 mt-1">$24.50</p>
+                </div>
+                <div class="bg-white rounded-lg p-2 border-2 border-gray-400 text-center">
+                    <p class="text-[10px] text-gray-600 mb-1 font-semibold">EFECTIVO Bs</p>
+                    <p class="text-xl font-bold text-gray-600">0%</p>
+                    <p class="text-[10px] text-gray-500 mt-1">$0.00</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ✅ TARJETAS DE TOTALES AL FINAL -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="bg-gradient-to-br from-blue-100 to-blue-200 border-2 border-blue-400 rounded-lg p-4 text-center info-box">
+                <p class="text-xs text-gray-700 mb-1 font-semibold">TOTAL VENTAS DÓLARES</p>
+                <p class="text-3xl font-bold text-blue-700 mb-1">$148.15</p>
+                <p class="text-[10px] text-gray-600">158 unidades vendidas</p>
+            </div>
+            <div class="bg-gradient-to-br from-green-100 to-green-200 border-2 border-green-400 rounded-lg p-4 text-center info-box">
+                <p class="text-xs text-gray-700 mb-1 font-semibold">TOTAL VENTAS BOLÍVARES</p>
+                <p class="text-3xl font-bold text-green-700 mb-1">Bs. 109,176.18</p>
+                <p class="text-[10px] text-gray-600">Tasa: Bs. 736.93/$</p>
+            </div>
+        </div>
+
+        <!-- Firmas -->
+        <div class="grid grid-cols-3 gap-4 mt-6 pt-4 border-t-2 border-gray-300">
+            <div class="text-center">
+                <div class="border-t border-gray-400 pt-2 mt-8">
+                    <p class="font-bold text-xs">Vendedor</p>
+                    <p class="text-[10px] text-gray-600 mt-1">Ana Martínez</p>
+                </div>
+            </div>
+            <div class="text-center">
+                <div class="border-t border-gray-400 pt-2 mt-8">
+                    <p class="font-bold text-xs">Supervisor</p>
+                    <p class="text-[10px] text-gray-600 mt-1">María González</p>
+                </div>
+            </div>
+            <div class="text-center">
+                <div class="border-t border-gray-400 pt-2 mt-8">
+                    <p class="font-bold text-xs">Gerente</p>
+                    <p class="text-[10px] text-gray-600 mt-1">Juan Rodríguez</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center text-[10px] text-gray-500 mt-4 pt-2 border-t">
+            Reporte generado el 17/07/2024 a las 18:30 | Tasa BCV: Bs. 736.93
+        </div>
     </div>
 
-    <script>
-        const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    <!-- Botón de Imprimir (no se imprime) -->
+    <div class="no-print max-w-6xl mx-auto mt-4 text-center">
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-200">
+            <i class="fas fa-print mr-2"></i>Imprimir Reporte
+        </button>
+    </div>
 
-        async function logout() {
-            await supabase.auth.signOut();
-            localStorage.clear();
-            window.location.href = 'login.html';
-        }
-
-        function notify(message, type = 'success') {
-            if (typeof alertify !== 'undefined') {
-                if (type === 'success') alertify.success(message);
-                else if (type === 'error') alertify.error(message);
-                else alertify.message(message);
-            } else {
-                alert(message);
-            }
-        }
-
-        function resumenApp() {
-            return {
-                mobileMenuOpen: false,
-                loading: true,
-                selectedDate: new Date().toISOString().split('T')[0],
-                selectedBranch: '',
-                userName: '',
-                userRole: '',
-                userBranch: '',
-                userInitials: '??',
-
-                summary: {
-                    pending: 0,
-                    topProduct: { name: '', units: 0, percentage: 0 }
-                },
-
-                pivot: {
-                    units: {
-                        efectivo: { 5: 0, 13: 0, 20: 0, total: 0 },
-                        pago_movil: { 5: 0, 13: 0, 20: 0, total: 0 },
-                        punto: { 5: 0, 13: 0, 20: 0, total: 0 },
-                        total: { 5: 0, 13: 0, 20: 0 },
-                        grandTotal: 0
-                    },
-                    amounts: {
-                        efectivo: { 5: 0, 13: 0, 20: 0, total: 0 },
-                        pago_movil: { 5: 0, 13: 0, 20: 0, total: 0 },
-                        punto: { 5: 0, 13: 0, 20: 0, total: 0 },
-                        total: { 5: 0, 13: 0, 20: 0 },
-                        grandTotal: 0
-                    }
-                },
-
-                comparison: {
-                    yesterdayRevenue: 0,
-                    yesterdaySales: 0,
-                    growth: 0
-                },
-
-                async initResumen() {
-                    if (typeof alertify !== 'undefined') {
-                        alertify.set('notifier', { position: 'top-right' });
-                    }
-
-                    const { data: { session } } = await supabase.auth.getSession();
-                    if (!session) {
-                        window.location.href = 'login.html';
-                        return;
-                    }
-
-                    try {
-                        const { data: profile } = await supabase
-                            .from('profiles')
-                            .select('full_name, role, branch')
-                            .eq('id', session.user.id)
-                            .single();
-
-                        if (profile) {
-                            this.userName = profile.full_name;
-                            this.userRole = profile.role;
-                            this.userBranch = profile.branch;
-                            this.userInitials = this.getInitials(profile.full_name);
-                            this.selectedBranch = profile.branch;
-                        }
-
-                        await this.loadDailySummary();
-
-                    } catch (err) {
-                        console.error('Error inicializando:', err);
-                    } finally {
-                        this.loading = false;
-                    }
-                },
-
-                async loadDailySummary() {
-                    this.loading = true;
-                    try {
-                        const startOfDay = this.selectedDate + 'T00:00:00';
-                        const endOfDay = this.selectedDate + 'T23:59:59';
-
-                        const { data: sales, error } = await supabase
-                            .from('sales')
-                            .select(`
-                                id, total, payment_method, status, created_at, branch,
-                                sale_items!inner(quantity, unit_price, product_id)
-                            `)
-                            .gte('created_at', startOfDay)
-                            .lte('created_at', endOfDay)
-                            .eq('status', 'completed');
-
-                        if (error) throw error;
-
-                        let filteredSales = sales;
-                        if (this.selectedBranch) {
-                            filteredSales = sales.filter(s => s.branch === this.selectedBranch);
-                        }
-
-                        // Resetear pivot
-                        this.pivot = {
-                            units: {
-                                efectivo: { 5: 0, 13: 0, 20: 0, total: 0 },
-                                pago_movil: { 5: 0, 13: 0, 20: 0, total: 0 },
-                                punto: { 5: 0, 13: 0, 20: 0, total: 0 },
-                                total: { 5: 0, 13: 0, 20: 0 },
-                                grandTotal: 0
-                            },
-                            amounts: {
-                                efectivo: { 5: 0, 13: 0, 20: 0, total: 0 },
-                                pago_movil: { 5: 0, 13: 0, 20: 0, total: 0 },
-                                punto: { 5: 0, 13: 0, 20: 0, total: 0 },
-                                total: { 5: 0, 13: 0, 20: 0 },
-                                grandTotal: 0
-                            }
-                        };
-
-                        const productStats = { 20: { name: 'Botellón 20L', units: 0 }, 13: { name: 'Botellón 13L', units: 0 }, 5: { name: 'Botella 5L', units: 0 } };
-
-                        for (const sale of filteredSales) {
-                            const method = sale.payment_method;
-
-                            // Mapear método de pago a categoría de la tabla
-                            let methodKey = method;
-                            if (method === 'efectivo_bs' || method === 'efectivo_divisas') {
-                                methodKey = 'efectivo';
-                            } else if (method === 'punto_venta') {
-                                methodKey = 'punto';
-                            } else if (method === 'pago_movil' || method === 'transferencia') {
-                                methodKey = 'pago_movil';
-                            }
-
-                            for (const item of sale.sale_items) {
-                                const { data: product } = await supabase
-                                    .from('products')
-                                    .select('size_liters')
-                                    .eq('id', item.product_id)
-                                    .single();
-
-                                if (!product) continue;
-
-                                const size = product.size_liters;
-                                if (![5, 13, 20].includes(size)) continue;
-
-                                // Actualizar tabla dinámica de unidades
-                                if (this.pivot.units[methodKey][size] !== undefined) {
-                                    this.pivot.units[methodKey][size] += item.quantity;
-                                    this.pivot.units[methodKey].total += item.quantity;
-                                }
-                                this.pivot.units.total[size] = (this.pivot.units.total[size] || 0) + item.quantity;
-                                this.pivot.units.grandTotal += item.quantity;
-
-                                // Actualizar tabla dinámica de montos
-                                const amount = item.quantity * item.unit_price;
-                                if (this.pivot.amounts[methodKey][size] !== undefined) {
-                                    this.pivot.amounts[methodKey][size] += amount;
-                                    this.pivot.amounts[methodKey].total += amount;
-                                }
-                                this.pivot.amounts.total[size] = (this.pivot.amounts.total[size] || 0) + amount;
-                                this.pivot.amounts.grandTotal += amount;
-
-                                // Estadísticas de producto
-                                if (productStats[size]) {
-                                    productStats[size].units += item.quantity;
-                                }
-                            }
-                        }
-
-                        // Producto más vendido
-                        const sortedProducts = Object.values(productStats).sort((a, b) => b.units - a.units);
-                        if (sortedProducts.length > 0 && sortedProducts[0].units > 0) {
-                            this.summary.topProduct = {
-                                name: sortedProducts[0].name,
-                                units: sortedProducts[0].units,
-                                percentage: this.pivot.units.grandTotal > 0 ? (sortedProducts[0].units / this.pivot.units.grandTotal) * 100 : 0
-                            };
-                        }
-
-                        // Cuentas por cobrar
-                        const { data: credits } = await supabase
-                            .from('credit_accounts')
-                            .select('remaining_amount')
-                            .gte('created_at', startOfDay)
-                            .lte('created_at', endOfDay)
-                            .eq('status', 'pending');
-
-                        if (credits) {
-                            this.summary.pending = credits.reduce((sum, c) => sum + c.remaining_amount, 0);
-                        }
-
-                        await this.loadComparison();
-
-                    } catch (err) {
-                        console.error('Error cargando resumen:', err);
-                        notify('Error al cargar resumen diario', 'error');
-                    } finally {
-                        this.loading = false;
-                    }
-                },
-
-                async loadComparison() {
-                    try {
-                        const yesterday = new Date(this.selectedDate);
-                        yesterday.setDate(yesterday.getDate() - 1);
-                        const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-                        const { data: sales } = await supabase
-                            .from('sales')
-                            .select('total, branch')
-                            .gte('created_at', yesterdayStr + 'T00:00:00')
-                            .lte('created_at', yesterdayStr + 'T23:59:59')
-                            .eq('status', 'completed');
-
-                        let filteredSales = sales || [];
-                        if (this.selectedBranch) {
-                            filteredSales = filteredSales.filter(s => s.branch === this.selectedBranch);
-                        }
-
-                        this.comparison.yesterdayRevenue = filteredSales.reduce((sum, s) => sum + s.total, 0);
-                        this.comparison.yesterdaySales = filteredSales.length;
-
-                        if (this.comparison.yesterdayRevenue > 0) {
-                            this.comparison.growth = ((this.pivot.amounts.grandTotal - this.comparison.yesterdayRevenue) / this.comparison.yesterdayRevenue) * 100;
-                        } else {
-                            this.comparison.growth = this.pivot.amounts.grandTotal > 0 ? 100 : 0;
-                        }
-                    } catch (err) {
-                        console.error('Error cargando comparativo:', err);
-                    }
-                },
-
-                async generatePDF() {
-                    try {
-                        const { jsPDF } = window.jspdf;
-                        const doc = new jsPDF({
-                            orientation: 'portrait',
-                            unit: 'mm',
-                            format: 'letter'
-                        });
-
-                        const pageWidth = doc.internal.pageSize.getWidth();
-                        const margin = 10;
-                        let yPos = 10;
-
-                        // Header
-                        doc.setFontSize(16);
-                        doc.setFont(undefined, 'bold');
-                        doc.text('AQUASERVICE', pageWidth / 2, yPos, { align: 'center' });
-
-                        doc.setFontSize(9);
-                        doc.setFont(undefined, 'normal');
-                        doc.text('Sistema de Gestión de Agua', pageWidth / 2, yPos + 4, { align: 'center' });
-
-                        doc.setFontSize(12);
-                        doc.setFont(undefined, 'bold');
-                        doc.text('RESUMEN DE VENTA DIARIO', pageWidth / 2, yPos + 9, { align: 'center' });
-
-                        doc.setFontSize(8);
-                        doc.setFont(undefined, 'normal');
-                        doc.text(`Fecha: ${this.formatDate(this.selectedDate)}`, pageWidth / 2, yPos + 14, { align: 'center' });
-                        doc.text(`Sucursal: ${this.selectedBranch || 'Todas'}`, pageWidth / 2, yPos + 18, { align: 'center' });
-
-                        yPos = 25;
-
-                        // Tabla de Unidades
-                        doc.setFontSize(10);
-                        doc.setFont(undefined, 'bold');
-                        doc.text('VENTAS POR PRODUCTO Y MÉTODO DE PAGO (UNIDADES)', margin, yPos);
-                        yPos += 3;
-
-                        const unitsData = [
-                            ['Efectivo', this.pivot.units.efectivo[5], this.pivot.units.efectivo[13], this.pivot.units.efectivo[20], this.pivot.units.efectivo.total],
-                            ['Pago Móvil', this.pivot.units.pago_movil[5], this.pivot.units.pago_movil[13], this.pivot.units.pago_movil[20], this.pivot.units.pago_movil.total],
-                            ['Punto', this.pivot.units.punto[5], this.pivot.units.punto[13], this.pivot.units.punto[20], this.pivot.units.punto.total],
-                            ['TOTAL', this.pivot.units.total[5], this.pivot.units.total[13], this.pivot.units.total[20], this.pivot.units.grandTotal]
-                        ];
-
-                        doc.autoTable({
-                            startY: yPos,
-                            head: [['Tipo de Pago', '5 LITROS', '13 LITROS', '20 LITROS', 'TOTAL']],
-                            body: unitsData,
-                            theme: 'striped',
-                            tableWidth: pageWidth - (margin * 2),
-                            headStyles: { fillColor: [59, 130, 246], fontStyle: 'bold', fontSize: 8 },
-                            columnStyles: {
-                                0: { fontStyle: 'bold', cellWidth: 40 },
-                                1: { halign: 'center', cellWidth: 30 },
-                                2: { halign: 'center', cellWidth: 30 },
-                                3: { halign: 'center', cellWidth: 30 },
-                                4: { halign: 'center', fontStyle: 'bold', cellWidth: 30 }
-                            },
-                            margin: { left: margin, right: margin },
-                            cellPadding: 2,
-                            didParseCell: function (data) {
-                                if (data.row.index === 3) {
-                                    data.cell.styles.fillColor = [200, 200, 200];
-                                    data.cell.styles.fontStyle = 'bold';
-                                }
-                            }
-                        });
-
-                        yPos = doc.lastAutoTable.finalY + 5;
-
-                        // Tabla de Montos
-                        doc.setFontSize(10);
-                        doc.setFont(undefined, 'bold');
-                        doc.text('VENTAS POR PRODUCTO Y MÉTODO DE PAGO (MONTOS EN USD)', margin, yPos);
-                        yPos += 3;
-
-                        const amountsData = [
-                            ['Efectivo', '$' + this.pivot.amounts.efectivo[5].toFixed(2), '$' + this.pivot.amounts.efectivo[13].toFixed(2), '$' + this.pivot.amounts.efectivo[20].toFixed(2), '$' + this.pivot.amounts.efectivo.total.toFixed(2)],
-                            ['Pago Móvil', '$' + this.pivot.amounts.pago_movil[5].toFixed(2), '$' + this.pivot.amounts.pago_movil[13].toFixed(2), '$' + this.pivot.amounts.pago_movil[20].toFixed(2), '$' + this.pivot.amounts.pago_movil.total.toFixed(2)],
-                            ['Punto', '$' + this.pivot.amounts.punto[5].toFixed(2), '$' + this.pivot.amounts.punto[13].toFixed(2), '$' + this.pivot.amounts.punto[20].toFixed(2), '$' + this.pivot.amounts.punto.total.toFixed(2)],
-                            ['TOTAL', '$' + this.pivot.amounts.total[5].toFixed(2), '$' + this.pivot.amounts.total[13].toFixed(2), '$' + this.pivot.amounts.total[20].toFixed(2), '$' + this.pivot.amounts.grandTotal.toFixed(2)]
-                        ];
-
-                        doc.autoTable({
-                            startY: yPos,
-                            head: [['Tipo de Pago', '5 LITROS ($0.50)', '13 LITROS ($1.00)', '20 LITROS ($1.50)', 'TOTAL']],
-                            body: amountsData,
-                            theme: 'striped',
-                            tableWidth: pageWidth - (margin * 2),
-                            headStyles: { fillColor: [34, 139, 34], fontStyle: 'bold', fontSize: 8 },
-                            columnStyles: {
-                                0: { fontStyle: 'bold', cellWidth: 40 },
-                                1: { halign: 'center', cellWidth: 30 },
-                                2: { halign: 'center', cellWidth: 30 },
-                                3: { halign: 'center', cellWidth: 30 },
-                                4: { halign: 'center', fontStyle: 'bold', cellWidth: 30 }
-                            },
-                            margin: { left: margin, right: margin },
-                            cellPadding: 2,
-                            didParseCell: function (data) {
-                                if (data.row.index === 3) {
-                                    data.cell.styles.fillColor = [200, 200, 200];
-                                    data.cell.styles.fontStyle = 'bold';
-                                }
-                            }
-                        });
-
-                        yPos = doc.lastAutoTable.finalY + 5;
-
-                        // Resumen adicional (3 columnas)
-                        doc.setFontSize(9);
-                        doc.setFont(undefined, 'bold');
-                        doc.text('RESUMEN ADICIONAL', margin, yPos);
-                        yPos += 4;
-
-                        const additionalData = [
-                            ['CUENTAS POR COBRAR', '', ''],
-                            ['Pendiente:', '$' + this.summary.pending.toFixed(2), ''],
-                            ['Cobrado:', '$' + (this.pivot.amounts.grandTotal - this.summary.pending).toFixed(2), ''],
-                            ['', '', ''],
-                            ['COMPARATIVO VS AYER', '', ''],
-                            ['Ventas Ayer:', '$' + this.comparison.yesterdayRevenue.toFixed(2), ''],
-                            ['Ventas Hoy:', '$' + this.pivot.amounts.grandTotal.toFixed(2), ''],
-                            ['Crecimiento:', (this.comparison.growth >= 0 ? '+' : '') + this.comparison.growth.toFixed(1) + '%', ''],
-                            ['', '', ''],
-                            ['PRODUCTO ESTRELLA', '', ''],
-                            ['Producto:', this.summary.topProduct.name, ''],
-                            ['Unidades:', this.summary.topProduct.units.toString(), ''],
-                            ['% del total:', this.summary.topProduct.percentage.toFixed(1) + '%', '']
-                        ];
-
-                        doc.autoTable({
-                            startY: yPos,
-                            body: additionalData,
-                            theme: 'plain',
-                            tableWidth: pageWidth - (margin * 2),
-                            columnStyles: {
-                                0: { cellWidth: 60, fontStyle: 'bold', fontSize: 7 },
-                                1: { cellWidth: 50, fontSize: 7 },
-                                2: { cellWidth: 50, fontSize: 7 }
-                            },
-                            margin: { left: margin, right: margin },
-                            cellPadding: 1,
-                            didParseCell: function (data) {
-                                if (data.row.index === 0 || data.row.index === 4 || data.row.index === 9) {
-                                    data.cell.styles.fillColor = [240, 240, 240];
-                                    data.cell.styles.fontStyle = 'bold';
-                                }
-                            }
-                        });
-
-                        yPos = doc.lastAutoTable.finalY + 10;
-
-                        // Firmas
-                        doc.setFontSize(8);
-                        doc.setFont(undefined, 'normal');
-                        doc.line(margin, yPos, pageWidth / 2 - 5, yPos);
-                        doc.text('Firma Vendedor', pageWidth / 4, yPos + 4, { align: 'center' });
-                        doc.text(this.userName, pageWidth / 4, yPos + 8, { align: 'center' });
-
-                        doc.line(pageWidth / 2 + 5, yPos, pageWidth - margin, yPos);
-                        doc.text('Firma Administrador', (pageWidth * 3) / 4, yPos + 4, { align: 'center' });
-
-                        // Footer
-                        doc.setFontSize(6);
-                        doc.text(`Generado: ${new Date().toLocaleString('es-VE')}`, pageWidth / 2, 280, { align: 'center' });
-
-                        doc.save(`resumen_diario_${this.selectedDate.replace(/-/g, '')}.pdf`);
-                        notify('PDF generado exitosamente');
-
-                    } catch (err) {
-                        console.error('Error generando PDF:', err);
-                        notify('Error al generar PDF', 'error');
-                    }
-                },
-
-                formatDate(dateString) {
-                    if (!dateString) return 'N/A';
-                    const date = new Date(dateString);
-                    return date.toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' });
-                },
-
-                getInitials(name) {
-                    if (!name) return '??';
-                    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-                }
-            }
-        }
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 </body>
-
 </html>
