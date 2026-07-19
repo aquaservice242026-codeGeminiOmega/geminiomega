@@ -14,7 +14,8 @@
         .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
         @media print {
             .no-print { display: none !important; }
-            .print-container { display: block !important; }
+            .print-container { display: block !important; box-shadow: none; }
+            body { background: white; }
         }
     </style>
 </head>
@@ -42,6 +43,15 @@
                 </a>
             </nav>
         </div>
+        <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold" x-text="userName ? userName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '??'"></div>
+                <div>
+                    <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
+                    <p class="text-xs text-blue-200 capitalize" x-text="userBranch || 'Cargando...'"></p>
+                </div>
+            </div>
+        </div>
     </aside>
 
     <!-- Main Content -->
@@ -50,20 +60,28 @@
         <div class="bg-white rounded-lg shadow-sm p-4 mb-6 no-print">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <h2 class="text-2xl font-bold text-gray-800">Reporte Diario de Ventas</h2>
-                <div class="flex flex-wrap items-center gap-3">
+                <div class="flex flex-wrap items-end gap-3">
                     <div>
                         <label class="block text-xs text-gray-600 mb-1">Fecha Inicio</label>
-                        <input type="date" x-model="filters.startDate" class="px-3 py-2 border rounded-lg text-sm">
+                        <input type="date" x-model="filters.startDate" class="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
                         <label class="block text-xs text-gray-600 mb-1">Fecha Fin</label>
-                        <input type="date" x-model="filters.endDate" class="px-3 py-2 border rounded-lg text-sm">
+                        <input type="date" x-model="filters.endDate" class="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
                     </div>
-                    <button @click="loadReportData()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+                    <!-- Selector de Sucursal Dinámico -->
+                    <div>
+                        <label class="block text-xs text-gray-600 mb-1">Sucursal</label>
+                        <select x-model="userBranch" @change="loadReportData()" class="px-3 py-2 border rounded-lg text-sm capitalize focus:ring-2 focus:ring-blue-500">
+                            <option value="geminis">Geminis</option>
+                            <option value="omega">Omega</option>
+                        </select>
+                    </div>
+                    <button @click="loadReportData()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm transition">
                         <i class="fas fa-search mr-2"></i>Buscar
                     </button>
-                    <button @click="exportToPDF()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm">
-                        <i class="fas fa-download mr-2"></i>PDF
+                    <button @click="exportToPDF()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm transition">
+                        <i class="fas fa-file-pdf mr-2"></i>PDF
                     </button>
                 </div>
             </div>
@@ -72,7 +90,7 @@
         <!-- Loading -->
         <div x-show="loading" class="text-center py-12">
             <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500"></i>
-            <p class="mt-4 text-gray-600">Cargando datos...</p>
+            <p class="mt-4 text-gray-600">Cargando datos del reporte...</p>
         </div>
 
         <!-- Report Content -->
@@ -82,8 +100,9 @@
                 <h1 class="text-2xl font-bold text-gray-800">SERVICIOS AGUA POTABLE</h1>
                 <p class="text-lg font-semibold text-blue-600">CIERRE DE CAJA POR TURNOS</p>
                 <p class="text-sm text-gray-600 mt-2">
-                    Fecha: <span x-text="formatDate(filters.startDate)"></span> | 
-                    Sucursal: <span class="capitalize" x-text="userBranch"></span> | 
+                    <i class="far fa-clock mr-1"></i>Generado: <span x-text="currentDateTime" class="font-semibold"></span> (Caracas, VE)<br>
+                    Período: <span x-text="formatDate(filters.startDate)"></span> al <span x-text="formatDate(filters.endDate)"></span> | 
+                    Sucursal: <span class="capitalize font-bold text-blue-700" x-text="userBranch"></span> | 
                     Tasa: Bs. <span x-text="exchangeRate.toFixed(2)"></span>
                 </p>
             </div>
@@ -94,11 +113,11 @@
                     <i class="fas fa-truck mr-2"></i>DELIVERY REALIZADOS
                 </h2>
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-white rounded-lg p-3 text-center">
+                    <div class="bg-white rounded-lg p-3 text-center border border-indigo-100">
                         <p class="text-sm text-gray-600">Total Deliverys:</p>
                         <p class="text-3xl font-bold text-indigo-600" x-text="stats.totalDeliverys"></p>
                     </div>
-                    <div class="bg-white rounded-lg p-3 text-center">
+                    <div class="bg-white rounded-lg p-3 text-center border border-indigo-100">
                         <p class="text-sm text-gray-600">Monto Total:</p>
                         <p class="text-2xl font-bold text-indigo-600" x-text="'$' + stats.deliveryAmount.toFixed(2)"></p>
                     </div>
@@ -107,8 +126,9 @@
 
             <!-- Turno Mañana -->
             <div class="mb-6 border-2 border-gray-300 rounded-lg overflow-hidden">
-                <div class="bg-blue-50 px-4 py-2 font-bold text-blue-800">
-                    <i class="fas fa-sun mr-2 text-yellow-500"></i>TURNO MAÑANA (06:00 AM - 02:00 PM)
+                <div class="bg-blue-50 px-4 py-2 font-bold text-blue-800 flex justify-between">
+                    <span><i class="fas fa-sun mr-2 text-yellow-500"></i>TURNO MAÑANA (06:00 AM - 02:00 PM)</span>
+                    <span class="text-sm font-normal" x-text="'Total: $' + morningShift.totals.total.toFixed(2)"></span>
                 </div>
                 <table class="w-full text-sm">
                     <thead class="bg-gray-100">
@@ -123,7 +143,7 @@
                     </thead>
                     <tbody>
                         <template x-for="product in morningShift.products" :key="product.name">
-                            <tr class="border-b">
+                            <tr class="border-b hover:bg-gray-50">
                                 <td class="px-3 py-2" x-text="product.name"></td>
                                 <td class="px-3 py-2 text-center" x-text="product.quantity"></td>
                                 <td class="px-3 py-2 text-right" x-text="'$' + product.pagoMovil.toFixed(2)"></td>
@@ -135,7 +155,7 @@
                         <tr x-show="morningShift.products.length === 0">
                             <td colspan="6" class="px-3 py-4 text-center text-gray-500">No hay ventas en este turno</td>
                         </tr>
-                        <tr class="bg-gray-100 font-bold">
+                        <tr class="bg-gray-100 font-bold border-t-2 border-gray-300">
                             <td class="px-3 py-2" colspan="2">SUBTOTAL:</td>
                             <td class="px-3 py-2 text-right" x-text="'$' + morningShift.totals.pagoMovil.toFixed(2)"></td>
                             <td class="px-3 py-2 text-right" x-text="'$' + morningShift.totals.punto.toFixed(2)"></td>
@@ -149,7 +169,7 @@
             <!-- Payment Methods & Totals -->
             <div class="grid grid-cols-2 gap-4 mb-6">
                 <div class="border-2 border-blue-400 rounded-lg p-4">
-                    <h3 class="font-bold text-blue-800 mb-3">VENTAS POR MÉTODO DE PAGO</h3>
+                    <h3 class="font-bold text-blue-800 mb-3 border-b border-blue-200 pb-2">VENTAS POR MÉTODO DE PAGO</h3>
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between">
                             <span>Pago Móvil:</span>
@@ -171,20 +191,20 @@
                 </div>
 
                 <div class="border-2 border-green-500 rounded-lg p-4">
-                    <h3 class="font-bold text-green-800 mb-3">TOTALES</h3>
+                    <h3 class="font-bold text-green-800 mb-3 border-b border-green-200 pb-2">TOTALES GENERALES</h3>
                     <div class="space-y-3">
                         <div class="flex justify-between">
                             <span>Total en $:</span>
                             <span class="font-bold text-green-700 text-lg" x-text="'$' + stats.totalSales.toFixed(2)"></span>
                         </div>
                         <div class="flex justify-between">
-                            <span>Total en Bs:</span>
+                            <span>Equivalente en Bs:</span>
                             <span class="font-bold text-green-700" x-text="'Bs. ' + (stats.totalSales * exchangeRate).toFixed(2)"></span>
                         </div>
                         <div class="border-t-2 border-green-400 pt-2">
-                            <div class="flex justify-between">
-                                <span class="font-bold text-lg">GRAN TOTAL:</span>
-                                <span class="font-bold text-green-800 text-2xl" x-text="'$' + (stats.totalSales * 2).toFixed(2)"></span>
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-lg">GRAN TOTAL (USD):</span>
+                                <span class="font-bold text-green-800 text-2xl" x-text="'$' + stats.totalSales.toFixed(2)"></span>
                             </div>
                         </div>
                     </div>
@@ -196,19 +216,19 @@
                 <h3 class="font-bold text-purple-800 mb-3 text-center">DISTRIBUCIÓN POR MÉTODO DE PAGO</h3>
                 <div class="grid grid-cols-4 gap-3">
                     <div class="bg-purple-100 rounded-lg p-3 text-center">
-                        <p class="text-xs text-gray-600">PAGO MÓVIL</p>
+                        <p class="text-xs text-gray-600 font-semibold">PAGO MÓVIL</p>
                         <p class="text-2xl font-bold text-purple-600" x-text="stats.percentages.pagoMovil + '%'"></p>
                     </div>
                     <div class="bg-orange-100 rounded-lg p-3 text-center">
-                        <p class="text-xs text-gray-600">PUNTO</p>
+                        <p class="text-xs text-gray-600 font-semibold">PUNTO</p>
                         <p class="text-2xl font-bold text-orange-600" x-text="stats.percentages.puntoVenta + '%'"></p>
                     </div>
                     <div class="bg-green-100 rounded-lg p-3 text-center">
-                        <p class="text-xs text-gray-600">EFECTIVO $</p>
+                        <p class="text-xs text-gray-600 font-semibold">EFECTIVO $</p>
                         <p class="text-2xl font-bold text-green-600" x-text="stats.percentages.efectivoUsd + '%'"></p>
                     </div>
                     <div class="bg-gray-100 rounded-lg p-3 text-center">
-                        <p class="text-xs text-gray-600">EFECTIVO Bs</p>
+                        <p class="text-xs text-gray-600 font-semibold">EFECTIVO Bs</p>
                         <p class="text-2xl font-bold text-gray-600" x-text="stats.percentages.efectivoBs + '%'"></p>
                     </div>
                 </div>
@@ -217,13 +237,28 @@
             <!-- Final Totals -->
             <div class="grid grid-cols-2 gap-4">
                 <div class="bg-gradient-to-br from-blue-100 to-blue-200 border-2 border-blue-400 rounded-lg p-4 text-center">
-                    <p class="text-sm text-gray-700 mb-1">TOTAL VENTAS DÓLARES</p>
+                    <p class="text-sm text-gray-700 mb-1 font-semibold">TOTAL VENTAS DÓLARES</p>
                     <p class="text-3xl font-bold text-blue-700" x-text="'$' + stats.totalSales.toFixed(2)"></p>
-                    <p class="text-xs text-gray-600" x-text="stats.totalTransactions + ' transacciones'"></p>
+                    <p class="text-xs text-gray-600 mt-1" x-text="stats.totalTransactions + ' transacciones registradas'"></p>
                 </div>
                 <div class="bg-gradient-to-br from-green-100 to-green-200 border-2 border-green-400 rounded-lg p-4 text-center">
-                    <p class="text-sm text-gray-700 mb-1">TOTAL VENTAS BOLÍVARES</p>
+                    <p class="text-sm text-gray-700 mb-1 font-semibold">TOTAL VENTAS BOLÍVARES</p>
                     <p class="text-3xl font-bold text-green-700" x-text="'Bs. ' + (stats.totalSales * exchangeRate).toFixed(2)"></p>
+                    <p class="text-xs text-gray-600 mt-1" x-text="'Tasa de cambio: Bs. ' + exchangeRate.toFixed(2)"></p>
+                </div>
+            </div>
+            
+            <!-- Firmas -->
+            <div class="grid grid-cols-2 gap-8 mt-12 pt-6 border-t-2 border-gray-300">
+                <div class="text-center">
+                    <div class="border-b-2 border-gray-400 pb-2 mb-2"></div>
+                    <p class="text-sm font-semibold text-gray-700">Elaborado por</p>
+                    <p class="text-xs text-gray-500" x-text="userName"></p>
+                </div>
+                <div class="text-center">
+                    <div class="border-b-2 border-gray-400 pb-2 mb-2"></div>
+                    <p class="text-sm font-semibold text-gray-700">Revisado por</p>
+                    <p class="text-xs text-gray-500">Gerente / Supervisor</p>
                 </div>
             </div>
         </div>
@@ -238,7 +273,9 @@
             return {
                 loading: true,
                 userBranch: 'geminis',
+                userName: 'Usuario',
                 exchangeRate: 736.93,
+                currentDateTime: '',
                 filters: {
                     startDate: new Date().toISOString().split('T')[0],
                     endDate: new Date().toISOString().split('T')[0]
@@ -272,8 +309,34 @@
                 },
 
                 async initReporte() {
+                    this.updateCurrentDateTime();
+                    
+                    // ✅ 1. OBTENER SUCURSAL Y NOMBRE DEL USUARIO LOGUEADO
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session) {
+                        const { data: profile } = await supabase
+                            .from('profiles')
+                            .select('branch, full_name')
+                            .eq('id', session.user.id)
+                            .single();
+                        if (profile) {
+                            this.userBranch = profile.branch || 'geminis';
+                            this.userName = profile.full_name || 'Usuario';
+                        }
+                    }
+
                     await this.loadExchangeRate();
                     await this.loadReportData();
+                },
+
+                updateCurrentDateTime() {
+                    // ✅ 2. FECHA Y HORA ACTUAL DE CARACAS, VENEZUELA
+                    const now = new Date();
+                    this.currentDateTime = now.toLocaleString('es-VE', { 
+                        timeZone: 'America/Caracas',
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit', second: '2-digit'
+                    });
                 },
 
                 async loadExchangeRate() {
@@ -283,11 +346,11 @@
 
                 async loadReportData() {
                     this.loading = true;
+                    this.updateCurrentDateTime(); // Actualizar hora al buscar
                     try {
-                        // Reset stats
                         this.resetStats();
 
-                        // Get sales for date range
+                        // ✅ 3. FILTRO POR SUCURSAL DINÁMICA
                         let query = supabase
                             .from('sales')
                             .select('*')
@@ -300,7 +363,7 @@
 
                         await this.processSales(sales || []);
                     } catch (err) {
-                        console.error('Error:', err);
+                        console.error('Error cargando reporte:', err);
                     } finally {
                         this.loading = false;
                     }
@@ -329,57 +392,39 @@
                         this.stats.totalSales += sale.total || 0;
                         this.stats.totalTransactions++;
 
-                        // Count deliveries
                         if (sale.delivery_type === 'delivery') {
                             this.stats.totalDeliverys++;
                             this.stats.deliveryAmount += sale.total || 0;
                         }
 
-                        // Get payments
                         const { data: payments } = await supabase
                             .from('sale_payments')
                             .select('*')
                             .eq('sale_id', sale.id);
 
-                        // Process payments
                         if (payments) {
                             for (const payment of payments) {
                                 const amount = payment.amount_usd || 0;
                                 
                                 switch(payment.payment_method) {
-                                    case 'pago_movil':
-                                        this.stats.paymentMethods.pagoMovil += amount;
-                                        break;
-                                    case 'punto_venta':
-                                        this.stats.paymentMethods.puntoVenta += amount;
-                                        break;
-                                    case 'efectivo_divisas':
-                                        this.stats.paymentMethods.efectivoUsd += amount;
-                                        break;
-                                    case 'efectivo_bs':
-                                        this.stats.paymentMethods.efectivoBs += amount;
-                                        break;
+                                    case 'pago_movil': this.stats.paymentMethods.pagoMovil += amount; break;
+                                    case 'punto_venta': this.stats.paymentMethods.puntoVenta += amount; break;
+                                    case 'efectivo_divisas': this.stats.paymentMethods.efectivoUsd += amount; break;
+                                    case 'efectivo_bs': this.stats.paymentMethods.efectivoBs += amount; break;
                                 }
 
-                                // Morning shift (6 AM - 2 PM)
-                                const saleHour = new Date(sale.created_at).getHours();
+                                const saleDate = new Date(sale.created_at);
+                                const saleHour = saleDate.getHours();
                                 if (saleHour >= 6 && saleHour < 14) {
                                     switch(payment.payment_method) {
-                                        case 'pago_movil':
-                                            this.morningShift.totals.pagoMovil += amount;
-                                            break;
-                                        case 'punto_venta':
-                                            this.morningShift.totals.punto += amount;
-                                            break;
-                                        case 'efectivo_divisas':
-                                            this.morningShift.totals.efectivoUsd += amount;
-                                            break;
+                                        case 'pago_movil': this.morningShift.totals.pagoMovil += amount; break;
+                                        case 'punto_venta': this.morningShift.totals.punto += amount; break;
+                                        case 'efectivo_divisas': this.morningShift.totals.efectivoUsd += amount; break;
                                     }
                                 }
                             }
                         }
 
-                        // Get sale items
                         const { data: items } = await supabase
                             .from('sale_items')
                             .select('product_id, quantity, total')
@@ -402,8 +447,8 @@
                                     productMap[name].quantity += item.quantity || 0;
                                     productMap[name].total += item.total || 0;
 
-                                    // Morning shift products
-                                    const saleHour = new Date(sale.created_at).getHours();
+                                    const saleDate = new Date(sale.created_at);
+                                    const saleHour = saleDate.getHours();
                                     if (saleHour >= 6 && saleHour < 14) {
                                         if (!morningProducts[name]) {
                                             morningProducts[name] = { name, quantity: 0, pagoMovil: 0, punto: 0, efectivoUsd: 0, total: 0 };
@@ -416,7 +461,6 @@
                         }
                     }
 
-                    // Calculate totals
                     this.morningShift.totals.total = 
                         this.morningShift.totals.pagoMovil + 
                         this.morningShift.totals.punto + 
@@ -424,7 +468,6 @@
 
                     this.morningShift.products = Object.values(morningProducts);
 
-                    // Calculate percentages
                     if (this.stats.totalSales > 0) {
                         const total = this.stats.totalSales;
                         this.stats.percentages.pagoMovil = Math.round((this.stats.paymentMethods.pagoMovil / total) * 100);
@@ -433,7 +476,6 @@
                         this.stats.percentages.efectivoBs = Math.round((this.stats.paymentMethods.efectivoBs / total) * 100);
                     }
 
-                    // Round all values
                     this.stats.totalSales = Math.round(this.stats.totalSales * 100) / 100;
                     Object.keys(this.stats.paymentMethods).forEach(key => {
                         this.stats.paymentMethods[key] = Math.round(this.stats.paymentMethods[key] * 100) / 100;
@@ -441,6 +483,7 @@
                 },
 
                 formatDate(dateStr) {
+                    if (!dateStr) return '';
                     const date = new Date(dateStr);
                     return date.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric' });
                 },
