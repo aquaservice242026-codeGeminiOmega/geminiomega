@@ -156,6 +156,10 @@
                     </select>
                 </div>
 
+                <button @click="openManageInventoryModal()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                    <i class="fas fa-plus"></i>
+                    <span class="hidden sm:inline">Gestionar Inventario</span>
+                </button>
                 <button @click="openRefillTankModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
                     <i class="fas fa-plus"></i>
                     <span class="hidden sm:inline">Recargar Tanque</span>
@@ -227,24 +231,6 @@
                             <h3 class="text-lg font-semibold text-gray-800" x-text="item.product_name"></h3>
                             <p class="text-4xl font-bold text-gray-900 mt-2" x-text="item.virtual_stock"></p>
                             <p class="text-sm text-gray-500 mt-1" x-text="item.product_type === 'cap' || item.product_type === 'empty_bottle' ? 'unidades disponibles' : 'botellones disponibles'"></p>
-                            <div class="mt-4 pt-4 border-t">
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Precio:</span>
-                                    <span class="font-semibold" x-text="'$' + parseFloat(item.price).toFixed(2)"></span>
-                                </div>
-                                <div class="flex justify-between text-sm mt-1">
-                                    <span class="text-gray-600">Valor total:</span>
-                                    <span class="font-semibold text-green-600" x-text="'$' + parseFloat(item.total_value).toFixed(2)"></span>
-                                </div>
-                                <div class="flex justify-between text-sm mt-1" x-show="item.water_assigned > 0">
-                                    <span class="text-gray-600">Agua asignada:</span>
-                                    <span class="font-semibold text-blue-600" x-text="item.water_assigned.toLocaleString() + 'L'"></span>
-                                </div>
-                                <div class="flex justify-between text-sm mt-1" x-show="item.product_type === 'cap' || item.product_type === 'empty_bottle'">
-                                    <span class="text-gray-600">Nota:</span>
-                                    <span class="font-semibold text-gray-600 text-xs" x-text="item.product_type === 'cap' ? 'Se descuentan en ventas 13L/20L' : 'No descuenta agua del tanque'"></span>
-                                </div>
-                            </div>
                         </div>
                     </template>
                 </div>
@@ -344,6 +330,71 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Modal Gestionar Inventario -->
+    <div x-show="showManageInventoryModal" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="closeManageInventoryModal()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-bounce-in" @click.stop>
+            <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white">
+                <h3 class="text-xl font-bold text-gray-800">
+                    <i class="fas fa-boxes text-purple-600 mr-2"></i>Gestionar Inventario
+                </h3>
+                <button @click="closeManageInventoryModal()" class="text-gray-400 hover:text-gray-600 touch-btn p-2">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Producto *</label>
+                    <select x-model="manageForm.productId" @change="loadProductData()" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-purple-500">
+                        <option value="">Seleccionar producto...</option>
+                        <template x-for="item in virtualInventory" :key="item.product_id">
+                            <option :value="item.product_id" x-text="item.product_name + ' (Stock: ' + item.virtual_stock + ')'"></option>
+                        </template>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Cantidad a Agregar *</label>
+                    <input type="number" x-model.number="manageForm.quantity" step="1" min="1"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-purple-500"
+                        placeholder="Ej: 50">
+                    <p class="text-xs text-gray-500 mt-1">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Se sumará al stock actual
+                    </p>
+                </div>
+
+                <div x-show="selectedProduct" class="bg-purple-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-purple-900 mb-2">Información del Producto</h4>
+                    <div class="space-y-1 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Producto:</span>
+                            <span class="font-semibold" x-text="selectedProduct?.product_name"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Stock actual:</span>
+                            <span class="font-semibold" x-text="selectedProduct?.virtual_stock"></span>
+                        </div>
+                        <div class="flex justify-between pt-2 border-t border-purple-200">
+                            <span class="text-gray-800 font-semibold">Nuevo stock:</span>
+                            <span class="font-bold text-green-600" x-text="(selectedProduct?.virtual_stock || 0) + (manageForm.quantity || 0)"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3 sticky bottom-0">
+                <button @click="closeManageInventoryModal()" class="px-4 py-2 text-gray-600 touch-btn">Cancelar</button>
+                <button @click="updateInventory()" :disabled="processing"
+                    class="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 touch-btn flex items-center space-x-2">
+                    <i class="fas fa-circle-notch fa-spin" x-show="processing"></i>
+                    <i class="fas fa-save" x-show="!processing"></i>
+                    <span x-text="processing ? 'Procesando...' : 'Actualizar'"></span>
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Modal Recargar Tanque -->
@@ -555,10 +606,13 @@
                 selectedBranch: 'all',
                 availableBranches: [],
 
+                showManageInventoryModal: false,
                 showRefillTankModal: false,
                 showFillBottlesModal: false,
+                manageForm: { productId: '', quantity: 0 },
                 refillForm: { tankId: '', liters: 0, notes: '' },
                 fillForm: { sizeLiters: '', quantity: 0, tankId: '' },
+                selectedProduct: null,
 
                 async initInventario() {
                     const { data: { session } } = await supabase.auth.getSession();
@@ -660,7 +714,6 @@
                             return {
                                 product_id: item.product_id,
                                 product_name: item.products.name,
-                                // ✅ CORRECCIÓN: Mantener size_liters para empty_bottle (15 o 20), solo null para caps
                                 size_liters: isCap ? null : item.products.size_liters,
                                 product_type: item.products.product_type,
                                 price: price,
@@ -706,6 +759,62 @@
                 formatDate(dateString) { return DateUtils.formatDate(dateString); },
                 formatDateTime(dateString) { return DateUtils.formatDateTime(dateString); },
                 formatDateLong(dateString) { return DateUtils.formatDateLong(dateString); },
+
+                openManageInventoryModal() {
+                    this.manageForm = { productId: '', quantity: 0 };
+                    this.selectedProduct = null;
+                    this.showManageInventoryModal = true;
+                },
+                closeManageInventoryModal() { this.showManageInventoryModal = false; },
+                
+                loadProductData() {
+                    this.selectedProduct = this.virtualInventory.find(item => item.product_id === this.manageForm.productId) || null;
+                },
+
+                async updateInventory() {
+                    if (!this.manageForm.productId) { showToast('Seleccione un producto', 'warning'); return; }
+                    if (!this.manageForm.quantity || this.manageForm.quantity <= 0) { showToast('Ingrese una cantidad válida', 'warning'); return; }
+
+                    const product = this.selectedProduct;
+                    const newStock = (product?.virtual_stock || 0) + this.manageForm.quantity;
+
+                    const confirmed = await showConfirm('Confirmar Actualización', `
+                        <div class="text-left space-y-2">
+                            <p><strong>Producto:</strong> ${product?.product_name}</p>
+                            <p><strong>Stock actual:</strong> ${product?.virtual_stock || 0}</p>
+                            <p><strong>A agregar:</strong> ${this.manageForm.quantity}</p>
+                            <div class="bg-green-50 p-3 rounded-lg mt-2">
+                                <p class="font-bold text-green-600">Nuevo stock: ${newStock}</p>
+                            </div>
+                        </div>`, 'Confirmar', 'Cancelar');
+
+                    if (!confirmed) return;
+
+                    this.processing = true;
+                    try {
+                        const { data: { session } } = await supabase.auth.getSession();
+                        
+                        // Actualizar inventario
+                        const { error: updateError } = await supabase.from('inventory')
+                            .update({
+                                quantity: newStock,
+                                updated_at: new Date().toISOString()
+                            })
+                            .eq('product_id', this.manageForm.productId)
+                            .eq('branch', this.selectedBranch === 'all' ? this.userBranch : this.selectedBranch);
+                        
+                        if (updateError) throw updateError;
+
+                        showToast(`Inventario actualizado: ${newStock} unidades`, 'success');
+                        this.closeManageInventoryModal();
+                        await this.refreshInventory();
+                    } catch (err) {
+                        console.error('Error actualizando inventario:', err);
+                        showToast('Error al actualizar inventario: ' + err.message, 'error');
+                    } finally {
+                        this.processing = false;
+                    }
+                },
 
                 openRefillTankModal() {
                     this.refillForm = { tankId: '', liters: 0, notes: '' };
