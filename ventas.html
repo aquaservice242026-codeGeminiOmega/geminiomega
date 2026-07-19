@@ -71,18 +71,12 @@
         .cart-item-compact .touch-btn { width: 28px !important; height: 28px !important; min-height: 28px !important; min-width: 28px !important; }
         .cart-item-compact .font-bold.text-lg { font-size: 1rem !important; }
         .cart-item-compact .font-bold.text-cyan-600 { font-size: 0.875rem !important; }
-        
-        /* ✅ NUEVO: Convertir texto a mayúsculas en inputs y textareas */
-        input[type="text"],
-        input[type="email"],
-        input[type="tel"],
-        textarea,
-        select {
-            text-transform: uppercase !important;
-        }
+        input[type="text"], input[type="email"], input[type="tel"], textarea, select { text-transform: uppercase !important; }
     </style>
 </head>
+
 <body class="bg-gray-50" x-data="ventasApp()" x-init="initVentas()">
+
     <!-- Sidebar (Desktop) -->
     <aside class="hidden lg:block fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40">
         <div class="p-6">
@@ -99,6 +93,7 @@
                     <p class="font-semibold capitalize text-sm" x-text="userBranch || 'Cargando...'"></p>
                 </div>
             </div>
+
             <nav class="space-y-2">
                 <a href="index.html" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-home w-5"></i><span>Dashboard</span>
@@ -126,6 +121,7 @@
                 </a>
             </nav>
         </div>
+
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold" x-text="userInitials"></div>
@@ -222,10 +218,12 @@
                         <h2 class="text-sm font-semibold text-gray-700">Productos Disponibles</h2>
                         <span class="text-xs text-gray-500" x-text="filteredProducts.length + ' productos'"></span>
                     </div>
+
                     <div x-show="filteredProducts.length === 0" class="text-center py-8 text-gray-400">
                         <i class="fas fa-box-open text-4xl mb-2"></i>
                         <p class="text-sm">No hay productos disponibles</p>
                     </div>
+
                     <div class="grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-4">
                         <template x-for="product in filteredProducts" :key="product.id">
                             <button @click="addProduct(product)" class="product-card rounded-xl text-white p-3 lg:p-6 relative overflow-hidden" :class="{
@@ -291,6 +289,7 @@
                     Carrito
                     <span x-show="cartItemCount > 0" class="ml-2 bg-cyan-500 text-white rounded-full px-2 py-0.5 text-xs font-bold" x-text="cartItemCount"></span>
                 </h3>
+
                 <div class="space-y-2 mb-4">
                     <template x-for="(item, index) in cart" :key="index">
                         <div class="animate-bounce-in cart-item-compact rounded-xl">
@@ -322,10 +321,12 @@
                         </div>
                     </template>
                 </div>
+
                 <div x-show="cart.length === 0" class="text-center py-8 text-gray-400">
                     <i class="fas fa-shopping-cart text-4xl mb-2"></i>
                     <p class="text-sm">Carrito vacío</p>
                 </div>
+
                 <div class="border-t pt-4 space-y-2">
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-600">Subtotal:</span>
@@ -387,10 +388,12 @@
                             <option value="credito">Crédito</option>
                         </select>
                     </div>
+
                     <div x-show="['pago_movil', 'transferencia'].includes(paymentMethod)" class="mt-4 p-3 bg-yellow-50 rounded-lg">
                         <label class="text-xs font-medium text-gray-700 mb-1 block">Referencia</label>
                         <input type="text" x-model="paymentReference" @input="paymentReference = paymentReference.toUpperCase()" placeholder="Últimos 4 dígitos" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                     </div>
+
                     <div x-show="paymentMethod === 'efectivo_bs'" class="mt-4 p-3 bg-green-50 rounded-lg">
                         <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (Bs.)</label>
                         <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
@@ -400,6 +403,7 @@
                             <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs. <span x-text="(totalBs - amountReceivedBs).toFixed(2)"></span></p>
                         </div>
                     </div>
+
                     <div x-show="paymentMethod === 'efectivo_divisas'" class="mt-4 p-3 bg-green-50 rounded-lg">
                         <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (USD)</label>
                         <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
@@ -408,6 +412,7 @@
                             <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta: $<span x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
                         </div>
                     </div>
+
                     <div x-show="paymentMethod === 'credito'" class="mt-4 p-3 bg-red-50 rounded-lg">
                         <p class="text-xs text-red-600">
                             <i class="fas fa-exclamation-circle mr-1"></i>
@@ -483,20 +488,24 @@
                                 <option value="transferencia">Transferencia</option>
                                 <option value="punto_venta">Punto de Venta</option>
                             </select>
+
                             <div x-show="newPayment.method !== 'efectivo_bs'">
                                 <label class="text-[10px] font-medium text-gray-600">Monto (USD)</label>
                                 <input type="number" x-model.number="newPayment.amountUsd" step="0.01" min="0" :placeholder="'Sugerido: $' + remainingAmount.toFixed(2)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                                 <p class="text-[10px] text-gray-500 mt-1">Equivale: Bs. <span class="font-semibold" x-text="((newPayment.amountUsd || 0) * exchangeRate).toFixed(2)"></span></p>
                             </div>
+
                             <div x-show="newPayment.method === 'efectivo_bs'">
                                 <label class="text-[10px] font-medium text-gray-600">Monto (Bs.)</label>
                                 <input type="number" x-model.number="newPayment.amountBs" step="0.01" min="0" :placeholder="'Sugerido: Bs. ' + (remainingAmount * exchangeRate).toFixed(2)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                                 <p class="text-[10px] text-gray-500 mt-1">Equivale: $<span class="font-semibold" x-text="((newPayment.amountBs || 0) / exchangeRate).toFixed(2)"></span></p>
                             </div>
+
                             <div x-show="['pago_movil', 'transferencia', 'punto_venta'].includes(newPayment.method)">
                                 <label class="text-[10px] font-medium text-gray-600">Referencia</label>
                                 <input type="text" x-model="newPayment.reference" @input="newPayment.reference = newPayment.reference.toUpperCase()" placeholder="Últimos 4 dígitos" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                             </div>
+
                             <button @click="addMultiplePayment()" :disabled="!canAddPayment()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed touch-btn">
                                 <i class="fas fa-plus mr-1"></i>Agregar Pago
                             </button>
@@ -518,6 +527,7 @@
                         <span>Crédito</span>
                     </button>
                 </div>
+
                 <button @click="quickSale()" :disabled="cart.length === 0 || processing" class="w-full mt-2 bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2 text-sm">
                     <i class="fas fa-bolt"></i>
                     <span>Venta Rápida (Contado sin cliente)</span>
@@ -568,12 +578,14 @@
                 </button>
             </div>
         </div>
+
         <div class="p-4 space-y-2 max-h-[50vh] overflow-y-auto">
             <div x-show="cart.length === 0" class="text-center py-8 text-gray-400">
                 <i class="fas fa-shopping-cart text-4xl mb-2"></i>
                 <p class="text-sm">Carrito vacío</p>
                 <p class="text-xs mt-1">Agrega productos para comenzar</p>
             </div>
+
             <template x-for="(item, index) in cart" :key="index">
                 <div class="animate-bounce-in cart-item-compact rounded-xl">
                     <div class="flex items-center justify-between mb-1">
@@ -604,6 +616,7 @@
                 </div>
             </template>
         </div>
+
         <div class="border-t p-4 bg-gray-50">
             <div class="space-y-2 mb-3">
                 <div class="flex justify-between text-sm">
@@ -619,6 +632,7 @@
                     <span class="font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></span>
                 </div>
             </div>
+
             <div class="mb-3">
                 <p class="text-xs font-semibold text-gray-700 mb-2">Tipo de Entrega</p>
                 <div class="flex space-x-2">
@@ -640,6 +654,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="mb-3">
                 <div class="flex items-center justify-between mb-2">
                     <label class="text-xs font-semibold text-gray-700">Cliente</label>
@@ -654,6 +669,7 @@
                     </template>
                 </select>
             </div>
+
             <div class="mb-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-3 border border-purple-200">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-2">
@@ -669,6 +685,7 @@
                     </label>
                 </div>
             </div>
+
             <div x-show="!useMultiplePayments" class="mb-3">
                 <label class="text-xs font-semibold text-gray-700 mb-2 block">Método de Pago</label>
                 <select x-model="paymentMethod" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
@@ -679,10 +696,12 @@
                     <option value="punto_venta">Punto de Venta</option>
                     <option value="credito">Crédito</option>
                 </select>
+
                 <div x-show="['pago_movil', 'transferencia'].includes(paymentMethod)" class="mt-2 p-3 bg-yellow-50 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Referencia</label>
                     <input type="text" x-model="paymentReference" @input="paymentReference = paymentReference.toUpperCase()" placeholder="Últimos 4 dígitos" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                 </div>
+
                 <div x-show="paymentMethod === 'efectivo_bs'" class="mt-2 p-3 bg-green-50 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (Bs.)</label>
                     <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
@@ -692,6 +711,7 @@
                         <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs. <span x-text="(totalBs - amountReceivedBs).toFixed(2)"></span></p>
                     </div>
                 </div>
+
                 <div x-show="paymentMethod === 'efectivo_divisas'" class="mt-2 p-3 bg-green-50 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (USD)</label>
                     <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
@@ -700,6 +720,7 @@
                         <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta: $<span x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
                     </div>
                 </div>
+
                 <div x-show="paymentMethod === 'credito'" class="mt-2 p-3 bg-red-50 rounded-lg">
                     <p class="text-xs text-red-600">
                         <i class="fas fa-exclamation-circle mr-1"></i>
@@ -707,6 +728,7 @@
                     </p>
                 </div>
             </div>
+
             <div x-show="useMultiplePayments" class="mb-3 space-y-3">
                 <div class="bg-blue-50 rounded-xl p-3 border border-blue-200">
                     <div class="flex justify-between items-center mb-2">
@@ -728,6 +750,7 @@
                         <p class="text-[10px] text-center text-gray-600 mt-1" x-text="paymentProgress + '% completado'"></p>
                     </div>
                 </div>
+
                 <div x-show="multiplePayments.length > 0" class="space-y-2">
                     <template x-for="(payment, index) in multiplePayments" :key="payment.id">
                         <div class="bg-white border border-gray-200 rounded-lg p-3 flex items-center justify-between">
@@ -748,6 +771,7 @@
                         </div>
                     </template>
                 </div>
+
                 <div class="bg-gray-50 rounded-xl p-3 border border-gray-200">
                     <p class="text-xs font-semibold text-gray-700 mb-2">
                         <i class="fas fa-plus-circle mr-1"></i>Agregar Pago
@@ -760,20 +784,24 @@
                             <option value="transferencia">Transferencia</option>
                             <option value="punto_venta">Punto de Venta</option>
                         </select>
+
                         <div x-show="newPayment.method !== 'efectivo_bs'">
                             <label class="text-[10px] font-medium text-gray-600">Monto (USD)</label>
                             <input type="number" x-model.number="newPayment.amountUsd" step="0.01" min="0" :placeholder="'Sugerido: $' + remainingAmount.toFixed(2)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                             <p class="text-[10px] text-gray-500 mt-1">Equivale: Bs. <span class="font-semibold" x-text="((newPayment.amountUsd || 0) * exchangeRate).toFixed(2)"></span></p>
                         </div>
+
                         <div x-show="newPayment.method === 'efectivo_bs'">
                             <label class="text-[10px] font-medium text-gray-600">Monto (Bs.)</label>
                             <input type="number" x-model.number="newPayment.amountBs" step="0.01" min="0" :placeholder="'Sugerido: Bs. ' + (remainingAmount * exchangeRate).toFixed(2)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                             <p class="text-[10px] text-gray-500 mt-1">Equivale: $<span class="font-semibold" x-text="((newPayment.amountBs || 0) / exchangeRate).toFixed(2)"></span></p>
                         </div>
+
                         <div x-show="['pago_movil', 'transferencia', 'punto_venta'].includes(newPayment.method)">
                             <label class="text-[10px] font-medium text-gray-600">Referencia</label>
                             <input type="text" x-model="newPayment.reference" @input="newPayment.reference = newPayment.reference.toUpperCase()" placeholder="Últimos 4 dígitos" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                         </div>
+
                         <button @click="addMultiplePayment()" :disabled="!canAddPayment()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed touch-btn">
                             <i class="fas fa-plus mr-1"></i>Agregar Pago
                         </button>
@@ -783,6 +811,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="grid grid-cols-2 gap-2 mt-4">
                 <button @click="processSale()" :disabled="cart.length === 0 || processing || (paymentMethod === 'credito' && !useMultiplePayments) || (useMultiplePayments && remainingAmount > 0.01)" class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-xl font-semibold touch-btn disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2">
                     <i class="fas fa-circle-notch fa-spin" x-show="processing"></i>
@@ -794,6 +823,7 @@
                     <span>Crédito</span>
                 </button>
             </div>
+
             <button @click="quickSale()" :disabled="cart.length === 0 || processing" class="w-full mt-2 bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2 text-sm">
                 <i class="fas fa-bolt"></i>
                 <span>Venta Rápida (Contado sin cliente)</span>
@@ -810,28 +840,34 @@
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
+
             <div class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nombre Completo *</label>
                     <input type="text" x-model="newCustomer.full_name" @input="newCustomer.full_name = newCustomer.full_name.toUpperCase()" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500" placeholder="Ej: Juan Pérez">
                 </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
                     <input type="tel" x-model="newCustomer.phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500" placeholder="0412-1234567">
                 </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
                     <input type="email" x-model="newCustomer.email" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500" placeholder="cliente@email.com">
                 </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Dirección</label>
                     <textarea x-model="newCustomer.address" @input="newCustomer.address = newCustomer.address.toUpperCase()" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500" placeholder="Dirección completa"></textarea>
                 </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Recomendado por</label>
                     <input type="text" x-model="newCustomer.recommended_by" @input="newCustomer.recommended_by = newCustomer.recommended_by.toUpperCase()" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500" placeholder="Nombre de quien recomendó">
                 </div>
             </div>
+
             <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3 sticky bottom-0">
                 <button @click="closeCustomerModal()" class="px-4 py-2 text-gray-600 touch-btn">Cancelar</button>
                 <button @click="saveCustomer()" :disabled="savingCustomer" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 touch-btn">
@@ -854,6 +890,7 @@
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
+
             <div class="p-6 space-y-4">
                 <div class="bg-blue-50 p-4 rounded-lg">
                     <h4 class="font-semibold text-gray-800 mb-3">
@@ -884,6 +921,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="bg-green-50 p-4 rounded-lg">
                     <h4 class="font-semibold text-gray-800 mb-3">
                         <i class="fas fa-shopping-cart mr-2 text-green-600"></i>Resumen
@@ -903,6 +941,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="bg-yellow-50 p-4 rounded-lg">
                     <h4 class="font-semibold text-gray-800 mb-3">
                         <i class="fas fa-calendar-alt mr-2 text-yellow-600"></i>Términos
@@ -930,11 +969,13 @@
                         </div>
                     </div>
                 </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Notas</label>
                     <textarea x-model="creditForm.notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white" placeholder="Observaciones"></textarea>
                 </div>
             </div>
+
             <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3 sticky bottom-0">
                 <button @click="closeCreditModal()" class="px-4 py-2 text-gray-600 touch-btn">Cancelar</button>
                 <button @click="processCreditSale()" :disabled="processing || !canProcessCredit()" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 touch-btn">
@@ -1034,7 +1075,7 @@
                 console.log('✅ Tasa BCV obtenida:', rate);
                 return { rate: rate, date: data.fechaActualizacion, source: 'BCV Oficial' };
             } catch (err) {
-                console.error(' Error obteniendo tasa BCV:', err);
+                console.error('❌ Error obteniendo tasa BCV:', err);
                 return null;
             }
         }
@@ -1194,7 +1235,7 @@
                         const customer = this.customers.find(c => c.id === this.selectedCustomer);
                         if (customer && customer.address) {
                             this.deliveryAddress = customer.address.toUpperCase();
-                            console.log(' Dirección autocompletada al activar delivery:', this.deliveryAddress);
+                            console.log('📍 Dirección autocompletada al activar delivery:', this.deliveryAddress);
                         }
                     }
                 },
@@ -1207,14 +1248,13 @@
                                 .from('customers')
                                 .update({ address: this.deliveryAddress })
                                 .eq('id', this.selectedCustomer);
-                            
                             if (!error) {
                                 // Actualizar en el array local
                                 const customer = this.customers.find(c => c.id === this.selectedCustomer);
                                 if (customer) customer.address = this.deliveryAddress;
                                 console.log('✅ Dirección del cliente actualizada:', this.deliveryAddress);
                             } else {
-                                console.warn('⚠️ Error actualizando dirección del cliente:', error.message);
+                                console.warn('️ Error actualizando dirección del cliente:', error.message);
                             }
                         } catch (err) {
                             console.error('Error actualizando dirección del cliente:', err);
@@ -1228,8 +1268,14 @@
                         window.location.href = 'login.html';
                         return;
                     }
+
                     try {
-                        const { data: profile } = await supabase.from('profiles').select('full_name, role, branch').eq('id', session.user.id).single();
+                        const { data: profile } = await supabase
+                            .from('profiles')
+                            .select('full_name, role, branch')
+                            .eq('id', session.user.id)
+                            .single();
+
                         if (profile) {
                             this.userName = profile.full_name;
                             this.userRole = profile.role;
@@ -1239,14 +1285,15 @@
                     } catch (err) {
                         console.error('Error obteniendo perfil:', err);
                     }
+
                     await this.loadExchangeRate();
                     await this.loadProducts();
                     await this.loadCustomers();
-                    
+
                     // ✅ NUEVO: Watchers para autocompletar dirección de delivery
                     this.$watch('selectedCustomer', () => this.onCustomerChange());
                     this.$watch('deliveryType', () => this.watchDeliveryType());
-                    
+
                     document.addEventListener('keydown', (e) => {
                         if (e.key === 'Escape') {
                             this.closeCart();
@@ -1290,11 +1337,18 @@
                     showToast('Consultando tasa BCV oficial...', 'info');
                     const bcvData = await fetchBCVRate();
                     if (!bcvData) {
-                        Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo obtener la tasa del BCV. Verifica tu conexión a internet.', confirmButtonText: 'Entendido' });
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudo obtener la tasa del BCV. Verifica tu conexión a internet.',
+                            confirmButtonText: 'Entendido'
+                        });
                         return;
                     }
+
                     const newRate = round2(bcvData.rate);
                     const rateDate = new Date(bcvData.date).toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' });
+
                     const confirmed = await Swal.fire({
                         title: '🏛️ Tasa BCV Oficial',
                         html: `<div class="text-center space-y-3">
@@ -1314,6 +1368,7 @@
                         cancelButtonText: 'Cancelar',
                         reverseButtons: true
                     });
+
                     if (confirmed.isConfirmed) {
                         this.exchangeRate = newRate;
                         await this.updateExchangeRate();
@@ -1339,38 +1394,49 @@
                     try {
                         console.log('🔄 Cargando productos para sucursal:', this.userBranch);
                         const { data: virtualInventory, error } = await supabase.rpc('calculate_virtual_inventory', { branch_param: this.userBranch });
+
                         if (error) {
-                            console.error('❌ Error en calculate_virtual_inventory:', error);
+                            console.error(' Error en calculate_virtual_inventory:', error);
                             throw error;
                         }
+
                         console.log('📦 Datos recibidos de inventory:', virtualInventory);
+
                         if (!virtualInventory || virtualInventory.length === 0) {
                             console.warn('⚠️ No hay inventario disponible');
                             this.products = [];
                             return;
                         }
+
                         const productsToShow = virtualInventory.filter(item => {
                             const stock = item.virtual_stock || item.stock || 0;
                             const size = item.size_liters || item.size;
                             const productType = item.product_type || item.type;
+
                             console.log('Evaluando producto:', {
                                 name: item.product_name || item.name,
                                 stock: stock,
                                 size: size,
                                 type: productType
                             });
+
                             const hasStock = stock > 0;
                             const hasValidSize = size !== null && size !== undefined && size > 0;
                             const isNotCap = productType !== 'cap';
                             const isValidProduct = (productType === 'bottle' || productType === 'empty_bottle');
+
                             console.log('  - hasStock:', hasStock, 'hasValidSize:', hasValidSize, 'isNotCap:', isNotCap, 'isValidProduct:', isValidProduct);
+
                             return hasStock && hasValidSize && isNotCap && isValidProduct;
                         });
+
                         console.log('✅ Productos filtrados:', productsToShow.length);
+
                         this.products = productsToShow.map(item => {
                             const stock = item.virtual_stock || item.stock || 0;
                             const size = item.size_liters || item.size;
                             const productType = item.product_type || item.type;
+
                             return {
                                 id: productType === 'empty_bottle' ? 'empty_' + size : 'size_' + size,
                                 product_id: item.product_id,
@@ -1381,6 +1447,7 @@
                                 stock: parseInt(stock) || 0
                             };
                         });
+
                         console.log('✅ Productos finales:', this.products);
                     } catch (err) {
                         console.error('Error cargando productos:', err);
@@ -1393,7 +1460,13 @@
 
                 async loadCustomers() {
                     try {
-                        const { data, error } = await supabase.from('customers').select('*').eq('branch', this.userBranch).eq('is_active', true).order('full_name');
+                        const { data, error } = await supabase
+                            .from('customers')
+                            .select('*')
+                            .eq('branch', this.userBranch)
+                            .eq('is_active', true)
+                            .order('full_name');
+
                         if (error) throw error;
                         this.customers = data || [];
                     } catch (err) {
@@ -1411,7 +1484,9 @@
                         showToast('Producto sin stock', 'error');
                         return;
                     }
+
                     const existingItem = this.cart.find(item => item.id === product.id);
+
                     if (existingItem) {
                         if (existingItem.quantity < product.stock) {
                             existingItem.quantity++;
@@ -1438,7 +1513,9 @@
                         showToast(`Stock insuficiente para +${quantity}`, 'error');
                         return;
                     }
+
                     const existingItem = this.cart.find(item => item.id === product.id);
+
                     if (existingItem) {
                         if (existingItem.quantity + quantity <= product.stock) {
                             existingItem.quantity += quantity;
@@ -1463,6 +1540,7 @@
                 updateQuantity(index, change) {
                     const item = this.cart[index];
                     const newQuantity = item.quantity + change;
+
                     if (newQuantity > 0 && newQuantity <= item.stock) {
                         item.quantity = newQuantity;
                     } else if (newQuantity <= 0) {
@@ -1521,17 +1599,24 @@
                         showToast('El nombre es obligatorio', 'error');
                         return;
                     }
+
                     this.savingCustomer = true;
                     try {
-                        const { data, error } = await supabase.from('customers').insert({
-                            full_name: this.newCustomer.full_name.toUpperCase(),
-                            phone: this.newCustomer.phone,
-                            email: this.newCustomer.email,
-                            address: this.newCustomer.address ? this.newCustomer.address.toUpperCase() : null,
-                            recommended_by: this.newCustomer.recommended_by ? this.newCustomer.recommended_by.toUpperCase() : null,
-                            branch: this.userBranch
-                        }).select().single();
+                        const { data, error } = await supabase
+                            .from('customers')
+                            .insert({
+                                full_name: this.newCustomer.full_name.toUpperCase(),
+                                phone: this.newCustomer.phone,
+                                email: this.newCustomer.email,
+                                address: this.newCustomer.address ? this.newCustomer.address.toUpperCase() : null,
+                                recommended_by: this.newCustomer.recommended_by ? this.newCustomer.recommended_by.toUpperCase() : null,
+                                branch: this.userBranch
+                            })
+                            .select()
+                            .single();
+
                         if (error) throw error;
+
                         showToast('Cliente creado', 'success');
                         this.customers.push(data);
                         this.selectedCustomer = data.id;
@@ -1549,6 +1634,7 @@
                         showToast('El carrito está vacío', 'error');
                         return;
                     }
+
                     const defaultDate = new Date();
                     defaultDate.setDate(defaultDate.getDate() + 30);
                     this.creditForm.payment_date = defaultDate.toISOString().split('T')[0];
@@ -1576,18 +1662,23 @@
 
                 async processSale() {
                     this.exchangeRate = ensureValidRate(this.exchangeRate);
+
                     if (this.cart.length === 0) {
                         showToast('El carrito está vacío', 'error');
                         return;
                     }
+
                     if (this.deliveryType === 'delivery' && !this.deliveryAddress) {
                         showToast('Debe ingresar la dirección', 'error');
                         return;
                     }
+
                     const customer = this.customers.find(c => c.id === this.selectedCustomer);
                     const customerName = customer?.full_name || 'Cliente no registrado';
+
                     let modalHtml = '';
                     let confirmText = 'Procesar Venta';
+
                     if (this.useMultiplePayments) {
                         if (this.multiplePayments.length === 0) {
                             showToast('Debe agregar al menos un pago', 'error');
@@ -1597,6 +1688,7 @@
                             showToast(`Falta completar: $${this.remainingAmount.toFixed(2)}`, 'error');
                             return;
                         }
+
                         modalHtml = `
                             <div class="text-left space-y-3">
                                 <div class="flex items-center space-x-2 text-gray-700">
@@ -1661,6 +1753,7 @@
                                 return;
                             }
                         }
+
                         modalHtml = `
                             <div class="text-left space-y-3">
                                 <div class="flex items-center space-x-2 text-gray-700">
@@ -1695,14 +1788,26 @@
                             </div>
                         `;
                     }
-                    const confirmed = await showConfirm(this.useMultiplePayments ? 'Confirmar Venta - Pago Múltiple' : 'Confirmar Venta', modalHtml, confirmText, 'Cancelar');
+
+                    const confirmed = await showConfirm(
+                        this.useMultiplePayments ? 'Confirmar Venta - Pago Múltiple' : 'Confirmar Venta',
+                        modalHtml,
+                        confirmText,
+                        'Cancelar'
+                    );
+
                     if (!confirmed) return;
+
                     this.processing = true;
+
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
+
                         let notes = [];
                         notes.push(`Tasa aplicada: Bs. ${this.exchangeRate.toFixed(2)}`);
+
                         let payment_method = this.paymentMethod;
+
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             payment_method = 'multiple';
                             notes.push('=== PAGO MÚLTIPLE ===');
@@ -1723,31 +1828,39 @@
                                 notes.push(`Cambio USD: $${(round2(this.amountReceivedUsd) - this.totalUSD).toFixed(2)}`);
                             }
                         }
-                        const { data: sale, error: saleError } = await supabase.from('sales').insert({
-                            branch: this.userBranch,
-                            customer_id: this.selectedCustomer || null,
-                            customer_name: customerName,
-                            subtotal: this.subtotal,
-                            tax: 0,
-                            total: this.totalUSD,
-                            payment_method: payment_method,
-                            status: payment_method === 'credito' ? 'pending' : 'completed',
-                            delivery_type: this.deliveryType,
-                            delivery_address: this.deliveryType === 'delivery' ? this.deliveryAddress : null,
-                            delivery_coordinates: this.deliveryType === 'delivery' ? this.deliveryCoordinates : null,
-                            notes: notes.join('\n') || null,
-                            exchange_rate_used: this.exchangeRate,
-                            rate_date: new Date().toISOString().split('T')[0],
-                            created_by: session.user.id
-                        }).select().single();
+
+                        // ✅ GUARDAR EN CAMPOS DEDICADOS
+                        const { data: sale, error: saleError } = await supabase
+                            .from('sales')
+                            .insert({
+                                branch: this.userBranch,
+                                customer_id: this.selectedCustomer || null,
+                                customer_name: customerName,
+                                subtotal: this.subtotal,
+                                tax: 0,
+                                total: this.totalUSD,
+                                payment_method: payment_method,
+                                status: payment_method === 'credito' ? 'pending' : 'completed',
+                                delivery_type: this.deliveryType, // ✅ Campo delivery_type
+                                delivery_address: this.deliveryType === 'delivery' ? this.deliveryAddress : null, // ✅ Campo delivery_address
+                                delivery_coordinates: this.deliveryType === 'delivery' ? this.deliveryCoordinates : null, // ✅ Campo delivery_coordinates
+                                notes: notes.join('\n') || null,
+                                exchange_rate_used: this.exchangeRate,
+                                rate_date: new Date().toISOString().split('T')[0],
+                                created_by: session.user.id
+                            })
+                            .select()
+                            .single();
+
                         if (saleError) throw saleError;
-                        
+
                         // ✅ NUEVO: Actualizar dirección del cliente si es delivery
                         if (this.deliveryType === 'delivery' && this.selectedCustomer) {
                             await this.updateCustomerAddress();
                         }
-                        
+
                         const paymentsToInsert = [];
+
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             this.multiplePayments.forEach((p, i) => {
                                 paymentsToInsert.push({
@@ -1763,6 +1876,7 @@
                         } else {
                             let amountUsd = 0;
                             let amountBs = 0;
+
                             if (this.paymentMethod === 'efectivo_bs') {
                                 amountBs = round2(this.amountReceivedBs);
                                 amountUsd = round2(amountBs / this.exchangeRate);
@@ -1773,6 +1887,7 @@
                                 amountUsd = round2(this.totalUSD);
                                 amountBs = round2(this.totalBs);
                             }
+
                             paymentsToInsert.push({
                                 sale_id: sale.id,
                                 payment_method: this.paymentMethod,
@@ -1783,19 +1898,31 @@
                                 created_by: session.user.id
                             });
                         }
+
                         if (paymentsToInsert.length > 0) {
-                            const { error: paymentsError } = await supabase.from('sale_payments').insert(paymentsToInsert);
+                            const { error: paymentsError } = await supabase
+                                .from('sale_payments')
+                                .insert(paymentsToInsert);
+
                             if (paymentsError) {
                                 console.warn('⚠️ No se pudo guardar en sale_payments:', paymentsError.message);
                             }
                         }
-                        const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters, product_type').eq('is_active', true);
+
+                        // ✅ DESCUENTO SIMPLE DE INVENTARIO - Igual que en el modal de inventario
+                        const { data: productsFromDB } = await supabase
+                            .from('products')
+                            .select('id, name, size_liters, product_type')
+                            .eq('is_active', true);
+
                         const sizeToProductId = {};
                         productsFromDB.forEach(p => {
                             if (p.size_liters) sizeToProductId[p.size_liters] = p.id;
                         });
+
                         const capProduct = productsFromDB.find(p => p.product_type === 'cap');
                         const emptyBottleProducts = productsFromDB.filter(p => p.product_type === 'empty_bottle');
+
                         const saleItems = this.cart.map(item => ({
                             sale_id: sale.id,
                             product_id: item.product_type === 'empty_bottle' ?
@@ -1805,82 +1932,136 @@
                             unit_price: item.price,
                             total: round2(item.price * item.quantity)
                         }));
-                        const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
+
+                        const { error: itemsError } = await supabase
+                            .from('sale_items')
+                            .insert(saleItems);
+
                         if (itemsError) throw itemsError;
+
                         let totalCapsNeeded = 0;
+
+                        // ✅ PROCESAR BOTELLONES CON AGUA - Descuento simple directo
                         for (const item of this.cart) {
                             if (item.product_type !== 'empty_bottle') {
-                                const realProductId = sizeToProductId[item.size_liters];
-                                if (!realProductId) continue;
-                                const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
-                                    branch_param: this.userBranch,
-                                    product_id_param: realProductId,
-                                    quantity_param: item.quantity,
-                                    user_id_param: session.user.id
-                                });
-                                if (tankError) throw tankError;
-                                if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
+                                // Consultar inventario actual
+                                const { data: inventory, error: invError } = await supabase
+                                    .from('inventory')
+                                    .select('quantity')
+                                    .eq('product_id', sizeToProductId[item.size_liters])
+                                    .eq('branch', this.userBranch)
+                                    .single();
+
+                                if (invError) {
+                                    console.warn('⚠️ Error consultando inventario:', invError.message);
+                                    continue;
+                                }
+
+                                if (!inventory || inventory.quantity < item.quantity) {
+                                    showToast(`⚠️ Stock insuficiente de ${item.name}`, 'warning');
+                                    continue;
+                                }
+
+                                // Descontar del inventario
+                                const newQuantity = inventory.quantity - item.quantity;
+                                const { error: updateError } = await supabase
+                                    .from('inventory')
+                                    .update({
+                                        quantity: newQuantity,
+                                        updated_at: new Date().toISOString()
+                                    })
+                                    .eq('product_id', sizeToProductId[item.size_liters])
+                                    .eq('branch', this.userBranch);
+
+                                if (updateError) {
+                                    console.warn('⚠️ Error actualizando inventario:', updateError.message);
+                                } else {
+                                    console.log(`✅ ${item.quantity} x ${item.name} descontado(s) (Stock: ${inventory.quantity} → ${newQuantity})`);
+                                }
+
+                                // Contar tapas
                                 if (item.size_liters === 13 || item.size_liters === 20) {
                                     totalCapsNeeded += item.quantity;
                                 }
                             }
                         }
+
+                        // ✅ PROCESAR BOTELLONES VACÍOS - Descuento simple directo
                         for (const item of this.cart) {
                             if (item.product_type === 'empty_bottle') {
                                 const emptyProduct = emptyBottleProducts.find(p => p.size_liters === item.size_liters);
                                 if (!emptyProduct) continue;
+
+                                // Consultar inventario actual
                                 const { data: emptyInventory, error: emptyInvError } = await supabase
                                     .from('inventory')
                                     .select('quantity')
                                     .eq('product_id', emptyProduct.id)
                                     .eq('branch', this.userBranch)
                                     .single();
+
                                 if (emptyInvError) {
                                     console.warn('⚠️ Error consultando inventario de botellón vacío:', emptyInvError.message);
-                                } else if (emptyInventory) {
-                                    if (emptyInventory.quantity < item.quantity) {
-                                        showToast(`⚠️ Stock bajo de botellón vacío ${item.size_liters}L: ${emptyInventory.quantity} disponibles`, 'warning');
-                                    }
-                                    const { error: updateEmptyError } = await supabase
-                                        .from('inventory')
-                                        .update({
-                                            quantity: emptyInventory.quantity - item.quantity,
-                                            updated_at: new Date().toISOString()
-                                        })
-                                        .eq('product_id', emptyProduct.id)
-                                        .eq('branch', this.userBranch);
-                                    if (updateEmptyError) {
-                                        console.warn('️ Error actualizando botellón vacío:', updateEmptyError.message);
-                                    } else {
-                                        console.log(`✅ ${item.quantity} botellón(es) vacío(s) ${item.size_liters}L descontado(s)`);
-                                    }
+                                    continue;
                                 }
+
+                                if (!emptyInventory || emptyInventory.quantity < item.quantity) {
+                                    showToast(`⚠️ Stock bajo de botellón vacío ${item.size_liters}L`, 'warning');
+                                    continue;
+                                }
+
+                                // Descontar del inventario
+                                const newQuantity = emptyInventory.quantity - item.quantity;
+                                const { error: updateEmptyError } = await supabase
+                                    .from('inventory')
+                                    .update({
+                                        quantity: newQuantity,
+                                        updated_at: new Date().toISOString()
+                                    })
+                                    .eq('product_id', emptyProduct.id)
+                                    .eq('branch', this.userBranch);
+
+                                if (updateEmptyError) {
+                                    console.warn('⚠️ Error actualizando botellón vacío:', updateEmptyError.message);
+                                } else {
+                                    console.log(`✅ ${item.quantity} botellón(es) vacío(s) ${item.size_liters}L descontado(s)`);
+                                }
+
+                                // Contar tapas
                                 if (item.size_liters === 15 || item.size_liters === 20) {
                                     totalCapsNeeded += item.quantity;
                                 }
                             }
                         }
+
+                        // ✅ DESCUENTO DE TAPAS - Simple y directo
                         if (totalCapsNeeded > 0 && capProduct) {
+                            console.log(`🔴 Descontando ${totalCapsNeeded} tapas del inventario`);
+
                             const { data: capInventory, error: capInventoryError } = await supabase
                                 .from('inventory')
                                 .select('quantity, product_id')
                                 .eq('product_id', capProduct.id)
                                 .eq('branch', this.userBranch)
                                 .single();
+
                             if (capInventoryError) {
                                 console.warn('⚠️ Error consultando inventario de tapas:', capInventoryError.message);
                             } else if (capInventory) {
                                 if (capInventory.quantity < totalCapsNeeded) {
-                                    showToast(`️ Stock de tapas bajo: ${capInventory.quantity} disponibles, se necesitan ${totalCapsNeeded}`, 'warning');
+                                    showToast(`⚠️ Stock de tapas bajo: ${capInventory.quantity} disponibles`, 'warning');
                                 }
+
+                                const newQuantity = capInventory.quantity - totalCapsNeeded;
                                 const { error: updateCapError } = await supabase
                                     .from('inventory')
                                     .update({
-                                        quantity: capInventory.quantity - totalCapsNeeded,
+                                        quantity: newQuantity,
                                         updated_at: new Date().toISOString()
                                     })
                                     .eq('product_id', capProduct.id)
                                     .eq('branch', this.userBranch);
+
                                 if (updateCapError) {
                                     console.warn('⚠️ Error actualizando tapas:', updateCapError.message);
                                 } else {
@@ -1888,6 +2069,7 @@
                                 }
                             }
                         }
+
                         let successDetails = '';
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             successDetails = `
@@ -1904,6 +2086,7 @@
                                 </div>
                             `;
                         }
+
                         Swal.fire({
                             icon: 'success',
                             title: '¡Venta Exitosa!',
@@ -1926,6 +2109,7 @@
                             timer: 3500,
                             showConfirmButton: false
                         });
+
                         this.cart = [];
                         this.deliveryAddress = '';
                         this.deliveryCoordinates = '';
@@ -1937,9 +2121,15 @@
                         this.useMultiplePayments = false;
                         this.closeCart();
                         await this.loadProducts();
+
                     } catch (err) {
                         console.error('Error:', err);
-                        Swal.fire({ icon: 'error', title: 'Error al Procesar Venta', text: err.message, confirmButtonText: 'Entendido' });
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error al Procesar Venta',
+                            text: err.message,
+                            confirmButtonText: 'Entendido'
+                        });
                     } finally {
                         this.processing = false;
                     }
@@ -1950,6 +2140,7 @@
                         showToast('El carrito está vacío', 'error');
                         return;
                     }
+
                     this.paymentMethod = 'efectivo_bs';
                     this.amountReceivedBs = this.totalBs;
                     this.selectedCustomer = '';
@@ -1959,12 +2150,15 @@
 
                 async processCreditSale() {
                     this.exchangeRate = ensureValidRate(this.exchangeRate);
+
                     if (!this.canProcessCredit()) {
                         showToast('Complete los campos obligatorios', 'error');
                         return;
                     }
+
                     const customer = this.customers.find(c => c.id === this.creditForm.customer_id);
                     const creditAmount = round2(this.totalUSD - this.creditForm.initial_payment);
+
                     const confirmed = await showConfirm('Venta a Crédito', `
                         <div class="text-left space-y-3">
                             <div class="flex items-center space-x-2 text-gray-700">
@@ -1991,29 +2185,45 @@
                             </div>
                         </div>
                     `, 'Confirmar Crédito', 'Cancelar');
+
                     if (!confirmed) return;
+
                     this.processing = true;
+
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
-                        const { data: sale, error: saleError } = await supabase.from('sales').insert({
-                            branch: this.userBranch,
-                            customer_id: this.creditForm.customer_id,
-                            customer_name: customer?.full_name,
-                            subtotal: this.subtotal,
-                            tax: 0,
-                            total: this.totalUSD,
-                            payment_method: 'credito',
-                            status: creditAmount > 0 ? 'pending' : 'completed',
-                            notes: `Crédito - Pago inicial: $${round2(this.creditForm.initial_payment).toFixed(2)}\n${this.creditForm.notes || ''}`,
-                            exchange_rate_used: this.exchangeRate,
-                            rate_date: new Date().toISOString().split('T')[0],
-                            created_by: session.user.id
-                        }).select().single();
+
+                        const { data: sale, error: saleError } = await supabase
+                            .from('sales')
+                            .insert({
+                                branch: this.userBranch,
+                                customer_id: this.creditForm.customer_id,
+                                customer_name: customer?.full_name,
+                                subtotal: this.subtotal,
+                                tax: 0,
+                                total: this.totalUSD,
+                                payment_method: 'credito',
+                                status: creditAmount > 0 ? 'pending' : 'completed',
+                                notes: `Crédito - Pago inicial: $${round2(this.creditForm.initial_payment).toFixed(2)}\n${this.creditForm.notes || ''}`,
+                                exchange_rate_used: this.exchangeRate,
+                                rate_date: new Date().toISOString().split('T')[0],
+                                created_by: session.user.id
+                            })
+                            .select()
+                            .single();
+
                         if (saleError) throw saleError;
-                        const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters, product_type').eq('is_active', true);
+
+                        const { data: productsFromDB } = await supabase
+                            .from('products')
+                            .select('id, name, size_liters, product_type')
+                            .eq('is_active', true);
+
                         const sizeToProductId = {};
                         productsFromDB.forEach(p => { if (p.size_liters) sizeToProductId[p.size_liters] = p.id; });
+
                         const capProduct = productsFromDB.find(p => p.product_type === 'cap');
+
                         const saleItems = this.cart.map(item => ({
                             sale_id: sale.id,
                             product_id: sizeToProductId[item.size_liters],
@@ -2021,62 +2231,94 @@
                             unit_price: item.price,
                             total: round2(item.price * item.quantity)
                         }));
-                        const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
+
+                        const { error: itemsError } = await supabase
+                            .from('sale_items')
+                            .insert(saleItems);
+
                         if (itemsError) throw itemsError;
+
                         let totalCapsNeeded = 0;
+
                         for (const item of this.cart) {
                             const realProductId = sizeToProductId[item.size_liters];
                             if (!realProductId) continue;
+
                             const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
                                 branch_param: this.userBranch,
                                 product_id_param: realProductId,
                                 quantity_param: item.quantity,
                                 user_id_param: session.user.id
                             });
+
                             if (tankError) throw tankError;
+
                             if (item.size_liters === 13 || item.size_liters === 20) {
                                 totalCapsNeeded += item.quantity;
                             }
                         }
+
                         if (totalCapsNeeded > 0 && capProduct) {
-                            const { data: capInventory } = await supabase.from('inventory').select('quantity').eq('product_id', capProduct.id).eq('branch', this.userBranch).single();
+                            const { data: capInventory } = await supabase
+                                .from('inventory')
+                                .select('quantity')
+                                .eq('product_id', capProduct.id)
+                                .eq('branch', this.userBranch)
+                                .single();
+
                             if (capInventory) {
-                                await supabase.from('inventory').update({
-                                    quantity: capInventory.quantity - totalCapsNeeded,
-                                    updated_at: new Date().toISOString()
-                                }).eq('product_id', capProduct.id).eq('branch', this.userBranch);
+                                await supabase
+                                    .from('inventory')
+                                    .update({
+                                        quantity: capInventory.quantity - totalCapsNeeded,
+                                        updated_at: new Date().toISOString()
+                                    })
+                                    .eq('product_id', capProduct.id)
+                                    .eq('branch', this.userBranch);
                             }
                         }
+
                         if (creditAmount > 0) {
-                            await supabase.from('credit_accounts').insert({
-                                sale_id: sale.id,
-                                customer_id: this.creditForm.customer_id,
-                                customer_name: customer?.full_name,
-                                customer_phone: customer?.phone,
-                                customer_id_card: this.creditForm.customer_id_card,
-                                total_amount: this.totalUSD,
-                                paid_amount: round2(this.creditForm.initial_payment),
-                                remaining_amount: creditAmount,
-                                payment_date: this.creditForm.payment_date,
-                                payment_terms: this.creditForm.payment_terms,
-                                notes: this.creditForm.notes,
-                                status: this.creditForm.initial_payment > 0 ? 'partial' : 'pending',
-                                created_by: session.user.id,
-                                branch: this.userBranch
-                            });
+                            await supabase
+                                .from('credit_accounts')
+                                .insert({
+                                    sale_id: sale.id,
+                                    customer_id: this.creditForm.customer_id,
+                                    customer_name: customer?.full_name,
+                                    customer_phone: customer?.phone,
+                                    customer_id_card: this.creditForm.customer_id_card,
+                                    total_amount: this.totalUSD,
+                                    paid_amount: round2(this.creditForm.initial_payment),
+                                    remaining_amount: creditAmount,
+                                    payment_date: this.creditForm.payment_date,
+                                    payment_terms: this.creditForm.payment_terms,
+                                    notes: this.creditForm.notes,
+                                    status: this.creditForm.initial_payment > 0 ? 'partial' : 'pending',
+                                    created_by: session.user.id,
+                                    branch: this.userBranch
+                                });
+
                             if (this.creditForm.initial_payment > 0) {
-                                const { data: creditAccount } = await supabase.from('credit_accounts').select('id').eq('sale_id', sale.id).single();
+                                const { data: creditAccount } = await supabase
+                                    .from('credit_accounts')
+                                    .select('id')
+                                    .eq('sale_id', sale.id)
+                                    .single();
+
                                 if (creditAccount) {
-                                    await supabase.from('credit_payments').insert({
-                                        credit_account_id: creditAccount.id,
-                                        amount: round2(this.creditForm.initial_payment),
-                                        payment_method: this.creditForm.initial_payment_method,
-                                        notes: 'Pago inicial',
-                                        created_by: session.user.id
-                                    });
+                                    await supabase
+                                        .from('credit_payments')
+                                        .insert({
+                                            credit_account_id: creditAccount.id,
+                                            amount: round2(this.creditForm.initial_payment),
+                                            payment_method: this.creditForm.initial_payment_method,
+                                            notes: 'Pago inicial',
+                                            created_by: session.user.id
+                                        });
                                 }
                             }
                         }
+
                         Swal.fire({
                             icon: 'success',
                             title: '¡Crédito Registrado!',
@@ -2092,13 +2334,20 @@
                             timer: 2500,
                             showConfirmButton: false
                         });
+
                         this.cart = [];
                         this.closeCreditModal();
                         this.closeCart();
                         await this.loadProducts();
+
                     } catch (err) {
                         console.error('Error:', err);
-                        Swal.fire({ icon: 'error', title: 'Error', text: err.message, confirmButtonText: 'Entendido' });
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: err.message,
+                            confirmButtonText: 'Entendido'
+                        });
                     } finally {
                         this.processing = false;
                     }
