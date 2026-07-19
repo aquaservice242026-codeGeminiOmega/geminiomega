@@ -87,9 +87,9 @@
         <div x-show="!loading" class="print-container max-w-6xl mx-auto bg-white rounded-lg shadow-sm p-4">
             <!-- Header del Reporte -->
             <div class="text-center mb-4 border-b-2 border-blue-500 pb-3">
-                <h1 class="text-xl font-bold text-gray-800">SERVICIOS AGUA POTABLE</h1>
-                <p class="text-base font-semibold text-blue-600">RESUMEN DIARIO DE VENTAS</p>
-                <p class="text-xs text-gray-600 mt-1">
+                <h1 class="text-2xl font-bold text-gray-800">SERVICIOS AGUA POTABLE</h1>
+                <p class="text-lg font-semibold text-blue-600">RESUMEN DIARIO DE VENTAS</p>
+                <p class="text-sm text-gray-600 mt-1">
                     <i class="far fa-clock mr-1"></i>Generado: <span x-text="currentDateTime" class="font-semibold"></span> (Caracas, VE) | 
                     Fecha: <span x-text="formatDate(filters.date)"></span> | 
                     Sucursal: <span class="capitalize font-bold text-blue-700" x-text="userBranch"></span> | 
@@ -110,11 +110,11 @@
                 </div>
             </div>
 
-            <!-- Turno Mañana - Tabla reorganizada -->
+            <!-- Tabla de Ventas por Producto -->
             <div class="mb-4 border-2 border-gray-300 rounded-lg overflow-hidden">
-                <div class="bg-blue-50 px-3 py-2 font-bold text-blue-800 flex justify-between text-sm">
-                    <span><i class="fas fa-sun mr-2 text-yellow-500"></i>TURNO MAÑANA (06:00 AM - 02:00 PM)</span>
-                    <span class="text-xs font-normal" x-text="'Total: $' + morningShift.totals.total.toFixed(2)"></span>
+                <div class="bg-blue-50 px-3 py-2 font-bold text-blue-800 flex justify-between">
+                    <span><i class="fas fa-receipt mr-2"></i>VENTAS DEL DÍA</span>
+                    <span class="text-sm font-normal" x-text="'Total: $' + stats.totalSales.toFixed(2)"></span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs">
@@ -131,7 +131,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <template x-for="product in morningShift.products" :key="product.name">
+                            <template x-for="product in stats.products" :key="product.name">
                                 <tr class="border-b hover:bg-gray-50">
                                     <td class="px-2 py-1.5 font-medium" x-text="product.name"></td>
                                     <td class="px-2 py-1.5 text-center font-bold" x-text="product.quantity"></td>
@@ -143,47 +143,72 @@
                                     <td class="px-2 py-1.5 text-right font-bold" x-text="'$' + product.total.toFixed(2)"></td>
                                 </tr>
                             </template>
-                            <tr x-show="morningShift.products.length === 0">
-                                <td colspan="8" class="px-3 py-3 text-center text-gray-500">No hay ventas en este turno</td>
+                            <tr x-show="stats.products.length === 0">
+                                <td colspan="8" class="px-3 py-3 text-center text-gray-500">No hay ventas en este día</td>
                             </tr>
+                            <!-- Sub-total de Pagos Digitales (Pago Móvil + Punto + Transferencia) -->
+                            <tr class="bg-blue-50 font-bold border-t border-blue-200">
+                                <td class="px-2 py-1.5" colspan="2">
+                                    <i class="fas fa-mobile-alt mr-1 text-blue-600"></i>
+                                    <span class="text-blue-800">PAGOS DIGITALES (Bs):</span>
+                                </td>
+                                <td class="px-2 py-1.5 text-right" colspan="5">
+                                    <span class="text-blue-800">
+                                        $<span x-text="stats.digitalPayments.toFixed(2)"></span> = 
+                                        Bs. <span x-text="stats.digitalPaymentsBs.toFixed(2)"></span>
+                                    </span>
+                                </td>
+                                <td class="px-2 py-1.5 text-right text-blue-800">
+                                    <span x-text="'$' + (stats.pagoMovil + stats.punto + stats.transferencia).toFixed(2)"></span>
+                                </td>
+                            </tr>
+                            <!-- Sub-total General -->
                             <tr class="bg-gray-100 font-bold border-t-2 border-gray-300">
                                 <td class="px-2 py-1.5" colspan="2">SUBTOTAL:</td>
-                                <td class="px-2 py-1.5 text-right bg-purple-50/30" x-text="'$' + morningShift.totals.efectivoBs.toFixed(2)"></td>
-                                <td class="px-2 py-1.5 text-right bg-green-50/30" x-text="'$' + morningShift.totals.efectivoUsd.toFixed(2)"></td>
-                                <td class="px-2 py-1.5 text-right bg-blue-50/30" x-text="'$' + morningShift.totals.pagoMovil.toFixed(2)"></td>
-                                <td class="px-2 py-1.5 text-right bg-orange-50/30" x-text="'$' + morningShift.totals.punto.toFixed(2)"></td>
-                                <td class="px-2 py-1.5 text-right bg-yellow-50/30" x-text="'$' + morningShift.totals.transferencia.toFixed(2)"></td>
-                                <td class="px-2 py-1.5 text-right" x-text="'$' + morningShift.totals.total.toFixed(2)"></td>
+                                <td class="px-2 py-1.5 text-right bg-purple-50/30" x-text="'$' + stats.efectivoBs.toFixed(2)"></td>
+                                <td class="px-2 py-1.5 text-right bg-green-50/30" x-text="'$' + stats.efectivoUsd.toFixed(2)"></td>
+                                <td class="px-2 py-1.5 text-right bg-blue-50/30" x-text="'$' + stats.pagoMovil.toFixed(2)"></td>
+                                <td class="px-2 py-1.5 text-right bg-orange-50/30" x-text="'$' + stats.punto.toFixed(2)"></td>
+                                <td class="px-2 py-1.5 text-right bg-yellow-50/30" x-text="'$' + stats.transferencia.toFixed(2)"></td>
+                                <td class="px-2 py-1.5 text-right" x-text="'$' + stats.totalSales.toFixed(2)"></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Resumen por Método de Pago -->
-            <div class="grid grid-cols-2 gap-3 mb-4">
+            <!-- Ventas por Método de Pago y Totales Generales -->
+            <div class="grid grid-cols-2 gap-4 mb-4">
                 <div class="border-2 border-blue-400 rounded-lg p-3">
                     <h3 class="font-bold text-blue-800 mb-2 text-sm border-b border-blue-200 pb-1">VENTAS POR MÉTODO DE PAGO</h3>
                     <div class="space-y-1 text-xs">
                         <div class="flex justify-between">
                             <span>Efectivo Bs:</span>
-                            <span class="font-bold" x-text="'$' + stats.paymentMethods.efectivoBs.toFixed(2)"></span>
+                            <span class="font-bold" x-text="'$' + stats.efectivoBs.toFixed(2)"></span>
                         </div>
                         <div class="flex justify-between">
                             <span>Efectivo $:</span>
-                            <span class="font-bold" x-text="'$' + stats.paymentMethods.efectivoUsd.toFixed(2)"></span>
+                            <span class="font-bold" x-text="'$' + stats.efectivoUsd.toFixed(2)"></span>
                         </div>
                         <div class="flex justify-between">
                             <span>Pago Móvil:</span>
-                            <span class="font-bold" x-text="'$' + stats.paymentMethods.pagoMovil.toFixed(2)"></span>
+                            <span class="font-bold" x-text="'$' + stats.pagoMovil.toFixed(2)"></span>
                         </div>
                         <div class="flex justify-between">
                             <span>Punto de Venta:</span>
-                            <span class="font-bold" x-text="'$' + stats.paymentMethods.puntoVenta.toFixed(2)"></span>
+                            <span class="font-bold" x-text="'$' + stats.punto.toFixed(2)"></span>
                         </div>
                         <div class="flex justify-between">
                             <span>Transferencia:</span>
-                            <span class="font-bold" x-text="'$' + stats.paymentMethods.transferencia.toFixed(2)"></span>
+                            <span class="font-bold" x-text="'$' + stats.transferencia.toFixed(2)"></span>
+                        </div>
+                        <div class="border-t border-blue-200 pt-1 mt-1 flex justify-between bg-blue-50 px-2 py-1 rounded">
+                            <span class="font-semibold text-blue-800">Pagos Digitales (Bs):</span>
+                            <span class="font-bold text-blue-800" x-text="'$' + stats.digitalPayments.toFixed(2)"></span>
+                        </div>
+                        <div class="flex justify-between bg-blue-50 px-2 py-1 rounded -mt-1">
+                            <span class="text-blue-800 text-[10px]">Equivalente en Bs:</span>
+                            <span class="font-bold text-blue-800 text-[10px]" x-text="'Bs. ' + stats.digitalPaymentsBs.toFixed(2)"></span>
                         </div>
                     </div>
                 </div>
@@ -209,7 +234,7 @@
                 </div>
             </div>
 
-            <!-- Distribución por Método -->
+            <!-- Distribución por Método de Pago -->
             <div class="border-2 border-purple-300 rounded-lg p-3 mb-4">
                 <h3 class="font-bold text-purple-800 mb-2 text-center text-sm">DISTRIBUCIÓN POR MÉTODO DE PAGO</h3>
                 <div class="grid grid-cols-5 gap-2">
@@ -227,7 +252,7 @@
                     </div>
                     <div class="bg-orange-100 rounded-lg p-2 text-center">
                         <p class="text-[10px] text-gray-600 font-semibold">PUNTO</p>
-                        <p class="text-lg font-bold text-orange-600" x-text="stats.percentages.puntoVenta + '%'"></p>
+                        <p class="text-lg font-bold text-orange-600" x-text="stats.percentages.punto + '%'"></p>
                     </div>
                     <div class="bg-yellow-100 rounded-lg p-2 text-center">
                         <p class="text-[10px] text-gray-600 font-semibold">TRANSF.</p>
@@ -237,7 +262,7 @@
             </div>
 
             <!-- Totales Finales -->
-            <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="grid grid-cols-2 gap-4 mb-4">
                 <div class="bg-gradient-to-br from-blue-100 to-blue-200 border-2 border-blue-400 rounded-lg p-3 text-center">
                     <p class="text-xs text-gray-700 mb-1 font-semibold">TOTAL VENTAS DÓLARES</p>
                     <p class="text-2xl font-bold text-blue-700" x-text="'$' + stats.totalSales.toFixed(2)"></p>
@@ -286,30 +311,20 @@
                     totalTransactions: 0,
                     totalDeliverys: 0,
                     deliveryAmount: 0,
-                    paymentMethods: {
-                        efectivoBs: 0,
-                        efectivoUsd: 0,
-                        pagoMovil: 0,
-                        puntoVenta: 0,
-                        transferencia: 0
-                    },
+                    efectivoBs: 0,
+                    efectivoUsd: 0,
+                    pagoMovil: 0,
+                    punto: 0,
+                    transferencia: 0,
+                    digitalPayments: 0,
+                    digitalPaymentsBs: 0,
+                    products: [],
                     percentages: {
                         efectivoBs: 0,
                         efectivoUsd: 0,
                         pagoMovil: 0,
-                        puntoVenta: 0,
-                        transferencia: 0
-                    }
-                },
-                morningShift: {
-                    products: [],
-                    totals: {
-                        efectivoBs: 0,
-                        efectivoUsd: 0,
-                        pagoMovil: 0,
                         punto: 0,
-                        transferencia: 0,
-                        total: 0
+                        transferencia: 0
                     }
                 },
 
@@ -381,18 +396,26 @@
                         totalTransactions: 0,
                         totalDeliverys: 0,
                         deliveryAmount: 0,
-                        paymentMethods: { efectivoBs: 0, efectivoUsd: 0, pagoMovil: 0, puntoVenta: 0, transferencia: 0 },
-                        percentages: { efectivoBs: 0, efectivoUsd: 0, pagoMovil: 0, puntoVenta: 0, transferencia: 0 }
-                    };
-                    this.morningShift = {
+                        efectivoBs: 0,
+                        efectivoUsd: 0,
+                        pagoMovil: 0,
+                        punto: 0,
+                        transferencia: 0,
+                        digitalPayments: 0,
+                        digitalPaymentsBs: 0,
                         products: [],
-                        totals: { efectivoBs: 0, efectivoUsd: 0, pagoMovil: 0, punto: 0, transferencia: 0, total: 0 }
+                        percentages: {
+                            efectivoBs: 0,
+                            efectivoUsd: 0,
+                            pagoMovil: 0,
+                            punto: 0,
+                            transferencia: 0
+                        }
                     };
                 },
 
                 async processSales(sales) {
                     const productMap = {};
-                    const morningProducts = {};
 
                     for (const sale of sales) {
                         this.stats.totalSales += sale.total || 0;
@@ -446,33 +469,46 @@
                                     const saleTotal = sale.total || 1;
                                     const proportion = itemTotal / saleTotal;
 
-                                    if (!morningProducts[name]) {
-                                        morningProducts[name] = { 
+                                    if (!productMap[name]) {
+                                        productMap[name] = { 
                                             name, quantity: 0, 
                                             efectivoBs: 0, efectivoUsd: 0,
                                             pagoMovil: 0, punto: 0, transferencia: 0,
                                             total: 0 
                                         };
                                     }
-                                    morningProducts[name].quantity += item.quantity || 0;
-                                    morningProducts[name].efectivoBs += saleEfectivoBs * proportion;
-                                    morningProducts[name].efectivoUsd += saleEfectivoUsd * proportion;
-                                    morningProducts[name].pagoMovil += salePagoMovil * proportion;
-                                    morningProducts[name].punto += salePunto * proportion;
-                                    morningProducts[name].transferencia += saleTransferencia * proportion;
-                                    morningProducts[name].total += itemTotal;
+                                    productMap[name].quantity += item.quantity || 0;
+                                    productMap[name].efectivoBs += saleEfectivoBs * proportion;
+                                    productMap[name].efectivoUsd += saleEfectivoUsd * proportion;
+                                    productMap[name].pagoMovil += salePagoMovil * proportion;
+                                    productMap[name].punto += salePunto * proportion;
+                                    productMap[name].transferencia += saleTransferencia * proportion;
+                                    productMap[name].total += itemTotal;
                                 }
                             }
                         }
 
-                        this.stats.paymentMethods.efectivoBs += saleEfectivoBs;
-                        this.stats.paymentMethods.efectivoUsd += saleEfectivoUsd;
-                        this.stats.paymentMethods.pagoMovil += salePagoMovil;
-                        this.stats.paymentMethods.puntoVenta += salePunto;
-                        this.stats.paymentMethods.transferencia += saleTransferencia;
+                        this.stats.efectivoBs += saleEfectivoBs;
+                        this.stats.efectivoUsd += saleEfectivoUsd;
+                        this.stats.pagoMovil += salePagoMovil;
+                        this.stats.punto += salePunto;
+                        this.stats.transferencia += saleTransferencia;
                     }
 
-                    this.morningShift.products = Object.values(morningProducts)
+                    // Redondear todos los valores
+                    this.stats.efectivoBs = Math.round(this.stats.efectivoBs * 100) / 100;
+                    this.stats.efectivoUsd = Math.round(this.stats.efectivoUsd * 100) / 100;
+                    this.stats.pagoMovil = Math.round(this.stats.pagoMovil * 100) / 100;
+                    this.stats.punto = Math.round(this.stats.punto * 100) / 100;
+                    this.stats.transferencia = Math.round(this.stats.transferencia * 100) / 100;
+                    this.stats.totalSales = Math.round(this.stats.totalSales * 100) / 100;
+
+                    // Calcular pagos digitales (Pago Móvil + Punto + Transferencia)
+                    this.stats.digitalPayments = Math.round((this.stats.pagoMovil + this.stats.punto + this.stats.transferencia) * 100) / 100;
+                    this.stats.digitalPaymentsBs = Math.round(this.stats.digitalPayments * this.exchangeRate * 100) / 100;
+
+                    // Convertir mapa a array
+                    this.stats.products = Object.values(productMap)
                         .map(p => ({
                             ...p,
                             efectivoBs: Math.round(p.efectivoBs * 100) / 100,
@@ -484,23 +520,23 @@
                         }))
                         .sort((a, b) => b.total - a.total);
 
-                    this.morningShift.totals.efectivoBs = Math.round(this.stats.paymentMethods.efectivoBs * 100) / 100;
-                    this.morningShift.totals.efectivoUsd = Math.round(this.stats.paymentMethods.efectivoUsd * 100) / 100;
-                    this.morningShift.totals.pagoMovil = Math.round(this.stats.paymentMethods.pagoMovil * 100) / 100;
-                    this.morningShift.totals.punto = Math.round(this.stats.paymentMethods.puntoVenta * 100) / 100;
-                    this.morningShift.totals.transferencia = Math.round(this.stats.paymentMethods.transferencia * 100) / 100;
-                    this.morningShift.totals.total = Math.round(this.stats.totalSales * 100) / 100;
-
+                    // Calcular porcentajes - Usando Math.floor para evitar que sume más de 100%
                     if (this.stats.totalSales > 0) {
                         const total = this.stats.totalSales;
-                        this.stats.percentages.efectivoBs = Math.round((this.stats.paymentMethods.efectivoBs / total) * 100);
-                        this.stats.percentages.efectivoUsd = Math.round((this.stats.paymentMethods.efectivoUsd / total) * 100);
-                        this.stats.percentages.pagoMovil = Math.round((this.stats.paymentMethods.pagoMovil / total) * 100);
-                        this.stats.percentages.puntoVenta = Math.round((this.stats.paymentMethods.puntoVenta / total) * 100);
-                        this.stats.percentages.transferencia = Math.round((this.stats.paymentMethods.transferencia / total) * 100);
+                        
+                        // Usar floor para todos excepto el último
+                        this.stats.percentages.efectivoBs = Math.floor((this.stats.efectivoBs / total) * 100);
+                        this.stats.percentages.efectivoUsd = Math.floor((this.stats.efectivoUsd / total) * 100);
+                        this.stats.percentages.pagoMovil = Math.floor((this.stats.pagoMovil / total) * 100);
+                        this.stats.percentages.punto = Math.floor((this.stats.punto / total) * 100);
+                        
+                        // El último se calcula como 100 - suma de los demás para garantizar que sume 100%
+                        const sumaParcial = this.stats.percentages.efectivoBs + 
+                                          this.stats.percentages.efectivoUsd + 
+                                          this.stats.percentages.pagoMovil + 
+                                          this.stats.percentages.punto;
+                        this.stats.percentages.transferencia = 100 - sumaParcial;
                     }
-
-                    this.stats.totalSales = Math.round(this.stats.totalSales * 100) / 100;
                 },
 
                 formatDate(dateStr) {
