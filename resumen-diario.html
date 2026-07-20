@@ -47,6 +47,19 @@
                 </a>
             </nav>
         </div>
+        <!-- Info del usuario en el sidebar -->
+        <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold text-sm" x-text="userName ? userName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '??'"></div>
+                <div>
+                    <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
+                    <p class="text-xs text-blue-200 capitalize">
+                        <span x-text="userRole === 'admin' ? 'Administrador' : 'Vendedor'"></span> | 
+                        <span x-text="userBranch"></span>
+                    </p>
+                </div>
+            </div>
+        </div>
     </aside>
 
     <!-- Main Content -->
@@ -60,17 +73,27 @@
                         <label class="block text-xs text-gray-600 mb-1">Fecha</label>
                         <input type="date" x-model="filters.date" class="px-3 py-2 border rounded-lg text-sm">
                     </div>
-                    <div>
+                    
+                    <!-- ✅ Selector de Sucursal SOLO para Administradores -->
+                    <div x-show="userRole === 'admin'">
                         <label class="block text-xs text-gray-600 mb-1">Sucursal</label>
-                        <select x-model="userBranch" @change="loadReportData()" class="px-3 py-2 border rounded-lg text-sm capitalize">
+                        <select x-model="userBranch" @change="loadReportData()" class="px-3 py-2 border rounded-lg text-sm capitalize focus:ring-2 focus:ring-blue-500">
                             <option value="geminis">Geminis</option>
                             <option value="omega">Omega</option>
                         </select>
                     </div>
-                    <button @click="loadReportData()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+                    
+                    <!-- ✅ Visualización de Sucursal para Vendedores (Solo lectura) -->
+                    <div x-show="userRole !== 'admin'" class="flex items-end pb-2">
+                        <span class="text-xs text-gray-600 font-semibold capitalize bg-gray-100 px-3 py-2 rounded-lg border flex items-center">
+                            <i class="fas fa-store mr-2 text-blue-500"></i> <span x-text="userBranch"></span>
+                        </span>
+                    </div>
+
+                    <button @click="loadReportData()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm transition">
                         <i class="fas fa-search mr-2"></i>Buscar
                     </button>
-                    <button @click="exportToPDF()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm">
+                    <button @click="exportToPDF()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm transition">
                         <i class="fas fa-file-pdf mr-2"></i>PDF
                     </button>
                 </div>
@@ -80,7 +103,7 @@
         <!-- Loading -->
         <div x-show="loading" class="text-center py-12">
             <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500"></i>
-            <p class="mt-4 text-gray-600">Cargando datos...</p>
+            <p class="mt-4 text-gray-600">Cargando datos del reporte...</p>
         </div>
 
         <!-- Report Content -->
@@ -146,7 +169,7 @@
                             <tr x-show="stats.products.length === 0">
                                 <td colspan="8" class="px-3 py-3 text-center text-gray-500">No hay ventas en este día</td>
                             </tr>
-                            <!-- Sub-total de Pagos Digitales (Pago Móvil + Punto + Transferencia) -->
+                            <!-- Sub-total de Pagos Digitales -->
                             <tr class="bg-blue-50 font-bold border-t border-blue-200">
                                 <td class="px-2 py-1.5" colspan="2">
                                     <i class="fas fa-mobile-alt mr-1 text-blue-600"></i>
@@ -299,7 +322,8 @@
         function reporteApp() {
             return {
                 loading: true,
-                userBranch: 'geminis',
+                userBranch: '',
+                userRole: '', // ✅ Nuevo: para controlar permisos
                 userName: 'Usuario',
                 exchangeRate: 736.93,
                 currentDateTime: '',
@@ -331,17 +355,26 @@
                 async initReporte() {
                     this.updateCurrentDateTime();
                     
+                    // ✅ Verificar sesión
                     const { data: { session } } = await supabase.auth.getSession();
-                    if (session) {
-                        const { data: profile } = await supabase
-                            .from('profiles')
-                            .select('branch, full_name')
-                            .eq('id', session.user.id)
-                            .single();
-                        if (profile) {
-                            this.userBranch = profile.branch || 'geminis';
-                            this.userName = profile.full_name || 'Usuario';
-                        }
+                    if (!session) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
+                    // ✅ Obtener perfil con rol, sucursal y nombre
+                    const { data: profile, error } = await supabase
+                        .from('profiles')
+                        .select('branch, full_name, role')
+                        .eq('id', session.user.id)
+                        .single();
+                    
+                    if (profile) {
+                        this.userBranch = profile.branch || 'geminis';
+                        this.userName = profile.full_name || 'Usuario';
+                        this.userRole = profile.role || 'vendedor';
+                    } else {
+                        console.error('Error cargando perfil:', error);
                     }
 
                     await this.loadExchangeRate();
@@ -372,6 +405,7 @@
                         const startOfDay = dateStr + 'T00:00:00';
                         const endOfDay = dateStr + 'T23:59:59';
 
+                        // ✅ Filtra por la sucursal seleccionada (admin puede cambiarla, vendedor usa la suya)
                         let query = supabase
                             .from('sales')
                             .select('*')
@@ -524,13 +558,11 @@
                     if (this.stats.totalSales > 0) {
                         const total = this.stats.totalSales;
                         
-                        // Usar floor para todos excepto el último
                         this.stats.percentages.efectivoBs = Math.floor((this.stats.efectivoBs / total) * 100);
                         this.stats.percentages.efectivoUsd = Math.floor((this.stats.efectivoUsd / total) * 100);
                         this.stats.percentages.pagoMovil = Math.floor((this.stats.pagoMovil / total) * 100);
                         this.stats.percentages.punto = Math.floor((this.stats.punto / total) * 100);
                         
-                        // El último se calcula como 100 - suma de los demás para garantizar que sume 100%
                         const sumaParcial = this.stats.percentages.efectivoBs + 
                                           this.stats.percentages.efectivoUsd + 
                                           this.stats.percentages.pagoMovil + 
