@@ -116,7 +116,7 @@
                     <i class="far fa-clock mr-1"></i>Generado: <span x-text="currentDateTime" class="font-semibold"></span> (Caracas, VE) | 
                     Fecha: <span x-text="formatDate(filters.date)"></span> | 
                     Sucursal: <span class="capitalize font-bold text-blue-700" x-text="userBranch"></span> | 
-                    Tasa: Bs. <span x-text="exchangeRate.toFixed(2)"></span>
+                    Tasa: Bs. <span x-text="formatVE(exchangeRate)"></span>
                 </p>
             </div>
 
@@ -137,7 +137,7 @@
             <div class="mb-4 border-2 border-gray-300 rounded-lg overflow-hidden">
                 <div class="bg-blue-50 px-3 py-2 font-bold text-blue-800 flex justify-between">
                     <span><i class="fas fa-receipt mr-2"></i>VENTAS DEL DÍA</span>
-                    <span class="text-sm font-normal" x-text="'Total: $' + stats.totalSales.toFixed(2)"></span>
+                    <span class="text-sm font-normal" x-text="'Total: $' + formatVE(stats.totalSales)"></span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs">
@@ -158,12 +158,12 @@
                                 <tr class="border-b hover:bg-gray-50">
                                     <td class="px-2 py-1.5 font-medium" x-text="product.name"></td>
                                     <td class="px-2 py-1.5 text-center font-bold" x-text="product.quantity"></td>
-                                    <td class="px-2 py-1.5 text-right bg-purple-50/30" x-text="'$' + product.efectivoBs.toFixed(2)"></td>
-                                    <td class="px-2 py-1.5 text-right bg-green-50/30" x-text="'$' + product.efectivoUsd.toFixed(2)"></td>
-                                    <td class="px-2 py-1.5 text-right bg-blue-50/30" x-text="'$' + product.pagoMovil.toFixed(2)"></td>
-                                    <td class="px-2 py-1.5 text-right bg-orange-50/30" x-text="'$' + product.punto.toFixed(2)"></td>
-                                    <td class="px-2 py-1.5 text-right bg-yellow-50/30" x-text="'$' + product.transferencia.toFixed(2)"></td>
-                                    <td class="px-2 py-1.5 text-right font-bold" x-text="'$' + product.total.toFixed(2)"></td>
+                                    <td class="px-2 py-1.5 text-right bg-purple-50/30" x-text="formatVE(product.efectivoBs)"></td>
+                                    <td class="px-2 py-1.5 text-right bg-green-50/30" x-text="formatVE(product.efectivoUsd)"></td>
+                                    <td class="px-2 py-1.5 text-right bg-blue-50/30" x-text="formatVE(product.pagoMovil)"></td>
+                                    <td class="px-2 py-1.5 text-right bg-orange-50/30" x-text="formatVE(product.punto)"></td>
+                                    <td class="px-2 py-1.5 text-right bg-yellow-50/30" x-text="formatVE(product.transferencia)"></td>
+                                    <td class="px-2 py-1.5 text-right font-bold" x-text="formatVE(product.total)"></td>
                                 </tr>
                             </template>
                             <tr x-show="stats.products.length === 0">
@@ -177,23 +177,23 @@
                                 </td>
                                 <td class="px-2 py-1.5 text-right" colspan="5">
                                     <span class="text-blue-800">
-                                        $<span x-text="stats.digitalPayments.toFixed(2)"></span> = 
-                                        Bs. <span x-text="stats.digitalPaymentsBs.toFixed(2)"></span>
+                                        $<span x-text="formatVE(stats.digitalPayments)"></span> = 
+                                        Bs. <span x-text="formatVE(stats.digitalPaymentsBs)"></span>
                                     </span>
                                 </td>
                                 <td class="px-2 py-1.5 text-right text-blue-800">
-                                    <span x-text="'$' + (stats.pagoMovil + stats.punto + stats.transferencia).toFixed(2)"></span>
+                                    <span x-text="formatVE(stats.pagoMovil + stats.punto + stats.transferencia)"></span>
                                 </td>
                             </tr>
                             <!-- Sub-total General -->
                             <tr class="bg-gray-100 font-bold border-t-2 border-gray-300">
                                 <td class="px-2 py-1.5" colspan="2">SUBTOTAL:</td>
-                                <td class="px-2 py-1.5 text-right bg-purple-50/30" x-text="'$' + stats.efectivoBs.toFixed(2)"></td>
-                                <td class="px-2 py-1.5 text-right bg-green-50/30" x-text="'$' + stats.efectivoUsd.toFixed(2)"></td>
-                                <td class="px-2 py-1.5 text-right bg-blue-50/30" x-text="'$' + stats.pagoMovil.toFixed(2)"></td>
-                                <td class="px-2 py-1.5 text-right bg-orange-50/30" x-text="'$' + stats.punto.toFixed(2)"></td>
-                                <td class="px-2 py-1.5 text-right bg-yellow-50/30" x-text="'$' + stats.transferencia.toFixed(2)"></td>
-                                <td class="px-2 py-1.5 text-right" x-text="'$' + stats.totalSales.toFixed(2)"></td>
+                                <td class="px-2 py-1.5 text-right bg-purple-50/30" x-text="formatVE(stats.efectivoBs)"></td>
+                                <td class="px-2 py-1.5 text-right bg-green-50/30" x-text="formatVE(stats.efectivoUsd)"></td>
+                                <td class="px-2 py-1.5 text-right bg-blue-50/30" x-text="formatVE(stats.pagoMovil)"></td>
+                                <td class="px-2 py-1.5 text-right bg-orange-50/30" x-text="formatVE(stats.punto)"></td>
+                                <td class="px-2 py-1.5 text-right bg-yellow-50/30" x-text="formatVE(stats.transferencia)"></td>
+                                <td class="px-2 py-1.5 text-right" x-text="formatVE(stats.totalSales)"></td>
                             </tr>
                         </tbody>
                     </table>
@@ -207,31 +207,31 @@
                     <div class="space-y-1 text-xs">
                         <div class="flex justify-between">
                             <span>Efectivo Bs:</span>
-                            <span class="font-bold" x-text="'$' + stats.efectivoBs.toFixed(2)"></span>
+                            <span class="font-bold" x-text="formatVE(stats.efectivoBs)"></span>
                         </div>
                         <div class="flex justify-between">
                             <span>Efectivo $:</span>
-                            <span class="font-bold" x-text="'$' + stats.efectivoUsd.toFixed(2)"></span>
+                            <span class="font-bold" x-text="formatVE(stats.efectivoUsd)"></span>
                         </div>
                         <div class="flex justify-between">
                             <span>Pago Móvil:</span>
-                            <span class="font-bold" x-text="'$' + stats.pagoMovil.toFixed(2)"></span>
+                            <span class="font-bold" x-text="formatVE(stats.pagoMovil)"></span>
                         </div>
                         <div class="flex justify-between">
                             <span>Punto de Venta:</span>
-                            <span class="font-bold" x-text="'$' + stats.punto.toFixed(2)"></span>
+                            <span class="font-bold" x-text="formatVE(stats.punto)"></span>
                         </div>
                         <div class="flex justify-between">
                             <span>Transferencia:</span>
-                            <span class="font-bold" x-text="'$' + stats.transferencia.toFixed(2)"></span>
+                            <span class="font-bold" x-text="formatVE(stats.transferencia)"></span>
                         </div>
                         <div class="border-t border-blue-200 pt-1 mt-1 flex justify-between bg-blue-50 px-2 py-1 rounded">
                             <span class="font-semibold text-blue-800">Pagos Digitales (Bs):</span>
-                            <span class="font-bold text-blue-800" x-text="'$' + stats.digitalPayments.toFixed(2)"></span>
+                            <span class="font-bold text-blue-800" x-text="formatVE(stats.digitalPayments)"></span>
                         </div>
                         <div class="flex justify-between bg-blue-50 px-2 py-1 rounded -mt-1">
                             <span class="text-blue-800 text-[10px]">Equivalente en Bs:</span>
-                            <span class="font-bold text-blue-800 text-[10px]" x-text="'Bs. ' + stats.digitalPaymentsBs.toFixed(2)"></span>
+                            <span class="font-bold text-blue-800 text-[10px]" x-text="'Bs. ' + formatVE(stats.digitalPaymentsBs)"></span>
                         </div>
                     </div>
                 </div>
@@ -241,16 +241,16 @@
                     <div class="space-y-2 text-xs">
                         <div class="flex justify-between">
                             <span>Total en $:</span>
-                            <span class="font-bold text-green-700 text-base" x-text="'$' + stats.totalSales.toFixed(2)"></span>
+                            <span class="font-bold text-green-700 text-base" x-text="formatVE(stats.totalSales)"></span>
                         </div>
                         <div class="flex justify-between">
                             <span>Equivalente en Bs:</span>
-                            <span class="font-bold text-green-700" x-text="'Bs. ' + (stats.totalSales * exchangeRate).toFixed(2)"></span>
+                            <span class="font-bold text-green-700" x-text="'Bs. ' + formatVE(stats.totalSales * exchangeRate)"></span>
                         </div>
                         <div class="border-t-2 border-green-400 pt-2">
                             <div class="flex justify-between items-center">
                                 <span class="font-bold text-sm">GRAN TOTAL (USD):</span>
-                                <span class="font-bold text-green-800 text-lg" x-text="'$' + stats.totalSales.toFixed(2)"></span>
+                                <span class="font-bold text-green-800 text-lg" x-text="formatVE(stats.totalSales)"></span>
                             </div>
                         </div>
                     </div>
@@ -288,13 +288,13 @@
             <div class="grid grid-cols-2 gap-4 mb-4">
                 <div class="bg-gradient-to-br from-blue-100 to-blue-200 border-2 border-blue-400 rounded-lg p-3 text-center">
                     <p class="text-xs text-gray-700 mb-1 font-semibold">TOTAL VENTAS DÓLARES</p>
-                    <p class="text-2xl font-bold text-blue-700" x-text="'$' + stats.totalSales.toFixed(2)"></p>
+                    <p class="text-2xl font-bold text-blue-700" x-text="formatVE(stats.totalSales)"></p>
                     <p class="text-[10px] text-gray-600 mt-1" x-text="stats.totalTransactions + ' transacciones'"></p>
                 </div>
                 <div class="bg-gradient-to-br from-green-100 to-green-200 border-2 border-green-400 rounded-lg p-3 text-center">
                     <p class="text-xs text-gray-700 mb-1 font-semibold">TOTAL VENTAS BOLÍVARES</p>
-                    <p class="text-2xl font-bold text-green-700" x-text="'Bs. ' + (stats.totalSales * exchangeRate).toFixed(2)"></p>
-                    <p class="text-[10px] text-gray-600 mt-1" x-text="'Tasa: Bs. ' + exchangeRate.toFixed(2)"></p>
+                    <p class="text-2xl font-bold text-green-700" x-text="'Bs. ' + formatVE(stats.totalSales * exchangeRate)"></p>
+                    <p class="text-[10px] text-gray-600 mt-1" x-text="'Tasa: Bs. ' + formatVE(exchangeRate)"></p>
                 </div>
             </div>
 
@@ -328,7 +328,6 @@
                 exchangeRate: 736.93,
                 currentDateTime: '',
                 filters: {
-                    // ✅ CORRECCIÓN 1: Obtener la fecha actual en zona horaria de Caracas (formato YYYY-MM-DD)
                     date: new Date().toLocaleDateString('en-CA', { timeZone: 'America/Caracas' })
                 },
                 stats: {
@@ -351,6 +350,15 @@
                         punto: 0,
                         transferencia: 0
                     }
+                },
+
+                // ✅ FUNCIÓN NUEVA: Formato de moneda venezolano (1.234,56)
+                formatVE(num) {
+                    if (num === null || num === undefined || isNaN(num)) return '0,00';
+                    return new Intl.NumberFormat('es-VE', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(num);
                 },
 
                 async initReporte() {
@@ -401,7 +409,6 @@
                         this.resetStats();
 
                         const dateStr = this.filters.date;
-                        // ✅ CORRECCIÓN 2: Forzar offset de Venezuela (-04:00) para que Supabase consulte el día correcto
                         const startOfDay = dateStr + 'T00:00:00-04:00';
                         const endOfDay = dateStr + 'T23:59:59-04:00';
 
@@ -528,7 +535,7 @@
                         this.stats.transferencia += saleTransferencia;
                     }
 
-                    // Redondear todos los valores
+                    // Redondear todos los valores internamente para cálculos precisos
                     this.stats.efectivoBs = Math.round(this.stats.efectivoBs * 100) / 100;
                     this.stats.efectivoUsd = Math.round(this.stats.efectivoUsd * 100) / 100;
                     this.stats.pagoMovil = Math.round(this.stats.pagoMovil * 100) / 100;
@@ -572,7 +579,6 @@
 
                 formatDate(dateStr) {
                     if (!dateStr) return '';
-                    // ✅ CORRECCIÓN 3: Evitar desfase de día por zona horaria usando split directo de la cadena YYYY-MM-DD
                     const [year, month, day] = dateStr.split('-');
                     return `${day}/${month}/${year}`;
                 },
