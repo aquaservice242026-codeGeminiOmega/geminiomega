@@ -59,8 +59,8 @@
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 28px; }
         .toggle-slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
-        input:checked + .toggle-slider { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
-        input:checked + .toggle-slider:before { transform: translateX(22px); }
+        input:checked+.toggle-slider { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
+        input:checked+.toggle-slider:before { transform: translateX(22px); }
         .payment-card { transition: all 0.2s ease; border: 2px solid transparent; }
         .payment-card:hover { border-color: #0ea5e9; transform: translateY(-1px); }
         @keyframes pulse-bcv { 0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); } 50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); } }
@@ -236,7 +236,7 @@
                                 <div class="flex flex-col items-center text-center space-y-1">
                                     <i class="fas fa-tint text-2xl lg:text-4xl mb-1"></i>
                                     <p class="font-bold text-sm lg:text-lg leading-tight" x-text="product.name"></p>
-                                    <p class="text-xs lg:text-sm opacity-90 font-semibold" x-text="'$' + formatVE(product.price)"></p>
+                                    <p class="text-xs lg:text-sm opacity-90 font-semibold" x-text="'$' + product.price.toFixed(2)"></p>
                                 </div>
                                 <div class="hidden lg:flex justify-center space-x-1 mt-4 pt-4 border-t border-white/20" @click.stop>
                                     <button @click="quickAdd(product, 1)" class="quick-add-btn bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded touch-btn" :disabled="product.stock < 1">+1</button>
@@ -290,7 +290,7 @@
                             <div class="flex items-center justify-between mb-1">
                                 <div class="flex-1">
                                     <h4 class="font-semibold text-gray-800" x-text="item.name"></h4>
-                                    <p class="text-xs text-gray-600" x-text="'$' + formatVE(item.price) + ' c/u'"></p>
+                                    <p class="text-xs text-gray-600" x-text="'$' + item.price.toFixed(2) + ' c/u'"></p>
                                 </div>
                                 <button @click="removeFromCart(index)" class="text-red-500 hover:text-red-700 touch-btn p-1">
                                     <i class="fas fa-trash text-sm"></i>
@@ -309,7 +309,7 @@
                                 </div>
                                 <div class="text-right">
                                     <p class="text-[10px] text-gray-600">Subtotal</p>
-                                    <p class="font-bold text-cyan-600 text-sm" x-text="'$' + formatVE(item.price * item.quantity)"></p>
+                                    <p class="font-bold text-cyan-600 text-sm" x-text="'$' + (item.price * item.quantity).toFixed(2)"></p>
                                 </div>
                             </div>
                         </div>
@@ -322,15 +322,15 @@
                 <div class="border-t pt-4 space-y-2">
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-600">Subtotal:</span>
-                        <span class="font-medium" x-text="'$' + formatVE(subtotal)"></span>
+                        <span class="font-medium" x-text="'$' + subtotal.toFixed(2)"></span>
                     </div>
                     <div class="flex justify-between text-lg font-bold border-t pt-2">
                         <span class="text-gray-800">Total USD:</span>
-                        <span class="text-cyan-600" x-text="'$' + formatVE(totalUSD)"></span>
+                        <span class="text-cyan-600" x-text="'$' + totalUSD.toFixed(2)"></span>
                     </div>
                     <div @click="copyTotalToReceived()" class="total-bs-clickable flex justify-between text-sm bg-green-50 p-2 rounded-lg cursor-pointer">
                         <span class="text-gray-600">Total Bs. <i class="fas fa-hand-pointer text-xs"></i></span>
-                        <span class="font-bold text-green-600" x-text="'Bs. ' + formatVE(totalBs)"></span>
+                        <span class="font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></span>
                     </div>
                 </div>
 
@@ -386,19 +386,19 @@
                     </div>
                     <div x-show="paymentMethod === 'efectivo_bs'" class="mt-4 p-3 bg-green-50 rounded-lg">
                         <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (Bs.)</label>
-                        <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0,00">
+                        <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
                         <div x-show="amountReceivedBs > 0" class="mt-2 text-xs space-y-1">
-                            <p class="text-gray-600">En USD: <span class="font-bold" x-text="'$' + formatVE(amountReceivedBs / exchangeRate)"></span></p>
-                            <p x-show="amountReceivedBs >= totalBs" class="text-green-600 font-semibold">Cambio: Bs. <span x-text="formatVE(amountReceivedBs - totalBs)"></span></p>
-                            <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs. <span x-text="formatVE(totalBs - amountReceivedBs)"></span></p>
+                            <p class="text-gray-600">En USD: <span class="font-bold" x-text="'$' + (amountReceivedBs / exchangeRate).toFixed(2)"></span></p>
+                            <p x-show="amountReceivedBs >= totalBs" class="text-green-600 font-semibold">Cambio: Bs. <span x-text="(amountReceivedBs - totalBs).toFixed(2)"></span></p>
+                            <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs. <span x-text="(totalBs - amountReceivedBs).toFixed(2)"></span></p>
                         </div>
                     </div>
                     <div x-show="paymentMethod === 'efectivo_divisas'" class="mt-4 p-3 bg-green-50 rounded-lg">
                         <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (USD)</label>
-                        <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0,00">
+                        <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
                         <div x-show="amountReceivedUsd > 0" class="mt-2 text-xs space-y-1">
-                            <p x-show="amountReceivedUsd >= totalUSD" class="text-green-600 font-semibold">Cambio: $<span x-text="formatVE(amountReceivedUsd - totalUSD)"></span></p>
-                            <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta: $<span x-text="formatVE(totalUSD - amountReceivedUsd)"></span></p>
+                            <p x-show="amountReceivedUsd >= totalUSD" class="text-green-600 font-semibold">Cambio: $<span x-text="(amountReceivedUsd - totalUSD).toFixed(2)"></span></p>
+                            <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta: $<span x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
                         </div>
                     </div>
                     <div x-show="paymentMethod === 'credito'" class="mt-4 p-3 bg-red-50 rounded-lg">
@@ -414,15 +414,15 @@
                     <div class="bg-blue-50 rounded-xl p-3 border border-blue-200">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-xs font-semibold text-gray-700">Total Venta:</span>
-                            <span class="text-sm font-bold text-blue-600">$<span x-text="formatVE(totalUSD)"></span></span>
+                            <span class="text-sm font-bold text-blue-600">$<span x-text="totalUSD.toFixed(2)"></span></span>
                         </div>
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-xs text-gray-600">Pagado:</span>
-                            <span class="text-sm font-semibold text-green-600">$<span x-text="formatVE(totalPaid)"></span></span>
+                            <span class="text-sm font-semibold text-green-600">$<span x-text="totalPaid.toFixed(2)"></span></span>
                         </div>
                         <div class="flex justify-between items-center pt-2 border-t border-blue-200">
                             <span class="text-xs font-bold text-gray-800">Restante:</span>
-                            <span class="text-lg font-bold" :class="remainingAmount <= 0.01 ? 'text-green-600' : 'text-red-600'">$<span x-text="formatVE(remainingAmount)"></span></span>
+                            <span class="text-lg font-bold" :class="remainingAmount <= 0.01 ? 'text-green-600' : 'text-red-600'">$<span x-text="remainingAmount.toFixed(2)"></span></span>
                         </div>
                         <div class="mt-2">
                             <div class="w-full bg-gray-200 rounded-full h-2">
@@ -450,8 +450,8 @@
                                             <span class="text-xs font-semibold text-gray-800" x-text="getPaymentMethodName(payment.method)"></span>
                                         </div>
                                         <div class="flex items-center space-x-3 text-xs">
-                                            <span class="text-green-600 font-bold">$<span x-text="formatVE(payment.amount)"></span></span>
-                                            <span class="text-gray-500" x-text="'Bs. ' + formatVE(payment.amount * exchangeRate)"></span>
+                                            <span class="text-green-600 font-bold">$<span x-text="payment.amount.toFixed(2)"></span></span>
+                                            <span class="text-gray-500" x-text="'Bs. ' + (payment.amount * exchangeRate).toFixed(2)"></span>
                                         </div>
                                         <p x-show="payment.reference" class="text-[10px] text-gray-500 mt-1">Ref: <span x-text="payment.reference"></span></p>
                                     </div>
@@ -476,13 +476,13 @@
                             </select>
                             <div x-show="newPayment.method !== 'efectivo_bs'">
                                 <label class="text-[10px] font-medium text-gray-600">Monto (USD)</label>
-                                <input type="number" x-model.number="newPayment.amountUsd" step="0.01" min="0" :placeholder="'Sugerido: $' + formatVE(remainingAmount)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
-                                <p class="text-[10px] text-gray-500 mt-1">Equivale: Bs. <span class="font-semibold" x-text="formatVE((newPayment.amountUsd || 0) * exchangeRate)"></span></p>
+                                <input type="number" x-model.number="newPayment.amountUsd" step="0.01" min="0" :placeholder="'Sugerido: $' + remainingAmount.toFixed(2)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+                                <p class="text-[10px] text-gray-500 mt-1">Equivale: Bs. <span class="font-semibold" x-text="((newPayment.amountUsd || 0) * exchangeRate).toFixed(2)"></span></p>
                             </div>
                             <div x-show="newPayment.method === 'efectivo_bs'">
                                 <label class="text-[10px] font-medium text-gray-600">Monto (Bs.)</label>
-                                <input type="number" x-model.number="newPayment.amountBs" step="0.01" min="0" :placeholder="'Sugerido: Bs. ' + formatVE(remainingAmount * exchangeRate)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
-                                <p class="text-[10px] text-gray-500 mt-1">Equivale: $<span class="font-semibold" x-text="formatVE((newPayment.amountBs || 0) / exchangeRate)"></span></p>
+                                <input type="number" x-model.number="newPayment.amountBs" step="0.01" min="0" :placeholder="'Sugerido: Bs. ' + (remainingAmount * exchangeRate).toFixed(2)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+                                <p class="text-[10px] text-gray-500 mt-1">Equivale: $<span class="font-semibold" x-text="((newPayment.amountBs || 0) / exchangeRate).toFixed(2)"></span></p>
                             </div>
                             <div x-show="['pago_movil', 'transferencia', 'punto_venta'].includes(newPayment.method)">
                                 <label class="text-[10px] font-medium text-gray-600">Referencia</label>
@@ -492,7 +492,7 @@
                                 <i class="fas fa-plus mr-1"></i>Agregar Pago
                             </button>
                             <button x-show="remainingAmount > 0.01" @click="fillRemainingPayment()" class="w-full bg-blue-100 text-blue-700 py-2 rounded-lg text-xs font-semibold touch-btn">
-                                <i class="fas fa-magic mr-1"></i>Completar con $<span x-text="formatVE(remainingAmount)"></span>
+                                <i class="fas fa-magic mr-1"></i>Completar con $<span x-text="remainingAmount.toFixed(2)"></span>
                             </button>
                         </div>
                     </div>
@@ -522,11 +522,11 @@
         <div class="flex items-center justify-between mb-2">
             <div>
                 <p class="text-xs text-gray-500">Total USD</p>
-                <p class="text-2xl font-bold text-gray-900" x-text="'$' + formatVE(totalUSD)"></p>
+                <p class="text-2xl font-bold text-gray-900" x-text="'$' + totalUSD.toFixed(2)"></p>
             </div>
             <div @click="copyTotalToReceived()" class="total-bs-clickable bg-green-50 px-3 py-2 rounded-lg text-right">
                 <p class="text-[10px] text-gray-500">Total Bs. <i class="fas fa-hand-pointer text-xs"></i></p>
-                <p class="text-lg font-bold text-green-600" x-text="'Bs. ' + formatVE(totalBs)"></p>
+                <p class="text-lg font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></p>
             </div>
         </div>
         <div class="flex items-center justify-between text-xs">
@@ -570,7 +570,7 @@
                     <div class="flex items-center justify-between mb-1">
                         <div class="flex-1">
                             <h4 class="font-semibold text-gray-800" x-text="item.name"></h4>
-                            <p class="text-xs text-gray-600" x-text="'$' + formatVE(item.price) + ' c/u'"></p>
+                            <p class="text-xs text-gray-600" x-text="'$' + item.price.toFixed(2) + ' c/u'"></p>
                         </div>
                         <button @click="removeFromCart(index)" class="text-red-500 hover:text-red-700 touch-btn p-1">
                             <i class="fas fa-trash text-sm"></i>
@@ -589,7 +589,7 @@
                         </div>
                         <div class="text-right">
                             <p class="text-[10px] text-gray-600">Subtotal</p>
-                            <p class="font-bold text-cyan-600 text-sm" x-text="'$' + formatVE(item.price * item.quantity)"></p>
+                            <p class="font-bold text-cyan-600 text-sm" x-text="'$' + (item.price * item.quantity).toFixed(2)"></p>
                         </div>
                     </div>
                 </div>
@@ -599,15 +599,15 @@
             <div class="space-y-2 mb-3">
                 <div class="flex justify-between text-sm">
                     <span class="text-gray-600">Subtotal:</span>
-                    <span class="font-medium" x-text="'$' + formatVE(subtotal)"></span>
+                    <span class="font-medium" x-text="'$' + subtotal.toFixed(2)"></span>
                 </div>
                 <div class="flex justify-between text-lg font-bold border-t pt-2">
                     <span class="text-gray-800">Total USD:</span>
-                    <span class="text-cyan-600" x-text="'$' + formatVE(totalUSD)"></span>
+                    <span class="text-cyan-600" x-text="'$' + totalUSD.toFixed(2)"></span>
                 </div>
                 <div @click="copyTotalToReceived()" class="total-bs-clickable flex justify-between text-sm bg-green-50 p-2 rounded-lg">
                     <span class="text-gray-600">Total Bs. <i class="fas fa-hand-pointer text-xs"></i></span>
-                    <span class="font-bold text-green-600" x-text="'Bs. ' + formatVE(totalBs)"></span>
+                    <span class="font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></span>
                 </div>
             </div>
             <div class="mb-3">
@@ -676,19 +676,19 @@
                 </div>
                 <div x-show="paymentMethod === 'efectivo_bs'" class="mt-2 p-3 bg-green-50 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (Bs.)</label>
-                    <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0,00">
+                    <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
                     <div x-show="amountReceivedBs > 0" class="mt-2 text-xs space-y-1">
-                        <p class="text-gray-600">En USD: <span class="font-bold" x-text="'$' + formatVE(amountReceivedBs / exchangeRate)"></span></p>
-                        <p x-show="amountReceivedBs >= totalBs" class="text-green-600 font-semibold">Cambio: Bs. <span x-text="formatVE(amountReceivedBs - totalBs)"></span></p>
-                        <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs. <span x-text="formatVE(totalBs - amountReceivedBs)"></span></p>
+                        <p class="text-gray-600">En USD: <span class="font-bold" x-text="'$' + (amountReceivedBs / exchangeRate).toFixed(2)"></span></p>
+                        <p x-show="amountReceivedBs >= totalBs" class="text-green-600 font-semibold">Cambio: Bs. <span x-text="(amountReceivedBs - totalBs).toFixed(2)"></span></p>
+                        <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs. <span x-text="(totalBs - amountReceivedBs).toFixed(2)"></span></p>
                     </div>
                 </div>
                 <div x-show="paymentMethod === 'efectivo_divisas'" class="mt-2 p-3 bg-green-50 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (USD)</label>
-                    <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0,00">
+                    <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
                     <div x-show="amountReceivedUsd > 0" class="mt-2 text-xs space-y-1">
-                        <p x-show="amountReceivedUsd >= totalUSD" class="text-green-600 font-semibold">Cambio: $<span x-text="formatVE(amountReceivedUsd - totalUSD)"></span></p>
-                        <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta: $<span x-text="formatVE(totalUSD - amountReceivedUsd)"></span></p>
+                        <p x-show="amountReceivedUsd >= totalUSD" class="text-green-600 font-semibold">Cambio: $<span x-text="(amountReceivedUsd - totalUSD).toFixed(2)"></span></p>
+                        <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta: $<span x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
                     </div>
                 </div>
                 <div x-show="paymentMethod === 'credito'" class="mt-2 p-3 bg-red-50 rounded-lg">
@@ -702,15 +702,15 @@
                 <div class="bg-blue-50 rounded-xl p-3 border border-blue-200">
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-xs font-semibold text-gray-700">Total:</span>
-                        <span class="text-sm font-bold text-blue-600">$<span x-text="formatVE(totalUSD)"></span></span>
+                        <span class="text-sm font-bold text-blue-600">$<span x-text="totalUSD.toFixed(2)"></span></span>
                     </div>
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-xs text-gray-600">Pagado:</span>
-                        <span class="text-sm font-semibold text-green-600">$<span x-text="formatVE(totalPaid)"></span></span>
+                        <span class="text-sm font-semibold text-green-600">$<span x-text="totalPaid.toFixed(2)"></span></span>
                     </div>
                     <div class="flex justify-between items-center pt-2 border-t border-blue-200">
                         <span class="text-xs font-bold text-gray-800">Restante:</span>
-                        <span class="text-lg font-bold" :class="remainingAmount <= 0.01 ? 'text-green-600' : 'text-red-600'">$<span x-text="formatVE(remainingAmount)"></span></span>
+                        <span class="text-lg font-bold" :class="remainingAmount <= 0.01 ? 'text-green-600' : 'text-red-600'">$<span x-text="remainingAmount.toFixed(2)"></span></span>
                     </div>
                     <div class="mt-2">
                         <div class="w-full bg-gray-200 rounded-full h-2">
@@ -728,8 +728,8 @@
                                     <span class="text-xs font-semibold text-gray-800" x-text="getPaymentMethodName(payment.method)"></span>
                                 </div>
                                 <div class="flex items-center space-x-3 text-xs">
-                                    <span class="text-green-600 font-bold">$<span x-text="formatVE(payment.amount)"></span></span>
-                                    <span class="text-gray-500" x-text="'Bs. ' + formatVE(payment.amount * exchangeRate)"></span>
+                                    <span class="text-green-600 font-bold">$<span x-text="payment.amount.toFixed(2)"></span></span>
+                                    <span class="text-gray-500" x-text="'Bs. ' + (payment.amount * exchangeRate).toFixed(2)"></span>
                                 </div>
                                 <p x-show="payment.reference" class="text-[10px] text-gray-500 mt-1">Ref: <span x-text="payment.reference"></span></p>
                             </div>
@@ -753,13 +753,13 @@
                         </select>
                         <div x-show="newPayment.method !== 'efectivo_bs'">
                             <label class="text-[10px] font-medium text-gray-600">Monto (USD)</label>
-                            <input type="number" x-model.number="newPayment.amountUsd" step="0.01" min="0" :placeholder="'Sugerido: $' + formatVE(remainingAmount)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
-                            <p class="text-[10px] text-gray-500 mt-1">Equivale: Bs. <span class="font-semibold" x-text="formatVE((newPayment.amountUsd || 0) * exchangeRate)"></span></p>
+                            <input type="number" x-model.number="newPayment.amountUsd" step="0.01" min="0" :placeholder="'Sugerido: $' + remainingAmount.toFixed(2)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+                            <p class="text-[10px] text-gray-500 mt-1">Equivale: Bs. <span class="font-semibold" x-text="((newPayment.amountUsd || 0) * exchangeRate).toFixed(2)"></span></p>
                         </div>
                         <div x-show="newPayment.method === 'efectivo_bs'">
                             <label class="text-[10px] font-medium text-gray-600">Monto (Bs.)</label>
-                            <input type="number" x-model.number="newPayment.amountBs" step="0.01" min="0" :placeholder="'Sugerido: Bs. ' + formatVE(remainingAmount * exchangeRate)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
-                            <p class="text-[10px] text-gray-500 mt-1">Equivale: $<span class="font-semibold" x-text="formatVE((newPayment.amountBs || 0) / exchangeRate)"></span></p>
+                            <input type="number" x-model.number="newPayment.amountBs" step="0.01" min="0" :placeholder="'Sugerido: Bs. ' + (remainingAmount * exchangeRate).toFixed(2)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+                            <p class="text-[10px] text-gray-500 mt-1">Equivale: $<span class="font-semibold" x-text="((newPayment.amountBs || 0) / exchangeRate).toFixed(2)"></span></p>
                         </div>
                         <div x-show="['pago_movil', 'transferencia', 'punto_venta'].includes(newPayment.method)">
                             <label class="text-[10px] font-medium text-gray-600">Referencia</label>
@@ -769,7 +769,7 @@
                             <i class="fas fa-plus mr-1"></i>Agregar Pago
                         </button>
                         <button x-show="remainingAmount > 0.01" @click="fillRemainingPayment()" class="w-full bg-blue-100 text-blue-700 py-2 rounded-lg text-xs font-semibold touch-btn">
-                            <i class="fas fa-magic mr-1"></i>Completar con $<span x-text="formatVE(remainingAmount)"></span>
+                            <i class="fas fa-magic mr-1"></i>Completar con $<span x-text="remainingAmount.toFixed(2)"></span>
                         </button>
                     </div>
                 </div>
@@ -792,7 +792,7 @@
         </div>
     </div>
 
-    <!-- Modal Crear Cliente -->
+    <!-- Modal Crear Cliente - CON DROPDOWNS ANIDADOS Y CÉDULA -->
     <div x-show="showCustomerModal" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="closeCustomerModal()">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-bounce-in" @click.stop>
             <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white">
@@ -804,20 +804,53 @@
             <div class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nombre Completo *</label>
-                    <input type="text" x-model="newCustomer.full_name" @input="newCustomer.full_name = newCustomer.full_name.toUpperCase()" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500" placeholder="Ej: Juan Pérez">
+                    <input type="text" x-model="newCustomer.full_name" @input="newCustomer.full_name = newCustomer.full_name.toUpperCase()" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500" placeholder="Ej: JUAN PÉREZ">
                 </div>
+                
+                <!-- ✅ NUEVO: Cédula de Identidad -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Cédula de Identidad</label>
+                    <input type="text" x-model="newCustomer.cedula" @input="newCustomer.cedula = newCustomer.cedula.toUpperCase()" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500" placeholder="Ej: V-12345678">
+                </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
                     <input type="tel" x-model="newCustomer.phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500" placeholder="0412-1234567">
                 </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
                     <input type="email" x-model="newCustomer.email" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500" placeholder="cliente@email.com">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Dirección</label>
-                    <textarea x-model="newCustomer.address" @input="newCustomer.address = newCustomer.address.toUpperCase()" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500" placeholder="Dirección completa"></textarea>
+
+                <!-- ✅ NUEVOS: Dropdowns anidados Municipio y Sector -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Municipio *</label>
+                        <select x-model="newCustomer.municipio" @change="onMunicipioChange()" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500">
+                            <option value="">Seleccione...</option>
+                            <template x-for="mun in locationData.municipios" :key="mun.id">
+                                <option :value="mun.id" x-text="mun.nombre"></option>
+                            </template>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Sector *</label>
+                        <select x-model="newCustomer.sector" :disabled="!newCustomer.municipio" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed">
+                            <option value="">Seleccione...</option>
+                            <template x-for="sec in filteredSectores" :key="sec.id">
+                                <option :value="sec.id" x-text="sec.nombre"></option>
+                            </template>
+                        </select>
+                    </div>
                 </div>
+
+                <!-- ✅ NUEVO: Dirección específica -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Dirección Específica (Calle, Casa, Ref.)</label>
+                    <textarea x-model="newCustomer.direccion_especifica" @input="newCustomer.direccion_especifica = newCustomer.direccion_especifica.toUpperCase()" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Ej: CALLE PRINCIPAL, CASA #15, FRENTE A LA FARMACIA"></textarea>
+                </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Recomendado por</label>
                     <input type="text" x-model="newCustomer.recommended_by" @input="newCustomer.recommended_by = newCustomer.recommended_by.toUpperCase()" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500" placeholder="Nombre de quien recomendó">
@@ -882,15 +915,15 @@
                     <div class="space-y-2">
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600">Total Venta:</span>
-                            <span class="font-bold text-lg" x-text="'$' + formatVE(totalUSD)"></span>
+                            <span class="font-bold text-lg" x-text="'$' + totalUSD.toFixed(2)"></span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600">Pago Inicial:</span>
-                            <span class="font-semibold" x-text="'$' + formatVE(creditForm.initial_payment)"></span>
+                            <span class="font-semibold" x-text="'$' + creditForm.initial_payment.toFixed(2)"></span>
                         </div>
                         <div class="border-t border-green-200 pt-2 flex justify-between">
                             <span class="text-gray-800 font-semibold">Monto a Financiar:</span>
-                            <span class="font-bold text-xl text-blue-600" x-text="'$' + formatVE(totalUSD - creditForm.initial_payment)"></span>
+                            <span class="font-bold text-xl text-blue-600" x-text="'$' + (totalUSD - creditForm.initial_payment).toFixed(2)"></span>
                         </div>
                     </div>
                 </div>
@@ -942,14 +975,63 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // ✅ FUNCIÓN GLOBAL PARA FORMATO DE MONEDA VENEZOLANO (Punto para miles, coma para decimales)
-        function formatVE(num) {
-            if (num === null || num === undefined || isNaN(num)) return '0,00';
-            return new Intl.NumberFormat('es-VE', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(num);
-        }
+        // ✅ DATOS DE UBICACIÓN - Municipios y Sectores de Nueva Esparta
+        const LOCATION_DATA = {
+            "estado": "Nueva Esparta",
+            "municipios": [
+                {
+                    "id": "marino",
+                    "nombre": "Mariño",
+                    "sectores": [
+                        { "id": "el-poblado", "nombre": "El Poblado" },
+                        { "id": "los-cocos", "nombre": "Los Cocos" },
+                        { "id": "bella-vista", "nombre": "Bella Vista" },
+                        { "id": "achipano", "nombre": "Achípano" },
+                        { "id": "conejeros", "nombre": "Conejeros" },
+                        { "id": "genoves", "nombre": "Genovés" },
+                        { "id": "campomar", "nombre": "Campomar" },
+                        { "id": "palguarime", "nombre": "Palguarime" },
+                        { "id": "cruz-grande", "nombre": "Cruz Grande" },
+                        { "id": "sabanamar", "nombre": "Sabanamar" },
+                        { "id": "costa-azul", "nombre": "Costa Azul" },
+                        { "id": "los-olivos", "nombre": "Los Olivos" }
+                    ]
+                },
+                {
+                    "id": "maneiro",
+                    "nombre": "Maneiro",
+                    "sectores": [
+                        { "id": "pampatar-casco", "nombre": "Pampatar (Casco Histórico)" },
+                        { "id": "los-robles", "nombre": "Los Robles" },
+                        { "id": "apostadero", "nombre": "Apostadero" },
+                        { "id": "agua-de-vaca", "nombre": "Agua de Vaca" },
+                        { "id": "los-cerritos", "nombre": "Los Cerritos" },
+                        { "id": "la-caranta", "nombre": "La Caranta" },
+                        { "id": "barrio-los-pescadores", "nombre": "Barrio Los Pescadores" },
+                        { "id": "san-lorenzo", "nombre": "San Lorenzo" },
+                        { "id": "playa-el-angel", "nombre": "Playa El Ángel" },
+                        { "id": "moreno", "nombre": "Moreno" },
+                        { "id": "jorge-coll", "nombre": "Jorge Coll" }
+                    ]
+                },
+                {
+                    "id": "garcia",
+                    "nombre": "García",
+                    "sectores": [
+                        { "id": "el-valle", "nombre": "El Valle del Espíritu Santo" },
+                        { "id": "villa-rosa", "nombre": "Villa Rosa" },
+                        { "id": "guatamare", "nombre": "Guatamare" },
+                        { "id": "la-isleta", "nombre": "La Isleta" },
+                        { "id": "pedro-luis-briceno", "nombre": "Pedro Luis Briceño" },
+                        { "id": "san-antonio", "nombre": "San Antonio" },
+                        { "id": "el-piache", "nombre": "El Piache" },
+                        { "id": "villa-juana", "nombre": "Villa Juana" },
+                        { "id": "la-cruz-del-pastel", "nombre": "La Cruz del Pastel" },
+                        { "id": "las-piedras", "nombre": "Las Piedras del Valle" }
+                    ]
+                }
+            ]
+        };
 
         async function logout() {
             await supabase.auth.signOut();
@@ -1010,10 +1092,6 @@
             return Math.round((parseFloat(num) + Number.EPSILON) * 100) / 100;
         }
 
-        function formatDecimal(num) {
-            return round2(num).toFixed(2).replace('.', ',');
-        }
-
         function ensureValidRate(rate) {
             const parsed = parseFloat(rate);
             if (isNaN(parsed) || parsed <= 0) {
@@ -1034,7 +1112,7 @@
                 console.log('✅ Tasa BCV obtenida:', rate);
                 return { rate: rate, date: data.fechaActualizacion, source: 'BCV Oficial' };
             } catch (err) {
-                console.error('❌ Error obteniendo tasa BCV:', err);
+                console.error(' Error obteniendo tasa BCV:', err);
                 return null;
             }
         }
@@ -1066,11 +1144,23 @@
                 userRole: '',
                 userBranch: '',
                 userInitials: '??',
-                newCustomer: { full_name: '', phone: '', email: '', address: '', recommended_by: '' },
+                // ✅ ACTUALIZADO: Nuevos campos para ubicación
+                newCustomer: { 
+                    full_name: '', 
+                    cedula: '',
+                    phone: '', 
+                    email: '', 
+                    municipio: '',
+                    sector: '',
+                    direccion_especifica: '',
+                    recommended_by: '' 
+                },
                 creditForm: { customer_id: '', customer_phone: '', customer_id_card: '', payment_date: '', payment_terms: '', initial_payment: 0, initial_payment_method: 'efectivo', notes: '' },
                 useMultiplePayments: false,
                 multiplePayments: [],
                 newPayment: { method: 'efectivo_divisas', amountUsd: 0, amountBs: 0, reference: '' },
+                // ✅ DATOS DE UBICACIÓN
+                locationData: LOCATION_DATA,
 
                 get filteredProducts() {
                     if (!this.productSearch) return this.products;
@@ -1145,7 +1235,7 @@
                         reference: this.newPayment.reference || ''
                     });
                     this.newPayment = { method: 'efectivo_divisas', amountUsd: 0, amountBs: 0, reference: '' };
-                    showToast(`Pago #${this.multiplePayments.length} agregado: $${formatVE(amountUsd)}`, 'success');
+                    showToast(`Pago #${this.multiplePayments.length} agregado: $${amountUsd.toFixed(2)}`, 'success');
                 },
 
                 removeMultiplePayment(id) {
@@ -1176,12 +1266,51 @@
                     return names[method] || method;
                 },
 
+                // ✅ NUEVO: Filtrar sectores según municipio seleccionado
+                get filteredSectores() {
+                    if (!this.newCustomer.municipio) return [];
+                    const mun = this.locationData.municipios.find(m => m.id === this.newCustomer.municipio);
+                    return mun ? mun.sectores : [];
+                },
+
+                // ✅ NUEVO: Cuando cambia el municipio, resetear el sector
+                onMunicipioChange() {
+                    this.newCustomer.sector = '';
+                },
+
+                // ✅ NUEVO: Obtener nombre del municipio
+                getMunicipioName(id) {
+                    const mun = this.locationData.municipios.find(m => m.id === id);
+                    return mun ? mun.nombre : id;
+                },
+
+                // ✅ NUEVO: Obtener nombre del sector
+                getSectorName(munId, secId) {
+                    const mun = this.locationData.municipios.find(m => m.id === munId);
+                    if (!mun) return secId;
+                    const sec = mun.sectores.find(s => s.id === secId);
+                    return sec ? sec.nombre : secId;
+                },
+
+                // ✅ ACTUALIZADO: Construir dirección completa desde municipio/sector/dirección específica
+                buildFullAddress(customer) {
+                    const parts = [];
+                    if (customer.municipio) parts.push(this.getMunicipioName(customer.municipio));
+                    if (customer.sector) parts.push(this.getSectorName(customer.municipio, customer.sector));
+                    if (customer.direccion_especifica) parts.push(customer.direccion_especifica);
+                    return parts.join(', ').toUpperCase();
+                },
+
                 onCustomerChange() {
-                    if (this.deliveryType === 'delivery' && this.selectedCustomer) {
+                    if (this.selectedCustomer) {
                         const customer = this.customers.find(c => c.id === this.selectedCustomer);
-                        if (customer && customer.address) {
-                            this.deliveryAddress = customer.address.toUpperCase();
-                            console.log('📍 Dirección autocompletada del cliente:', this.deliveryAddress);
+                        if (customer) {
+                            // ✅ Construir dirección completa desde los nuevos campos
+                            const fullAddress = this.buildFullAddress(customer);
+                            if (fullAddress && this.deliveryType === 'delivery') {
+                                this.deliveryAddress = fullAddress;
+                                console.log('📍 Dirección autocompletada del cliente:', this.deliveryAddress);
+                            }
                         }
                     }
                 },
@@ -1189,9 +1318,12 @@
                 watchDeliveryType() {
                     if (this.deliveryType === 'delivery' && this.selectedCustomer) {
                         const customer = this.customers.find(c => c.id === this.selectedCustomer);
-                        if (customer && customer.address) {
-                            this.deliveryAddress = customer.address.toUpperCase();
-                            console.log('📍 Dirección autocompletada al activar delivery:', this.deliveryAddress);
+                        if (customer) {
+                            const fullAddress = this.buildFullAddress(customer);
+                            if (fullAddress) {
+                                this.deliveryAddress = fullAddress;
+                                console.log('📍 Dirección autocompletada al activar delivery:', this.deliveryAddress);
+                            }
                         }
                     }
                 },
@@ -1259,12 +1391,12 @@
 
                 async loadExchangeRate() {
                     try {
-                        console.log('🔄 Consultando tasa centralizada de Supabase');
+                        console.log(' Consultando tasa centralizada de Supabase');
                         const { data, error } = await supabase.rpc('get_active_exchange_rate');
                         if (!error && data) {
                             const rate = ensureValidRate(data);
                             this.exchangeRate = rate;
-                            console.log('✅ Tasa cargada desde Supabase:', formatVE(this.exchangeRate));
+                            console.log('✅ Tasa cargada desde Supabase:', this.exchangeRate);
                         } else {
                             console.warn('⚠️ No se encontró tasa en BD, usando 700.22');
                             this.exchangeRate = 700.22;
@@ -1289,11 +1421,11 @@
                         html: `<div class="text-center space-y-3">
                             <div class="bg-blue-50 rounded-lg p-4">
                                 <p class="text-sm text-gray-600 mb-2">Tasa oficial del BCV:</p>
-                                <p class="text-4xl font-bold text-blue-600">Bs. ${formatVE(newRate)}</p>
+                                <p class="text-4xl font-bold text-blue-600">Bs. ${newRate.toFixed(2)}</p>
                                 <p class="text-xs text-gray-500 mt-2"><i class="fas fa-calendar mr-1"></i>Actualizada: ${rateDate}</p>
                             </div>
                             <div class="bg-yellow-50 rounded-lg p-3">
-                                <p class="text-xs text-gray-700"><i class="fas fa-info-circle mr-1"></i>Tasa actual en el sistema: <strong>Bs. ${formatVE(this.exchangeRate)}</strong></p>
+                                <p class="text-xs text-gray-700"><i class="fas fa-info-circle mr-1"></i>Tasa actual en el sistema: <strong>Bs. ${this.exchangeRate.toFixed(2)}</strong></p>
                             </div>
                             <p class="text-xs text-gray-500 mt-2">Fuente: ${bcvData.source}</p>
                         </div>`,
@@ -1306,7 +1438,7 @@
                     if (confirmed.isConfirmed) {
                         this.exchangeRate = newRate;
                         await this.updateExchangeRate();
-                        showToast(`✅ Tasa BCV aplicada: Bs. ${formatVE(newRate)}`, 'success');
+                        showToast(`✅ Tasa BCV aplicada: Bs. ${newRate.toFixed(2)}`, 'success');
                     }
                 },
 
@@ -1326,13 +1458,12 @@
                 async loadProducts() {
                     this.loading = true;
                     try {
-                        console.log('🔄 Cargando productos para sucursal:', this.userBranch);
+                        console.log(' Cargando productos para sucursal:', this.userBranch);
                         const { data: virtualInventory, error } = await supabase.rpc('calculate_virtual_inventory', { branch_param: this.userBranch });
                         if (error) {
                             console.error('❌ Error en calculate_virtual_inventory:', error);
                             throw error;
                         }
-                        console.log('📦 Datos recibidos de inventory:', virtualInventory);
                         if (!virtualInventory || virtualInventory.length === 0) {
                             console.warn('⚠️ No hay inventario disponible');
                             this.products = [];
@@ -1342,20 +1473,12 @@
                             const stock = item.virtual_stock || item.stock || 0;
                             const size = item.size_liters || item.size;
                             const productType = item.product_type || item.type;
-                            console.log('Evaluando producto:', {
-                                name: item.product_name || item.name,
-                                stock: stock,
-                                size: size,
-                                type: productType
-                            });
                             const hasStock = stock > 0;
                             const hasValidSize = size !== null && size !== undefined && size > 0;
                             const isNotCap = productType !== 'cap';
                             const isValidProduct = (productType === 'bottle' || productType === 'empty_bottle');
-                            console.log('  - hasStock:', hasStock, 'hasValidSize:', hasValidSize, 'isNotCap:', isNotCap, 'isValidProduct:', isValidProduct);
                             return hasStock && hasValidSize && isNotCap && isValidProduct;
                         });
-                        console.log('✅ Productos filtrados:', productsToShow.length);
                         this.products = productsToShow.map(item => {
                             const stock = item.virtual_stock || item.stock || 0;
                             const size = item.size_liters || item.size;
@@ -1370,7 +1493,6 @@
                                 stock: parseInt(stock) || 0
                             };
                         });
-                        console.log('✅ Productos finales:', this.products);
                     } catch (err) {
                         console.error('Error cargando productos:', err);
                         showToast('Error al cargar productos', 'error');
@@ -1499,7 +1621,17 @@
                 },
 
                 openCustomerModal() {
-                    this.newCustomer = { full_name: '', phone: '', email: '', address: '', recommended_by: '' };
+                    // ✅ ACTUALIZADO: Inicializar con los nuevos campos
+                    this.newCustomer = { 
+                        full_name: '', 
+                        cedula: '',
+                        phone: '', 
+                        email: '', 
+                        municipio: '',
+                        sector: '',
+                        direccion_especifica: '',
+                        recommended_by: '' 
+                    };
                     this.showCustomerModal = true;
                 },
 
@@ -1514,11 +1646,17 @@
                     }
                     this.savingCustomer = true;
                     try {
+                        // ✅ ACTUALIZADO: Guardar los nuevos campos
                         const { data, error } = await supabase.from('customers').insert({
                             full_name: this.newCustomer.full_name.toUpperCase(),
+                            cedula: this.newCustomer.cedula ? this.newCustomer.cedula.toUpperCase() : null,
                             phone: this.newCustomer.phone,
                             email: this.newCustomer.email,
-                            address: this.newCustomer.address ? this.newCustomer.address.toUpperCase() : null,
+                            municipio: this.newCustomer.municipio || null,
+                            sector: this.newCustomer.sector || null,
+                            direccion_especifica: this.newCustomer.direccion_especifica ? this.newCustomer.direccion_especifica.toUpperCase() : null,
+                            // Mantener campo address para compatibilidad con datos antiguos
+                            address: this.buildFullAddress(this.newCustomer) || null,
                             recommended_by: this.newCustomer.recommended_by ? this.newCustomer.recommended_by.toUpperCase() : null,
                             branch: this.userBranch
                         }).select().single();
@@ -1529,7 +1667,7 @@
                         this.closeCustomerModal();
                     } catch (err) {
                         console.error('Error creando cliente:', err);
-                        showToast('Error al crear cliente', 'error');
+                        showToast('Error al crear cliente: ' + err.message, 'error');
                     } finally {
                         this.savingCustomer = false;
                     }
@@ -1555,6 +1693,7 @@
                     const customer = this.customers.find(c => c.id === this.creditForm.customer_id);
                     if (customer) {
                         this.creditForm.customer_phone = customer.phone || '';
+                        this.creditForm.customer_id_card = customer.cedula || '';
                     }
                 },
 
@@ -1585,7 +1724,7 @@
                             return;
                         }
                         if (this.remainingAmount > 0.01) {
-                            showToast(`Falta completar: $${formatVE(this.remainingAmount)}`, 'error');
+                            showToast(`Falta completar: $${this.remainingAmount.toFixed(2)}`, 'error');
                             return;
                         }
                         modalHtml = `
@@ -1601,14 +1740,14 @@
                             <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-3 border border-blue-200">
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="text-sm font-semibold text-gray-700">Total de la Venta:</span>
-                                    <span class="text-xl font-bold text-blue-600">$${formatVE(this.totalUSD)}</span>
+                                    <span class="text-xl font-bold text-blue-600">$${this.totalUSD.toFixed(2)}</span>
                                 </div>
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="text-sm text-gray-600">Total en Bs.:</span>
-                                    <span class="text-sm font-semibold text-blue-600">Bs. ${formatVE(this.totalBs)}</span>
+                                    <span class="text-sm font-semibold text-blue-600">Bs. ${this.totalBs.toFixed(2)}</span>
                                 </div>
                                 <div class="flex justify-between items-center pt-2 border-t border-blue-200">
-                                    <span class="text-xs text-gray-500"><i class="fas fa-exchange-alt mr-1"></i>Tasa: Bs. ${formatVE(this.exchangeRate)}</span>
+                                    <span class="text-xs text-gray-500"><i class="fas fa-exchange-alt mr-1"></i>Tasa: Bs. ${this.exchangeRate.toFixed(2)}</span>
                                 </div>
                             </div>
                             <div class="space-y-2">
@@ -1623,8 +1762,8 @@
                                             ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` : ''}
                                         </div>
                                         <div class="text-right">
-                                            <p class="text-sm font-bold text-green-600">$${formatVE(p.amount)}</p>
-                                            <p class="text-[10px] text-gray-500">Bs. ${formatVE(p.amountBs)}</p>
+                                            <p class="text-sm font-bold text-green-600">$${p.amount.toFixed(2)}</p>
+                                            <p class="text-[10px] text-gray-500">Bs. ${p.amountBs.toFixed(2)}</p>
                                         </div>
                                     </div>
                                 `).join('')}
@@ -1670,17 +1809,17 @@
                                 <div class="p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
                                     <div class="flex justify-between items-center">
                                         <span class="text-gray-700 font-semibold">Total USD:</span>
-                                        <span class="text-2xl font-bold text-green-600">$${formatVE(this.totalUSD)}</span>
+                                        <span class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</span>
                                     </div>
                                 </div>
                                 <div class="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
                                     <div class="flex justify-between items-center">
                                         <span class="text-gray-700 font-semibold">Total Bs.:</span>
-                                        <span class="text-2xl font-bold text-blue-600">Bs. ${formatVE(this.totalUSD * this.exchangeRate)}</span>
+                                        <span class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</span>
                                     </div>
                                 </div>
                                 <div class="text-center text-xs text-gray-500">
-                                    <i class="fas fa-exchange-alt mr-1"></i>Tasa: Bs. ${formatVE(this.exchangeRate)} por USD
+                                    <i class="fas fa-exchange-alt mr-1"></i>Tasa: Bs. ${this.exchangeRate.toFixed(2)} por USD
                                 </div>
                             </div>
                         </div>
@@ -1692,29 +1831,28 @@
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
                         let notes = [];
-                        notes.push(`Tasa aplicada: Bs. ${formatVE(this.exchangeRate)}`);
+                        notes.push(`Tasa aplicada: Bs. ${this.exchangeRate.toFixed(2)}`);
                         let payment_method = this.paymentMethod;
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             payment_method = 'multiple';
                             notes.push('=== PAGO MÚLTIPLE ===');
-                            notes.push(`Total: $${formatVE(this.totalUSD)} | ${this.multiplePayments.length} método(s)`);
+                            notes.push(`Total: $${this.totalUSD.toFixed(2)} | ${this.multiplePayments.length} método(s)`);
                             this.multiplePayments.forEach((p, i) => {
-                                let note = `  ${i + 1}. ${this.getPaymentMethodName(p.method)}: $${formatVE(p.amount)} (Bs. ${formatVE(p.amountBs)})`;
+                                let note = `  ${i + 1}. ${this.getPaymentMethodName(p.method)}: $${p.amount.toFixed(2)} (Bs. ${p.amountBs.toFixed(2)})`;
                                 if (p.reference) note += ` | Ref: ${p.reference}`;
                                 notes.push(note);
                             });
                         } else {
                             if (this.paymentReference) notes.push(`Ref: ${this.paymentReference}`);
                             if (this.paymentMethod === 'efectivo_bs' && this.amountReceivedBs > 0) {
-                                notes.push(`Recibido Bs: ${formatVE(round2(this.amountReceivedBs))}`);
-                                notes.push(`Cambio Bs: ${formatVE(round2(this.amountReceivedBs) - this.totalBs)}`);
+                                notes.push(`Recibido Bs: ${round2(this.amountReceivedBs).toFixed(2)}`);
+                                notes.push(`Cambio Bs: ${(round2(this.amountReceivedBs) - this.totalBs).toFixed(2)}`);
                             }
                             if (this.paymentMethod === 'efectivo_divisas' && this.amountReceivedUsd > 0) {
-                                notes.push(`Recibido USD: $${formatVE(round2(this.amountReceivedUsd))}`);
-                                notes.push(`Cambio USD: $${formatVE(round2(this.amountReceivedUsd) - this.totalUSD)}`);
+                                notes.push(`Recibido USD: $${round2(this.amountReceivedUsd).toFixed(2)}`);
+                                notes.push(`Cambio USD: $${(round2(this.amountReceivedUsd) - this.totalUSD).toFixed(2)}`);
                             }
                         }
-                        
                         const { data: sale, error: saleError } = await supabase.from('sales').insert({
                             branch: this.userBranch,
                             customer_id: this.selectedCustomer || null,
@@ -1801,7 +1939,6 @@
                             if (item.product_type !== 'empty_bottle') {
                                 const realProductId = sizeToProductId[item.size_liters];
                                 if (!realProductId) continue;
-                                console.log(`💧 Procesando botellón con agua ${item.size_liters}L - Cantidad: ${item.quantity}`);
                                 const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
                                     branch_param: this.userBranch,
                                     product_id_param: realProductId,
@@ -1812,7 +1949,6 @@
                                 if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
                                 if (item.size_liters === 13 || item.size_liters === 20) {
                                     totalCapsNeeded += item.quantity;
-                                    console.log(`🔴 Contando ${item.quantity} tapa(s) para botellón con agua ${item.size_liters}L`);
                                 }
                             }
                         }
@@ -1820,7 +1956,6 @@
                             if (item.product_type === 'empty_bottle') {
                                 const emptyProduct = emptyBottleProducts.find(p => p.size_liters === item.size_liters);
                                 if (!emptyProduct) continue;
-                                console.log(`🏺 Procesando botellón vacío ${item.size_liters}L - Cantidad: ${item.quantity}`);
                                 const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
                                     branch_param: this.userBranch,
                                     product_id_param: emptyProduct.id,
@@ -1830,9 +1965,7 @@
                                 if (tankError) {
                                     console.warn('⚠️ Error descontando agua del tanque:', tankError.message);
                                 } else if (!tankResult || !tankResult.success) {
-                                    showToast(`⚠️ Agua insuficiente en el tanque para ${item.size_liters}L`, 'warning');
-                                } else {
-                                    console.log(`✅ ${item.quantity * item.size_liters}L descontados del tanque (botellón vacío ${item.size_liters}L)`);
+                                    showToast(`️ Agua insuficiente en el tanque para ${item.size_liters}L`, 'warning');
                                 }
                                 const { data: emptyInventory, error: emptyInvError } = await supabase
                                     .from('inventory')
@@ -1841,10 +1974,10 @@
                                     .eq('branch', this.userBranch)
                                     .single();
                                 if (emptyInvError) {
-                                    console.warn('⚠️ Error consultando inventario de botellón vacío:', emptyInvError.message);
+                                    console.warn('️ Error consultando inventario de botellón vacío:', emptyInvError.message);
                                 } else if (emptyInventory) {
                                     if (emptyInventory.quantity < item.quantity) {
-                                        showToast(`⚠️ Stock bajo de botellón vacío ${item.size_liters}L`, 'warning');
+                                        showToast(`️ Stock bajo de botellón vacío ${item.size_liters}L`, 'warning');
                                     }
                                     const { error: updateEmptyError } = await supabase
                                         .from('inventory')
@@ -1856,18 +1989,14 @@
                                         .eq('branch', this.userBranch);
                                     if (updateEmptyError) {
                                         console.warn('⚠️ Error actualizando botellón vacío:', updateEmptyError.message);
-                                    } else {
-                                        console.log(`✅ ${item.quantity} botellón(es) vacío(s) ${item.size_liters}L descontado(s) del inventario`);
                                     }
                                 }
                                 if (item.size_liters === 15 || item.size_liters === 20) {
                                     totalCapsNeeded += item.quantity;
-                                    console.log(`🔴 Contando ${item.quantity} tapa(s) para botellón vacío ${item.size_liters}L`);
                                 }
                             }
                         }
                         if (totalCapsNeeded > 0 && capProduct) {
-                            console.log(`🔴 Descontando ${totalCapsNeeded} tapas del inventario`);
                             const { data: capInventory, error: capInventoryError } = await supabase
                                 .from('inventory')
                                 .select('quantity, product_id')
@@ -1875,7 +2004,7 @@
                                 .eq('branch', this.userBranch)
                                 .single();
                             if (capInventoryError) {
-                                console.warn('⚠️ Error consultando inventario de tapas:', capInventoryError.message);
+                                console.warn('️ Error consultando inventario de tapas:', capInventoryError.message);
                             } else if (capInventory) {
                                 if (capInventory.quantity < totalCapsNeeded) {
                                     showToast(`⚠️ Stock de tapas bajo: ${capInventory.quantity} disponibles`, 'warning');
@@ -1889,7 +2018,7 @@
                                     .eq('product_id', capProduct.id)
                                     .eq('branch', this.userBranch);
                                 if (updateCapError) {
-                                    console.warn('⚠️ Error actualizando tapas:', updateCapError.message);
+                                    console.warn('️ Error actualizando tapas:', updateCapError.message);
                                 } else {
                                     console.log(`✅ ${totalCapsNeeded} tapas descontadas del inventario`);
                                 }
@@ -1904,7 +2033,7 @@
                                     ${this.multiplePayments.map((p, i) => `
                                         <div class="flex justify-between text-xs">
                                             <span class="text-gray-600">${i + 1}. ${this.getPaymentMethodName(p.method)}</span>
-                                            <span class="font-semibold text-green-600">$${formatVE(p.amount)}</span>
+                                            <span class="font-semibold text-green-600">$${p.amount.toFixed(2)}</span>
                                         </div>
                                     `).join('')}
                                 </div>
@@ -1920,11 +2049,11 @@
                                 <div class="mt-3 space-y-2">
                                     <div class="p-3 bg-green-50 rounded-lg border border-green-200">
                                         <p class="text-xs text-gray-500">Total USD</p>
-                                        <p class="text-2xl font-bold text-green-600">$${formatVE(this.totalUSD)}</p>
+                                        <p class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</p>
                                     </div>
                                     <div class="p-3 bg-blue-50 rounded-lg border border-blue-200">
                                         <p class="text-xs text-gray-500">Total Bs.</p>
-                                        <p class="text-2xl font-bold text-blue-600">Bs. ${formatVE(this.totalUSD * this.exchangeRate)}</p>
+                                        <p class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</p>
                                     </div>
                                     ${successDetails}
                                 </div>
@@ -1985,15 +2114,15 @@
                         <div class="mt-4 space-y-2">
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">Total Venta:</span>
-                                <span class="font-semibold">$${formatVE(this.totalUSD)}</span>
+                                <span class="font-semibold">$${this.totalUSD.toFixed(2)}</span>
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">Pago Inicial:</span>
-                                <span class="font-semibold text-green-600">$${formatVE(this.creditForm.initial_payment)}</span>
+                                <span class="font-semibold text-green-600">$${this.creditForm.initial_payment.toFixed(2)}</span>
                             </div>
                             <div class="flex justify-between text-sm border-t pt-2">
                                 <span class="text-gray-700 font-semibold">A Financiar:</span>
-                                <span class="text-xl font-bold text-red-600">$${formatVE(creditAmount)}</span>
+                                <span class="text-xl font-bold text-red-600">$${creditAmount.toFixed(2)}</span>
                             </div>
                         </div>
                     </div>
@@ -2011,7 +2140,7 @@
                             total: this.totalUSD,
                             payment_method: 'credito',
                             status: creditAmount > 0 ? 'pending' : 'completed',
-                            notes: `Crédito - Pago inicial: $${formatVE(round2(this.creditForm.initial_payment))}\n${this.creditForm.notes || ''}`,
+                            notes: `Crédito - Pago inicial: $${round2(this.creditForm.initial_payment).toFixed(2)}\n${this.creditForm.notes || ''}`,
                             exchange_rate_used: this.exchangeRate,
                             rate_date: new Date().toISOString().split('T')[0],
                             created_by: session.user.id
@@ -2092,7 +2221,7 @@
                                 <p class="text-gray-600">La venta a crédito ha sido procesada</p>
                                 <div class="mt-3 p-3 bg-blue-50 rounded-lg">
                                     <p class="text-sm text-gray-600">Monto a cobrar:</p>
-                                    <p class="text-2xl font-bold text-blue-600">$${formatVE(creditAmount)}</p>
+                                    <p class="text-2xl font-bold text-blue-600">$${creditAmount.toFixed(2)}</p>
                                 </div>
                             </div>
                             `,
