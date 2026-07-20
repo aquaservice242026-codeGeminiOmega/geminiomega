@@ -236,7 +236,7 @@
                                 <div class="flex flex-col items-center text-center space-y-1">
                                     <i class="fas fa-tint text-2xl lg:text-4xl mb-1"></i>
                                     <p class="font-bold text-sm lg:text-lg leading-tight" x-text="product.name"></p>
-                                    <p class="text-xs lg:text-sm opacity-90 font-semibold" x-text="'$' + product.price.toFixed(2)"></p>
+                                    <p class="text-xs lg:text-sm opacity-90 font-semibold" x-text="'$' + formatVE(product.price)"></p>
                                 </div>
                                 <div class="hidden lg:flex justify-center space-x-1 mt-4 pt-4 border-t border-white/20" @click.stop>
                                     <button @click="quickAdd(product, 1)" class="quick-add-btn bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded touch-btn" :disabled="product.stock < 1">+1</button>
@@ -290,7 +290,7 @@
                             <div class="flex items-center justify-between mb-1">
                                 <div class="flex-1">
                                     <h4 class="font-semibold text-gray-800" x-text="item.name"></h4>
-                                    <p class="text-xs text-gray-600" x-text="'$' + item.price.toFixed(2) + ' c/u'"></p>
+                                    <p class="text-xs text-gray-600" x-text="'$' + formatVE(item.price) + ' c/u'"></p>
                                 </div>
                                 <button @click="removeFromCart(index)" class="text-red-500 hover:text-red-700 touch-btn p-1">
                                     <i class="fas fa-trash text-sm"></i>
@@ -309,7 +309,7 @@
                                 </div>
                                 <div class="text-right">
                                     <p class="text-[10px] text-gray-600">Subtotal</p>
-                                    <p class="font-bold text-cyan-600 text-sm" x-text="'$' + (item.price * item.quantity).toFixed(2)"></p>
+                                    <p class="font-bold text-cyan-600 text-sm" x-text="'$' + formatVE(item.price * item.quantity)"></p>
                                 </div>
                             </div>
                         </div>
@@ -322,15 +322,15 @@
                 <div class="border-t pt-4 space-y-2">
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-600">Subtotal:</span>
-                        <span class="font-medium" x-text="'$' + subtotal.toFixed(2)"></span>
+                        <span class="font-medium" x-text="'$' + formatVE(subtotal)"></span>
                     </div>
                     <div class="flex justify-between text-lg font-bold border-t pt-2">
                         <span class="text-gray-800">Total USD:</span>
-                        <span class="text-cyan-600" x-text="'$' + totalUSD.toFixed(2)"></span>
+                        <span class="text-cyan-600" x-text="'$' + formatVE(totalUSD)"></span>
                     </div>
                     <div @click="copyTotalToReceived()" class="total-bs-clickable flex justify-between text-sm bg-green-50 p-2 rounded-lg cursor-pointer">
                         <span class="text-gray-600">Total Bs. <i class="fas fa-hand-pointer text-xs"></i></span>
-                        <span class="font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></span>
+                        <span class="font-bold text-green-600" x-text="'Bs. ' + formatVE(totalBs)"></span>
                     </div>
                 </div>
 
@@ -386,19 +386,19 @@
                     </div>
                     <div x-show="paymentMethod === 'efectivo_bs'" class="mt-4 p-3 bg-green-50 rounded-lg">
                         <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (Bs.)</label>
-                        <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
+                        <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0,00">
                         <div x-show="amountReceivedBs > 0" class="mt-2 text-xs space-y-1">
-                            <p class="text-gray-600">En USD: <span class="font-bold" x-text="'$' + (amountReceivedBs / exchangeRate).toFixed(2)"></span></p>
-                            <p x-show="amountReceivedBs >= totalBs" class="text-green-600 font-semibold">Cambio: Bs. <span x-text="(amountReceivedBs - totalBs).toFixed(2)"></span></p>
-                            <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs. <span x-text="(totalBs - amountReceivedBs).toFixed(2)"></span></p>
+                            <p class="text-gray-600">En USD: <span class="font-bold" x-text="'$' + formatVE(amountReceivedBs / exchangeRate)"></span></p>
+                            <p x-show="amountReceivedBs >= totalBs" class="text-green-600 font-semibold">Cambio: Bs. <span x-text="formatVE(amountReceivedBs - totalBs)"></span></p>
+                            <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs. <span x-text="formatVE(totalBs - amountReceivedBs)"></span></p>
                         </div>
                     </div>
                     <div x-show="paymentMethod === 'efectivo_divisas'" class="mt-4 p-3 bg-green-50 rounded-lg">
                         <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (USD)</label>
-                        <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
+                        <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0,00">
                         <div x-show="amountReceivedUsd > 0" class="mt-2 text-xs space-y-1">
-                            <p x-show="amountReceivedUsd >= totalUSD" class="text-green-600 font-semibold">Cambio: $<span x-text="(amountReceivedUsd - totalUSD).toFixed(2)"></span></p>
-                            <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta: $<span x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
+                            <p x-show="amountReceivedUsd >= totalUSD" class="text-green-600 font-semibold">Cambio: $<span x-text="formatVE(amountReceivedUsd - totalUSD)"></span></p>
+                            <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta: $<span x-text="formatVE(totalUSD - amountReceivedUsd)"></span></p>
                         </div>
                     </div>
                     <div x-show="paymentMethod === 'credito'" class="mt-4 p-3 bg-red-50 rounded-lg">
@@ -414,15 +414,15 @@
                     <div class="bg-blue-50 rounded-xl p-3 border border-blue-200">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-xs font-semibold text-gray-700">Total Venta:</span>
-                            <span class="text-sm font-bold text-blue-600">$<span x-text="totalUSD.toFixed(2)"></span></span>
+                            <span class="text-sm font-bold text-blue-600">$<span x-text="formatVE(totalUSD)"></span></span>
                         </div>
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-xs text-gray-600">Pagado:</span>
-                            <span class="text-sm font-semibold text-green-600">$<span x-text="totalPaid.toFixed(2)"></span></span>
+                            <span class="text-sm font-semibold text-green-600">$<span x-text="formatVE(totalPaid)"></span></span>
                         </div>
                         <div class="flex justify-between items-center pt-2 border-t border-blue-200">
                             <span class="text-xs font-bold text-gray-800">Restante:</span>
-                            <span class="text-lg font-bold" :class="remainingAmount <= 0.01 ? 'text-green-600' : 'text-red-600'">$<span x-text="remainingAmount.toFixed(2)"></span></span>
+                            <span class="text-lg font-bold" :class="remainingAmount <= 0.01 ? 'text-green-600' : 'text-red-600'">$<span x-text="formatVE(remainingAmount)"></span></span>
                         </div>
                         <div class="mt-2">
                             <div class="w-full bg-gray-200 rounded-full h-2">
@@ -450,8 +450,8 @@
                                             <span class="text-xs font-semibold text-gray-800" x-text="getPaymentMethodName(payment.method)"></span>
                                         </div>
                                         <div class="flex items-center space-x-3 text-xs">
-                                            <span class="text-green-600 font-bold">$<span x-text="payment.amount.toFixed(2)"></span></span>
-                                            <span class="text-gray-500" x-text="'Bs. ' + (payment.amount * exchangeRate).toFixed(2)"></span>
+                                            <span class="text-green-600 font-bold">$<span x-text="formatVE(payment.amount)"></span></span>
+                                            <span class="text-gray-500" x-text="'Bs. ' + formatVE(payment.amount * exchangeRate)"></span>
                                         </div>
                                         <p x-show="payment.reference" class="text-[10px] text-gray-500 mt-1">Ref: <span x-text="payment.reference"></span></p>
                                     </div>
@@ -476,13 +476,13 @@
                             </select>
                             <div x-show="newPayment.method !== 'efectivo_bs'">
                                 <label class="text-[10px] font-medium text-gray-600">Monto (USD)</label>
-                                <input type="number" x-model.number="newPayment.amountUsd" step="0.01" min="0" :placeholder="'Sugerido: $' + remainingAmount.toFixed(2)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
-                                <p class="text-[10px] text-gray-500 mt-1">Equivale: Bs. <span class="font-semibold" x-text="((newPayment.amountUsd || 0) * exchangeRate).toFixed(2)"></span></p>
+                                <input type="number" x-model.number="newPayment.amountUsd" step="0.01" min="0" :placeholder="'Sugerido: $' + formatVE(remainingAmount)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+                                <p class="text-[10px] text-gray-500 mt-1">Equivale: Bs. <span class="font-semibold" x-text="formatVE((newPayment.amountUsd || 0) * exchangeRate)"></span></p>
                             </div>
                             <div x-show="newPayment.method === 'efectivo_bs'">
                                 <label class="text-[10px] font-medium text-gray-600">Monto (Bs.)</label>
-                                <input type="number" x-model.number="newPayment.amountBs" step="0.01" min="0" :placeholder="'Sugerido: Bs. ' + (remainingAmount * exchangeRate).toFixed(2)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
-                                <p class="text-[10px] text-gray-500 mt-1">Equivale: $<span class="font-semibold" x-text="((newPayment.amountBs || 0) / exchangeRate).toFixed(2)"></span></p>
+                                <input type="number" x-model.number="newPayment.amountBs" step="0.01" min="0" :placeholder="'Sugerido: Bs. ' + formatVE(remainingAmount * exchangeRate)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+                                <p class="text-[10px] text-gray-500 mt-1">Equivale: $<span class="font-semibold" x-text="formatVE((newPayment.amountBs || 0) / exchangeRate)"></span></p>
                             </div>
                             <div x-show="['pago_movil', 'transferencia', 'punto_venta'].includes(newPayment.method)">
                                 <label class="text-[10px] font-medium text-gray-600">Referencia</label>
@@ -492,7 +492,7 @@
                                 <i class="fas fa-plus mr-1"></i>Agregar Pago
                             </button>
                             <button x-show="remainingAmount > 0.01" @click="fillRemainingPayment()" class="w-full bg-blue-100 text-blue-700 py-2 rounded-lg text-xs font-semibold touch-btn">
-                                <i class="fas fa-magic mr-1"></i>Completar con $<span x-text="remainingAmount.toFixed(2)"></span>
+                                <i class="fas fa-magic mr-1"></i>Completar con $<span x-text="formatVE(remainingAmount)"></span>
                             </button>
                         </div>
                     </div>
@@ -522,11 +522,11 @@
         <div class="flex items-center justify-between mb-2">
             <div>
                 <p class="text-xs text-gray-500">Total USD</p>
-                <p class="text-2xl font-bold text-gray-900" x-text="'$' + totalUSD.toFixed(2)"></p>
+                <p class="text-2xl font-bold text-gray-900" x-text="'$' + formatVE(totalUSD)"></p>
             </div>
             <div @click="copyTotalToReceived()" class="total-bs-clickable bg-green-50 px-3 py-2 rounded-lg text-right">
                 <p class="text-[10px] text-gray-500">Total Bs. <i class="fas fa-hand-pointer text-xs"></i></p>
-                <p class="text-lg font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></p>
+                <p class="text-lg font-bold text-green-600" x-text="'Bs. ' + formatVE(totalBs)"></p>
             </div>
         </div>
         <div class="flex items-center justify-between text-xs">
@@ -570,7 +570,7 @@
                     <div class="flex items-center justify-between mb-1">
                         <div class="flex-1">
                             <h4 class="font-semibold text-gray-800" x-text="item.name"></h4>
-                            <p class="text-xs text-gray-600" x-text="'$' + item.price.toFixed(2) + ' c/u'"></p>
+                            <p class="text-xs text-gray-600" x-text="'$' + formatVE(item.price) + ' c/u'"></p>
                         </div>
                         <button @click="removeFromCart(index)" class="text-red-500 hover:text-red-700 touch-btn p-1">
                             <i class="fas fa-trash text-sm"></i>
@@ -589,7 +589,7 @@
                         </div>
                         <div class="text-right">
                             <p class="text-[10px] text-gray-600">Subtotal</p>
-                            <p class="font-bold text-cyan-600 text-sm" x-text="'$' + (item.price * item.quantity).toFixed(2)"></p>
+                            <p class="font-bold text-cyan-600 text-sm" x-text="'$' + formatVE(item.price * item.quantity)"></p>
                         </div>
                     </div>
                 </div>
@@ -599,15 +599,15 @@
             <div class="space-y-2 mb-3">
                 <div class="flex justify-between text-sm">
                     <span class="text-gray-600">Subtotal:</span>
-                    <span class="font-medium" x-text="'$' + subtotal.toFixed(2)"></span>
+                    <span class="font-medium" x-text="'$' + formatVE(subtotal)"></span>
                 </div>
                 <div class="flex justify-between text-lg font-bold border-t pt-2">
                     <span class="text-gray-800">Total USD:</span>
-                    <span class="text-cyan-600" x-text="'$' + totalUSD.toFixed(2)"></span>
+                    <span class="text-cyan-600" x-text="'$' + formatVE(totalUSD)"></span>
                 </div>
                 <div @click="copyTotalToReceived()" class="total-bs-clickable flex justify-between text-sm bg-green-50 p-2 rounded-lg">
                     <span class="text-gray-600">Total Bs. <i class="fas fa-hand-pointer text-xs"></i></span>
-                    <span class="font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></span>
+                    <span class="font-bold text-green-600" x-text="'Bs. ' + formatVE(totalBs)"></span>
                 </div>
             </div>
             <div class="mb-3">
@@ -676,19 +676,19 @@
                 </div>
                 <div x-show="paymentMethod === 'efectivo_bs'" class="mt-2 p-3 bg-green-50 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (Bs.)</label>
-                    <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
+                    <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0,00">
                     <div x-show="amountReceivedBs > 0" class="mt-2 text-xs space-y-1">
-                        <p class="text-gray-600">En USD: <span class="font-bold" x-text="'$' + (amountReceivedBs / exchangeRate).toFixed(2)"></span></p>
-                        <p x-show="amountReceivedBs >= totalBs" class="text-green-600 font-semibold">Cambio: Bs. <span x-text="(amountReceivedBs - totalBs).toFixed(2)"></span></p>
-                        <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs. <span x-text="(totalBs - amountReceivedBs).toFixed(2)"></span></p>
+                        <p class="text-gray-600">En USD: <span class="font-bold" x-text="'$' + formatVE(amountReceivedBs / exchangeRate)"></span></p>
+                        <p x-show="amountReceivedBs >= totalBs" class="text-green-600 font-semibold">Cambio: Bs. <span x-text="formatVE(amountReceivedBs - totalBs)"></span></p>
+                        <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs. <span x-text="formatVE(totalBs - amountReceivedBs)"></span></p>
                     </div>
                 </div>
                 <div x-show="paymentMethod === 'efectivo_divisas'" class="mt-2 p-3 bg-green-50 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (USD)</label>
-                    <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
+                    <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0,00">
                     <div x-show="amountReceivedUsd > 0" class="mt-2 text-xs space-y-1">
-                        <p x-show="amountReceivedUsd >= totalUSD" class="text-green-600 font-semibold">Cambio: $<span x-text="(amountReceivedUsd - totalUSD).toFixed(2)"></span></p>
-                        <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta: $<span x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
+                        <p x-show="amountReceivedUsd >= totalUSD" class="text-green-600 font-semibold">Cambio: $<span x-text="formatVE(amountReceivedUsd - totalUSD)"></span></p>
+                        <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta: $<span x-text="formatVE(totalUSD - amountReceivedUsd)"></span></p>
                     </div>
                 </div>
                 <div x-show="paymentMethod === 'credito'" class="mt-2 p-3 bg-red-50 rounded-lg">
@@ -702,15 +702,15 @@
                 <div class="bg-blue-50 rounded-xl p-3 border border-blue-200">
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-xs font-semibold text-gray-700">Total:</span>
-                        <span class="text-sm font-bold text-blue-600">$<span x-text="totalUSD.toFixed(2)"></span></span>
+                        <span class="text-sm font-bold text-blue-600">$<span x-text="formatVE(totalUSD)"></span></span>
                     </div>
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-xs text-gray-600">Pagado:</span>
-                        <span class="text-sm font-semibold text-green-600">$<span x-text="totalPaid.toFixed(2)"></span></span>
+                        <span class="text-sm font-semibold text-green-600">$<span x-text="formatVE(totalPaid)"></span></span>
                     </div>
                     <div class="flex justify-between items-center pt-2 border-t border-blue-200">
                         <span class="text-xs font-bold text-gray-800">Restante:</span>
-                        <span class="text-lg font-bold" :class="remainingAmount <= 0.01 ? 'text-green-600' : 'text-red-600'">$<span x-text="remainingAmount.toFixed(2)"></span></span>
+                        <span class="text-lg font-bold" :class="remainingAmount <= 0.01 ? 'text-green-600' : 'text-red-600'">$<span x-text="formatVE(remainingAmount)"></span></span>
                     </div>
                     <div class="mt-2">
                         <div class="w-full bg-gray-200 rounded-full h-2">
@@ -728,8 +728,8 @@
                                     <span class="text-xs font-semibold text-gray-800" x-text="getPaymentMethodName(payment.method)"></span>
                                 </div>
                                 <div class="flex items-center space-x-3 text-xs">
-                                    <span class="text-green-600 font-bold">$<span x-text="payment.amount.toFixed(2)"></span></span>
-                                    <span class="text-gray-500" x-text="'Bs. ' + (payment.amount * exchangeRate).toFixed(2)"></span>
+                                    <span class="text-green-600 font-bold">$<span x-text="formatVE(payment.amount)"></span></span>
+                                    <span class="text-gray-500" x-text="'Bs. ' + formatVE(payment.amount * exchangeRate)"></span>
                                 </div>
                                 <p x-show="payment.reference" class="text-[10px] text-gray-500 mt-1">Ref: <span x-text="payment.reference"></span></p>
                             </div>
@@ -753,13 +753,13 @@
                         </select>
                         <div x-show="newPayment.method !== 'efectivo_bs'">
                             <label class="text-[10px] font-medium text-gray-600">Monto (USD)</label>
-                            <input type="number" x-model.number="newPayment.amountUsd" step="0.01" min="0" :placeholder="'Sugerido: $' + remainingAmount.toFixed(2)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
-                            <p class="text-[10px] text-gray-500 mt-1">Equivale: Bs. <span class="font-semibold" x-text="((newPayment.amountUsd || 0) * exchangeRate).toFixed(2)"></span></p>
+                            <input type="number" x-model.number="newPayment.amountUsd" step="0.01" min="0" :placeholder="'Sugerido: $' + formatVE(remainingAmount)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+                            <p class="text-[10px] text-gray-500 mt-1">Equivale: Bs. <span class="font-semibold" x-text="formatVE((newPayment.amountUsd || 0) * exchangeRate)"></span></p>
                         </div>
                         <div x-show="newPayment.method === 'efectivo_bs'">
                             <label class="text-[10px] font-medium text-gray-600">Monto (Bs.)</label>
-                            <input type="number" x-model.number="newPayment.amountBs" step="0.01" min="0" :placeholder="'Sugerido: Bs. ' + (remainingAmount * exchangeRate).toFixed(2)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
-                            <p class="text-[10px] text-gray-500 mt-1">Equivale: $<span class="font-semibold" x-text="((newPayment.amountBs || 0) / exchangeRate).toFixed(2)"></span></p>
+                            <input type="number" x-model.number="newPayment.amountBs" step="0.01" min="0" :placeholder="'Sugerido: Bs. ' + formatVE(remainingAmount * exchangeRate)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+                            <p class="text-[10px] text-gray-500 mt-1">Equivale: $<span class="font-semibold" x-text="formatVE((newPayment.amountBs || 0) / exchangeRate)"></span></p>
                         </div>
                         <div x-show="['pago_movil', 'transferencia', 'punto_venta'].includes(newPayment.method)">
                             <label class="text-[10px] font-medium text-gray-600">Referencia</label>
@@ -769,7 +769,7 @@
                             <i class="fas fa-plus mr-1"></i>Agregar Pago
                         </button>
                         <button x-show="remainingAmount > 0.01" @click="fillRemainingPayment()" class="w-full bg-blue-100 text-blue-700 py-2 rounded-lg text-xs font-semibold touch-btn">
-                            <i class="fas fa-magic mr-1"></i>Completar con $<span x-text="remainingAmount.toFixed(2)"></span>
+                            <i class="fas fa-magic mr-1"></i>Completar con $<span x-text="formatVE(remainingAmount)"></span>
                         </button>
                     </div>
                 </div>
@@ -882,15 +882,15 @@
                     <div class="space-y-2">
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600">Total Venta:</span>
-                            <span class="font-bold text-lg" x-text="'$' + totalUSD.toFixed(2)"></span>
+                            <span class="font-bold text-lg" x-text="'$' + formatVE(totalUSD)"></span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600">Pago Inicial:</span>
-                            <span class="font-semibold" x-text="'$' + creditForm.initial_payment.toFixed(2)"></span>
+                            <span class="font-semibold" x-text="'$' + formatVE(creditForm.initial_payment)"></span>
                         </div>
                         <div class="border-t border-green-200 pt-2 flex justify-between">
                             <span class="text-gray-800 font-semibold">Monto a Financiar:</span>
-                            <span class="font-bold text-xl text-blue-600" x-text="'$' + (totalUSD - creditForm.initial_payment).toFixed(2)"></span>
+                            <span class="font-bold text-xl text-blue-600" x-text="'$' + formatVE(totalUSD - creditForm.initial_payment)"></span>
                         </div>
                     </div>
                 </div>
@@ -942,6 +942,15 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // ✅ FUNCIÓN GLOBAL PARA FORMATO DE MONEDA VENEZOLANO (Punto para miles, coma para decimales)
+        function formatVE(num) {
+            if (num === null || num === undefined || isNaN(num)) return '0,00';
+            return new Intl.NumberFormat('es-VE', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(num);
+        }
+
         async function logout() {
             await supabase.auth.signOut();
             localStorage.clear();
@@ -955,7 +964,7 @@
                 warning: 'linear-gradient(to right, #f59e0b, #d97706)',
                 info: 'linear-gradient(to right, #3b82f6, #2563eb)'
             };
-            const icons = { success: '✓', error: '', warning: '⚠', info: '' };
+            const icons = { success: '✓', error: '✗', warning: '⚠', info: '' };
             Toastify({
                 text: `${icons[type]} ${message}`,
                 duration: 3000,
@@ -1028,15 +1037,6 @@
                 console.error('❌ Error obteniendo tasa BCV:', err);
                 return null;
             }
-        }
-
-        // ✅ FUNCIÓN PARA OBTENER FECHA DE CARACAS
-        function getCaracasDate() {
-            const now = new Date();
-            const caracasTime = new Date(now.toLocaleString('en-US', {
-                timeZone: 'America/Caracas'
-            }));
-            return caracasTime;
         }
 
         function ventasApp() {
@@ -1145,7 +1145,7 @@
                         reference: this.newPayment.reference || ''
                     });
                     this.newPayment = { method: 'efectivo_divisas', amountUsd: 0, amountBs: 0, reference: '' };
-                    showToast(`Pago #${this.multiplePayments.length} agregado: $${amountUsd.toFixed(2)}`, 'success');
+                    showToast(`Pago #${this.multiplePayments.length} agregado: $${formatVE(amountUsd)}`, 'success');
                 },
 
                 removeMultiplePayment(id) {
@@ -1264,7 +1264,7 @@
                         if (!error && data) {
                             const rate = ensureValidRate(data);
                             this.exchangeRate = rate;
-                            console.log('✅ Tasa cargada desde Supabase:', this.exchangeRate);
+                            console.log('✅ Tasa cargada desde Supabase:', formatVE(this.exchangeRate));
                         } else {
                             console.warn('⚠️ No se encontró tasa en BD, usando 700.22');
                             this.exchangeRate = 700.22;
@@ -1289,11 +1289,11 @@
                         html: `<div class="text-center space-y-3">
                             <div class="bg-blue-50 rounded-lg p-4">
                                 <p class="text-sm text-gray-600 mb-2">Tasa oficial del BCV:</p>
-                                <p class="text-4xl font-bold text-blue-600">Bs. ${newRate.toFixed(2)}</p>
+                                <p class="text-4xl font-bold text-blue-600">Bs. ${formatVE(newRate)}</p>
                                 <p class="text-xs text-gray-500 mt-2"><i class="fas fa-calendar mr-1"></i>Actualizada: ${rateDate}</p>
                             </div>
                             <div class="bg-yellow-50 rounded-lg p-3">
-                                <p class="text-xs text-gray-700"><i class="fas fa-info-circle mr-1"></i>Tasa actual en el sistema: <strong>Bs. ${this.exchangeRate.toFixed(2)}</strong></p>
+                                <p class="text-xs text-gray-700"><i class="fas fa-info-circle mr-1"></i>Tasa actual en el sistema: <strong>Bs. ${formatVE(this.exchangeRate)}</strong></p>
                             </div>
                             <p class="text-xs text-gray-500 mt-2">Fuente: ${bcvData.source}</p>
                         </div>`,
@@ -1306,7 +1306,7 @@
                     if (confirmed.isConfirmed) {
                         this.exchangeRate = newRate;
                         await this.updateExchangeRate();
-                        showToast(`✅ Tasa BCV aplicada: Bs. ${newRate.toFixed(2)}`, 'success');
+                        showToast(`✅ Tasa BCV aplicada: Bs. ${formatVE(newRate)}`, 'success');
                     }
                 },
 
@@ -1585,7 +1585,7 @@
                             return;
                         }
                         if (this.remainingAmount > 0.01) {
-                            showToast(`Falta completar: $${this.remainingAmount.toFixed(2)}`, 'error');
+                            showToast(`Falta completar: $${formatVE(this.remainingAmount)}`, 'error');
                             return;
                         }
                         modalHtml = `
@@ -1601,14 +1601,14 @@
                             <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-3 border border-blue-200">
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="text-sm font-semibold text-gray-700">Total de la Venta:</span>
-                                    <span class="text-xl font-bold text-blue-600">$${this.totalUSD.toFixed(2)}</span>
+                                    <span class="text-xl font-bold text-blue-600">$${formatVE(this.totalUSD)}</span>
                                 </div>
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="text-sm text-gray-600">Total en Bs.:</span>
-                                    <span class="text-sm font-semibold text-blue-600">Bs. ${this.totalBs.toFixed(2)}</span>
+                                    <span class="text-sm font-semibold text-blue-600">Bs. ${formatVE(this.totalBs)}</span>
                                 </div>
                                 <div class="flex justify-between items-center pt-2 border-t border-blue-200">
-                                    <span class="text-xs text-gray-500"><i class="fas fa-exchange-alt mr-1"></i>Tasa: Bs. ${this.exchangeRate.toFixed(2)}</span>
+                                    <span class="text-xs text-gray-500"><i class="fas fa-exchange-alt mr-1"></i>Tasa: Bs. ${formatVE(this.exchangeRate)}</span>
                                 </div>
                             </div>
                             <div class="space-y-2">
@@ -1623,8 +1623,8 @@
                                             ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` : ''}
                                         </div>
                                         <div class="text-right">
-                                            <p class="text-sm font-bold text-green-600">$${p.amount.toFixed(2)}</p>
-                                            <p class="text-[10px] text-gray-500">Bs. ${p.amountBs.toFixed(2)}</p>
+                                            <p class="text-sm font-bold text-green-600">$${formatVE(p.amount)}</p>
+                                            <p class="text-[10px] text-gray-500">Bs. ${formatVE(p.amountBs)}</p>
                                         </div>
                                     </div>
                                 `).join('')}
@@ -1670,17 +1670,17 @@
                                 <div class="p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
                                     <div class="flex justify-between items-center">
                                         <span class="text-gray-700 font-semibold">Total USD:</span>
-                                        <span class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</span>
+                                        <span class="text-2xl font-bold text-green-600">$${formatVE(this.totalUSD)}</span>
                                     </div>
                                 </div>
                                 <div class="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
                                     <div class="flex justify-between items-center">
                                         <span class="text-gray-700 font-semibold">Total Bs.:</span>
-                                        <span class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</span>
+                                        <span class="text-2xl font-bold text-blue-600">Bs. ${formatVE(this.totalUSD * this.exchangeRate)}</span>
                                     </div>
                                 </div>
                                 <div class="text-center text-xs text-gray-500">
-                                    <i class="fas fa-exchange-alt mr-1"></i>Tasa: Bs. ${this.exchangeRate.toFixed(2)} por USD
+                                    <i class="fas fa-exchange-alt mr-1"></i>Tasa: Bs. ${formatVE(this.exchangeRate)} por USD
                                 </div>
                             </div>
                         </div>
@@ -1692,32 +1692,28 @@
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
                         let notes = [];
-                        notes.push(`Tasa aplicada: Bs. ${this.exchangeRate.toFixed(2)}`);
+                        notes.push(`Tasa aplicada: Bs. ${formatVE(this.exchangeRate)}`);
                         let payment_method = this.paymentMethod;
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             payment_method = 'multiple';
                             notes.push('=== PAGO MÚLTIPLE ===');
-                            notes.push(`Total: $${this.totalUSD.toFixed(2)} | ${this.multiplePayments.length} método(s)`);
+                            notes.push(`Total: $${formatVE(this.totalUSD)} | ${this.multiplePayments.length} método(s)`);
                             this.multiplePayments.forEach((p, i) => {
-                                let note = `  ${i + 1}. ${this.getPaymentMethodName(p.method)}: $${p.amount.toFixed(2)} (Bs. ${p.amountBs.toFixed(2)})`;
+                                let note = `  ${i + 1}. ${this.getPaymentMethodName(p.method)}: $${formatVE(p.amount)} (Bs. ${formatVE(p.amountBs)})`;
                                 if (p.reference) note += ` | Ref: ${p.reference}`;
                                 notes.push(note);
                             });
                         } else {
                             if (this.paymentReference) notes.push(`Ref: ${this.paymentReference}`);
                             if (this.paymentMethod === 'efectivo_bs' && this.amountReceivedBs > 0) {
-                                notes.push(`Recibido Bs: ${round2(this.amountReceivedBs).toFixed(2)}`);
-                                notes.push(`Cambio Bs: ${(round2(this.amountReceivedBs) - this.totalBs).toFixed(2)}`);
+                                notes.push(`Recibido Bs: ${formatVE(round2(this.amountReceivedBs))}`);
+                                notes.push(`Cambio Bs: ${formatVE(round2(this.amountReceivedBs) - this.totalBs)}`);
                             }
                             if (this.paymentMethod === 'efectivo_divisas' && this.amountReceivedUsd > 0) {
-                                notes.push(`Recibido USD: $${round2(this.amountReceivedUsd).toFixed(2)}`);
-                                notes.push(`Cambio USD: $${(round2(this.amountReceivedUsd) - this.totalUSD).toFixed(2)}`);
+                                notes.push(`Recibido USD: $${formatVE(round2(this.amountReceivedUsd))}`);
+                                notes.push(`Cambio USD: $${formatVE(round2(this.amountReceivedUsd) - this.totalUSD)}`);
                             }
                         }
-                        
-                        // ✅ CORRECCIÓN: Usar fecha de Caracas en lugar de UTC
-                        const caracasDate = getCaracasDate();
-                        const rateDateStr = caracasDate.toISOString().split('T')[0];
                         
                         const { data: sale, error: saleError } = await supabase.from('sales').insert({
                             branch: this.userBranch,
@@ -1733,7 +1729,7 @@
                             delivery_coordinates: this.deliveryType === 'delivery' ? this.deliveryCoordinates : null,
                             notes: notes.join('\n') || null,
                             exchange_rate_used: this.exchangeRate,
-                            rate_date: rateDateStr, // ← AHORA USA FECHA DE CARACAS
+                            rate_date: new Date().toISOString().split('T')[0],
                             created_by: session.user.id
                         }).select().single();
                         if (saleError) throw saleError;
@@ -1834,7 +1830,7 @@
                                 if (tankError) {
                                     console.warn('⚠️ Error descontando agua del tanque:', tankError.message);
                                 } else if (!tankResult || !tankResult.success) {
-                                    showToast(`️ Agua insuficiente en el tanque para ${item.size_liters}L`, 'warning');
+                                    showToast(`⚠️ Agua insuficiente en el tanque para ${item.size_liters}L`, 'warning');
                                 } else {
                                     console.log(`✅ ${item.quantity * item.size_liters}L descontados del tanque (botellón vacío ${item.size_liters}L)`);
                                 }
@@ -1848,7 +1844,7 @@
                                     console.warn('⚠️ Error consultando inventario de botellón vacío:', emptyInvError.message);
                                 } else if (emptyInventory) {
                                     if (emptyInventory.quantity < item.quantity) {
-                                        showToast(`️ Stock bajo de botellón vacío ${item.size_liters}L`, 'warning');
+                                        showToast(`⚠️ Stock bajo de botellón vacío ${item.size_liters}L`, 'warning');
                                     }
                                     const { error: updateEmptyError } = await supabase
                                         .from('inventory')
@@ -1908,7 +1904,7 @@
                                     ${this.multiplePayments.map((p, i) => `
                                         <div class="flex justify-between text-xs">
                                             <span class="text-gray-600">${i + 1}. ${this.getPaymentMethodName(p.method)}</span>
-                                            <span class="font-semibold text-green-600">$${p.amount.toFixed(2)}</span>
+                                            <span class="font-semibold text-green-600">$${formatVE(p.amount)}</span>
                                         </div>
                                     `).join('')}
                                 </div>
@@ -1924,11 +1920,11 @@
                                 <div class="mt-3 space-y-2">
                                     <div class="p-3 bg-green-50 rounded-lg border border-green-200">
                                         <p class="text-xs text-gray-500">Total USD</p>
-                                        <p class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</p>
+                                        <p class="text-2xl font-bold text-green-600">$${formatVE(this.totalUSD)}</p>
                                     </div>
                                     <div class="p-3 bg-blue-50 rounded-lg border border-blue-200">
                                         <p class="text-xs text-gray-500">Total Bs.</p>
-                                        <p class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</p>
+                                        <p class="text-2xl font-bold text-blue-600">Bs. ${formatVE(this.totalUSD * this.exchangeRate)}</p>
                                     </div>
                                     ${successDetails}
                                 </div>
@@ -1989,15 +1985,15 @@
                         <div class="mt-4 space-y-2">
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">Total Venta:</span>
-                                <span class="font-semibold">$${this.totalUSD.toFixed(2)}</span>
+                                <span class="font-semibold">$${formatVE(this.totalUSD)}</span>
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">Pago Inicial:</span>
-                                <span class="font-semibold text-green-600">$${this.creditForm.initial_payment.toFixed(2)}</span>
+                                <span class="font-semibold text-green-600">$${formatVE(this.creditForm.initial_payment)}</span>
                             </div>
                             <div class="flex justify-between text-sm border-t pt-2">
                                 <span class="text-gray-700 font-semibold">A Financiar:</span>
-                                <span class="text-xl font-bold text-red-600">$${creditAmount.toFixed(2)}</span>
+                                <span class="text-xl font-bold text-red-600">$${formatVE(creditAmount)}</span>
                             </div>
                         </div>
                     </div>
@@ -2006,11 +2002,6 @@
                     this.processing = true;
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
-                        
-                        // ✅ CORRECCIÓN: Usar fecha de Caracas para créditos también
-                        const caracasDate = getCaracasDate();
-                        const rateDateStr = caracasDate.toISOString().split('T')[0];
-                        
                         const { data: sale, error: saleError } = await supabase.from('sales').insert({
                             branch: this.userBranch,
                             customer_id: this.creditForm.customer_id,
@@ -2020,9 +2011,9 @@
                             total: this.totalUSD,
                             payment_method: 'credito',
                             status: creditAmount > 0 ? 'pending' : 'completed',
-                            notes: `Crédito - Pago inicial: $${round2(this.creditForm.initial_payment).toFixed(2)}\n${this.creditForm.notes || ''}`,
+                            notes: `Crédito - Pago inicial: $${formatVE(round2(this.creditForm.initial_payment))}\n${this.creditForm.notes || ''}`,
                             exchange_rate_used: this.exchangeRate,
-                            rate_date: rateDateStr, // ← AHORA USA FECHA DE CARACAS
+                            rate_date: new Date().toISOString().split('T')[0],
                             created_by: session.user.id
                         }).select().single();
                         if (saleError) throw saleError;
@@ -2101,7 +2092,7 @@
                                 <p class="text-gray-600">La venta a crédito ha sido procesada</p>
                                 <div class="mt-3 p-3 bg-blue-50 rounded-lg">
                                     <p class="text-sm text-gray-600">Monto a cobrar:</p>
-                                    <p class="text-2xl font-bold text-blue-600">$${creditAmount.toFixed(2)}</p>
+                                    <p class="text-2xl font-bold text-blue-600">$${formatVE(creditAmount)}</p>
                                 </div>
                             </div>
                             `,
