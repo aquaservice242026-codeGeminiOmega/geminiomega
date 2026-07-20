@@ -59,8 +59,8 @@
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 28px; }
         .toggle-slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
-        input:checked+.toggle-slider { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
-        input:checked+.toggle-slider:before { transform: translateX(22px); }
+        input:checked + .toggle-slider { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
+        input:checked + .toggle-slider:before { transform: translateX(22px); }
         .payment-card { transition: all 0.2s ease; border: 2px solid transparent; }
         .payment-card:hover { border-color: #0ea5e9; transform: translateY(-1px); }
         @keyframes pulse-bcv { 0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); } 50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); } }
@@ -215,12 +215,10 @@
                         <h2 class="text-sm font-semibold text-gray-700">Productos Disponibles</h2>
                         <span class="text-xs text-gray-500" x-text="filteredProducts.length + ' productos'"></span>
                     </div>
-
                     <div x-show="filteredProducts.length === 0" class="text-center py-8 text-gray-400">
                         <i class="fas fa-box-open text-4xl mb-2"></i>
                         <p class="text-sm">No hay productos disponibles</p>
                     </div>
-
                     <div class="grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-4">
                         <template x-for="product in filteredProducts" :key="product.id">
                             <button @click="addProduct(product)" class="product-card rounded-xl text-white p-3 lg:p-6 relative overflow-hidden" :class="{
@@ -286,7 +284,6 @@
                     Carrito
                     <span x-show="cartItemCount > 0" class="ml-2 bg-cyan-500 text-white rounded-full px-2 py-0.5 text-xs font-bold" x-text="cartItemCount"></span>
                 </h3>
-
                 <div class="space-y-2 mb-4">
                     <template x-for="(item, index) in cart" :key="index">
                         <div class="animate-bounce-in cart-item-compact rounded-xl">
@@ -318,12 +315,10 @@
                         </div>
                     </template>
                 </div>
-
                 <div x-show="cart.length === 0" class="text-center py-8 text-gray-400">
                     <i class="fas fa-shopping-cart text-4xl mb-2"></i>
                     <p class="text-sm">Carrito vacío</p>
                 </div>
-
                 <div class="border-t pt-4 space-y-2">
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-600">Subtotal:</span>
@@ -385,12 +380,10 @@
                             <option value="credito">Crédito</option>
                         </select>
                     </div>
-
                     <div x-show="['pago_movil', 'transferencia'].includes(paymentMethod)" class="mt-4 p-3 bg-yellow-50 rounded-lg">
                         <label class="text-xs font-medium text-gray-700 mb-1 block">Referencia</label>
                         <input type="text" x-model="paymentReference" @input="paymentReference = paymentReference.toUpperCase()" placeholder="Últimos 4 dígitos" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                     </div>
-
                     <div x-show="paymentMethod === 'efectivo_bs'" class="mt-4 p-3 bg-green-50 rounded-lg">
                         <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (Bs.)</label>
                         <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
@@ -400,7 +393,6 @@
                             <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs. <span x-text="(totalBs - amountReceivedBs).toFixed(2)"></span></p>
                         </div>
                     </div>
-
                     <div x-show="paymentMethod === 'efectivo_divisas'" class="mt-4 p-3 bg-green-50 rounded-lg">
                         <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (USD)</label>
                         <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
@@ -409,7 +401,6 @@
                             <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta: $<span x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
                         </div>
                     </div>
-
                     <div x-show="paymentMethod === 'credito'" class="mt-4 p-3 bg-red-50 rounded-lg">
                         <p class="text-xs text-red-600">
                             <i class="fas fa-exclamation-circle mr-1"></i>
@@ -440,7 +431,6 @@
                             <p class="text-[10px] text-center text-gray-600 mt-1" x-text="paymentProgress + '% completado'"></p>
                         </div>
                     </div>
-
                     <div>
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-xs font-semibold text-gray-700">
@@ -472,7 +462,6 @@
                             </template>
                         </div>
                     </div>
-
                     <div class="bg-gray-50 rounded-xl p-3 border border-gray-200">
                         <p class="text-xs font-semibold text-gray-700 mb-2">
                             <i class="fas fa-plus-circle mr-1"></i>Agregar Pago
@@ -485,24 +474,20 @@
                                 <option value="transferencia">Transferencia</option>
                                 <option value="punto_venta">Punto de Venta</option>
                             </select>
-
                             <div x-show="newPayment.method !== 'efectivo_bs'">
                                 <label class="text-[10px] font-medium text-gray-600">Monto (USD)</label>
                                 <input type="number" x-model.number="newPayment.amountUsd" step="0.01" min="0" :placeholder="'Sugerido: $' + remainingAmount.toFixed(2)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                                 <p class="text-[10px] text-gray-500 mt-1">Equivale: Bs. <span class="font-semibold" x-text="((newPayment.amountUsd || 0) * exchangeRate).toFixed(2)"></span></p>
                             </div>
-
                             <div x-show="newPayment.method === 'efectivo_bs'">
                                 <label class="text-[10px] font-medium text-gray-600">Monto (Bs.)</label>
                                 <input type="number" x-model.number="newPayment.amountBs" step="0.01" min="0" :placeholder="'Sugerido: Bs. ' + (remainingAmount * exchangeRate).toFixed(2)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                                 <p class="text-[10px] text-gray-500 mt-1">Equivale: $<span class="font-semibold" x-text="((newPayment.amountBs || 0) / exchangeRate).toFixed(2)"></span></p>
                             </div>
-
                             <div x-show="['pago_movil', 'transferencia', 'punto_venta'].includes(newPayment.method)">
                                 <label class="text-[10px] font-medium text-gray-600">Referencia</label>
                                 <input type="text" x-model="newPayment.reference" @input="newPayment.reference = newPayment.reference.toUpperCase()" placeholder="Últimos 4 dígitos" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                             </div>
-
                             <button @click="addMultiplePayment()" :disabled="!canAddPayment()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed touch-btn">
                                 <i class="fas fa-plus mr-1"></i>Agregar Pago
                             </button>
@@ -524,7 +509,6 @@
                         <span>Crédito</span>
                     </button>
                 </div>
-
                 <button @click="quickSale()" :disabled="cart.length === 0 || processing" class="w-full mt-2 bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2 text-sm">
                     <i class="fas fa-bolt"></i>
                     <span>Venta Rápida (Contado sin cliente)</span>
@@ -575,14 +559,12 @@
                 </button>
             </div>
         </div>
-
         <div class="p-4 space-y-2 max-h-[50vh] overflow-y-auto">
             <div x-show="cart.length === 0" class="text-center py-8 text-gray-400">
                 <i class="fas fa-shopping-cart text-4xl mb-2"></i>
                 <p class="text-sm">Carrito vacío</p>
                 <p class="text-xs mt-1">Agrega productos para comenzar</p>
             </div>
-
             <template x-for="(item, index) in cart" :key="index">
                 <div class="animate-bounce-in cart-item-compact rounded-xl">
                     <div class="flex items-center justify-between mb-1">
@@ -613,7 +595,6 @@
                 </div>
             </template>
         </div>
-
         <div class="border-t p-4 bg-gray-50">
             <div class="space-y-2 mb-3">
                 <div class="flex justify-between text-sm">
@@ -629,7 +610,6 @@
                     <span class="font-bold text-green-600" x-text="'Bs. ' + totalBs.toFixed(2)"></span>
                 </div>
             </div>
-
             <div class="mb-3">
                 <p class="text-xs font-semibold text-gray-700 mb-2">Tipo de Entrega</p>
                 <div class="flex space-x-2">
@@ -651,7 +631,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="mb-3">
                 <div class="flex items-center justify-between mb-2">
                     <label class="text-xs font-semibold text-gray-700">Cliente</label>
@@ -666,7 +645,6 @@
                     </template>
                 </select>
             </div>
-
             <div class="mb-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-3 border border-purple-200">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-2">
@@ -682,7 +660,6 @@
                     </label>
                 </div>
             </div>
-
             <div x-show="!useMultiplePayments" class="mb-3">
                 <label class="text-xs font-semibold text-gray-700 mb-2 block">Método de Pago</label>
                 <select x-model="paymentMethod" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
@@ -693,12 +670,10 @@
                     <option value="punto_venta">Punto de Venta</option>
                     <option value="credito">Crédito</option>
                 </select>
-
                 <div x-show="['pago_movil', 'transferencia'].includes(paymentMethod)" class="mt-2 p-3 bg-yellow-50 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Referencia</label>
                     <input type="text" x-model="paymentReference" @input="paymentReference = paymentReference.toUpperCase()" placeholder="Últimos 4 dígitos" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                 </div>
-
                 <div x-show="paymentMethod === 'efectivo_bs'" class="mt-2 p-3 bg-green-50 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (Bs.)</label>
                     <input type="number" x-model.number="amountReceivedBs" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
@@ -708,7 +683,6 @@
                         <p x-show="amountReceivedBs < totalBs" class="text-red-600 font-semibold">Falta: Bs. <span x-text="(totalBs - amountReceivedBs).toFixed(2)"></span></p>
                     </div>
                 </div>
-
                 <div x-show="paymentMethod === 'efectivo_divisas'" class="mt-2 p-3 bg-green-50 rounded-lg">
                     <label class="text-xs font-medium text-gray-700 mb-1 block">Monto Recibido (USD)</label>
                     <input type="number" x-model.number="amountReceivedUsd" step="0.01" min="0" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="0.00">
@@ -717,7 +691,6 @@
                         <p x-show="amountReceivedUsd < totalUSD" class="text-red-600 font-semibold">Falta: $<span x-text="(totalUSD - amountReceivedUsd).toFixed(2)"></span></p>
                     </div>
                 </div>
-
                 <div x-show="paymentMethod === 'credito'" class="mt-2 p-3 bg-red-50 rounded-lg">
                     <p class="text-xs text-red-600">
                         <i class="fas fa-exclamation-circle mr-1"></i>
@@ -725,7 +698,6 @@
                     </p>
                 </div>
             </div>
-
             <div x-show="useMultiplePayments" class="mb-3 space-y-3">
                 <div class="bg-blue-50 rounded-xl p-3 border border-blue-200">
                     <div class="flex justify-between items-center mb-2">
@@ -747,7 +719,6 @@
                         <p class="text-[10px] text-center text-gray-600 mt-1" x-text="paymentProgress + '% completado'"></p>
                     </div>
                 </div>
-
                 <div x-show="multiplePayments.length > 0" class="space-y-2">
                     <template x-for="(payment, index) in multiplePayments" :key="payment.id">
                         <div class="bg-white border border-gray-200 rounded-lg p-3 flex items-center justify-between">
@@ -768,7 +739,6 @@
                         </div>
                     </template>
                 </div>
-
                 <div class="bg-gray-50 rounded-xl p-3 border border-gray-200">
                     <p class="text-xs font-semibold text-gray-700 mb-2">
                         <i class="fas fa-plus-circle mr-1"></i>Agregar Pago
@@ -781,24 +751,20 @@
                             <option value="transferencia">Transferencia</option>
                             <option value="punto_venta">Punto de Venta</option>
                         </select>
-
                         <div x-show="newPayment.method !== 'efectivo_bs'">
                             <label class="text-[10px] font-medium text-gray-600">Monto (USD)</label>
                             <input type="number" x-model.number="newPayment.amountUsd" step="0.01" min="0" :placeholder="'Sugerido: $' + remainingAmount.toFixed(2)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                             <p class="text-[10px] text-gray-500 mt-1">Equivale: Bs. <span class="font-semibold" x-text="((newPayment.amountUsd || 0) * exchangeRate).toFixed(2)"></span></p>
                         </div>
-
                         <div x-show="newPayment.method === 'efectivo_bs'">
                             <label class="text-[10px] font-medium text-gray-600">Monto (Bs.)</label>
                             <input type="number" x-model.number="newPayment.amountBs" step="0.01" min="0" :placeholder="'Sugerido: Bs. ' + (remainingAmount * exchangeRate).toFixed(2)" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                             <p class="text-[10px] text-gray-500 mt-1">Equivale: $<span class="font-semibold" x-text="((newPayment.amountBs || 0) / exchangeRate).toFixed(2)"></span></p>
                         </div>
-
                         <div x-show="['pago_movil', 'transferencia', 'punto_venta'].includes(newPayment.method)">
                             <label class="text-[10px] font-medium text-gray-600">Referencia</label>
                             <input type="text" x-model="newPayment.reference" @input="newPayment.reference = newPayment.reference.toUpperCase()" placeholder="Últimos 4 dígitos" class="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white">
                         </div>
-
                         <button @click="addMultiplePayment()" :disabled="!canAddPayment()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed touch-btn">
                             <i class="fas fa-plus mr-1"></i>Agregar Pago
                         </button>
@@ -808,7 +774,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="grid grid-cols-2 gap-2 mt-4">
                 <button @click="processSale()" :disabled="cart.length === 0 || processing || (paymentMethod === 'credito' && !useMultiplePayments) || (useMultiplePayments && remainingAmount > 0.01)" class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-xl font-semibold touch-btn disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2">
                     <i class="fas fa-circle-notch fa-spin" x-show="processing"></i>
@@ -820,7 +785,6 @@
                     <span>Crédito</span>
                 </button>
             </div>
-
             <button @click="quickSale()" :disabled="cart.length === 0 || processing" class="w-full mt-2 bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 rounded-xl font-semibold touch-btn disabled:opacity-50 flex items-center justify-center space-x-2 text-sm">
                 <i class="fas fa-bolt"></i>
                 <span>Venta Rápida (Contado sin cliente)</span>
@@ -837,34 +801,28 @@
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
-
             <div class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nombre Completo *</label>
                     <input type="text" x-model="newCustomer.full_name" @input="newCustomer.full_name = newCustomer.full_name.toUpperCase()" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500" placeholder="Ej: Juan Pérez">
                 </div>
-
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
                     <input type="tel" x-model="newCustomer.phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500" placeholder="0412-1234567">
                 </div>
-
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
                     <input type="email" x-model="newCustomer.email" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500" placeholder="cliente@email.com">
                 </div>
-
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Dirección</label>
                     <textarea x-model="newCustomer.address" @input="newCustomer.address = newCustomer.address.toUpperCase()" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500" placeholder="Dirección completa"></textarea>
                 </div>
-
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Recomendado por</label>
                     <input type="text" x-model="newCustomer.recommended_by" @input="newCustomer.recommended_by = newCustomer.recommended_by.toUpperCase()" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500" placeholder="Nombre de quien recomendó">
                 </div>
             </div>
-
             <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3 sticky bottom-0">
                 <button @click="closeCustomerModal()" class="px-4 py-2 text-gray-600 touch-btn">Cancelar</button>
                 <button @click="saveCustomer()" :disabled="savingCustomer" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 touch-btn">
@@ -887,7 +845,6 @@
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
-
             <div class="p-6 space-y-4">
                 <div class="bg-blue-50 p-4 rounded-lg">
                     <h4 class="font-semibold text-gray-800 mb-3">
@@ -918,7 +875,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="bg-green-50 p-4 rounded-lg">
                     <h4 class="font-semibold text-gray-800 mb-3">
                         <i class="fas fa-shopping-cart mr-2 text-green-600"></i>Resumen
@@ -938,7 +894,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="bg-yellow-50 p-4 rounded-lg">
                     <h4 class="font-semibold text-gray-800 mb-3">
                         <i class="fas fa-calendar-alt mr-2 text-yellow-600"></i>Términos
@@ -966,13 +921,11 @@
                         </div>
                     </div>
                 </div>
-
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Notas</label>
                     <textarea x-model="creditForm.notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white" placeholder="Observaciones"></textarea>
                 </div>
             </div>
-
             <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3 sticky bottom-0">
                 <button @click="closeCreditModal()" class="px-4 py-2 text-gray-600 touch-btn">Cancelar</button>
                 <button @click="processCreditSale()" :disabled="processing || !canProcessCredit()" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 touch-btn">
@@ -1002,7 +955,7 @@
                 warning: 'linear-gradient(to right, #f59e0b, #d97706)',
                 info: 'linear-gradient(to right, #3b82f6, #2563eb)'
             };
-            const icons = { success: '✓', error: '✗', warning: '', info: '' };
+            const icons = { success: '✓', error: '', warning: '⚠', info: '' };
             Toastify({
                 text: `${icons[type]} ${message}`,
                 duration: 3000,
@@ -1055,7 +1008,7 @@
         function ensureValidRate(rate) {
             const parsed = parseFloat(rate);
             if (isNaN(parsed) || parsed <= 0) {
-                console.warn('️ Tasa inválida detectada, usando valor por defecto 700.22');
+                console.warn('⚠️ Tasa inválida detectada, usando valor por defecto 700.22');
                 return 700.22;
             }
             return round2(parsed);
@@ -1075,6 +1028,15 @@
                 console.error('❌ Error obteniendo tasa BCV:', err);
                 return null;
             }
+        }
+
+        // ✅ FUNCIÓN PARA OBTENER FECHA DE CARACAS
+        function getCaracasDate() {
+            const now = new Date();
+            const caracasTime = new Date(now.toLocaleString('en-US', {
+                timeZone: 'America/Caracas'
+            }));
+            return caracasTime;
         }
 
         function ventasApp() {
@@ -1229,7 +1191,7 @@
                         const customer = this.customers.find(c => c.id === this.selectedCustomer);
                         if (customer && customer.address) {
                             this.deliveryAddress = customer.address.toUpperCase();
-                            console.log(' Dirección autocompletada al activar delivery:', this.deliveryAddress);
+                            console.log('📍 Dirección autocompletada al activar delivery:', this.deliveryAddress);
                         }
                     }
                 },
@@ -1372,7 +1334,7 @@
                         }
                         console.log('📦 Datos recibidos de inventory:', virtualInventory);
                         if (!virtualInventory || virtualInventory.length === 0) {
-                            console.warn('️ No hay inventario disponible');
+                            console.warn('⚠️ No hay inventario disponible');
                             this.products = [];
                             return;
                         }
@@ -1627,53 +1589,53 @@
                             return;
                         }
                         modalHtml = `
-                            <div class="text-left space-y-3">
-                                <div class="flex items-center space-x-2 text-gray-700">
-                                    <i class="fas fa-user text-blue-500"></i>
-                                    <span><strong>Cliente:</strong> ${customerName}</span>
+                        <div class="text-left space-y-3">
+                            <div class="flex items-center space-x-2 text-gray-700">
+                                <i class="fas fa-user text-blue-500"></i>
+                                <span><strong>Cliente:</strong> ${customerName}</span>
+                            </div>
+                            <div class="flex items-center space-x-2 text-gray-700">
+                                <i class="fas fa-shopping-cart text-blue-500"></i>
+                                <span><strong>Productos:</strong> ${this.cartItemCount} items</span>
+                            </div>
+                            <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-3 border border-blue-200">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-semibold text-gray-700">Total de la Venta:</span>
+                                    <span class="text-xl font-bold text-blue-600">$${this.totalUSD.toFixed(2)}</span>
                                 </div>
-                                <div class="flex items-center space-x-2 text-gray-700">
-                                    <i class="fas fa-shopping-cart text-blue-500"></i>
-                                    <span><strong>Productos:</strong> ${this.cartItemCount} items</span>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm text-gray-600">Total en Bs.:</span>
+                                    <span class="text-sm font-semibold text-blue-600">Bs. ${this.totalBs.toFixed(2)}</span>
                                 </div>
-                                <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-3 border border-blue-200">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="text-sm font-semibold text-gray-700">Total de la Venta:</span>
-                                        <span class="text-xl font-bold text-blue-600">$${this.totalUSD.toFixed(2)}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="text-sm text-gray-600">Total en Bs.:</span>
-                                        <span class="text-sm font-semibold text-blue-600">Bs. ${this.totalBs.toFixed(2)}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center pt-2 border-t border-blue-200">
-                                        <span class="text-xs text-gray-500"><i class="fas fa-exchange-alt mr-1"></i>Tasa: Bs. ${this.exchangeRate.toFixed(2)}</span>
-                                    </div>
-                                </div>
-                                <div class="space-y-2">
-                                    <h4 class="font-semibold text-gray-800 text-sm"><i class="fas fa-list-check mr-1 text-purple-600"></i>Pagos Registrados (${this.multiplePayments.length}):</h4>
-                                    ${this.multiplePayments.map((p, i) => `
-                                        <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center border border-gray-200">
-                                            <div>
-                                                <div class="flex items-center space-x-2 mb-1">
-                                                    <span class="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded">#${i + 1}</span>
-                                                    <span class="text-sm font-semibold text-gray-800">${this.getPaymentMethodName(p.method)}</span>
-                                                </div>
-                                                ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` : ''}
-                                            </div>
-                                            <div class="text-right">
-                                                <p class="text-sm font-bold text-green-600">$${p.amount.toFixed(2)}</p>
-                                                <p class="text-[10px] text-gray-500">Bs. ${p.amountBs.toFixed(2)}</p>
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                                <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border border-green-200">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-sm font-semibold text-gray-700">Estado:</span>
-                                        <span class="text-sm font-bold text-green-600"><i class="fas fa-check-circle mr-1"></i>Pago Completo</span>
-                                    </div>
+                                <div class="flex justify-between items-center pt-2 border-t border-blue-200">
+                                    <span class="text-xs text-gray-500"><i class="fas fa-exchange-alt mr-1"></i>Tasa: Bs. ${this.exchangeRate.toFixed(2)}</span>
                                 </div>
                             </div>
+                            <div class="space-y-2">
+                                <h4 class="font-semibold text-gray-800 text-sm"><i class="fas fa-list-check mr-1 text-purple-600"></i>Pagos Registrados (${this.multiplePayments.length}):</h4>
+                                ${this.multiplePayments.map((p, i) => `
+                                    <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center border border-gray-200">
+                                        <div>
+                                            <div class="flex items-center space-x-2 mb-1">
+                                                <span class="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded">#${i + 1}</span>
+                                                <span class="text-sm font-semibold text-gray-800">${this.getPaymentMethodName(p.method)}</span>
+                                            </div>
+                                            ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` : ''}
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm font-bold text-green-600">$${p.amount.toFixed(2)}</p>
+                                            <p class="text-[10px] text-gray-500">Bs. ${p.amountBs.toFixed(2)}</p>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border border-green-200">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-semibold text-gray-700">Estado:</span>
+                                    <span class="text-sm font-bold text-green-600"><i class="fas fa-check-circle mr-1"></i>Pago Completo</span>
+                                </div>
+                            </div>
+                        </div>
                         `;
                     } else {
                         if (this.paymentMethod !== 'credito') {
@@ -1691,37 +1653,37 @@
                             }
                         }
                         modalHtml = `
-                            <div class="text-left space-y-3">
-                                <div class="flex items-center space-x-2 text-gray-700">
-                                    <i class="fas fa-user text-blue-500"></i>
-                                    <span><strong>Cliente:</strong> ${customerName}</span>
-                                </div>
-                                <div class="flex items-center space-x-2 text-gray-700">
-                                    <i class="fas fa-shopping-cart text-blue-500"></i>
-                                    <span><strong>Productos:</strong> ${this.cartItemCount} items</span>
-                                </div>
-                                <div class="flex items-center space-x-2 text-gray-700">
-                                    <i class="fas fa-credit-card text-blue-500"></i>
-                                    <span><strong>Método:</strong> ${this.getPaymentMethodName(this.paymentMethod)}</span>
-                                </div>
-                                <div class="mt-4 space-y-2">
-                                    <div class="p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-gray-700 font-semibold">Total USD:</span>
-                                            <span class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</span>
-                                        </div>
+                        <div class="text-left space-y-3">
+                            <div class="flex items-center space-x-2 text-gray-700">
+                                <i class="fas fa-user text-blue-500"></i>
+                                <span><strong>Cliente:</strong> ${customerName}</span>
+                            </div>
+                            <div class="flex items-center space-x-2 text-gray-700">
+                                <i class="fas fa-shopping-cart text-blue-500"></i>
+                                <span><strong>Productos:</strong> ${this.cartItemCount} items</span>
+                            </div>
+                            <div class="flex items-center space-x-2 text-gray-700">
+                                <i class="fas fa-credit-card text-blue-500"></i>
+                                <span><strong>Método:</strong> ${this.getPaymentMethodName(this.paymentMethod)}</span>
+                            </div>
+                            <div class="mt-4 space-y-2">
+                                <div class="p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-gray-700 font-semibold">Total USD:</span>
+                                        <span class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</span>
                                     </div>
-                                    <div class="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-gray-700 font-semibold">Total Bs.:</span>
-                                            <span class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</span>
-                                        </div>
+                                </div>
+                                <div class="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-gray-700 font-semibold">Total Bs.:</span>
+                                        <span class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</span>
                                     </div>
-                                    <div class="text-center text-xs text-gray-500">
-                                        <i class="fas fa-exchange-alt mr-1"></i>Tasa: Bs. ${this.exchangeRate.toFixed(2)} por USD
-                                    </div>
+                                </div>
+                                <div class="text-center text-xs text-gray-500">
+                                    <i class="fas fa-exchange-alt mr-1"></i>Tasa: Bs. ${this.exchangeRate.toFixed(2)} por USD
                                 </div>
                             </div>
+                        </div>
                         `;
                     }
                     const confirmed = await showConfirm(this.useMultiplePayments ? 'Confirmar Venta - Pago Múltiple' : 'Confirmar Venta', modalHtml, confirmText, 'Cancelar');
@@ -1752,6 +1714,11 @@
                                 notes.push(`Cambio USD: $${(round2(this.amountReceivedUsd) - this.totalUSD).toFixed(2)}`);
                             }
                         }
+                        
+                        // ✅ CORRECCIÓN: Usar fecha de Caracas en lugar de UTC
+                        const caracasDate = getCaracasDate();
+                        const rateDateStr = caracasDate.toISOString().split('T')[0];
+                        
                         const { data: sale, error: saleError } = await supabase.from('sales').insert({
                             branch: this.userBranch,
                             customer_id: this.selectedCustomer || null,
@@ -1766,7 +1733,7 @@
                             delivery_coordinates: this.deliveryType === 'delivery' ? this.deliveryCoordinates : null,
                             notes: notes.join('\n') || null,
                             exchange_rate_used: this.exchangeRate,
-                            rate_date: new Date().toISOString().split('T')[0],
+                            rate_date: rateDateStr, // ← AHORA USA FECHA DE CARACAS
                             created_by: session.user.id
                         }).select().single();
                         if (saleError) throw saleError;
@@ -1833,165 +1800,139 @@
                         }));
                         const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
                         if (itemsError) throw itemsError;
-
-                        // ✅ DESCUENTO DE INVENTARIO - Simplificado y directo
-let totalCapsNeeded = 0;
-
-// ✅ BUCLE 1: Botellones CON AGUA (5L, 13L, 20L)
-for (const item of this.cart) {
-    if (item.product_type !== 'empty_bottle') {
-        const realProductId = sizeToProductId[item.size_liters];
-        if (!realProductId) continue;
-        
-        console.log(`💧 Procesando botellón con agua ${item.size_liters}L - Cantidad: ${item.quantity}`);
-        
-        const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
-            branch_param: this.userBranch,
-            product_id_param: realProductId,
-            quantity_param: item.quantity,
-            user_id_param: session.user.id
-        });
-        
-        if (tankError) throw tankError;
-        if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
-        
-        // Contar tapas para 13L y 20L con agua
-        if (item.size_liters === 13 || item.size_liters === 20) {
-            totalCapsNeeded += item.quantity;
-            console.log(`🔴 Contando ${item.quantity} tapa(s) para botellón con agua ${item.size_liters}L`);
-        }
-    }
-}
-
-// ✅ BUCLE 2: Botellones VACÍOS (15L y 20L)
-for (const item of this.cart) {
-    if (item.product_type === 'empty_bottle') {
-        const emptyProduct = emptyBottleProducts.find(p => p.size_liters === item.size_liters);
-        if (!emptyProduct) continue;
-        
-        console.log(`🏺 Procesando botellón vacío ${item.size_liters}L - Cantidad: ${item.quantity}`);
-        
-        // ✅ NUEVO: Descontar agua del tanque (15L o 20L según el producto)
-        const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
-            branch_param: this.userBranch,
-            product_id_param: emptyProduct.id, // ← ID del producto vacío (tiene size_liters = 15 o 20)
-            quantity_param: item.quantity,
-            user_id_param: session.user.id
-        });
-        
-        if (tankError) {
-            console.warn('⚠️ Error descontando agua del tanque:', tankError.message);
-        } else if (!tankResult || !tankResult.success) {
-            showToast(`⚠️ Agua insuficiente en el tanque para ${item.size_liters}L`, 'warning');
-        } else {
-            console.log(`✅ ${item.quantity * item.size_liters}L descontados del tanque (botellón vacío ${item.size_liters}L)`);
-        }
-        
-        // Descontar del inventario físico (botellón vacío)
-        const { data: emptyInventory, error: emptyInvError } = await supabase
-            .from('inventory')
-            .select('quantity')
-            .eq('product_id', emptyProduct.id)
-            .eq('branch', this.userBranch)
-            .single();
-        
-        if (emptyInvError) {
-            console.warn('⚠️ Error consultando inventario de botellón vacío:', emptyInvError.message);
-        } else if (emptyInventory) {
-            if (emptyInventory.quantity < item.quantity) {
-                showToast(`⚠️ Stock bajo de botellón vacío ${item.size_liters}L`, 'warning');
-            }
-            const { error: updateEmptyError } = await supabase
-                .from('inventory')
-                .update({
-                    quantity: emptyInventory.quantity - item.quantity,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('product_id', emptyProduct.id)
-                .eq('branch', this.userBranch);
-            
-            if (updateEmptyError) {
-                console.warn('⚠️ Error actualizando botellón vacío:', updateEmptyError.message);
-            } else {
-                console.log(`✅ ${item.quantity} botellón(es) vacío(s) ${item.size_liters}L descontado(s) del inventario`);
-            }
-        }
-        
-        // Contar tapas para botellones vacíos de 15L y 20L
-        if (item.size_liters === 15 || item.size_liters === 20) {
-            totalCapsNeeded += item.quantity;
-            console.log(`🔴 Contando ${item.quantity} tapa(s) para botellón vacío ${item.size_liters}L`);
-        }
-    }
-}
-
-// ✅ DESCUENTO DE TAPAS
-if (totalCapsNeeded > 0 && capProduct) {
-    console.log(`🔴 Descontando ${totalCapsNeeded} tapas del inventario`);
-    const { data: capInventory, error: capInventoryError } = await supabase
-        .from('inventory')
-        .select('quantity, product_id')
-        .eq('product_id', capProduct.id)
-        .eq('branch', this.userBranch)
-        .single();
-    
-    if (capInventoryError) {
-        console.warn('⚠️ Error consultando inventario de tapas:', capInventoryError.message);
-    } else if (capInventory) {
-        if (capInventory.quantity < totalCapsNeeded) {
-            showToast(`⚠️ Stock de tapas bajo: ${capInventory.quantity} disponibles`, 'warning');
-        }
-        const { error: updateCapError } = await supabase
-            .from('inventory')
-            .update({
-                quantity: capInventory.quantity - totalCapsNeeded,
-                updated_at: new Date().toISOString()
-            })
-            .eq('product_id', capProduct.id)
-            .eq('branch', this.userBranch);
-        
-        if (updateCapError) {
-            console.warn('⚠️ Error actualizando tapas:', updateCapError.message);
-        } else {
-            console.log(`✅ ${totalCapsNeeded} tapas descontadas del inventario`);
-        }
-    }
-}
-
+                        let totalCapsNeeded = 0;
+                        for (const item of this.cart) {
+                            if (item.product_type !== 'empty_bottle') {
+                                const realProductId = sizeToProductId[item.size_liters];
+                                if (!realProductId) continue;
+                                console.log(`💧 Procesando botellón con agua ${item.size_liters}L - Cantidad: ${item.quantity}`);
+                                const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
+                                    branch_param: this.userBranch,
+                                    product_id_param: realProductId,
+                                    quantity_param: item.quantity,
+                                    user_id_param: session.user.id
+                                });
+                                if (tankError) throw tankError;
+                                if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
+                                if (item.size_liters === 13 || item.size_liters === 20) {
+                                    totalCapsNeeded += item.quantity;
+                                    console.log(`🔴 Contando ${item.quantity} tapa(s) para botellón con agua ${item.size_liters}L`);
+                                }
+                            }
+                        }
+                        for (const item of this.cart) {
+                            if (item.product_type === 'empty_bottle') {
+                                const emptyProduct = emptyBottleProducts.find(p => p.size_liters === item.size_liters);
+                                if (!emptyProduct) continue;
+                                console.log(`🏺 Procesando botellón vacío ${item.size_liters}L - Cantidad: ${item.quantity}`);
+                                const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
+                                    branch_param: this.userBranch,
+                                    product_id_param: emptyProduct.id,
+                                    quantity_param: item.quantity,
+                                    user_id_param: session.user.id
+                                });
+                                if (tankError) {
+                                    console.warn('⚠️ Error descontando agua del tanque:', tankError.message);
+                                } else if (!tankResult || !tankResult.success) {
+                                    showToast(`️ Agua insuficiente en el tanque para ${item.size_liters}L`, 'warning');
+                                } else {
+                                    console.log(`✅ ${item.quantity * item.size_liters}L descontados del tanque (botellón vacío ${item.size_liters}L)`);
+                                }
+                                const { data: emptyInventory, error: emptyInvError } = await supabase
+                                    .from('inventory')
+                                    .select('quantity')
+                                    .eq('product_id', emptyProduct.id)
+                                    .eq('branch', this.userBranch)
+                                    .single();
+                                if (emptyInvError) {
+                                    console.warn('⚠️ Error consultando inventario de botellón vacío:', emptyInvError.message);
+                                } else if (emptyInventory) {
+                                    if (emptyInventory.quantity < item.quantity) {
+                                        showToast(`️ Stock bajo de botellón vacío ${item.size_liters}L`, 'warning');
+                                    }
+                                    const { error: updateEmptyError } = await supabase
+                                        .from('inventory')
+                                        .update({
+                                            quantity: emptyInventory.quantity - item.quantity,
+                                            updated_at: new Date().toISOString()
+                                        })
+                                        .eq('product_id', emptyProduct.id)
+                                        .eq('branch', this.userBranch);
+                                    if (updateEmptyError) {
+                                        console.warn('⚠️ Error actualizando botellón vacío:', updateEmptyError.message);
+                                    } else {
+                                        console.log(`✅ ${item.quantity} botellón(es) vacío(s) ${item.size_liters}L descontado(s) del inventario`);
+                                    }
+                                }
+                                if (item.size_liters === 15 || item.size_liters === 20) {
+                                    totalCapsNeeded += item.quantity;
+                                    console.log(`🔴 Contando ${item.quantity} tapa(s) para botellón vacío ${item.size_liters}L`);
+                                }
+                            }
+                        }
+                        if (totalCapsNeeded > 0 && capProduct) {
+                            console.log(`🔴 Descontando ${totalCapsNeeded} tapas del inventario`);
+                            const { data: capInventory, error: capInventoryError } = await supabase
+                                .from('inventory')
+                                .select('quantity, product_id')
+                                .eq('product_id', capProduct.id)
+                                .eq('branch', this.userBranch)
+                                .single();
+                            if (capInventoryError) {
+                                console.warn('⚠️ Error consultando inventario de tapas:', capInventoryError.message);
+                            } else if (capInventory) {
+                                if (capInventory.quantity < totalCapsNeeded) {
+                                    showToast(`⚠️ Stock de tapas bajo: ${capInventory.quantity} disponibles`, 'warning');
+                                }
+                                const { error: updateCapError } = await supabase
+                                    .from('inventory')
+                                    .update({
+                                        quantity: capInventory.quantity - totalCapsNeeded,
+                                        updated_at: new Date().toISOString()
+                                    })
+                                    .eq('product_id', capProduct.id)
+                                    .eq('branch', this.userBranch);
+                                if (updateCapError) {
+                                    console.warn('⚠️ Error actualizando tapas:', updateCapError.message);
+                                } else {
+                                    console.log(`✅ ${totalCapsNeeded} tapas descontadas del inventario`);
+                                }
+                            }
+                        }
                         let successDetails = '';
                         if (this.useMultiplePayments && this.multiplePayments.length > 0) {
                             successDetails = `
-                                <div class="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
-                                    <p class="text-xs font-semibold text-purple-800 mb-2"><i class="fas fa-list-check mr-1"></i>${this.multiplePayments.length} método(s) de pago:</p>
-                                    <div class="space-y-1">
-                                        ${this.multiplePayments.map((p, i) => `
-                                            <div class="flex justify-between text-xs">
-                                                <span class="text-gray-600">${i + 1}. ${this.getPaymentMethodName(p.method)}</span>
-                                                <span class="font-semibold text-green-600">$${p.amount.toFixed(2)}</span>
-                                            </div>
-                                        `).join('')}
-                                    </div>
+                            <div class="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
+                                <p class="text-xs font-semibold text-purple-800 mb-2"><i class="fas fa-list-check mr-1"></i>${this.multiplePayments.length} método(s) de pago:</p>
+                                <div class="space-y-1">
+                                    ${this.multiplePayments.map((p, i) => `
+                                        <div class="flex justify-between text-xs">
+                                            <span class="text-gray-600">${i + 1}. ${this.getPaymentMethodName(p.method)}</span>
+                                            <span class="font-semibold text-green-600">$${p.amount.toFixed(2)}</span>
+                                        </div>
+                                    `).join('')}
                                 </div>
+                            </div>
                             `;
                         }
                         Swal.fire({
                             icon: 'success',
                             title: '¡Venta Exitosa!',
                             html: `
-                                <div class="text-center space-y-2">
-                                    <p class="text-gray-600">La venta ha sido procesada correctamente</p>
-                                    <div class="mt-3 space-y-2">
-                                        <div class="p-3 bg-green-50 rounded-lg border border-green-200">
-                                            <p class="text-xs text-gray-500">Total USD</p>
-                                            <p class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</p>
-                                        </div>
-                                        <div class="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                                            <p class="text-xs text-gray-500">Total Bs.</p>
-                                            <p class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</p>
-                                        </div>
-                                        ${successDetails}
+                            <div class="text-center space-y-2">
+                                <p class="text-gray-600">La venta ha sido procesada correctamente</p>
+                                <div class="mt-3 space-y-2">
+                                    <div class="p-3 bg-green-50 rounded-lg border border-green-200">
+                                        <p class="text-xs text-gray-500">Total USD</p>
+                                        <p class="text-2xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</p>
                                     </div>
+                                    <div class="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                        <p class="text-xs text-gray-500">Total Bs.</p>
+                                        <p class="text-2xl font-bold text-blue-600">Bs. ${(this.totalUSD * this.exchangeRate).toFixed(2)}</p>
+                                    </div>
+                                    ${successDetails}
                                 </div>
+                            </div>
                             `,
                             timer: 3500,
                             showConfirmButton: false
@@ -2036,35 +1977,40 @@ if (totalCapsNeeded > 0 && capProduct) {
                     const customer = this.customers.find(c => c.id === this.creditForm.customer_id);
                     const creditAmount = round2(this.totalUSD - this.creditForm.initial_payment);
                     const confirmed = await showConfirm('Venta a Crédito', `
-                        <div class="text-left space-y-3">
-                            <div class="flex items-center space-x-2 text-gray-700">
-                                <i class="fas fa-user text-blue-500"></i>
-                                <span><strong>Cliente:</strong> ${customer?.full_name || 'N/A'}</span>
+                    <div class="text-left space-y-3">
+                        <div class="flex items-center space-x-2 text-gray-700">
+                            <i class="fas fa-user text-blue-500"></i>
+                            <span><strong>Cliente:</strong> ${customer?.full_name || 'N/A'}</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-gray-700">
+                            <i class="fas fa-calendar text-blue-500"></i>
+                            <span><strong>Fecha Límite:</strong> ${this.creditForm.payment_date}</span>
+                        </div>
+                        <div class="mt-4 space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Total Venta:</span>
+                                <span class="font-semibold">$${this.totalUSD.toFixed(2)}</span>
                             </div>
-                            <div class="flex items-center space-x-2 text-gray-700">
-                                <i class="fas fa-calendar text-blue-500"></i>
-                                <span><strong>Fecha Límite:</strong> ${this.creditForm.payment_date}</span>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Pago Inicial:</span>
+                                <span class="font-semibold text-green-600">$${this.creditForm.initial_payment.toFixed(2)}</span>
                             </div>
-                            <div class="mt-4 space-y-2">
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Total Venta:</span>
-                                    <span class="font-semibold">$${this.totalUSD.toFixed(2)}</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Pago Inicial:</span>
-                                    <span class="font-semibold text-green-600">$${this.creditForm.initial_payment.toFixed(2)}</span>
-                                </div>
-                                <div class="flex justify-between text-sm border-t pt-2">
-                                    <span class="text-gray-700 font-semibold">A Financiar:</span>
-                                    <span class="text-xl font-bold text-red-600">$${creditAmount.toFixed(2)}</span>
-                                </div>
+                            <div class="flex justify-between text-sm border-t pt-2">
+                                <span class="text-gray-700 font-semibold">A Financiar:</span>
+                                <span class="text-xl font-bold text-red-600">$${creditAmount.toFixed(2)}</span>
                             </div>
                         </div>
+                    </div>
                     `, 'Confirmar Crédito', 'Cancelar');
                     if (!confirmed) return;
                     this.processing = true;
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
+                        
+                        // ✅ CORRECCIÓN: Usar fecha de Caracas para créditos también
+                        const caracasDate = getCaracasDate();
+                        const rateDateStr = caracasDate.toISOString().split('T')[0];
+                        
                         const { data: sale, error: saleError } = await supabase.from('sales').insert({
                             branch: this.userBranch,
                             customer_id: this.creditForm.customer_id,
@@ -2076,7 +2022,7 @@ if (totalCapsNeeded > 0 && capProduct) {
                             status: creditAmount > 0 ? 'pending' : 'completed',
                             notes: `Crédito - Pago inicial: $${round2(this.creditForm.initial_payment).toFixed(2)}\n${this.creditForm.notes || ''}`,
                             exchange_rate_used: this.exchangeRate,
-                            rate_date: new Date().toISOString().split('T')[0],
+                            rate_date: rateDateStr, // ← AHORA USA FECHA DE CARACAS
                             created_by: session.user.id
                         }).select().single();
                         if (saleError) throw saleError;
@@ -2151,13 +2097,13 @@ if (totalCapsNeeded > 0 && capProduct) {
                             icon: 'success',
                             title: '¡Crédito Registrado!',
                             html: `
-                                <div class="text-center space-y-2">
-                                    <p class="text-gray-600">La venta a crédito ha sido procesada</p>
-                                    <div class="mt-3 p-3 bg-blue-50 rounded-lg">
-                                        <p class="text-sm text-gray-600">Monto a cobrar:</p>
-                                        <p class="text-2xl font-bold text-blue-600">$${creditAmount.toFixed(2)}</p>
-                                    </div>
+                            <div class="text-center space-y-2">
+                                <p class="text-gray-600">La venta a crédito ha sido procesada</p>
+                                <div class="mt-3 p-3 bg-blue-50 rounded-lg">
+                                    <p class="text-sm text-gray-600">Monto a cobrar:</p>
+                                    <p class="text-2xl font-bold text-blue-600">$${creditAmount.toFixed(2)}</p>
                                 </div>
+                            </div>
                             `,
                             timer: 2500,
                             showConfirmButton: false
