@@ -323,12 +323,13 @@
             return {
                 loading: true,
                 userBranch: '',
-                userRole: '', // ✅ Nuevo: para controlar permisos
+                userRole: '', 
                 userName: 'Usuario',
                 exchangeRate: 736.93,
                 currentDateTime: '',
                 filters: {
-                    date: new Date().toISOString().split('T')[0]
+                    // ✅ CORRECCIÓN 1: Obtener la fecha actual en zona horaria de Caracas (formato YYYY-MM-DD)
+                    date: new Date().toLocaleDateString('en-CA', { timeZone: 'America/Caracas' })
                 },
                 stats: {
                     totalSales: 0,
@@ -355,14 +356,12 @@
                 async initReporte() {
                     this.updateCurrentDateTime();
                     
-                    // ✅ Verificar sesión
                     const { data: { session } } = await supabase.auth.getSession();
                     if (!session) {
                         window.location.href = 'login.html';
                         return;
                     }
 
-                    // ✅ Obtener perfil con rol, sucursal y nombre
                     const { data: profile, error } = await supabase
                         .from('profiles')
                         .select('branch, full_name, role')
@@ -402,10 +401,10 @@
                         this.resetStats();
 
                         const dateStr = this.filters.date;
-                        const startOfDay = dateStr + 'T00:00:00';
-                        const endOfDay = dateStr + 'T23:59:59';
+                        // ✅ CORRECCIÓN 2: Forzar offset de Venezuela (-04:00) para que Supabase consulte el día correcto
+                        const startOfDay = dateStr + 'T00:00:00-04:00';
+                        const endOfDay = dateStr + 'T23:59:59-04:00';
 
-                        // ✅ Filtra por la sucursal seleccionada (admin puede cambiarla, vendedor usa la suya)
                         let query = supabase
                             .from('sales')
                             .select('*')
@@ -573,8 +572,9 @@
 
                 formatDate(dateStr) {
                     if (!dateStr) return '';
-                    const date = new Date(dateStr);
-                    return date.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    // ✅ CORRECCIÓN 3: Evitar desfase de día por zona horaria usando split directo de la cadena YYYY-MM-DD
+                    const [year, month, day] = dateStr.split('-');
+                    return `${day}/${month}/${year}`;
                 },
 
                 exportToPDF() {
