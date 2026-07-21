@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Agregado para los gráficos -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -131,20 +132,6 @@
             animation: bounce-in 0.4s ease-out;
         }
 
-        .product-card {
-            transition: all 0.2s ease;
-            touch-action: manipulation;
-        }
-
-        .product-card:active {
-            transform: scale(0.95);
-        }
-
-        .product-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-
         .touch-btn {
             min-height: 44px;
             min-width: 44px;
@@ -165,204 +152,12 @@
             border-radius: 3px;
         }
 
-        .cart-drawer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            max-height: 90vh;
-            background: white;
-            border-radius: 24px 24px 0 0;
-            z-index: 40;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
-            overflow-y: auto;
-        }
-
-        .cart-drawer.open {
-            transform: translateY(0);
-        }
-
-        .cart-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 39;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-
-        .cart-overlay.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .total-bar {
-            position: sticky;
-            bottom: 0;
-            z-index: 30;
-        }
-
-        .quick-add-btn {
-            transition: all 0.15s;
-        }
-
-        .quick-add-btn:active {
-            transform: scale(0.9);
-        }
-
-        .low-stock {
-            position: relative;
-        }
-
-        .low-stock::after {
-            content: 'Stock Bajo';
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: #ef4444;
-            color: white;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-weight: 600;
-        }
-
         .branch-badge-geminis {
             background: linear-gradient(135deg, #06b6d4, #0891b2);
         }
 
         .branch-badge-omega {
             background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-        }
-
-        .total-bs-clickable {
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .total-bs-clickable:hover {
-            background-color: rgba(34, 197, 94, 0.1);
-            transform: scale(1.02);
-        }
-
-        .total-bs-clickable:active {
-            transform: scale(0.98);
-        }
-
-        .compact-mode .product-card {
-            padding: 12px;
-        }
-
-        .compact-mode .product-card .fa-tint {
-            font-size: 1.5rem !important;
-        }
-
-        .compact-mode .product-card p.font-bold {
-            font-size: 0.9rem !important;
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 28px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #cbd5e1;
-            transition: .3s;
-            border-radius: 28px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        input:checked+.toggle-slider {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-        }
-
-        input:checked+.toggle-slider:before {
-            transform: translateX(22px);
-        }
-
-        .payment-card {
-            transition: all 0.2s ease;
-            border: 2px solid transparent;
-        }
-
-        .payment-card:hover {
-            border-color: #0ea5e9;
-            transform: translateY(-1px);
-        }
-
-        @keyframes pulse-bcv {
-
-            0%,
-            100% {
-                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
-            }
-
-            50% {
-                box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
-            }
-        }
-
-        .btn-bcv-pulse {
-            animation: pulse-bcv 2s infinite;
-        }
-
-        .cart-item-compact {
-            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%) !important;
-            padding: 8px 12px !important;
-            margin-bottom: 8px !important;
-        }
-
-        .cart-item-compact h4 {
-            font-size: 0.85rem !important;
-            line-height: 1.2 !important;
-        }
-
-        .cart-item-compact .text-xs {
-            font-size: 0.7rem !important;
-        }
-
-        .cart-item-compact .touch-btn {
-            width: 28px !important;
-            height: 28px !important;
-            min-height: 28px !important;
-            min-width: 28px !important;
-        }
-
-        .cart-item-compact .font-bold.text-lg {
-            font-size: 1rem !important;
-        }
-
-        .cart-item-compact .font-bold.text-cyan-600 {
-            font-size: 0.875rem !important;
         }
 
         /* Estilos específicos para reportes */
@@ -499,7 +294,6 @@
             box-shadow: 0 6px 12px rgba(14, 165, 233, 0.3);
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .report-header {
                 flex-direction: column;
@@ -519,6 +313,7 @@
 </head>
 
 <body class="bg-gray-50" x-data="reportesApp()" x-init="initReportes()">
+
     <!-- Sidebar (Desktop) -->
     <aside class="hidden lg:block fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40">
         <div class="p-6">
@@ -537,36 +332,29 @@
             </div>
             <nav class="space-y-2">
                 <a href="index.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-home w-5"></i><span>Dashboard</span>
-                </a>
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-home w-5"></i><span>Dashboard</span></a>
                 <a href="ventas.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
-                </a>
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-shopping-cart w-5"></i><span>Ventas</span></a>
                 <a href="cuentas-cobrar.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-file-invoice-dollar w-5"></i><span>Cuentas por Cobrar</span>
-                </a>
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-file-invoice-dollar w-5"></i><span>Cuentas por Cobrar</span></a>
                 <a href="clientes.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-users w-5"></i><span>Clientes</span>
-                </a>
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-users w-5"></i><span>Clientes</span></a>
                 <a href="inventario.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-boxes w-5"></i><span>Inventario</span>
-                </a>
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-boxes w-5"></i><span>Inventario</span></a>
                 <a href="usuarios.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
-                </a>
-                <a href="reportes.html" class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
-                    <i class="fas fa-chart-line w-5"></i><span class="font-medium">Reportes</span>
-                </a>
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-user-cog w-5"></i><span>Usuarios</span></a>
+                <a href="reportes.html"
+                    class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg"><i
+                        class="fas fa-chart-line w-5"></i><span class="font-medium">Reportes</span></a>
                 <a href="resumen-diario.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-file-alt w-5"></i><span>Resumen Diario</span>
-                </a>
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-file-alt w-5"></i><span>Resumen Diario</span></a>
             </nav>
         </div>
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
@@ -580,9 +368,9 @@
             </div>
         </div>
     </aside>
+
     <!-- Main Content -->
     <div class="lg:ml-64 min-h-screen">
-        <!-- Header Desktop -->
         <header class="hidden lg:block bg-white shadow-sm border-b px-6 py-4">
             <div class="flex justify-between items-center">
                 <div>
@@ -595,28 +383,23 @@
                         <input type="number" x-model.number="exchangeRate" step="0.01"
                             class="w-24 px-2 py-1 text-sm font-bold text-blue-600 bg-transparent border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-center"
                             @change="updateExchangeRate()">
-                        <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
+                        <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs"><i
+                                class="fas fa-sync-alt"></i></button>
                         <button @click="fetchAndUpdateBCV()"
-                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-semibold touch-btn btn-bcv-pulse"
-                            title="Obtener tasa oficial BCV">
-                            <i class="fas fa-landmark mr-1"></i>BCV
-                        </button>
+                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-semibold touch-btn"
+                            title="Obtener tasa oficial BCV"><i class="fas fa-landmark mr-1"></i>BCV</button>
                     </div>
-                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
-                        <i class="fas fa-sign-out-alt mr-2"></i>Salir
-                    </button>
+                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"><i
+                            class="fas fa-sign-out-alt mr-2"></i>Salir</button>
                 </div>
             </div>
         </header>
-        <!-- Header Móvil -->
+
         <header class="lg:hidden bg-white shadow-sm border-b sticky top-0 z-20">
             <div class="px-3 py-2 flex items-center justify-between">
                 <div class="flex items-center space-x-2">
-                    <button @click="goBack()" class="touch-btn text-gray-600 hover:text-gray-800">
-                        <i class="fas fa-arrow-left text-xl"></i>
-                    </button>
+                    <button @click="goBack()" class="touch-btn text-gray-600 hover:text-gray-800"><i
+                            class="fas fa-arrow-left text-xl"></i></button>
                     <div class="flex items-center space-x-2">
                         <i class="fas fa-tint text-cyan-500 text-xl"></i>
                         <div>
@@ -633,657 +416,392 @@
                         <input type="number" x-model.number="exchangeRate" step="0.01"
                             class="w-14 px-1 py-0.5 text-xs font-bold text-blue-600 bg-transparent border-none focus:outline-none text-right"
                             @change="updateExchangeRate()">
-                        <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
                         <button @click="fetchAndUpdateBCV()"
-                            class="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-[10px] font-bold touch-btn"
-                            title="BCV">
-                            <i class="fas fa-landmark"></i>
-                        </button>
+                            class="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-[10px] font-bold touch-btn"><i
+                                class="fas fa-landmark"></i></button>
                     </div>
                 </div>
             </div>
         </header>
-        <div class="flex">
-            <!-- Content Área Principal -->
-            <main class="flex-1 p-3 lg:p-6" :class="{ 'compact-mode': compactMode }">
-                <!-- Breadcrumb -->
-                <div class="mb-4 flex items-center space-x-2 text-sm text-gray-500">
-                    <a href="index.html" class="hover:text-blue-600">Dashboard</a>
-                    <span>/</span>
-                    <span>Reportes</span>
-                </div>
 
-                <!-- Encabezado de Reportes -->
-                <div class="report-header">
-                    <h1 class="report-title">Reportes de Negocio</h1>
-                    <div class="report-actions">
-                        <button @click="exportReport('pdf')" class="export-btn flex items-center space-x-2">
-                            <i class="fas fa-file-pdf"></i>
-                            <span>Exportar PDF</span>
+        <main class="flex-1 p-3 lg:p-6">
+            <div class="mb-4 flex items-center space-x-2 text-sm text-gray-500">
+                <a href="index.html" class="hover:text-blue-600">Dashboard</a><span>/</span><span>Reportes</span>
+            </div>
+
+            <div class="report-header">
+                <h1 class="report-title">Reportes de Negocio</h1>
+                <div class="report-actions">
+                    <button @click="exportReport('pdf')" class="export-btn flex items-center space-x-2"><i
+                            class="fas fa-file-pdf"></i><span>Exportar PDF</span></button>
+                </div>
+            </div>
+
+            <div class="report-filters">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Reporte</label>
+                        <select x-model="reportType" @change="generateReport()"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                            <option value="ventas">Ventas</option>
+                            <option value="clientes">Clientes</option>
+                            <option value="inventario">Inventario</option>
+                            <option value="cuentas">Cuentas por Cobrar</option>
+                            <option value="resumen">Resumen Diario</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
+                        <input type="date" x-model="startDate"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
+                        <input type="date" x-model="endDate"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Sucursal</label>
+                        <select x-model="selectedBranch" @change="generateReport()"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                            <option value="">Todas las sucursales</option>
+                            <option value="geminis">Sucursal Géminis</option>
+                            <option value="omega">Sucursal Omega</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Método de Pago</label>
+                        <select x-model="paymentMethod" @change="generateReport()"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                            <option value="">Todos los métodos</option>
+                            <option value="efectivo_bs">Efectivo Bs</option>
+                            <option value="efectivo_divisas">Efectivo Divisas</option>
+                            <option value="pago_movil">Pago Móvil</option>
+                            <option value="transferencia">Transferencia</option>
+                            <option value="punto_venta">Punto de Venta</option>
+                            <option value="credito">Crédito</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button @click="generateReport()"
+                            class="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-2 rounded-lg font-semibold hover:opacity-90 transition">
+                            <i class="fas fa-search mr-2"></i>Generar Reporte
                         </button>
-                        <button @click="exportReport('excel')" class="export-btn flex items-center space-x-2">
-                            <i class="fas fa-file-excel"></i>
-                            <span>Exportar Excel</span>
-                        </button>
                     </div>
                 </div>
+            </div>
 
-                <!-- Filtros de Reportes -->
-                <div class="report-filters">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Reporte</label>
-                            <select x-model="reportType"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
-                                <option value="ventas">Ventas</option>
-                                <option value="clientes">Clientes</option>
-                                <option value="inventario">Inventario</option>
-                                <option value="cuentas">Cuentas por Cobrar</option>
-                                <option value="resumen">Resumen Diario</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
-                            <input type="date" x-model="startDate"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
-                            <input type="date" x-model="endDate"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
-                        </div>
-                    </div>
+            <div x-show="loading" class="text-center py-12">
+                <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500"></i>
+                <p class="mt-4 text-gray-600">Cargando datos desde la base de datos...</p>
+            </div>
 
-                    <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Sucursal</label>
-                            <select x-model="selectedBranch"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
-                                <option value="">Todas las sucursales</option>
-                                <option value="geminis">Sucursal Géminis</option>
-                                <option value="omega">Sucursal Omega</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Método de Pago</label>
-                            <select x-model="paymentMethod"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
-                                <option value="">Todos los métodos</option>
-                                <option value="efectivo_bs">Efectivo Bs</option>
-                                <option value="efectivo_divisas">Efectivo Divisas</option>
-                                <option value="pago_movil">Pago Móvil</option>
-                                <option value="transferencia">Transferencia</option>
-                                <option value="punto_venta">Punto de Venta</option>
-                                <option value="credito">Crédito</option>
-                            </select>
-                        </div>
-                        <div class="flex items-end">
-                            <button @click="generateReport()"
-                                class="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-2 rounded-lg font-semibold">
-                                <i class="fas fa-search mr-2"></i>Generar Reporte
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Estadísticas Principales -->
+            <div x-show="!loading">
                 <div class="report-stats-grid">
                     <div class="stat-card">
                         <div class="text-sm text-gray-500">Ventas Totales</div>
-                        <div class="stat-value" x-text="'Bs. ' + formatCurrency(totalSales)"></div>
-                        <div class="text-sm text-green-500">+12% vs mes pasado</div>
+                        <div class="stat-value" x-text="formatCurrency(totalSales)"></div>
                     </div>
                     <div class="stat-card">
-                        <div class="text-sm text-gray-500">Clientes Nuevos</div>
-                        <div class="stat-value" x-text="newCustomers"></div>
-                        <div class="text-sm text-green-500">+8% vs mes pasado</div>
+                        <div class="text-sm text-gray-500">Transacciones</div>
+                        <div class="stat-value" x-text="totalTransactions"></div>
                     </div>
                     <div class="stat-card">
-                        <div class="text-sm text-gray-500">Inventario Actual</div>
-                        <div class="stat-value" x-text="totalInventory"></div>
-                        <div class="text-sm text-amber-500">Nivel de stock</div>
+                        <div class="text-sm text-gray-500">Inventario Valorado</div>
+                        <div class="stat-value" x-text="formatCurrency(totalInventoryValue)"></div>
                     </div>
                     <div class="stat-card">
                         <div class="text-sm text-gray-500">Cuentas Pendientes</div>
-                        <div class="stat-value" x-text="'Bs. ' + formatCurrency(pendingAccounts)"></div>
-                        <div class="text-sm text-red-500">+5% vs mes pasado</div>
+                        <div class="stat-value" x-text="formatCurrency(pendingAccounts)"></div>
                     </div>
                 </div>
 
-                <!-- Contenedor de Reportes -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Panel Izquierdo - Tipos de Reportes -->
                     <div class="lg:col-span-1">
                         <div class="report-card">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Tipos de Reportes</h3>
-
-                            <div class="grid grid-cols-2 gap-3">
-                                <div @click="setReportType('ventas')"
-                                    class="report-type-card p-4 rounded-xl cursor-pointer border border-gray-200"
-                                    :class="{'active': reportType === 'ventas'}">
-                                    <div class="text-center">
-                                        <div class="text-3xl text-blue-500 mb-2">
-                                            <i class="fas fa-shopping-cart"></i>
-                                        </div>
-                                        <h4 class="font-semibold">Ventas</h4>
-                                        <p class="text-xs text-gray-500">Detalles de ventas</p>
-                                    </div>
-                                </div>
-
-                                <div @click="setReportType('clientes')"
-                                    class="report-type-card p-4 rounded-xl cursor-pointer border border-gray-200"
-                                    :class="{'active': reportType === 'clientes'}">
-                                    <div class="text-center">
-                                        <div class="text-3xl text-purple-500 mb-2">
-                                            <i class="fas fa-users"></i>
-                                        </div>
-                                        <h4 class="font-semibold">Clientes</h4>
-                                        <p class="text-xs text-gray-500">Análisis de clientes</p>
-                                    </div>
-                                </div>
-
-                                <div @click="setReportType('inventario')"
-                                    class="report-type-card p-4 rounded-xl cursor-pointer border border-gray-200"
-                                    :class="{'active': reportType === 'inventario'}">
-                                    <div class="text-center">
-                                        <div class="text-3xl text-indigo-500 mb-2">
-                                            <i class="fas fa-boxes"></i>
-                                        </div>
-                                        <h4 class="font-semibold">Inventario</h4>
-                                        <p class="text-xs text-gray-500">Nivel de inventario</p>
-                                    </div>
-                                </div>
-
-                                <div @click="setReportType('cuentas')"
-                                    class="report-type-card p-4 rounded-xl cursor-pointer border border-gray-200"
-                                    :class="{'active': reportType === 'cuentas'}">
-                                    <div class="text-center">
-                                        <div class="text-3xl text-amber-500 mb-2">
-                                            <i class="fas fa-file-invoice-dollar"></i>
-                                        </div>
-                                        <h4 class="font-semibold">Cuentas por Cobrar</h4>
-                                        <p class="text-xs text-gray-500">Estado de pagos</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mt-6">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Filtros Rápidos</h3>
-
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Rango de Fechas</label>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <button @click="setDateRange('today')"
-                                            class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200">
-                                            Hoy
-                                        </button>
-                                        <button @click="setDateRange('week')"
-                                            class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200">
-                                            Última Semana
-                                        </button>
-                                        <button @click="setDateRange('month')"
-                                            class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200">
-                                            Último Mes
-                                        </button>
-                                        <button @click="setDateRange('year')"
-                                            class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200">
-                                            Último Año
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Sucursales</label>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <button @click="setBranch('geminis')"
-                                            class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
-                                            <span class="bg-blue-500 w-2 h-2 rounded-full mr-2"></span> Géminis
-                                        </button>
-                                        <button @click="setBranch('omega')"
-                                            class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
-                                            <span class="bg-purple-500 w-2 h-2 rounded-full mr-2"></span> Omega
-                                        </button>
-                                    </div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Filtros Rápidos</h3>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Rango de Fechas</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button @click="setDateRange('today')"
+                                        class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200 transition">Hoy</button>
+                                    <button @click="setDateRange('week')"
+                                        class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200 transition">Última
+                                        Semana</button>
+                                    <button @click="setDateRange('month')"
+                                        class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200 transition">Último
+                                        Mes</button>
+                                    <button @click="setDateRange('year')"
+                                        class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200 transition">Último
+                                        Año</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Panel Derecho - Contenido del Reporte -->
                     <div class="lg:col-span-2">
                         <!-- Panel de Ventas -->
-                        <div x-show="reportType === 'ventas'">
-                            <div class="report-card">
-                                <div class="flex justify-between items-center mb-4">
-                                    <h3 class="text-lg font-semibold text-gray-800">Análisis de Ventas</h3>
-                                    <div class="flex space-x-2">
-                                        <button @click="viewMode = 'table'"
-                                            :class="{'bg-blue-100': viewMode === 'table'}"
-                                            class="px-3 py-1.5 rounded-lg text-sm">
-                                            Tabla
-                                        </button>
-                                        <button @click="viewMode = 'chart'"
-                                            :class="{'bg-blue-100': viewMode === 'chart'}"
-                                            class="px-3 py-1.5 rounded-lg text-sm">
-                                            Gráficos
-                                        </button>
-                                    </div>
+                        <div x-show="reportType === 'ventas'" class="report-card">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold text-gray-800">Análisis de Ventas</h3>
+                                <div class="flex space-x-2">
+                                    <button @click="viewMode = 'table'"
+                                        :class="{'bg-blue-100 text-blue-700': viewMode === 'table', 'text-gray-600': viewMode !== 'table'}"
+                                        class="px-3 py-1.5 rounded-lg text-sm transition">Tabla</button>
+                                    <button @click="viewMode = 'chart'"
+                                        :class="{'bg-blue-100 text-blue-700': viewMode === 'chart', 'text-gray-600': viewMode !== 'chart'}"
+                                        class="px-3 py-1.5 rounded-lg text-sm transition">Gráficos</button>
                                 </div>
-
-                                <div x-show="viewMode === 'table'">
-                                    <div class="table-container">
-                                        <table class="data-table">
-                                            <thead>
+                            </div>
+                            <div x-show="viewMode === 'table'">
+                                <div class="table-container">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Cliente</th>
+                                                <th>Producto</th>
+                                                <th>Cant.</th>
+                                                <th>Precio Unit.</th>
+                                                <th>Total</th>
+                                                <th>Método</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template
+                                                x-for="sale in salesData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)"
+                                                :key="sale.id + '-' + sale.item_id">
                                                 <tr>
-                                                    <th>Fecha</th>
-                                                    <th>Cliente</th>
-                                                    <th>Producto</th>
-                                                    <th>Cantidad</th>
-                                                    <th>Precio Unitario</th>
-                                                    <th>Total</th>
-                                                    <th>Método Pago</th>
+                                                    <td x-text="formatDate(sale.created_at)"></td>
+                                                    <td x-text="sale.customer_name || 'Cliente Anónimo'"></td>
+                                                    <td x-text="sale.product_name"></td>
+                                                    <td x-text="sale.quantity"></td>
+                                                    <td x-text="formatCurrency(sale.price)"></td>
+                                                    <td x-text="formatCurrency(sale.total)"></td>
+                                                    <td x-text="getPaymentMethodName(sale.payment_method)"></td>
                                                 </tr>
-                                            </thead>
-                                            <tbody>
-                                                <template x-for="sale in salesData" :key="sale.id">
-                                                    <tr>
-                                                        <td x-text="formatDate(sale.created_at)"></td>
-                                                        <td x-text="sale.customer_name || 'Cliente Anónimo'"></td>
-                                                        <td x-text="sale.product_name"></td>
-                                                        <td x-text="sale.quantity"></td>
-                                                        <td x-text="'$' + sale.price.toFixed(2)"></td>
-                                                        <td x-text="'$' + sale.total.toFixed(2)"></td>
-                                                        <td x-text="getPaymentMethodName(sale.payment_method)"></td>
-                                                    </tr>
-                                                </template>
-                                            </tbody>
-                                        </table>
+                                            </template>
+                                            <tr x-show="salesData.length === 0">
+                                                <td colspan="7" class="text-center py-8 text-gray-500">No hay ventas en
+                                                    este período</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="mt-4 flex justify-between items-center"
+                                    x-show="salesData.length > itemsPerPage">
+                                    <div class="text-sm text-gray-500">Página <span x-text="currentPage"></span> de
+                                        <span x-text="totalPages"></span>
                                     </div>
-
-                                    <div class="mt-4 flex justify-between items-center">
-                                        <div class="text-sm text-gray-500">
-                                            Mostrando <span x-text="currentPage"></span> de <span
-                                                x-text="totalPages"></span> páginas
-                                        </div>
-                                        <div class="flex space-x-2">
-                                            <button @click="prevPage()"
-                                                class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200">
-                                                Anterior
-                                            </button>
-                                            <button @click="nextPage()"
-                                                class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200">
-                                                Siguiente
-                                            </button>
-                                        </div>
+                                    <div class="flex space-x-2">
+                                        <button @click="prevPage()" :disabled="currentPage === 1"
+                                            class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50">Anterior</button>
+                                        <button @click="nextPage()" :disabled="currentPage === totalPages"
+                                            class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50">Siguiente</button>
                                     </div>
                                 </div>
-
-                                <div x-show="viewMode === 'chart'" class="chart-container">
-                                    <canvas id="salesChart"></canvas>
-                                </div>
-
-                                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div class="report-card">
-                                        <h4 class="text-sm font-medium text-gray-800 mb-2">Ventas por Producto</h4>
-                                        <div class="chart-container">
-                                            <canvas id="productSalesChart"></canvas>
-                                        </div>
-                                    </div>
-
-                                    <div class="report-card">
-                                        <h4 class="text-sm font-medium text-gray-800 mb-2">Ventas por Método de Pago
-                                        </h4>
-                                        <div class="chart-container">
-                                            <canvas id="paymentMethodChart"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
+                            </div>
+                            <div x-show="viewMode === 'chart'" class="chart-container">
+                                <canvas id="salesChart"></canvas>
                             </div>
                         </div>
 
                         <!-- Panel de Clientes -->
-                        <div x-show="reportType === 'clientes'">
-                            <div class="report-card">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Análisis de Clientes</h3>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                    <div class="stat-card">
-                                        <div class="text-sm text-gray-500">Clientes Totales</div>
-                                        <div class="stat-value" x-text="totalClients"></div>
-                                        <div class="text-sm text-green-500">+5% vs mes pasado</div>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="text-sm text-gray-500">Clientes Activos</div>
-                                        <div class="stat-value" x-text="activeClients"></div>
-                                        <div class="text-sm text-green-500">+8% vs mes pasado</div>
-                                    </div>
+                        <div x-show="reportType === 'clientes'" class="report-card">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Análisis de Clientes</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div class="stat-card">
+                                    <div class="text-sm text-gray-500">Clientes Totales</div>
+                                    <div class="stat-value" x-text="totalClients"></div>
                                 </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                    <div class="report-card">
-                                        <h4 class="text-sm font-medium text-gray-800 mb-3">Clientes por Zona</h4>
-                                        <div class="chart-container">
-                                            <canvas id="clientsByZoneChart"></canvas>
-                                        </div>
-                                    </div>
-
-                                    <div class="report-card">
-                                        <h4 class="text-sm font-medium text-gray-800 mb-3">Clientes por Tipo</h4>
-                                        <div class="chart-container">
-                                            <canvas id="clientsByTypeChart"></canvas>
-                                        </div>
-                                    </div>
+                                <div class="stat-card">
+                                    <div class="text-sm text-gray-500">Clientes Activos</div>
+                                    <div class="stat-value" x-text="activeClients"></div>
                                 </div>
-
-                                <div class="table-container">
-                                    <table class="data-table">
-                                        <thead>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>Teléfono</th>
+                                            <th>Email</th>
+                                            <th>Fecha Registro</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="client in clientsData" :key="client.id">
                                             <tr>
-                                                <th>Nombre</th>
-                                                <th>Teléfono</th>
-                                                <th>Email</th>
-                                                <th>Fecha Registro</th>
-                                                <th>Total Compras</th>
-                                                <th>Estado</th>
+                                                <td x-text="client.full_name"></td>
+                                                <td x-text="client.phone || 'N/A'"></td>
+                                                <td x-text="client.email || 'N/A'"></td>
+                                                <td x-text="formatDate(client.created_at)"></td>
+                                                <td>
+                                                    <span class="px-2 py-1 rounded-full text-xs font-semibold"
+                                                        :class="client.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                                                        x-text="client.is_active ? 'Activo' : 'Inactivo'"></span>
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            <template x-for="client in clientsData" :key="client.id">
-                                                <tr>
-                                                    <td x-text="client.full_name"></td>
-                                                    <td x-text="client.phone || 'N/A'"></td>
-                                                    <td x-text="client.email || 'N/A'"></td>
-                                                    <td x-text="formatDate(client.created_at)"></td>
-                                                    <td x-text="'$' + client.total_spent.toFixed(2)"></td>
-                                                    <td>
-                                                        <span x-text="client.is_active ? 'Activo' : 'Inactivo'"
-                                                            :class="client.is_active ? 'text-green-600' : 'text-red-600'"></span>
-                                                    </td>
-                                                </tr>
-                                            </template>
-                                        </tbody>
-                                    </table>
-                                </div>
+                                        </template>
+                                        <tr x-show="clientsData.length === 0">
+                                            <td colspan="5" class="text-center py-8 text-gray-500">No hay clientes
+                                                registrados</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 
                         <!-- Panel de Inventario -->
-                        <div x-show="reportType === 'inventario'">
-                            <div class="report-card">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Estado del Inventario</h3>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                    <div class="stat-card">
-                                        <div class="text-sm text-gray-500">Total Productos</div>
-                                        <div class="stat-value" x-text="totalProducts"></div>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="text-sm text-gray-500">Stock Total</div>
-                                        <div class="stat-value" x-text="totalStock"></div>
-                                    </div>
+                        <div x-show="reportType === 'inventario'" class="report-card">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Estado del Inventario</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div class="stat-card">
+                                    <div class="text-sm text-gray-500">Total Productos</div>
+                                    <div class="stat-value" x-text="totalProducts"></div>
                                 </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                    <div class="report-card">
-                                        <h4 class="text-sm font-medium text-gray-800 mb-3">Nivel de Stock por Producto
-                                        </h4>
-                                        <div class="chart-container">
-                                            <canvas id="stockLevelChart"></canvas>
-                                        </div>
-                                    </div>
-
-                                    <div class="report-card">
-                                        <h4 class="text-sm font-medium text-gray-800 mb-3">Productos con Bajo Stock</h4>
-                                        <div class="space-y-3">
-                                            <template x-for="product in lowStockProducts" :key="product.id">
-                                                <div
-                                                    class="flex justify-between items-center p-3 bg-amber-50 rounded-lg">
-                                                    <div>
-                                                        <p class="font-medium" x-text="product.name"></p>
-                                                        <p class="text-xs text-gray-500"
-                                                            x-text="'Stock: ' + product.stock + ' / ' + product.min_stock">
-                                                        </p>
-                                                    </div>
-                                                    <span
-                                                        class="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs">
-                                                        Bajo Stock
-                                                    </span>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </div>
+                                <div class="stat-card">
+                                    <div class="text-sm text-gray-500">Stock Total (Unidades)</div>
+                                    <div class="stat-value" x-text="totalStock"></div>
                                 </div>
-
-                                <div class="table-container">
-                                    <table class="data-table">
-                                        <thead>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th>Tamaño</th>
+                                            <th>Stock Actual</th>
+                                            <th>Stock Mínimo</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="product in inventoryData" :key="product.id">
                                             <tr>
-                                                <th>Producto</th>
-                                                <th>Tamaño</th>
-                                                <th>Stock Actual</th>
-                                                <th>Stock Mínimo</th>
-                                                <th>Estado</th>
-                                                <th>Acciones</th>
+                                                <td x-text="product.name"></td>
+                                                <td x-text="product.size_liters ? product.size_liters + 'L' : 'N/A'">
+                                                </td>
+                                                <td x-text="product.stock"></td>
+                                                <td x-text="product.min_stock"></td>
+                                                <td>
+                                                    <span class="px-2 py-1 rounded-full text-xs font-semibold"
+                                                        :class="product.stock <= product.min_stock ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'"
+                                                        x-text="product.stock <= product.min_stock ? 'Bajo Stock' : 'Adecuado'"></span>
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            <template x-for="product in inventoryData" :key="product.id">
-                                                <tr>
-                                                    <td x-text="product.name"></td>
-                                                    <td x-text="product.size_liters + 'L'"></td>
-                                                    <td x-text="product.stock"></td>
-                                                    <td x-text="product.min_stock"></td>
-                                                    <td>
-                                                        <span
-                                                            x-text="product.stock <= product.min_stock ? 'Bajo Stock' : 'Adecuado'"
-                                                            :class="product.stock <= product.min_stock ? 'text-amber-600' : 'text-green-600'"></span>
-                                                    </td>
-                                                    <td>
-                                                        <button @click="restockProduct(product)"
-                                                            class="text-blue-600 hover:text-blue-800 text-sm">
-                                                            <i class="fas fa-box-open mr-1"></i>Reabastecer
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            </template>
-                                        </tbody>
-                                    </table>
-                                </div>
+                                        </template>
+                                        <tr x-show="inventoryData.length === 0">
+                                            <td colspan="5" class="text-center py-8 text-gray-500">No hay datos de
+                                                inventario</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 
                         <!-- Panel de Cuentas por Cobrar -->
-                        <div x-show="reportType === 'cuentas'">
-                            <div class="report-card">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Cuentas por Cobrar</h3>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                    <div class="stat-card">
-                                        <div class="text-sm text-gray-500">Total Pendiente</div>
-                                        <div class="stat-value" x-text="'Bs. ' + formatCurrency(totalPending)"></div>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="text-sm text-gray-500">Total Pagado</div>
-                                        <div class="stat-value" x-text="'Bs. ' + formatCurrency(totalPaid)"></div>
-                                    </div>
+                        <div x-show="reportType === 'cuentas'" class="report-card">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Cuentas por Cobrar</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div class="stat-card">
+                                    <div class="text-sm text-gray-500">Total Pendiente</div>
+                                    <div class="stat-value" x-text="formatCurrency(totalPending)"></div>
                                 </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                    <div class="report-card">
-                                        <h4 class="text-sm font-medium text-gray-800 mb-3">Estado de Cuentas</h4>
-                                        <div class="chart-container">
-                                            <canvas id="accountStatusChart"></canvas>
-                                        </div>
-                                    </div>
-
-                                    <div class="report-card">
-                                        <h4 class="text-sm font-medium text-gray-800 mb-3">Cuentas por Vencimiento</h4>
-                                        <div class="space-y-3">
-                                            <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                                                <div>
-                                                    <p class="font-medium">1-7 días</p>
-                                                    <p class="text-xs text-gray-500"
-                                                        x-text="'Bs. ' + formatCurrency(accountsDue1to7)"></p>
-                                                </div>
-                                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
-                                                    1-7 días
-                                                </span>
-                                            </div>
-                                            <div class="flex justify-between items-center p-3 bg-amber-50 rounded-lg">
-                                                <div>
-                                                    <p class="font-medium">8-15 días</p>
-                                                    <p class="text-xs text-gray-500"
-                                                        x-text="'Bs. ' + formatCurrency(accountsDue8to15)"></p>
-                                                </div>
-                                                <span
-                                                    class="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs">
-                                                    8-15 días
-                                                </span>
-                                            </div>
-                                            <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                                                <div>
-                                                    <p class="font-medium">Más de 15 días</p>
-                                                    <p class="text-xs text-gray-500"
-                                                        x-text="'Bs. ' + formatCurrency(accountsOver15)"></p>
-                                                </div>
-                                                <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">
-                                                    >15 días
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div class="stat-card">
+                                    <div class="text-sm text-gray-500">Total Pagado</div>
+                                    <div class="stat-value" x-text="formatCurrency(totalPaid)"></div>
                                 </div>
-
-                                <div class="table-container">
-                                    <table class="data-table">
-                                        <thead>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Cliente</th>
+                                            <th>Fecha Límite</th>
+                                            <th>Total</th>
+                                            <th>Pagado</th>
+                                            <th>Pendiente</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="account in accountsData" :key="account.id">
                                             <tr>
-                                                <th>Cliente</th>
-                                                <th>Fecha Vencimiento</th>
-                                                <th>Total</th>
-                                                <th>Pagado</th>
-                                                <th>Pendiente</th>
-                                                <th>Estado</th>
-                                                <th>Acciones</th>
+                                                <td x-text="account.customer_name"></td>
+                                                <td x-text="formatDate(account.payment_date)"></td>
+                                                <td x-text="formatCurrency(account.total_amount)"></td>
+                                                <td x-text="formatCurrency(account.paid_amount)"></td>
+                                                <td x-text="formatCurrency(account.remaining_amount)"></td>
+                                                <td>
+                                                    <span class="px-2 py-1 rounded-full text-xs font-semibold"
+                                                        :class="account.status === 'pending' ? 'bg-amber-100 text-amber-800' : (account.status === 'partial' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800')"
+                                                        x-text="account.status === 'pending' ? 'Pendiente' : (account.status === 'partial' ? 'Parcial' : 'Pagado')"></span>
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            <template x-for="account in accountsData" :key="account.id">
-                                                <tr>
-                                                    <td x-text="account.customer_name"></td>
-                                                    <td x-text="formatDate(account.payment_date)"></td>
-                                                    <td x-text="'Bs. ' + formatCurrency(account.total_amount)"></td>
-                                                    <td x-text="'Bs. ' + formatCurrency(account.paid_amount)"></td>
-                                                    <td x-text="'Bs. ' + formatCurrency(account.remaining_amount)"></td>
-                                                    <td>
-                                                        <span x-text="account.status" :class="account.status === 'pending' ? 'text-amber-600' : 
-                                                     account.status === 'partial' ? 'text-blue-600' : 
-                                                     'text-green-600'"></span>
-                                                    </td>
-                                                    <td>
-                                                        <button @click="viewAccountDetails(account)"
-                                                            class="text-blue-600 hover:text-blue-800 text-sm">
-                                                            <i class="fas fa-eye mr-1"></i>Ver
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            </template>
-                                        </tbody>
-                                    </table>
-                                </div>
+                                        </template>
+                                        <tr x-show="accountsData.length === 0">
+                                            <td colspan="6" class="text-center py-8 text-gray-500">No hay cuentas por
+                                                cobrar</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 
                         <!-- Panel de Resumen Diario -->
-                        <div x-show="reportType === 'resumen'">
-                            <div class="report-card">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Resumen Diario</h3>
-
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                                    <div class="stat-card">
-                                        <div class="text-sm text-gray-500">Ventas del Día</div>
-                                        <div class="stat-value" x-text="'Bs. ' + formatCurrency(dailySales)"></div>
-                                        <div class="text-sm text-green-500">+12% vs ayer</div>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="text-sm text-gray-500">Clientes Atendidos</div>
-                                        <div class="stat-value" x-text="dailyClients"></div>
-                                        <div class="text-sm text-green-500">+8% vs ayer</div>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="text-sm text-gray-500">Inventario Final</div>
-                                        <div class="stat-value" x-text="dailyInventory"></div>
-                                        <div class="text-sm text-amber-500">Nivel de stock</div>
-                                    </div>
+                        <div x-show="reportType === 'resumen'" class="report-card">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Resumen del Período</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                <div class="stat-card">
+                                    <div class="text-sm text-gray-500">Ventas Totales</div>
+                                    <div class="stat-value" x-text="formatCurrency(dailySales)"></div>
                                 </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                    <div class="report-card">
-                                        <h4 class="text-sm font-medium text-gray-800 mb-3">Ventas por Hora</h4>
-                                        <div class="chart-container">
-                                            <canvas id="dailySalesChart"></canvas>
+                                <div class="stat-card">
+                                    <div class="text-sm text-gray-500">Transacciones</div>
+                                    <div class="stat-value" x-text="dailyClients"></div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="text-sm text-gray-500">Ticket Promedio</div>
+                                    <div class="stat-value" x-text="formatCurrency(averageTicket)"></div>
+                                </div>
+                            </div>
+                            <div class="chart-container mb-6">
+                                <canvas id="dailySalesChart"></canvas>
+                            </div>
+                            <h4 class="text-sm font-medium text-gray-800 mb-3">Productos Más Vendidos</h4>
+                            <div class="space-y-3">
+                                <template x-for="product in topSellingProducts" :key="product.name">
+                                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <p class="font-medium" x-text="product.name"></p>
+                                            <p class="text-xs text-gray-500"
+                                                x-text="product.quantity + ' unidades vendidas'"></p>
                                         </div>
+                                        <span
+                                            class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold"
+                                            x-text="formatCurrency(product.total)"></span>
                                     </div>
-
-                                    <div class="report-card">
-                                        <h4 class="text-sm font-medium text-gray-800 mb-3">Productos Más Vendidos</h4>
-                                        <div class="space-y-3">
-                                            <template x-for="product in topSellingProducts" :key="product.id">
-                                                <div
-                                                    class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                                    <div>
-                                                        <p class="font-medium" x-text="product.name"></p>
-                                                        <p class="text-xs text-gray-500"
-                                                            x-text="product.quantity + ' vendidos'"></p>
-                                                    </div>
-                                                    <span
-                                                        class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
-                                                        <span x-text="product.percentage + '%'"></span>
-                                                    </span>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="table-container">
-                                    <table class="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Hora</th>
-                                                <th>Ventas</th>
-                                                <th>Clientes</th>
-                                                <th>Productos Vendidos</th>
-                                                <th>Ingreso en Bs</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <template x-for="hour in dailyHours" :key="hour.hour">
-                                                <tr>
-                                                    <td x-text="hour.hour + ':00'"></td>
-                                                    <td x-text="hour.sales_count"></td>
-                                                    <td x-text="hour.clients_count"></td>
-                                                    <td x-text="hour.products_sold"></td>
-                                                    <td x-text="'Bs. ' + formatCurrency(hour.total_sales)"></td>
-                                                </tr>
-                                            </template>
-                                        </tbody>
-                                    </table>
-                                </div>
+                                </template>
+                                <div x-show="topSellingProducts.length === 0" class="text-center py-4 text-gray-500">No
+                                    hay datos de productos</div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-            </main>
-        </div>
+            </div>
+        </main>
     </div>
+
     <script>
         const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let charts = {}; // Para almacenar instancias de gráficos y destruirlos antes de recrear
 
         async function logout() {
             await supabase.auth.signOut();
@@ -1298,7 +816,7 @@
                 warning: 'linear-gradient(to right, #f59e0b, #d97706)',
                 info: 'linear-gradient(to right, #3b82f6, #2563eb)'
             };
-            const icons = { success: '✓', error: '✗', warning: '⚠', info: '' };
+            const icons = { success: '✓', error: '✗', warning: '⚠', info: 'ℹ' };
             Toastify({
                 text: `${icons[type]} ${message}`,
                 duration: 3000,
@@ -1319,26 +837,6 @@
             }).showToast();
         }
 
-        async function showConfirm(title, html, confirmText = 'Confirmar', cancelText = 'Cancelar') {
-            const result = await Swal.fire({
-                title: title,
-                html: html,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: confirmText,
-                cancelButtonText: cancelText,
-                reverseButtons: true,
-                focusCancel: true,
-                customClass: {
-                    popup: 'rounded-2xl',
-                    confirmButton: 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-xl font-semibold',
-                    cancelButton: 'bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold'
-                },
-                buttonsStyling: false
-            });
-            return result.isConfirmed;
-        }
-
         function round2(num) {
             if (num === null || num === undefined || isNaN(num)) return 0;
             return Math.round((parseFloat(num) + Number.EPSILON) * 100) / 100;
@@ -1356,11 +854,7 @@
         function formatDate(dateString) {
             if (!dateString) return '';
             const date = new Date(dateString);
-            return date.toLocaleDateString('es-VE', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
+            return date.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric' });
         }
 
         function getPaymentMethodName(method) {
@@ -1370,7 +864,8 @@
                 'pago_movil': 'Pago Móvil',
                 'transferencia': 'Transferencia',
                 'punto_venta': 'Punto de Venta',
-                'credito': 'Crédito'
+                'credito': 'Crédito',
+                'multiple': 'Múltiple'
             };
             return names[method] || method;
         }
@@ -1378,7 +873,6 @@
         function reportesApp() {
             return {
                 loading: true,
-                processing: false,
                 compactMode: false,
                 userBranch: '',
                 userName: '',
@@ -1392,43 +886,33 @@
                 selectedBranch: '',
                 paymentMethod: '',
                 currentPage: 1,
-                itemsPerPage: 10,
+                itemsPerPage: 15,
 
-                // Datos de Ventas
+                // Datos
                 salesData: [],
                 totalSales: 0,
-                newCustomers: 0,
-                totalInventory: 0,
+                totalTransactions: 0,
+                totalInventoryValue: 0,
                 pendingAccounts: 0,
                 totalPages: 1,
 
-                // Datos de Clientes
                 totalClients: 0,
                 activeClients: 0,
                 clientsData: [],
 
-                // Datos de Inventario
                 totalProducts: 0,
                 totalStock: 0,
-                lowStockProducts: [],
                 inventoryData: [],
 
-                // Datos de Cuentas por Cobrar
                 totalPending: 0,
                 totalPaid: 0,
-                accountsDue1to7: 0,
-                accountsDue8to15: 0,
-                accountsOver15: 0,
                 accountsData: [],
 
-                // Datos de Resumen Diario
                 dailySales: 0,
                 dailyClients: 0,
-                dailyInventory: 0,
+                averageTicket: 0,
                 topSellingProducts: [],
-                dailyHours: [],
 
-                // Inicialización
                 async initReportes() {
                     const { data: { session } } = await supabase.auth.getSession();
                     if (!session) {
@@ -1447,17 +931,14 @@
                             this.userRole = profile.role;
                             this.userBranch = profile.branch;
                             this.userInitials = this.getInitials(profile.full_name);
+                            this.selectedBranch = profile.branch; // Por defecto, la sucursal del usuario
                         }
 
-                        // Cargar datos iniciales
                         await this.loadExchangeRate();
                         await this.generateReport();
-
-                        // Inicializar gráficos
-                        this.initCharts();
-
                     } catch (err) {
                         console.error('Error obteniendo perfil:', err);
+                        showToast('Error al cargar perfil', 'error');
                     }
                 },
 
@@ -1468,48 +949,77 @@
 
                 async loadExchangeRate() {
                     try {
-                        console.log('🔄 Consultando tasa centralizada de Supabase');
                         const { data, error } = await supabase.rpc('get_active_exchange_rate');
                         if (!error && data) {
-                            this.exchangeRate = parseFloat(data);
-                            console.log('✅ Tasa cargada desde Supabase:', this.exchangeRate);
-                        } else {
-                            console.warn('⚠️ No se encontró tasa en BD, usando 700.22');
-                            this.exchangeRate = 700.22;
+                            this.exchangeRate = parseFloat(data) || 700.22;
                         }
                     } catch (err) {
-                        console.error('❌ Error cargando tasa:', err);
-                        this.exchangeRate = 700.22;
+                        console.error('Error cargando tasa:', err);
+                    }
+                },
+
+                async fetchAndUpdateBCV() {
+                    showToast('Consultando tasa BCV...', 'info');
+                    try {
+                        const response = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
+                        const data = await response.json();
+                        const newRate = round2(parseFloat(data.promedio));
+
+                        this.exchangeRate = newRate;
+                        await supabase.from('exchange_rates').update({ is_active: false }).eq('is_active', true);
+                        await supabase.from('exchange_rates').insert({ rate: newRate, is_active: true });
+
+                        showToast(`Tasa BCV aplicada: Bs. ${newRate.toFixed(2)}`, 'success');
+                        this.generateReport(); // Recalcular con nueva tasa
+                    } catch (err) {
+                        showToast('Error al obtener tasa BCV', 'error');
+                    }
+                },
+
+                async updateExchangeRate() {
+                    const validRate = round2(this.exchangeRate);
+                    this.exchangeRate = validRate;
+                    try {
+                        await supabase.from('exchange_rates').update({ is_active: false }).eq('is_active', true);
+                        await supabase.from('exchange_rates').insert({ rate: validRate, is_active: true });
+                        showToast('Tasa actualizada', 'success');
+                        this.generateReport();
+                    } catch (err) {
+                        showToast('Error al actualizar tasa', 'error');
                     }
                 },
 
                 async generateReport() {
                     this.loading = true;
-                    try {
-                        // Simular carga de datos
-                        await new Promise(resolve => setTimeout(resolve, 800));
+                    this.currentPage = 1;
 
-                        // Generar datos de ejemplo según el tipo de reporte
-                        switch (this.reportType) {
-                            case 'ventas':
-                                this.generateSalesReport();
-                                break;
-                            case 'clientes':
-                                this.generateClientsReport();
-                                break;
-                            case 'inventario':
-                                this.generateInventoryReport();
-                                break;
-                            case 'cuentas':
-                                this.generateAccountsReport();
-                                break;
-                            case 'resumen':
-                                this.generateDailyReport();
-                                break;
+                    // Determinar sucursal a consultar
+                    const branchToQuery = this.selectedBranch || this.userBranch;
+
+                    try {
+                        const startDateTime = this.startDate + 'T00:00:00';
+                        const endDateTime = this.endDate + 'T23:59:59';
+
+                        if (this.reportType === 'ventas') {
+                            await this.fetchSalesData(branchToQuery, startDateTime, endDateTime);
+                        } else if (this.reportType === 'clientes') {
+                            await this.fetchClientsData(branchToQuery);
+                        } else if (this.reportType === 'inventario') {
+                            await this.fetchInventoryData(branchToQuery);
+                        } else if (this.reportType === 'cuentas') {
+                            await this.fetchAccountsData(branchToQuery);
+                        } else if (this.reportType === 'resumen') {
+                            await this.fetchSummaryData(branchToQuery, startDateTime, endDateTime);
                         }
 
-                        // Inicializar gráficos
-                        this.initCharts();
+                        // Actualizar estadísticas globales del dashboard superior
+                        await this.updateGlobalStats(branchToQuery);
+
+                        // Renderizar gráficos si es necesario
+                        this.$nextTick(() => {
+                            this.initCharts();
+                        });
+
                     } catch (err) {
                         console.error('Error generando reporte:', err);
                         showToast('Error al generar reporte', 'error');
@@ -1518,106 +1028,138 @@
                     }
                 },
 
-                generateSalesReport() {
-                    // Datos simulados para ventas
-                    this.salesData = [
-                        { id: 1, created_at: '2023-07-01', customer_name: 'Juan Pérez', product_name: 'Agua 20L', quantity: 2, price: 15.50, total: 31.00, payment_method: 'efectivo_bs' },
-                        { id: 2, created_at: '2023-07-01', customer_name: 'María López', product_name: 'Agua 13L', quantity: 3, price: 12.75, total: 38.25, payment_method: 'pago_movil' },
-                        { id: 3, created_at: '2023-07-02', customer_name: 'Carlos Gómez', product_name: 'Botellón Vacío 20L', quantity: 1, price: 8.00, total: 8.00, payment_method: 'efectivo_divisas' },
-                        { id: 4, created_at: '2023-07-02', customer_name: 'Ana Martínez', product_name: 'Agua 5L', quantity: 5, price: 4.25, total: 21.25, payment_method: 'transferencia' },
-                        { id: 5, created_at: '2023-07-03', customer_name: 'Luis Fernández', product_name: 'Agua 20L', quantity: 3, price: 15.50, total: 46.50, payment_method: 'credito' },
-                        { id: 6, created_at: '2023-07-03', customer_name: 'Sofía Torres', product_name: 'Agua 13L', quantity: 2, price: 12.75, total: 25.50, payment_method: 'efectivo_bs' },
-                        { id: 7, created_at: '2023-07-04', customer_name: 'Pedro Ramírez', product_name: 'Botellón Vacío 15L', quantity: 1, price: 6.50, total: 6.50, payment_method: 'pago_movil' },
-                        { id: 8, created_at: '2023-07-04', customer_name: 'Elena Sánchez', product_name: 'Agua 5L', quantity: 4, price: 4.25, total: 17.00, payment_method: 'transferencia' },
-                        { id: 9, created_at: '2023-07-05', customer_name: 'Javier Morales', product_name: 'Agua 20L', quantity: 2, price: 15.50, total: 31.00, payment_method: 'efectivo_bs' },
-                        { id: 10, created_at: '2023-07-05', customer_name: 'Carmen Díaz', product_name: 'Agua 13L', quantity: 4, price: 12.75, total: 51.00, payment_method: 'credito' }
-                    ];
+                async fetchSalesData(branch, start, end) {
+                    let query = supabase.from('sales').select(`
+                id, created_at, customer_name, total, payment_method,
+                sale_items ( quantity, unit_price, total, products (name) )
+            `).gte('created_at', start).lte('created_at', end).eq('branch', branch);
 
-                    this.totalSales = 270.00;
-                    this.newCustomers = 8;
-                    this.totalInventory = 150;
-                    this.pendingAccounts = 77.00;
-                    this.totalPages = Math.ceil(this.salesData.length / this.itemsPerPage);
+                    if (this.paymentMethod) {
+                        query = query.eq('payment_method', this.paymentMethod);
+                    }
+
+                    const { data, error } = await query.order('created_at', { ascending: false });
+                    if (error) throw error;
+
+                    // Aplanar los datos para la tabla
+                    const flattened = [];
+                    let total = 0;
+
+                    data.forEach(sale => {
+                        total += sale.total || 0;
+                        if (sale.sale_items) {
+                            sale.sale_items.forEach((item, index) => {
+                                flattened.push({
+                                    id: sale.id,
+                                    item_id: index,
+                                    created_at: sale.created_at,
+                                    customer_name: sale.customer_name,
+                                    product_name: item.products?.name || 'Producto',
+                                    quantity: item.quantity,
+                                    price: item.unit_price,
+                                    total: item.total,
+                                    payment_method: sale.payment_method
+                                });
+                            });
+                        }
+                    });
+
+                    this.salesData = flattened;
+                    this.totalSales = total;
+                    this.totalTransactions = data.length;
+                    this.totalPages = Math.ceil(this.salesData.length / this.itemsPerPage) || 1;
                 },
 
-                generateClientsReport() {
-                    // Datos simulados para clientes
-                    this.clientsData = [
-                        { id: 1, full_name: 'Juan Pérez', phone: '0412-1234567', email: 'juan@example.com', created_at: '2023-01-15', total_spent: 245.50, is_active: true },
-                        { id: 2, full_name: 'María López', phone: '0414-7654321', email: 'maria@example.com', created_at: '2023-02-20', total_spent: 387.25, is_active: true },
-                        { id: 3, full_name: 'Carlos Gómez', phone: '0424-9876543', email: 'carlos@example.com', created_at: '2023-03-05', total_spent: 156.75, is_active: true },
-                        { id: 4, full_name: 'Ana Martínez', phone: '0412-3456789', email: 'ana@example.com', created_at: '2023-04-12', total_spent: 423.00, is_active: true },
-                        { id: 5, full_name: 'Luis Fernández', phone: '0414-1122334', email: 'luis@example.com', created_at: '2023-05-22', total_spent: 289.50, is_active: true },
-                        { id: 6, full_name: 'Sofía Torres', phone: '0424-4455667', email: 'sofia@example.com', created_at: '2023-06-10', total_spent: 198.25, is_active: true },
-                        { id: 7, full_name: 'Pedro Ramírez', phone: '0412-9988776', email: 'pedro@example.com', created_at: '2023-06-18', total_spent: 145.00, is_active: true },
-                        { id: 8, full_name: 'Elena Sánchez', phone: '0414-5566778', email: 'elena@example.com', created_at: '2023-06-25', total_spent: 325.75, is_active: true },
-                        { id: 9, full_name: 'Javier Morales', phone: '0424-6677889', email: 'javier@example.com', created_at: '2023-07-03', total_spent: 215.50, is_active: true },
-                        { id: 10, full_name: 'Carmen Díaz', phone: '0412-7788990', email: 'carmen@example.com', created_at: '2023-07-10', total_spent: 187.25, is_active: true }
-                    ];
+                async fetchClientsData(branch) {
+                    const { data, error } = await supabase.from('customers')
+                        .select('id, full_name, phone, email, created_at, is_active')
+                        .eq('branch', branch)
+                        .order('created_at', { ascending: false });
 
-                    this.totalClients = 10;
-                    this.activeClients = 10;
+                    if (error) throw error;
+
+                    this.clientsData = data || [];
+                    this.totalClients = this.clientsData.length;
+                    this.activeClients = this.clientsData.filter(c => c.is_active).length;
                 },
 
-                generateInventoryReport() {
-                    // Datos simulados para inventario
-                    this.inventoryData = [
-                        { id: 1, name: 'Agua 5L', size_liters: 5, stock: 125, min_stock: 20 },
-                        { id: 2, name: 'Agua 13L', size_liters: 13, stock: 87, min_stock: 15 },
-                        { id: 3, name: 'Agua 20L', size_liters: 20, stock: 42, min_stock: 10 },
-                        { id: 4, name: 'Botellón Vacío 15L', size_liters: 15, stock: 28, min_stock: 20 },
-                        { id: 5, name: 'Botellón Vacío 20L', size_liters: 20, stock: 15, min_stock: 15 },
-                        { id: 6, name: 'Tapa', size_liters: null, stock: 75, min_stock: 50 }
-                    ];
+                async fetchInventoryData(branch) {
+                    const { data, error } = await supabase.from('inventory')
+                        .select(`quantity, min_stock, products (id, name, size_liters, price)`)
+                        .eq('branch', branch);
 
-                    this.totalProducts = 6;
-                    this.totalStock = 372;
-                    this.lowStockProducts = this.inventoryData.filter(p => p.stock <= p.min_stock);
+                    if (error) throw error;
+
+                    const mapped = (data || []).map(item => ({
+                        id: item.products?.id,
+                        name: item.products?.name || 'Desconocido',
+                        size_liters: item.products?.size_liters,
+                        stock: item.quantity || 0,
+                        min_stock: item.min_stock || 0,
+                        price: item.products?.price || 0
+                    }));
+
+                    this.inventoryData = mapped;
+                    this.totalProducts = mapped.length;
+                    this.totalStock = mapped.reduce((sum, p) => sum + p.stock, 0);
+                    this.totalInventoryValue = mapped.reduce((sum, p) => sum + (p.stock * p.price), 0);
                 },
 
-                generateAccountsReport() {
-                    // Datos simulados para cuentas por cobrar
-                    this.accountsData = [
-                        { id: 1, customer_name: 'Juan Pérez', payment_date: '2023-07-20', total_amount: 45.50, paid_amount: 20.00, remaining_amount: 25.50, status: 'partial' },
-                        { id: 2, customer_name: 'María López', payment_date: '2023-07-25', total_amount: 38.25, paid_amount: 0.00, remaining_amount: 38.25, status: 'pending' },
-                        { id: 3, customer_name: 'Carlos Gómez', payment_date: '2023-07-30', total_amount: 25.00, paid_amount: 25.00, remaining_amount: 0.00, status: 'completed' },
-                        { id: 4, customer_name: 'Ana Martínez', payment_date: '2023-08-05', total_amount: 52.75, paid_amount: 0.00, remaining_amount: 52.75, status: 'pending' },
-                        { id: 5, customer_name: 'Luis Fernández', payment_date: '2023-08-10', total_amount: 46.50, paid_amount: 20.00, remaining_amount: 26.50, status: 'partial' },
-                        { id: 6, customer_name: 'Sofía Torres', payment_date: '2023-08-15', total_amount: 32.00, paid_amount: 32.00, remaining_amount: 0.00, status: 'completed' }
-                    ];
+                async fetchAccountsData(branch) {
+                    const { data, error } = await supabase.from('credit_accounts')
+                        .select('id, customer_name, payment_date, total_amount, paid_amount, remaining_amount, status')
+                        .eq('branch', branch)
+                        .in('status', ['pending', 'partial'])
+                        .order('payment_date', { ascending: true });
 
-                    this.totalPending = 142.50;
-                    this.totalPaid = 105.00;
-                    this.accountsDue1to7 = 46.50;
-                    this.accountsDue8to15 = 52.75;
-                    this.accountsOver15 = 43.25;
+                    if (error) throw error;
+
+                    this.accountsData = data || [];
+                    this.totalPending = this.accountsData.reduce((sum, acc) => sum + (acc.remaining_amount || 0), 0);
+                    this.totalPaid = this.accountsData.reduce((sum, acc) => sum + (acc.paid_amount || 0), 0);
                 },
 
-                generateDailyReport() {
-                    // Datos simulados para resumen diario
-                    this.dailySales = 185.00;
-                    this.dailyClients = 8;
-                    this.dailyInventory = 352;
+                async fetchSummaryData(branch, start, end) {
+                    const { data: sales, error } = await supabase.from('sales')
+                        .select('total, sale_items (quantity, products (name))')
+                        .gte('created_at', start)
+                        .lte('created_at', end)
+                        .eq('branch', branch);
 
-                    this.topSellingProducts = [
-                        { name: 'Agua 20L', quantity: 12, percentage: 40 },
-                        { name: 'Agua 13L', quantity: 9, percentage: 30 },
-                        { name: 'Agua 5L', quantity: 8, percentage: 26 },
-                        { name: 'Botellón Vacío 20L', quantity: 2, percentage: 4 }
-                    ];
+                    if (error) throw error;
 
-                    this.dailyHours = [
-                        { hour: '8', sales_count: 1, clients_count: 1, products_sold: 3, total_sales: 35.00 },
-                        { hour: '9', sales_count: 2, clients_count: 2, products_sold: 5, total_sales: 42.50 },
-                        { hour: '10', sales_count: 3, clients_count: 3, products_sold: 8, total_sales: 65.00 },
-                        { hour: '11', sales_count: 2, clients_count: 2, products_sold: 6, total_sales: 42.50 },
-                        { hour: '12', sales_count: 1, clients_count: 1, products_sold: 3, total_sales: 35.00 },
-                        { hour: '13', sales_count: 0, clients_count: 0, products_sold: 0, total_sales: 0.00 },
-                        { hour: '14', sales_count: 1, clients_count: 1, products_sold: 3, total_sales: 35.00 },
-                        { hour: '15', sales_count: 2, clients_count: 2, products_sold: 5, total_sales: 42.50 },
-                        { hour: '16', sales_count: 3, clients_count: 3, products_sold: 8, total_sales: 65.00 },
-                        { hour: '17', sales_count: 2, clients_count: 2, products_sold: 6, total_sales: 42.50 }
-                    ];
+                    const safeSales = sales || [];
+                    this.dailySales = safeSales.reduce((sum, s) => sum + (s.total || 0), 0);
+                    this.dailyClients = safeSales.length;
+                    this.averageTicket = this.dailyClients > 0 ? (this.dailySales / this.dailyClients) : 0;
+
+                    // Calcular productos más vendidos
+                    const productCounts = {};
+                    safeSales.forEach(sale => {
+                        if (sale.sale_items) {
+                            sale.sale_items.forEach(item => {
+                                const name = item.products?.name || 'Desconocido';
+                                if (!productCounts[name]) {
+                                    productCounts[name] = { name, quantity: 0, total: 0 };
+                                }
+                                productCounts[name].quantity += item.quantity || 0;
+                                productCounts[name].total += item.total || 0;
+                            });
+                        }
+                    });
+
+                    this.topSellingProducts = Object.values(productCounts)
+                        .sort((a, b) => b.quantity - a.quantity)
+                        .slice(0, 5);
+                },
+
+                async updateGlobalStats(branch) {
+                    // Cuentas pendientes globales
+                    const { data: accounts } = await supabase.from('credit_accounts')
+                        .select('remaining_amount')
+                        .eq('branch', branch)
+                        .in('status', ['pending', 'partial']);
+                    this.pendingAccounts = accounts ? accounts.reduce((sum, acc) => sum + (acc.remaining_amount || 0), 0) : 0;
                 },
 
                 setReportType(type) {
@@ -1650,51 +1192,80 @@
                             this.endDate = today.toISOString().split('T')[0];
                             break;
                     }
-
-                    this.generateReport();
-                },
-
-                setBranch(branch) {
-                    this.selectedBranch = branch;
                     this.generateReport();
                 },
 
                 prevPage() {
-                    if (this.currentPage > 1) {
-                        this.currentPage--;
-                    }
+                    if (this.currentPage > 1) this.currentPage--;
                 },
 
                 nextPage() {
-                    if (this.currentPage < this.totalPages) {
-                        this.currentPage++;
-                    }
+                    if (this.currentPage < this.totalPages) this.currentPage++;
+                },
+
+                goBack() {
+                    window.location.href = 'index.html';
                 },
 
                 initCharts() {
-                    // Aquí iría la inicialización de los gráficos con Chart.js
-                    // Para el ejemplo, solo simulamos la existencia
-                    console.log('Iniciando gráficos...');
+                    // Destruir gráficos anteriores para evitar superposición
+                    if (charts.sales) charts.sales.destroy();
+                    if (charts.daily) charts.daily.destroy();
+
+                    if (this.reportType === 'ventas' && this.viewMode === 'chart' && this.salesData.length > 0) {
+                        const ctx = document.getElementById('salesChart');
+                        if (ctx) {
+                            // Agrupar ventas por día
+                            const salesByDay = {};
+                            this.salesData.forEach(s => {
+                                const day = s.created_at.split('T')[0];
+                                salesByDay[day] = (salesByDay[day] || 0) + s.total;
+                            });
+
+                            charts.sales = new Chart(ctx, {
+                                type: 'bar',
+                                data: {
+                                    labels: Object.keys(salesByDay).sort(),
+                                    datasets: [{
+                                        label: 'Ventas (Bs.)',
+                                        data: Object.keys(salesByDay).sort().map(k => salesByDay[k]),
+                                        backgroundColor: 'rgba(14, 165, 233, 0.6)',
+                                        borderColor: 'rgba(14, 165, 233, 1)',
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: { responsive: true, maintainAspectRatio: false }
+                            });
+                        }
+                    }
+
+                    if (this.reportType === 'resumen' && this.topSellingProducts.length > 0) {
+                        const ctx = document.getElementById('dailySalesChart');
+                        if (ctx) {
+                            charts.daily = new Chart(ctx, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: this.topSellingProducts.map(p => p.name),
+                                    datasets: [{
+                                        data: this.topSellingProducts.map(p => p.quantity),
+                                        backgroundColor: ['#0ea5e9', '#06b6d4', '#8b5cf6', '#f59e0b', '#10b981']
+                                    }]
+                                },
+                                options: { responsive: true, maintainAspectRatio: false }
+                            });
+                        }
+                    }
                 },
 
                 exportReport(format) {
-                    showToast(`Exportando reporte en formato ${format.toUpperCase()}`, 'info');
-                    // Lógica para exportar reportes
-                },
-
-                viewAccountDetails(account) {
-                    // Mostrar detalles de la cuenta
-                    showToast(`Mostrando detalles de la cuenta para ${account.customer_name}`, 'info');
-                },
-
-                restockProduct(product) {
-                    // Iniciar proceso de reabastecimiento
-                    showToast(`Iniciando reabastecimiento para ${product.name}`, 'info');
+                    if (format === 'pdf') {
+                        showToast('Preparando vista de impresión...', 'info');
+                        setTimeout(() => window.print(), 500);
+                    }
                 }
             };
         }
 
-        // Inicializar el componente
         document.addEventListener('DOMContentLoaded', function () {
             if (window.Alpine) {
                 window.Alpine.data('reportesApp', reportesApp);
