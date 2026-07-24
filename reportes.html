@@ -456,9 +456,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Reporte</label>
-                            <select x-model="reportType"
+                            <select x-model="reportType" @change="generateReport()"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
                                 <option value="ventas">Ventas</option>
+                                <option value="ventas_producto">Ventas por Producto</option>
+                                <option value="ventas_metodo">Ventas por Método de Pago</option>
                                 <option value="clientes">Clientes</option>
                                 <option value="inventario">Inventario</option>
                                 <option value="cuentas">Cuentas por Cobrar</option>
@@ -467,12 +469,12 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
-                            <input type="date" x-model="startDate"
+                            <input type="date" x-model="startDate" @change="generateReport()"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
-                            <input type="date" x-model="endDate"
+                            <input type="date" x-model="endDate" @change="generateReport()"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
                         </div>
                     </div>
@@ -480,7 +482,7 @@
                     <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Sucursal</label>
-                            <select x-model="selectedBranch"
+                            <select x-model="selectedBranch" @change="generateReport()"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
                                 <option value="">Todas las sucursales</option>
                                 <option value="geminis">Sucursal Géminis</option>
@@ -489,7 +491,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Método de Pago</label>
-                            <select x-model="paymentMethod"
+                            <select x-model="paymentMethod" @change="generateReport()"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
                                 <option value="">Todos los métodos</option>
                                 <option value="efectivo_bs">Efectivo Bs</option>
@@ -508,11 +510,13 @@
                     </div>
                 </div>
 
-                <!-- Estadísticas Principales - CORREGIDO: Eliminado 'Bs. ' extra -->
+                <!-- Estadísticas Principales - ACTUALIZADO: Mostrar USD y Bs -->
                 <div class="report-stats-grid">
                     <div class="stat-card">
                         <div class="text-sm text-gray-500">Ventas Totales</div>
-                        <div class="stat-value" x-text="formatCurrency(totalSales)"></div>
+                        <div class="stat-value text-blue-600" x-text="'$' + formatNumber(totalSales / exchangeRate)">
+                        </div>
+                        <div class="text-lg font-semibold text-green-600" x-text="formatCurrency(totalSales)"></div>
                         <div class="text-sm text-green-500">+12% vs mes pasado</div>
                     </div>
                     <div class="stat-card">
@@ -527,7 +531,9 @@
                     </div>
                     <div class="stat-card">
                         <div class="text-sm text-gray-500">Cuentas Pendientes</div>
-                        <div class="stat-value" x-text="formatCurrency(pendingAccounts)"></div>
+                        <div class="stat-value text-amber-600"
+                            x-text="'$' + formatNumber(pendingAccounts / exchangeRate)"></div>
+                        <div class="text-lg font-semibold text-red-600" x-text="formatCurrency(pendingAccounts)"></div>
                         <div class="text-sm text-red-500">+5% vs mes pasado</div>
                     </div>
                 </div>
@@ -547,6 +553,25 @@
                                         </div>
                                         <h4 class="font-semibold">Ventas</h4>
                                         <p class="text-xs text-gray-500">Detalles de ventas</p>
+                                    </div>
+                                </div>
+                                <div @click="setReportType('ventas_producto')"
+                                    class="report-type-card p-4 rounded-xl cursor-pointer border border-gray-200"
+                                    :class="{'active': reportType === 'ventas_producto'}">
+                                    <div class="text-center">
+                                        <div class="text-3xl text-purple-500 mb-2"><i class="fas fa-box-open"></i></div>
+                                        <h4 class="font-semibold">Ventas por Producto</h4>
+                                        <p class="text-xs text-gray-500">Agrupado por producto</p>
+                                    </div>
+                                </div>
+                                <div @click="setReportType('ventas_metodo')"
+                                    class="report-type-card p-4 rounded-xl cursor-pointer border border-gray-200"
+                                    :class="{'active': reportType === 'ventas_metodo'}">
+                                    <div class="text-center">
+                                        <div class="text-3xl text-indigo-500 mb-2"><i class="fas fa-credit-card"></i>
+                                        </div>
+                                        <h4 class="font-semibold">Ventas por Método</h4>
+                                        <p class="text-xs text-gray-500">Agrupado por método</p>
                                     </div>
                                 </div>
                                 <div @click="setReportType('clientes')"
@@ -639,12 +664,12 @@
                                                     <th>Producto</th>
                                                     <th>Cantidad</th>
                                                     <th>Precio Unitario</th>
-                                                    <th>Total</th>
+                                                    <th>Total USD</th>
+                                                    <th>Total Bs</th>
                                                     <th>Método Pago</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <!-- CORREGIDO: Verificar que salesData exista y tenga longitud -->
                                                 <template x-if="salesData && salesData.length > 0">
                                                     <template x-for="(sale, index) in salesData" :key="index">
                                                         <tr>
@@ -654,13 +679,14 @@
                                                             <td x-text="sale.quantity"></td>
                                                             <td x-text="'$' + sale.price.toFixed(2)"></td>
                                                             <td x-text="'$' + sale.total.toFixed(2)"></td>
+                                                            <td x-text="formatCurrency(sale.total * exchangeRate)"></td>
                                                             <td x-text="getPaymentMethodName(sale.payment_method)"></td>
                                                         </tr>
                                                     </template>
                                                 </template>
                                                 <template x-if="!salesData || salesData.length === 0">
                                                     <tr>
-                                                        <td colspan="7" class="text-center py-8 text-gray-500">
+                                                        <td colspan="8" class="text-center py-8 text-gray-500">
                                                             <i class="fas fa-inbox text-4xl mb-2 block"></i>
                                                             No hay ventas en el período seleccionado
                                                         </td>
@@ -706,6 +732,64 @@
                             </div>
                         </div>
 
+                        <!-- Panel de Ventas por Producto -->
+                        <div x-show="reportType === 'ventas_producto'">
+                            <div class="report-card">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Ventas por Producto</h3>
+                                <div class="table-container">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Producto</th>
+                                                <th>Cantidad Vendida</th>
+                                                <th>Total USD</th>
+                                                <th>Total Bs</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template x-for="product in productSalesSummary" :key="product.name">
+                                                <tr>
+                                                    <td x-text="product.name"></td>
+                                                    <td x-text="product.quantity"></td>
+                                                    <td x-text="'$' + product.total.toFixed(2)"></td>
+                                                    <td x-text="formatCurrency(product.total * exchangeRate)"></td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel de Ventas por Método de Pago -->
+                        <div x-show="reportType === 'ventas_metodo'">
+                            <div class="report-card">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Ventas por Método de Pago</h3>
+                                <div class="table-container">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Método de Pago</th>
+                                                <th>Cantidad Transacciones</th>
+                                                <th>Total USD</th>
+                                                <th>Total Bs</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template x-for="method in paymentMethodSummary" :key="method.method">
+                                                <tr>
+                                                    <td x-text="getPaymentMethodName(method.method)"></td>
+                                                    <td x-text="method.count"></td>
+                                                    <td x-text="'$' + method.total.toFixed(2)"></td>
+                                                    <td x-text="formatCurrency(method.total * exchangeRate)"></td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Panel de Clientes -->
                         <div x-show="reportType === 'clientes'">
                             <div class="report-card">
@@ -730,7 +814,8 @@
                                                 <th>Teléfono</th>
                                                 <th>Email</th>
                                                 <th>Fecha Registro</th>
-                                                <th>Total Compras</th>
+                                                <th>Total Compras USD</th>
+                                                <th>Total Compras Bs</th>
                                                 <th>Estado</th>
                                             </tr>
                                         </thead>
@@ -742,6 +827,7 @@
                                                     <td x-text="client.email || 'N/A'"></td>
                                                     <td x-text="formatDate(client.created_at)"></td>
                                                     <td x-text="'$' + client.total_spent.toFixed(2)"></td>
+                                                    <td x-text="formatCurrency(client.total_spent * exchangeRate)"></td>
                                                     <td><span x-text="client.is_active ? 'Activo' : 'Inactivo'"
                                                             :class="client.is_active ? 'text-green-600' : 'text-red-600'"></span>
                                                     </td>
@@ -810,12 +896,18 @@
                                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Cuentas por Cobrar</h3>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                     <div class="stat-card">
-                                        <div class="text-sm text-gray-500">Total Pendiente</div>
-                                        <div class="stat-value" x-text="formatCurrency(totalPending)"></div>
+                                        <div class="text-sm text-gray-500">Total Pendiente USD</div>
+                                        <div class="stat-value text-amber-600"
+                                            x-text="'$' + formatNumber(totalPending / exchangeRate)"></div>
+                                        <div class="text-lg font-semibold text-red-600"
+                                            x-text="formatCurrency(totalPending)"></div>
                                     </div>
                                     <div class="stat-card">
-                                        <div class="text-sm text-gray-500">Total Pagado</div>
-                                        <div class="stat-value" x-text="formatCurrency(totalPaid)"></div>
+                                        <div class="text-sm text-gray-500">Total Pagado USD</div>
+                                        <div class="stat-value text-green-600"
+                                            x-text="'$' + formatNumber(totalPaid / exchangeRate)"></div>
+                                        <div class="text-lg font-semibold text-blue-600"
+                                            x-text="formatCurrency(totalPaid)"></div>
                                     </div>
                                 </div>
                                 <div class="table-container">
@@ -824,9 +916,10 @@
                                             <tr>
                                                 <th>Cliente</th>
                                                 <th>Fecha Vencimiento</th>
-                                                <th>Total</th>
-                                                <th>Pagado</th>
-                                                <th>Pendiente</th>
+                                                <th>Total USD</th>
+                                                <th>Total Bs</th>
+                                                <th>Pagado USD</th>
+                                                <th>Pendiente USD</th>
                                                 <th>Estado</th>
                                                 <th>Acciones</th>
                                             </tr>
@@ -836,9 +929,12 @@
                                                 <tr>
                                                     <td x-text="account.customer_name"></td>
                                                     <td x-text="formatDate(account.payment_date)"></td>
-                                                    <td x-text="formatCurrency(account.total_amount)"></td>
-                                                    <td x-text="formatCurrency(account.paid_amount)"></td>
-                                                    <td x-text="formatCurrency(account.remaining_amount)"></td>
+                                                    <td x-text="'$' + (account.total_amount || 0).toFixed(2)"></td>
+                                                    <td
+                                                        x-text="formatCurrency((account.total_amount || 0) * exchangeRate)">
+                                                    </td>
+                                                    <td x-text="'$' + (account.paid_amount || 0).toFixed(2)"></td>
+                                                    <td x-text="'$' + (account.remaining_amount || 0).toFixed(2)"></td>
                                                     <td><span x-text="account.status"
                                                             :class="account.status === 'pending' ? 'text-amber-600' : account.status === 'partial' ? 'text-blue-600' : 'text-green-600'"></span>
                                                     </td>
@@ -859,8 +955,11 @@
                                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Resumen Diario</h3>
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                                     <div class="stat-card">
-                                        <div class="text-sm text-gray-500">Ventas del Día</div>
-                                        <div class="stat-value" x-text="formatCurrency(dailySales)"></div>
+                                        <div class="text-sm text-gray-500">Ventas del Día USD</div>
+                                        <div class="stat-value text-blue-600"
+                                            x-text="'$' + formatNumber(dailySales / exchangeRate)"></div>
+                                        <div class="text-lg font-semibold text-green-600"
+                                            x-text="formatCurrency(dailySales)"></div>
                                         <div class="text-sm text-green-500">+12% vs ayer</div>
                                     </div>
                                     <div class="stat-card">
@@ -882,7 +981,8 @@
                                                 <th>Ventas</th>
                                                 <th>Clientes</th>
                                                 <th>Productos Vendidos</th>
-                                                <th>Ingreso en Bs</th>
+                                                <th>Ingreso USD</th>
+                                                <th>Ingreso Bs</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -892,6 +992,8 @@
                                                     <td x-text="hour.sales_count"></td>
                                                     <td x-text="hour.clients_count"></td>
                                                     <td x-text="hour.products_sold"></td>
+                                                    <td x-text="'$' + (hour.total_sales / exchangeRate).toFixed(2)">
+                                                    </td>
                                                     <td x-text="formatCurrency(hour.total_sales)"></td>
                                                 </tr>
                                             </template>
@@ -908,7 +1010,7 @@
 
     <script>
         const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqqzBs';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         async function logout() {
@@ -970,7 +1072,6 @@
             return Math.round((parseFloat(num) + Number.EPSILON) * 100) / 100;
         }
 
-        // ✅ CORREGIDO: formatCurrency ya incluye "Bs."
         function formatCurrency(num) {
             return round2(num).toLocaleString('es-VE', {
                 style: 'currency',
@@ -978,6 +1079,22 @@
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             }).replace('VES', 'Bs.');
+        }
+
+        function formatNumber(num) {
+            return round2(num).toLocaleString('es-VE', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        // ✅ NUEVA FUNCIÓN: Obtener fecha de Caracas
+        function getCaracasDate() {
+            const now = new Date();
+            const caracasTime = new Date(now.toLocaleString('en-US', {
+                timeZone: 'America/Caracas'
+            }));
+            return caracasTime;
         }
 
         function formatDate(dateString) {
@@ -1037,10 +1154,11 @@
                 userRole: '',
                 userInitials: '??',
                 exchangeRate: 700.22,
-                reportType: 'ventas',
+                reportType: 'resumen', // ✅ CAMBIADO: Por defecto Resumen Diario
                 viewMode: 'table',
-                startDate: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0],
-                endDate: new Date().toISOString().split('T')[0],
+                // ✅ CAMBIADO: Fechas por defecto = hoy (zona horaria Caracas)
+                startDate: getCaracasDate().toISOString().split('T')[0],
+                endDate: getCaracasDate().toISOString().split('T')[0],
                 selectedBranch: '',
                 paymentMethod: '',
                 currentPage: 1,
@@ -1048,6 +1166,8 @@
 
                 // Datos de Ventas
                 salesData: [],
+                productSalesSummary: [], // ✅ NUEVO: Para ventas por producto
+                paymentMethodSummary: [], // ✅ NUEVO: Para ventas por método
                 totalSales: 0,
                 newCustomers: 0,
                 totalInventory: 0,
@@ -1102,7 +1222,7 @@
                         }
 
                         await this.loadExchangeRate();
-                        await this.generateReport();
+                        await this.generateReport(); // ✅ Generar reporte al iniciar
                         this.initCharts();
 
                     } catch (err) {
@@ -1127,7 +1247,7 @@
                             this.exchangeRate = ensureValidRate(data);
                             console.log('✅ Tasa cargada desde Supabase:', this.exchangeRate);
                         } else {
-                            console.warn('️ No se encontró tasa en BD, usando 700.22');
+                            console.warn('⚠️ No se encontró tasa en BD, usando 700.22');
                             this.exchangeRate = 700.22;
                         }
                     } catch (err) {
@@ -1191,6 +1311,12 @@
                         switch (this.reportType) {
                             case 'ventas':
                                 await this.generateSalesReport();
+                                break;
+                            case 'ventas_producto':
+                                await this.generateSalesByProductReport();
+                                break;
+                            case 'ventas_metodo':
+                                await this.generateSalesByPaymentMethodReport();
                                 break;
                             case 'clientes':
                                 await this.generateClientsReport();
@@ -1256,7 +1382,6 @@
                     const salesById = {};
                     salesList.forEach(s => salesById[s.id] = s);
 
-                    // ✅ CORREGIDO: Crear salesData con índice único
                     this.salesData = items.map((item, index) => {
                         const sale = salesById[item.sale_id] || {};
                         return {
@@ -1294,6 +1419,87 @@
                     const { data: credData } = await credQuery;
                     const rawPendingUSD = (credData || []).reduce((sum, c) => sum + (c.remaining_amount || 0), 0);
                     this.pendingAccounts = round2(rawPendingUSD * this.exchangeRate);
+                },
+
+                // ✅ NUEVO: Reporte de Ventas por Producto
+                async generateSalesByProductReport() {
+                    let query = supabase
+                        .from('sales')
+                        .select('*')
+                        .gte('created_at', this.rangeStart())
+                        .lte('created_at', this.rangeEnd());
+
+                    if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
+                    if (this.paymentMethod) query = query.eq('payment_method', this.paymentMethod);
+
+                    const { data: sales, error } = await query;
+                    if (error) throw error;
+                    const salesList = sales || [];
+                    const saleIds = salesList.map(s => s.id);
+
+                    let items = [];
+                    if (saleIds.length > 0) {
+                        const { data: itemsData } = await supabase
+                            .from('sale_items')
+                            .select('sale_id, product_id, quantity, total')
+                            .in('sale_id', saleIds);
+                        items = itemsData || [];
+                    }
+
+                    const { data: productsData } = await supabase.from('products').select('id, name, size_liters');
+                    const productMap = {};
+                    (productsData || []).forEach(p => {
+                        productMap[p.id] = p.name || `Botellón ${p.size_liters}L`;
+                    });
+
+                    // Agrupar por producto
+                    const productSummary = {};
+                    items.forEach(item => {
+                        const productName = productMap[item.product_id] || 'Producto';
+                        if (!productSummary[productName]) {
+                            productSummary[productName] = { name: productName, quantity: 0, total: 0 };
+                        }
+                        productSummary[productName].quantity += item.quantity || 0;
+                        productSummary[productName].total += item.total || 0;
+                    });
+
+                    this.productSalesSummary = Object.values(productSummary).sort((a, b) => b.total - a.total);
+
+                    // Calcular totales generales
+                    const rawSalesTotalUSD = salesList.reduce((sum, s) => sum + (s.total || 0), 0);
+                    this.totalSales = round2(rawSalesTotalUSD * this.exchangeRate);
+                },
+
+                // ✅ NUEVO: Reporte de Ventas por Método de Pago
+                async generateSalesByPaymentMethodReport() {
+                    let query = supabase
+                        .from('sales')
+                        .select('*')
+                        .gte('created_at', this.rangeStart())
+                        .lte('created_at', this.rangeEnd());
+
+                    if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
+
+                    const { data: sales, error } = await query;
+                    if (error) throw error;
+                    const salesList = sales || [];
+
+                    // Agrupar por método de pago
+                    const methodSummary = {};
+                    salesList.forEach(sale => {
+                        const method = sale.payment_method || 'unknown';
+                        if (!methodSummary[method]) {
+                            methodSummary[method] = { method: method, count: 0, total: 0 };
+                        }
+                        methodSummary[method].count++;
+                        methodSummary[method].total += sale.total || 0;
+                    });
+
+                    this.paymentMethodSummary = Object.values(methodSummary).sort((a, b) => b.total - a.total);
+
+                    // Calcular totales generales
+                    const rawSalesTotalUSD = salesList.reduce((sum, s) => sum + (s.total || 0), 0);
+                    this.totalSales = round2(rawSalesTotalUSD * this.exchangeRate);
                 },
 
                 async generateClientsReport() {
@@ -1469,8 +1675,8 @@
                 },
 
                 setDateRange(range) {
-                    const today = new Date();
-                    const date = new Date();
+                    const today = getCaracasDate();
+                    const date = new Date(today);
                     switch (range) {
                         case 'today':
                             this.startDate = today.toISOString().split('T')[0];
@@ -1531,18 +1737,32 @@
                     switch (this.reportType) {
                         case 'ventas':
                             filename = 'reporte_ventas';
-                            rows.push(['Fecha', 'Cliente', 'Producto', 'Cantidad', 'Precio Unitario', 'Total', 'Metodo de Pago']);
+                            rows.push(['Fecha', 'Cliente', 'Producto', 'Cantidad', 'Precio Unitario', 'Total USD', 'Total Bs', 'Metodo de Pago']);
                             this.salesData.forEach(s => rows.push([
                                 formatDate(s.created_at), s.customer_name || 'Cliente Anonimo', s.product_name,
-                                s.quantity, s.price.toFixed(2), s.total.toFixed(2), getPaymentMethodName(s.payment_method)
+                                s.quantity, s.price.toFixed(2), s.total.toFixed(2), (s.total * this.exchangeRate).toFixed(2), getPaymentMethodName(s.payment_method)
+                            ]));
+                            break;
+                        case 'ventas_producto':
+                            filename = 'reporte_ventas_producto';
+                            rows.push(['Producto', 'Cantidad', 'Total USD', 'Total Bs']);
+                            this.productSalesSummary.forEach(p => rows.push([
+                                p.name, p.quantity, p.total.toFixed(2), (p.total * this.exchangeRate).toFixed(2)
+                            ]));
+                            break;
+                        case 'ventas_metodo':
+                            filename = 'reporte_ventas_metodo';
+                            rows.push(['Metodo de Pago', 'Transacciones', 'Total USD', 'Total Bs']);
+                            this.paymentMethodSummary.forEach(m => rows.push([
+                                getPaymentMethodName(m.method), m.count, m.total.toFixed(2), (m.total * this.exchangeRate).toFixed(2)
                             ]));
                             break;
                         case 'clientes':
                             filename = 'reporte_clientes';
-                            rows.push(['Nombre', 'Telefono', 'Email', 'Fecha Registro', 'Total Compras (USD)', 'Estado']);
+                            rows.push(['Nombre', 'Telefono', 'Email', 'Fecha Registro', 'Total Compras USD', 'Total Compras Bs', 'Estado']);
                             this.clientsData.forEach(c => rows.push([
                                 c.full_name, c.phone || 'N/A', c.email || 'N/A', formatDate(c.created_at),
-                                c.total_spent.toFixed(2), c.is_active ? 'Activo' : 'Inactivo'
+                                c.total_spent.toFixed(2), (c.total_spent * this.exchangeRate).toFixed(2), c.is_active ? 'Activo' : 'Inactivo'
                             ]));
                             break;
                         case 'inventario':
@@ -1555,17 +1775,19 @@
                             break;
                         case 'cuentas':
                             filename = 'reporte_cuentas_cobrar';
-                            rows.push(['Cliente', 'Fecha Vencimiento', 'Total (USD)', 'Pagado (USD)', 'Pendiente (USD)', 'Estado']);
+                            rows.push(['Cliente', 'Fecha Vencimiento', 'Total USD', 'Total Bs', 'Pagado USD', 'Pendiente USD', 'Estado']);
                             this.accountsData.forEach(a => rows.push([
                                 a.customer_name, formatDate(a.payment_date), (a.total_amount || 0).toFixed(2),
+                                ((a.total_amount || 0) * this.exchangeRate).toFixed(2),
                                 (a.paid_amount || 0).toFixed(2), (a.remaining_amount || 0).toFixed(2), a.status
                             ]));
                             break;
                         case 'resumen':
                             filename = 'resumen_diario';
-                            rows.push(['Hora', 'Ventas', 'Clientes', 'Productos Vendidos', 'Ingreso en Bs']);
+                            rows.push(['Hora', 'Ventas', 'Clientes', 'Productos Vendidos', 'Ingreso USD', 'Ingreso Bs']);
                             this.dailyHours.forEach(h => rows.push([
-                                h.hour + ':00', h.sales_count, h.clients_count, h.products_sold, h.total_sales.toFixed(2)
+                                h.hour + ':00', h.sales_count, h.clients_count, h.products_sold,
+                                (h.total_sales / this.exchangeRate).toFixed(2), h.total_sales.toFixed(2)
                             ]));
                             break;
                     }
@@ -1591,7 +1813,7 @@
                         title: account.customer_name || 'Cliente',
                         html: `<div class="text-left space-y-2">
                             <p><strong>Fecha límite de pago:</strong> ${formatDate(account.payment_date)}</p>
-                            <p><strong>Total:</strong> $${(account.total_amount || 0).toFixed(2)}</p>
+                            <p><strong>Total:</strong> $${(account.total_amount || 0).toFixed(2)} / ${formatCurrency((account.total_amount || 0) * this.exchangeRate)}</p>
                             <p><strong>Pagado:</strong> $${(account.paid_amount || 0).toFixed(2)}</p>
                             <p><strong>Pendiente:</strong> $${(account.remaining_amount || 0).toFixed(2)}</p>
                             <p><strong>Estado:</strong> ${account.status}</p>
