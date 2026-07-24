@@ -165,207 +165,6 @@
             border-radius: 3px;
         }
 
-        .cart-drawer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            max-height: 90vh;
-            background: white;
-            border-radius: 24px 24px 0 0;
-            z-index: 40;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
-            overflow-y: auto;
-        }
-
-        .cart-drawer.open {
-            transform: translateY(0);
-        }
-
-        .cart-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 39;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-
-        .cart-overlay.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .total-bar {
-            position: sticky;
-            bottom: 0;
-            z-index: 30;
-        }
-
-        .quick-add-btn {
-            transition: all 0.15s;
-        }
-
-        .quick-add-btn:active {
-            transform: scale(0.9);
-        }
-
-        .low-stock {
-            position: relative;
-        }
-
-        .low-stock::after {
-            content: 'Stock Bajo';
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: #ef4444;
-            color: white;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-weight: 600;
-        }
-
-        .branch-badge-geminis {
-            background: linear-gradient(135deg, #06b6d4, #0891b2);
-        }
-
-        .branch-badge-omega {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-        }
-
-        .total-bs-clickable {
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .total-bs-clickable:hover {
-            background-color: rgba(34, 197, 94, 0.1);
-            transform: scale(1.02);
-        }
-
-        .total-bs-clickable:active {
-            transform: scale(0.98);
-        }
-
-        .compact-mode .product-card {
-            padding: 12px;
-        }
-
-        .compact-mode .product-card .fa-tint {
-            font-size: 1.5rem !important;
-        }
-
-        .compact-mode .product-card p.font-bold {
-            font-size: 0.9rem !important;
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 28px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #cbd5e1;
-            transition: .3s;
-            border-radius: 28px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        input:checked+.toggle-slider {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-        }
-
-        input:checked+.toggle-slider:before {
-            transform: translateX(22px);
-        }
-
-        .payment-card {
-            transition: all 0.2s ease;
-            border: 2px solid transparent;
-        }
-
-        .payment-card:hover {
-            border-color: #0ea5e9;
-            transform: translateY(-1px);
-        }
-
-        @keyframes pulse-bcv {
-
-            0%,
-            100% {
-                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
-            }
-
-            50% {
-                box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
-            }
-        }
-
-        .btn-bcv-pulse {
-            animation: pulse-bcv 2s infinite;
-        }
-
-        .cart-item-compact {
-            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%) !important;
-            padding: 8px 12px !important;
-            margin-bottom: 8px !important;
-        }
-
-        .cart-item-compact h4 {
-            font-size: 0.85rem !important;
-            line-height: 1.2 !important;
-        }
-
-        .cart-item-compact .text-xs {
-            font-size: 0.7rem !important;
-        }
-
-        .cart-item-compact .touch-btn {
-            width: 28px !important;
-            height: 28px !important;
-            min-height: 28px !important;
-            min-width: 28px !important;
-        }
-
-        .cart-item-compact .font-bold.text-lg {
-            font-size: 1rem !important;
-        }
-
-        .cart-item-compact .font-bold.text-cyan-600 {
-            font-size: 0.875rem !important;
-        }
-
-        /* Estilos específicos para reportes */
         .report-filters {
             background: white;
             border-radius: 12px;
@@ -499,7 +298,6 @@
             box-shadow: 0 6px 12px rgba(14, 165, 233, 0.3);
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .report-header {
                 flex-direction: column;
@@ -537,36 +335,29 @@
             </div>
             <nav class="space-y-2">
                 <a href="index.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-home w-5"></i><span>Dashboard</span>
-                </a>
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-home w-5"></i><span>Dashboard</span></a>
                 <a href="ventas.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
-                </a>
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-shopping-cart w-5"></i><span>Ventas</span></a>
                 <a href="cuentas-cobrar.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-file-invoice-dollar w-5"></i><span>Cuentas por Cobrar</span>
-                </a>
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-file-invoice-dollar w-5"></i><span>Cuentas por Cobrar</span></a>
                 <a href="clientes.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-users w-5"></i><span>Clientes</span>
-                </a>
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-users w-5"></i><span>Clientes</span></a>
                 <a href="inventario.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-boxes w-5"></i><span>Inventario</span>
-                </a>
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-boxes w-5"></i><span>Inventario</span></a>
                 <a href="usuarios.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
-                </a>
-                <a href="reportes.html" class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
-                    <i class="fas fa-chart-line w-5"></i><span class="font-medium">Reportes</span>
-                </a>
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-user-cog w-5"></i><span>Usuarios</span></a>
+                <a href="reportes.html"
+                    class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg"><i
+                        class="fas fa-chart-line w-5"></i><span class="font-medium">Reportes</span></a>
                 <a href="resumen-diario.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-file-alt w-5"></i><span>Resumen Diario</span>
-                </a>
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-file-alt w-5"></i><span>Resumen Diario</span></a>
             </nav>
         </div>
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
@@ -580,6 +371,7 @@
             </div>
         </div>
     </aside>
+
     <!-- Main Content -->
     <div class="lg:ml-64 min-h-screen">
         <!-- Header Desktop -->
@@ -595,28 +387,24 @@
                         <input type="number" x-model.number="exchangeRate" step="0.01"
                             class="w-24 px-2 py-1 text-sm font-bold text-blue-600 bg-transparent border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-center"
                             @change="updateExchangeRate()">
-                        <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
+                        <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs"><i
+                                class="fas fa-sync-alt"></i></button>
                         <button @click="fetchAndUpdateBCV()"
                             class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-semibold touch-btn btn-bcv-pulse"
-                            title="Obtener tasa oficial BCV">
-                            <i class="fas fa-landmark mr-1"></i>BCV
-                        </button>
+                            title="Obtener tasa oficial BCV"><i class="fas fa-landmark mr-1"></i>BCV</button>
                     </div>
-                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
-                        <i class="fas fa-sign-out-alt mr-2"></i>Salir
-                    </button>
+                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"><i
+                            class="fas fa-sign-out-alt mr-2"></i>Salir</button>
                 </div>
             </div>
         </header>
+
         <!-- Header Móvil -->
         <header class="lg:hidden bg-white shadow-sm border-b sticky top-0 z-20">
             <div class="px-3 py-2 flex items-center justify-between">
                 <div class="flex items-center space-x-2">
-                    <button @click="goBack()" class="touch-btn text-gray-600 hover:text-gray-800">
-                        <i class="fas fa-arrow-left text-xl"></i>
-                    </button>
+                    <button @click="goBack()" class="touch-btn text-gray-600 hover:text-gray-800"><i
+                            class="fas fa-arrow-left text-xl"></i></button>
                     <div class="flex items-center space-x-2">
                         <i class="fas fa-tint text-cyan-500 text-xl"></i>
                         <div>
@@ -633,20 +421,17 @@
                         <input type="number" x-model.number="exchangeRate" step="0.01"
                             class="w-14 px-1 py-0.5 text-xs font-bold text-blue-600 bg-transparent border-none focus:outline-none text-right"
                             @change="updateExchangeRate()">
-                        <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
+                        <button @click="loadExchangeRate()" class="text-blue-600 hover:text-blue-800 text-xs"><i
+                                class="fas fa-sync-alt"></i></button>
                         <button @click="fetchAndUpdateBCV()"
                             class="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-[10px] font-bold touch-btn"
-                            title="BCV">
-                            <i class="fas fa-landmark"></i>
-                        </button>
+                            title="BCV"><i class="fas fa-landmark"></i></button>
                     </div>
                 </div>
             </div>
         </header>
+
         <div class="flex">
-            <!-- Content Área Principal -->
             <main class="flex-1 p-3 lg:p-6" :class="{ 'compact-mode': compactMode }">
                 <!-- Breadcrumb -->
                 <div class="mb-4 flex items-center space-x-2 text-sm text-gray-500">
@@ -659,14 +444,10 @@
                 <div class="report-header">
                     <h1 class="report-title">Reportes de Negocio</h1>
                     <div class="report-actions">
-                        <button @click="exportReport('pdf')" class="export-btn flex items-center space-x-2">
-                            <i class="fas fa-file-pdf"></i>
-                            <span>Exportar PDF</span>
-                        </button>
-                        <button @click="exportReport('excel')" class="export-btn flex items-center space-x-2">
-                            <i class="fas fa-file-excel"></i>
-                            <span>Exportar Excel</span>
-                        </button>
+                        <button @click="exportReport('pdf')" class="export-btn flex items-center space-x-2"><i
+                                class="fas fa-file-pdf"></i><span>Exportar PDF</span></button>
+                        <button @click="exportReport('excel')" class="export-btn flex items-center space-x-2"><i
+                                class="fas fa-file-excel"></i><span>Exportar Excel</span></button>
                     </div>
                 </div>
 
@@ -721,18 +502,17 @@
                         </div>
                         <div class="flex items-end">
                             <button @click="generateReport()"
-                                class="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-2 rounded-lg font-semibold">
-                                <i class="fas fa-search mr-2"></i>Generar Reporte
-                            </button>
+                                class="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-2 rounded-lg font-semibold"><i
+                                    class="fas fa-search mr-2"></i>Generar Reporte</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Estadísticas Principales -->
+                <!-- Estadísticas Principales - CORREGIDO: Eliminado 'Bs. ' extra -->
                 <div class="report-stats-grid">
                     <div class="stat-card">
                         <div class="text-sm text-gray-500">Ventas Totales</div>
-                        <div class="stat-value" x-text="'Bs. ' + formatCurrency(totalSales)"></div>
+                        <div class="stat-value" x-text="formatCurrency(totalSales)"></div>
                         <div class="text-sm text-green-500">+12% vs mes pasado</div>
                     </div>
                     <div class="stat-card">
@@ -747,7 +527,7 @@
                     </div>
                     <div class="stat-card">
                         <div class="text-sm text-gray-500">Cuentas Pendientes</div>
-                        <div class="stat-value" x-text="'Bs. ' + formatCurrency(pendingAccounts)"></div>
+                        <div class="stat-value" x-text="formatCurrency(pendingAccounts)"></div>
                         <div class="text-sm text-red-500">+5% vs mes pasado</div>
                     </div>
                 </div>
@@ -758,51 +538,41 @@
                     <div class="lg:col-span-1">
                         <div class="report-card">
                             <h3 class="text-lg font-semibold text-gray-800 mb-4">Tipos de Reportes</h3>
-
                             <div class="grid grid-cols-2 gap-3">
                                 <div @click="setReportType('ventas')"
                                     class="report-type-card p-4 rounded-xl cursor-pointer border border-gray-200"
                                     :class="{'active': reportType === 'ventas'}">
                                     <div class="text-center">
-                                        <div class="text-3xl text-blue-500 mb-2">
-                                            <i class="fas fa-shopping-cart"></i>
+                                        <div class="text-3xl text-blue-500 mb-2"><i class="fas fa-shopping-cart"></i>
                                         </div>
                                         <h4 class="font-semibold">Ventas</h4>
                                         <p class="text-xs text-gray-500">Detalles de ventas</p>
                                     </div>
                                 </div>
-
                                 <div @click="setReportType('clientes')"
                                     class="report-type-card p-4 rounded-xl cursor-pointer border border-gray-200"
                                     :class="{'active': reportType === 'clientes'}">
                                     <div class="text-center">
-                                        <div class="text-3xl text-purple-500 mb-2">
-                                            <i class="fas fa-users"></i>
-                                        </div>
+                                        <div class="text-3xl text-purple-500 mb-2"><i class="fas fa-users"></i></div>
                                         <h4 class="font-semibold">Clientes</h4>
                                         <p class="text-xs text-gray-500">Análisis de clientes</p>
                                     </div>
                                 </div>
-
                                 <div @click="setReportType('inventario')"
                                     class="report-type-card p-4 rounded-xl cursor-pointer border border-gray-200"
                                     :class="{'active': reportType === 'inventario'}">
                                     <div class="text-center">
-                                        <div class="text-3xl text-indigo-500 mb-2">
-                                            <i class="fas fa-boxes"></i>
-                                        </div>
+                                        <div class="text-3xl text-indigo-500 mb-2"><i class="fas fa-boxes"></i></div>
                                         <h4 class="font-semibold">Inventario</h4>
                                         <p class="text-xs text-gray-500">Nivel de inventario</p>
                                     </div>
                                 </div>
-
                                 <div @click="setReportType('cuentas')"
                                     class="report-type-card p-4 rounded-xl cursor-pointer border border-gray-200"
                                     :class="{'active': reportType === 'cuentas'}">
                                     <div class="text-center">
-                                        <div class="text-3xl text-amber-500 mb-2">
-                                            <i class="fas fa-file-invoice-dollar"></i>
-                                        </div>
+                                        <div class="text-3xl text-amber-500 mb-2"><i
+                                                class="fas fa-file-invoice-dollar"></i></div>
                                         <h4 class="font-semibold">Cuentas por Cobrar</h4>
                                         <p class="text-xs text-gray-500">Estado de pagos</p>
                                     </div>
@@ -811,40 +581,31 @@
 
                             <div class="mt-6">
                                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Filtros Rápidos</h3>
-
                                 <div class="mb-4">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Rango de Fechas</label>
                                     <div class="grid grid-cols-2 gap-2">
                                         <button @click="setDateRange('today')"
-                                            class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200">
-                                            Hoy
-                                        </button>
+                                            class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200">Hoy</button>
                                         <button @click="setDateRange('week')"
-                                            class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200">
-                                            Última Semana
-                                        </button>
+                                            class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200">Última
+                                            Semana</button>
                                         <button @click="setDateRange('month')"
-                                            class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200">
-                                            Último Mes
-                                        </button>
+                                            class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200">Último
+                                            Mes</button>
                                         <button @click="setDateRange('year')"
-                                            class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200">
-                                            Último Año
-                                        </button>
+                                            class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200">Último
+                                            Año</button>
                                     </div>
                                 </div>
-
                                 <div class="mb-4">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Sucursales</label>
                                     <div class="grid grid-cols-2 gap-2">
                                         <button @click="setBranch('geminis')"
-                                            class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
-                                            <span class="bg-blue-500 w-2 h-2 rounded-full mr-2"></span> Géminis
-                                        </button>
+                                            class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center"><span
+                                                class="bg-blue-500 w-2 h-2 rounded-full mr-2"></span> Géminis</button>
                                         <button @click="setBranch('omega')"
-                                            class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
-                                            <span class="bg-purple-500 w-2 h-2 rounded-full mr-2"></span> Omega
-                                        </button>
+                                            class="py-1.5 text-sm rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center"><span
+                                                class="bg-purple-500 w-2 h-2 rounded-full mr-2"></span> Omega</button>
                                     </div>
                                 </div>
                             </div>
@@ -861,14 +622,10 @@
                                     <div class="flex space-x-2">
                                         <button @click="viewMode = 'table'"
                                             :class="{'bg-blue-100': viewMode === 'table'}"
-                                            class="px-3 py-1.5 rounded-lg text-sm">
-                                            Tabla
-                                        </button>
+                                            class="px-3 py-1.5 rounded-lg text-sm">Tabla</button>
                                         <button @click="viewMode = 'chart'"
                                             :class="{'bg-blue-100': viewMode === 'chart'}"
-                                            class="px-3 py-1.5 rounded-lg text-sm">
-                                            Gráficos
-                                        </button>
+                                            class="px-3 py-1.5 rounded-lg text-sm">Gráficos</button>
                                     </div>
                                 </div>
 
@@ -887,15 +644,26 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <template x-for="sale in salesData" :key="sale.id">
+                                                <!-- CORREGIDO: Verificar que salesData exista y tenga longitud -->
+                                                <template x-if="salesData && salesData.length > 0">
+                                                    <template x-for="(sale, index) in salesData" :key="index">
+                                                        <tr>
+                                                            <td x-text="formatDate(sale.created_at)"></td>
+                                                            <td x-text="sale.customer_name || 'Cliente Anónimo'"></td>
+                                                            <td x-text="sale.product_name"></td>
+                                                            <td x-text="sale.quantity"></td>
+                                                            <td x-text="'$' + sale.price.toFixed(2)"></td>
+                                                            <td x-text="'$' + sale.total.toFixed(2)"></td>
+                                                            <td x-text="getPaymentMethodName(sale.payment_method)"></td>
+                                                        </tr>
+                                                    </template>
+                                                </template>
+                                                <template x-if="!salesData || salesData.length === 0">
                                                     <tr>
-                                                        <td x-text="formatDate(sale.created_at)"></td>
-                                                        <td x-text="sale.customer_name || 'Cliente Anónimo'"></td>
-                                                        <td x-text="sale.product_name"></td>
-                                                        <td x-text="sale.quantity"></td>
-                                                        <td x-text="'$' + sale.price.toFixed(2)"></td>
-                                                        <td x-text="'$' + sale.total.toFixed(2)"></td>
-                                                        <td x-text="getPaymentMethodName(sale.payment_method)"></td>
+                                                        <td colspan="7" class="text-center py-8 text-gray-500">
+                                                            <i class="fas fa-inbox text-4xl mb-2 block"></i>
+                                                            No hay ventas en el período seleccionado
+                                                        </td>
                                                     </tr>
                                                 </template>
                                             </tbody>
@@ -908,14 +676,10 @@
                                                 x-text="totalPages"></span> páginas
                                         </div>
                                         <div class="flex space-x-2">
-                                            <button @click="prevPage()"
-                                                class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200">
-                                                Anterior
-                                            </button>
-                                            <button @click="nextPage()"
-                                                class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200">
-                                                Siguiente
-                                            </button>
+                                            <button @click="prevPage()" :disabled="currentPage <= 1"
+                                                class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50">Anterior</button>
+                                            <button @click="nextPage()" :disabled="currentPage >= totalPages"
+                                                class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50">Siguiente</button>
                                         </div>
                                     </div>
                                 </div>
@@ -931,7 +695,6 @@
                                             <canvas id="productSalesChart"></canvas>
                                         </div>
                                     </div>
-
                                     <div class="report-card">
                                         <h4 class="text-sm font-medium text-gray-800 mb-2">Ventas por Método de Pago
                                         </h4>
@@ -947,7 +710,6 @@
                         <div x-show="reportType === 'clientes'">
                             <div class="report-card">
                                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Análisis de Clientes</h3>
-
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                     <div class="stat-card">
                                         <div class="text-sm text-gray-500">Clientes Totales</div>
@@ -960,23 +722,6 @@
                                         <div class="text-sm text-green-500">+8% vs mes pasado</div>
                                     </div>
                                 </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                    <div class="report-card">
-                                        <h4 class="text-sm font-medium text-gray-800 mb-3">Clientes por Zona</h4>
-                                        <div class="chart-container">
-                                            <canvas id="clientsByZoneChart"></canvas>
-                                        </div>
-                                    </div>
-
-                                    <div class="report-card">
-                                        <h4 class="text-sm font-medium text-gray-800 mb-3">Clientes por Tipo</h4>
-                                        <div class="chart-container">
-                                            <canvas id="clientsByTypeChart"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <div class="table-container">
                                     <table class="data-table">
                                         <thead>
@@ -997,8 +742,7 @@
                                                     <td x-text="client.email || 'N/A'"></td>
                                                     <td x-text="formatDate(client.created_at)"></td>
                                                     <td x-text="'$' + client.total_spent.toFixed(2)"></td>
-                                                    <td>
-                                                        <span x-text="client.is_active ? 'Activo' : 'Inactivo'"
+                                                    <td><span x-text="client.is_active ? 'Activo' : 'Inactivo'"
                                                             :class="client.is_active ? 'text-green-600' : 'text-red-600'"></span>
                                                     </td>
                                                 </tr>
@@ -1013,7 +757,6 @@
                         <div x-show="reportType === 'inventario'">
                             <div class="report-card">
                                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Estado del Inventario</h3>
-
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                     <div class="stat-card">
                                         <div class="text-sm text-gray-500">Total Productos</div>
@@ -1024,38 +767,6 @@
                                         <div class="stat-value" x-text="totalStock"></div>
                                     </div>
                                 </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                    <div class="report-card">
-                                        <h4 class="text-sm font-medium text-gray-800 mb-3">Nivel de Stock por Producto
-                                        </h4>
-                                        <div class="chart-container">
-                                            <canvas id="stockLevelChart"></canvas>
-                                        </div>
-                                    </div>
-
-                                    <div class="report-card">
-                                        <h4 class="text-sm font-medium text-gray-800 mb-3">Productos con Bajo Stock</h4>
-                                        <div class="space-y-3">
-                                            <template x-for="product in lowStockProducts" :key="product.id">
-                                                <div
-                                                    class="flex justify-between items-center p-3 bg-amber-50 rounded-lg">
-                                                    <div>
-                                                        <p class="font-medium" x-text="product.name"></p>
-                                                        <p class="text-xs text-gray-500"
-                                                            x-text="'Stock: ' + product.stock + ' / ' + product.min_stock">
-                                                        </p>
-                                                    </div>
-                                                    <span
-                                                        class="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs">
-                                                        Bajo Stock
-                                                    </span>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <div class="table-container">
                                     <table class="data-table">
                                         <thead>
@@ -1072,19 +783,18 @@
                                             <template x-for="product in inventoryData" :key="product.id">
                                                 <tr>
                                                     <td x-text="product.name"></td>
-                                                    <td x-text="product.size_liters + 'L'"></td>
+                                                    <td
+                                                        x-text="product.size_liters ? product.size_liters + 'L' : 'N/A'">
+                                                    </td>
                                                     <td x-text="product.stock"></td>
                                                     <td x-text="product.min_stock"></td>
-                                                    <td>
-                                                        <span
+                                                    <td><span
                                                             x-text="product.stock <= product.min_stock ? 'Bajo Stock' : 'Adecuado'"
                                                             :class="product.stock <= product.min_stock ? 'text-amber-600' : 'text-green-600'"></span>
                                                     </td>
-                                                    <td>
-                                                        <button @click="restockProduct(product)"
-                                                            class="text-blue-600 hover:text-blue-800 text-sm">
-                                                            <i class="fas fa-box-open mr-1"></i>Reabastecer
-                                                        </button>
+                                                    <td><button @click="restockProduct(product)"
+                                                            class="text-blue-600 hover:text-blue-800 text-sm"><i
+                                                                class="fas fa-box-open mr-1"></i>Reabastecer</button>
                                                     </td>
                                                 </tr>
                                             </template>
@@ -1098,64 +808,16 @@
                         <div x-show="reportType === 'cuentas'">
                             <div class="report-card">
                                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Cuentas por Cobrar</h3>
-
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                     <div class="stat-card">
                                         <div class="text-sm text-gray-500">Total Pendiente</div>
-                                        <div class="stat-value" x-text="'Bs. ' + formatCurrency(totalPending)"></div>
+                                        <div class="stat-value" x-text="formatCurrency(totalPending)"></div>
                                     </div>
                                     <div class="stat-card">
                                         <div class="text-sm text-gray-500">Total Pagado</div>
-                                        <div class="stat-value" x-text="'Bs. ' + formatCurrency(totalPaid)"></div>
+                                        <div class="stat-value" x-text="formatCurrency(totalPaid)"></div>
                                     </div>
                                 </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                    <div class="report-card">
-                                        <h4 class="text-sm font-medium text-gray-800 mb-3">Estado de Cuentas</h4>
-                                        <div class="chart-container">
-                                            <canvas id="accountStatusChart"></canvas>
-                                        </div>
-                                    </div>
-
-                                    <div class="report-card">
-                                        <h4 class="text-sm font-medium text-gray-800 mb-3">Cuentas por Vencimiento</h4>
-                                        <div class="space-y-3">
-                                            <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                                                <div>
-                                                    <p class="font-medium">1-7 días</p>
-                                                    <p class="text-xs text-gray-500"
-                                                        x-text="'Bs. ' + formatCurrency(accountsDue1to7)"></p>
-                                                </div>
-                                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
-                                                    1-7 días
-                                                </span>
-                                            </div>
-                                            <div class="flex justify-between items-center p-3 bg-amber-50 rounded-lg">
-                                                <div>
-                                                    <p class="font-medium">8-15 días</p>
-                                                    <p class="text-xs text-gray-500"
-                                                        x-text="'Bs. ' + formatCurrency(accountsDue8to15)"></p>
-                                                </div>
-                                                <span
-                                                    class="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs">
-                                                    8-15 días
-                                                </span>
-                                            </div>
-                                            <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                                                <div>
-                                                    <p class="font-medium">Más de 15 días</p>
-                                                    <p class="text-xs text-gray-500"
-                                                        x-text="'Bs. ' + formatCurrency(accountsOver15)"></p>
-                                                </div>
-                                                <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">
-                                                    >15 días
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <div class="table-container">
                                     <table class="data-table">
                                         <thead>
@@ -1174,20 +836,15 @@
                                                 <tr>
                                                     <td x-text="account.customer_name"></td>
                                                     <td x-text="formatDate(account.payment_date)"></td>
-                                                    <td x-text="'Bs. ' + formatCurrency(account.total_amount)"></td>
-                                                    <td x-text="'Bs. ' + formatCurrency(account.paid_amount)"></td>
-                                                    <td x-text="'Bs. ' + formatCurrency(account.remaining_amount)"></td>
-                                                    <td>
-                                                        <span x-text="account.status" :class="account.status === 'pending' ? 'text-amber-600' : 
-                                                     account.status === 'partial' ? 'text-blue-600' : 
-                                                     'text-green-600'"></span>
+                                                    <td x-text="formatCurrency(account.total_amount)"></td>
+                                                    <td x-text="formatCurrency(account.paid_amount)"></td>
+                                                    <td x-text="formatCurrency(account.remaining_amount)"></td>
+                                                    <td><span x-text="account.status"
+                                                            :class="account.status === 'pending' ? 'text-amber-600' : account.status === 'partial' ? 'text-blue-600' : 'text-green-600'"></span>
                                                     </td>
-                                                    <td>
-                                                        <button @click="viewAccountDetails(account)"
-                                                            class="text-blue-600 hover:text-blue-800 text-sm">
-                                                            <i class="fas fa-eye mr-1"></i>Ver
-                                                        </button>
-                                                    </td>
+                                                    <td><button @click="viewAccountDetails(account)"
+                                                            class="text-blue-600 hover:text-blue-800 text-sm"><i
+                                                                class="fas fa-eye mr-1"></i>Ver</button></td>
                                                 </tr>
                                             </template>
                                         </tbody>
@@ -1200,11 +857,10 @@
                         <div x-show="reportType === 'resumen'">
                             <div class="report-card">
                                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Resumen Diario</h3>
-
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                                     <div class="stat-card">
                                         <div class="text-sm text-gray-500">Ventas del Día</div>
-                                        <div class="stat-value" x-text="'Bs. ' + formatCurrency(dailySales)"></div>
+                                        <div class="stat-value" x-text="formatCurrency(dailySales)"></div>
                                         <div class="text-sm text-green-500">+12% vs ayer</div>
                                     </div>
                                     <div class="stat-card">
@@ -1218,36 +874,6 @@
                                         <div class="text-sm text-amber-500">Nivel de stock</div>
                                     </div>
                                 </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                    <div class="report-card">
-                                        <h4 class="text-sm font-medium text-gray-800 mb-3">Ventas por Hora</h4>
-                                        <div class="chart-container">
-                                            <canvas id="dailySalesChart"></canvas>
-                                        </div>
-                                    </div>
-
-                                    <div class="report-card">
-                                        <h4 class="text-sm font-medium text-gray-800 mb-3">Productos Más Vendidos</h4>
-                                        <div class="space-y-3">
-                                            <template x-for="product in topSellingProducts" :key="product.id">
-                                                <div
-                                                    class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                                    <div>
-                                                        <p class="font-medium" x-text="product.name"></p>
-                                                        <p class="text-xs text-gray-500"
-                                                            x-text="product.quantity + ' vendidos'"></p>
-                                                    </div>
-                                                    <span
-                                                        class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
-                                                        <span x-text="product.percentage + '%'"></span>
-                                                    </span>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <div class="table-container">
                                     <table class="data-table">
                                         <thead>
@@ -1266,7 +892,7 @@
                                                     <td x-text="hour.sales_count"></td>
                                                     <td x-text="hour.clients_count"></td>
                                                     <td x-text="hour.products_sold"></td>
-                                                    <td x-text="'Bs. ' + formatCurrency(hour.total_sales)"></td>
+                                                    <td x-text="formatCurrency(hour.total_sales)"></td>
                                                 </tr>
                                             </template>
                                         </tbody>
@@ -1276,10 +902,10 @@
                         </div>
                     </div>
                 </div>
-
             </main>
         </div>
     </div>
+
     <script>
         const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
@@ -1344,6 +970,7 @@
             return Math.round((parseFloat(num) + Number.EPSILON) * 100) / 100;
         }
 
+        // ✅ CORREGIDO: formatCurrency ya incluye "Bs."
         function formatCurrency(num) {
             return round2(num).toLocaleString('es-VE', {
                 style: 'currency',
@@ -1474,11 +1101,8 @@
                             this.userInitials = this.getInitials(profile.full_name);
                         }
 
-                        // Cargar datos iniciales
                         await this.loadExchangeRate();
                         await this.generateReport();
-
-                        // Inicializar gráficos
                         this.initCharts();
 
                     } catch (err) {
@@ -1503,7 +1127,7 @@
                             this.exchangeRate = ensureValidRate(data);
                             console.log('✅ Tasa cargada desde Supabase:', this.exchangeRate);
                         } else {
-                            console.warn('⚠️ No se encontró tasa en BD, usando 700.22');
+                            console.warn('️ No se encontró tasa en BD, usando 700.22');
                             this.exchangeRate = 700.22;
                         }
                     } catch (err) {
@@ -1538,16 +1162,16 @@
                     const confirmed = await Swal.fire({
                         title: '🏛️ Tasa BCV Oficial',
                         html: `<div class="text-center space-y-3">
-<div class="bg-blue-50 rounded-lg p-4">
-<p class="text-sm text-gray-600 mb-2">Tasa oficial del BCV:</p>
-<p class="text-4xl font-bold text-blue-600">Bs. ${newRate.toFixed(2)}</p>
-<p class="text-xs text-gray-500 mt-2"><i class="fas fa-calendar mr-1"></i>Actualizada: ${rateDate}</p>
-</div>
-<div class="bg-yellow-50 rounded-lg p-3">
-<p class="text-xs text-gray-700"><i class="fas fa-info-circle mr-1"></i>Tasa actual en el sistema: <strong>Bs. ${this.exchangeRate.toFixed(2)}</strong></p>
-</div>
-<p class="text-xs text-gray-500 mt-2">Fuente: ${bcvData.source}</p>
-</div>`,
+                            <div class="bg-blue-50 rounded-lg p-4">
+                                <p class="text-sm text-gray-600 mb-2">Tasa oficial del BCV:</p>
+                                <p class="text-4xl font-bold text-blue-600">Bs. ${newRate.toFixed(2)}</p>
+                                <p class="text-xs text-gray-500 mt-2"><i class="fas fa-calendar mr-1"></i>Actualizada: ${rateDate}</p>
+                            </div>
+                            <div class="bg-yellow-50 rounded-lg p-3">
+                                <p class="text-xs text-gray-700"><i class="fas fa-info-circle mr-1"></i>Tasa actual en el sistema: <strong>Bs. ${this.exchangeRate.toFixed(2)}</strong></p>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Fuente: ${bcvData.source}</p>
+                        </div>`,
                         icon: 'question',
                         showCancelButton: true,
                         confirmButtonText: 'Aplicar Tasa',
@@ -1564,7 +1188,6 @@
                 async generateReport() {
                     this.loading = true;
                     try {
-                        // Consultar datos reales desde Supabase según el tipo de reporte
                         switch (this.reportType) {
                             case 'ventas':
                                 await this.generateSalesReport();
@@ -1582,8 +1205,6 @@
                                 await this.generateDailyReport();
                                 break;
                         }
-
-                        // Inicializar gráficos
                         this.initCharts();
                     } catch (err) {
                         console.error('Error generando reporte:', err);
@@ -1593,7 +1214,6 @@
                     }
                 },
 
-                // Rango de fechas en formato timestamptz (zona horaria Caracas)
                 rangeStart() {
                     return this.startDate + 'T00:00:00-04:00';
                 },
@@ -1602,7 +1222,6 @@
                 },
 
                 async generateSalesReport() {
-                    // Ventas dentro del rango de fechas seleccionado
                     let query = supabase
                         .from('sales')
                         .select('*')
@@ -1618,7 +1237,6 @@
                     const salesList = sales || [];
                     const saleIds = salesList.map(s => s.id);
 
-                    // Items vendidos en esas ventas
                     let items = [];
                     if (saleIds.length > 0) {
                         const { data: itemsData, error: itemsError } = await supabase
@@ -1629,10 +1247,7 @@
                         items = itemsData || [];
                     }
 
-                    // Nombres de producto
-                    const { data: productsData } = await supabase
-                        .from('products')
-                        .select('id, name, size_liters');
+                    const { data: productsData } = await supabase.from('products').select('id, name, size_liters');
                     const productMap = {};
                     (productsData || []).forEach(p => {
                         productMap[p.id] = p.name || `Botellón ${p.size_liters}L`;
@@ -1641,28 +1256,26 @@
                     const salesById = {};
                     salesList.forEach(s => salesById[s.id] = s);
 
-                    this.salesData = items
-                        .map(item => {
-                            const sale = salesById[item.sale_id] || {};
-                            return {
-                                id: `${item.sale_id}_${item.product_id}`,
-                                created_at: sale.created_at,
-                                customer_name: sale.customer_name,
-                                product_name: productMap[item.product_id] || 'Producto',
-                                quantity: item.quantity || 0,
-                                price: item.unit_price || 0,
-                                total: item.total || 0,
-                                payment_method: sale.payment_method
-                            };
-                        })
-                        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                    // ✅ CORREGIDO: Crear salesData con índice único
+                    this.salesData = items.map((item, index) => {
+                        const sale = salesById[item.sale_id] || {};
+                        return {
+                            id: `${item.sale_id}_${item.product_id}_${index}`,
+                            created_at: sale.created_at,
+                            customer_name: sale.customer_name,
+                            product_name: productMap[item.product_id] || 'Producto',
+                            quantity: item.quantity || 0,
+                            price: item.unit_price || 0,
+                            total: item.total || 0,
+                            payment_method: sale.payment_method
+                        };
+                    }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
                     const rawSalesTotalUSD = salesList.reduce((sum, s) => sum + (s.total || 0), 0);
                     this.totalSales = round2(rawSalesTotalUSD * this.exchangeRate);
                     this.currentPage = 1;
                     this.totalPages = Math.max(1, Math.ceil(this.salesData.length / this.itemsPerPage));
 
-                    // Clientes nuevos en el rango de fechas
                     let custQuery = supabase.from('customers')
                         .select('id', { count: 'exact', head: true })
                         .gte('created_at', this.rangeStart())
@@ -1671,13 +1284,11 @@
                     const { count: newCustomersCount } = await custQuery;
                     this.newCustomers = newCustomersCount || 0;
 
-                    // Inventario total actual
                     let invQuery = supabase.from('inventory').select('quantity');
                     if (this.selectedBranch) invQuery = invQuery.eq('branch', this.selectedBranch);
                     const { data: invData } = await invQuery;
                     this.totalInventory = (invData || []).reduce((sum, i) => sum + (i.quantity || 0), 0);
 
-                    // Cuentas por cobrar pendientes (en Bs.)
                     let credQuery = supabase.from('credit_accounts').select('remaining_amount, status').neq('status', 'completed');
                     if (this.selectedBranch) credQuery = credQuery.eq('branch', this.selectedBranch);
                     const { data: credData } = await credQuery;
@@ -1692,7 +1303,6 @@
                     if (error) throw error;
                     const customersList = customers || [];
 
-                    // Total gastado por cliente dentro del rango de fechas seleccionado
                     let salesQuery = supabase.from('sales').select('customer_id, total')
                         .gte('created_at', this.rangeStart())
                         .lte('created_at', this.rangeEnd())
@@ -1720,10 +1330,7 @@
                 },
 
                 async generateInventoryReport() {
-                    // NOTA: la BD no tiene columna "min_stock" por producto; se usa un umbral
-                    // por defecto configurable aquí mismo para marcar "Bajo Stock".
                     const DEFAULT_MIN_STOCK = 15;
-
                     const branches = this.selectedBranch ? [this.selectedBranch] : ['geminis', 'omega'];
                     const combined = {};
 
@@ -1762,11 +1369,8 @@
                     if (error) throw error;
                     this.accountsData = data || [];
 
-                    const rawTotalPendingUSD = this.accountsData
-                        .filter(a => a.status !== 'completed')
-                        .reduce((sum, a) => sum + (a.remaining_amount || 0), 0);
-                    const rawTotalPaidUSD = this.accountsData
-                        .reduce((sum, a) => sum + (a.paid_amount || 0), 0);
+                    const rawTotalPendingUSD = this.accountsData.filter(a => a.status !== 'completed').reduce((sum, a) => sum + (a.remaining_amount || 0), 0);
+                    const rawTotalPaidUSD = this.accountsData.reduce((sum, a) => sum + (a.paid_amount || 0), 0);
                     this.totalPending = round2(rawTotalPendingUSD * this.exchangeRate);
                     this.totalPaid = round2(rawTotalPaidUSD * this.exchangeRate);
 
@@ -1787,14 +1391,11 @@
                 },
 
                 async generateDailyReport() {
-                    // El "día" del resumen es la fecha "Fecha Fin" seleccionada en los filtros
                     const dateStr = this.endDate;
                     const startOfDay = dateStr + 'T00:00:00-04:00';
                     const endOfDay = dateStr + 'T23:59:59-04:00';
 
-                    let query = supabase.from('sales').select('*')
-                        .gte('created_at', startOfDay)
-                        .lte('created_at', endOfDay);
+                    let query = supabase.from('sales').select('*').gte('created_at', startOfDay).lte('created_at', endOfDay);
                     if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
                     const { data: sales, error } = await query;
                     if (error) throw error;
@@ -1806,20 +1407,15 @@
                     const uniqueCustomers = new Set(salesList.filter(s => s.customer_id).map(s => s.customer_id));
                     this.dailyClients = uniqueCustomers.size;
 
-                    // Inventario actual (al momento de generar el reporte)
                     let invQuery = supabase.from('inventory').select('quantity');
                     if (this.selectedBranch) invQuery = invQuery.eq('branch', this.selectedBranch);
                     const { data: invData } = await invQuery;
                     this.dailyInventory = (invData || []).reduce((sum, i) => sum + (i.quantity || 0), 0);
 
-                    // Productos vendidos ese día
                     const saleIds = salesList.map(s => s.id);
                     let items = [];
                     if (saleIds.length > 0) {
-                        const { data: itemsData } = await supabase
-                            .from('sale_items')
-                            .select('sale_id, product_id, quantity, total')
-                            .in('sale_id', saleIds);
+                        const { data: itemsData } = await supabase.from('sale_items').select('sale_id, product_id, quantity, total').in('sale_id', saleIds);
                         items = itemsData || [];
                     }
                     const { data: productsData } = await supabase.from('products').select('id, name, size_liters');
@@ -1833,24 +1429,18 @@
                         productTotals[name] = (productTotals[name] || 0) + (item.quantity || 0);
                         totalQty += item.quantity || 0;
                     });
-                    this.topSellingProducts = Object.entries(productTotals)
-                        .map(([name, quantity], idx) => ({
-                            id: idx + 1,
-                            name,
-                            quantity,
-                            percentage: totalQty > 0 ? Math.round((quantity / totalQty) * 100) : 0
-                        }))
-                        .sort((a, b) => b.quantity - a.quantity)
-                        .slice(0, 6);
+                    this.topSellingProducts = Object.entries(productTotals).map(([name, quantity], idx) => ({
+                        id: idx + 1,
+                        name,
+                        quantity,
+                        percentage: totalQty > 0 ? Math.round((quantity / totalQty) * 100) : 0
+                    })).sort((a, b) => b.quantity - a.quantity).slice(0, 6);
 
-                    // Ventas agrupadas por hora (zona horaria Caracas)
                     const hoursMap = {};
                     const saleHourMap = {};
                     salesList.forEach(sale => {
                         const saleDate = new Date(sale.created_at);
-                        const hour = String(parseInt(saleDate.toLocaleString('en-US', {
-                            timeZone: 'America/Caracas', hour: '2-digit', hour12: false
-                        })));
+                        const hour = String(parseInt(saleDate.toLocaleString('en-US', { timeZone: 'America/Caracas', hour: '2-digit', hour12: false })));
                         saleHourMap[sale.id] = hour;
                         if (!hoursMap[hour]) {
                             hoursMap[hour] = { hour, sales_count: 0, clientsSet: new Set(), products_sold: 0, total_sales: 0 };
@@ -1864,15 +1454,13 @@
                         if (hour && hoursMap[hour]) hoursMap[hour].products_sold += item.quantity || 0;
                     });
 
-                    this.dailyHours = Object.values(hoursMap)
-                        .map(h => ({
-                            hour: h.hour,
-                            sales_count: h.sales_count,
-                            clients_count: h.clientsSet.size,
-                            products_sold: h.products_sold,
-                            total_sales: round2(h.total_sales * this.exchangeRate)
-                        }))
-                        .sort((a, b) => parseInt(a.hour) - parseInt(b.hour));
+                    this.dailyHours = Object.values(hoursMap).map(h => ({
+                        hour: h.hour,
+                        sales_count: h.sales_count,
+                        clients_count: h.clientsSet.size,
+                        products_sold: h.products_sold,
+                        total_sales: round2(h.total_sales * this.exchangeRate)
+                    })).sort((a, b) => parseInt(a.hour) - parseInt(b.hour));
                 },
 
                 setReportType(type) {
@@ -1883,7 +1471,6 @@
                 setDateRange(range) {
                     const today = new Date();
                     const date = new Date();
-
                     switch (range) {
                         case 'today':
                             this.startDate = today.toISOString().split('T')[0];
@@ -1905,7 +1492,6 @@
                             this.endDate = today.toISOString().split('T')[0];
                             break;
                     }
-
                     this.generateReport();
                 },
 
@@ -1915,20 +1501,14 @@
                 },
 
                 prevPage() {
-                    if (this.currentPage > 1) {
-                        this.currentPage--;
-                    }
+                    if (this.currentPage > 1) this.currentPage--;
                 },
 
                 nextPage() {
-                    if (this.currentPage < this.totalPages) {
-                        this.currentPage++;
-                    }
+                    if (this.currentPage < this.totalPages) this.currentPage++;
                 },
 
                 initCharts() {
-                    // Aquí iría la inicialización de los gráficos con Chart.js
-                    // Para el ejemplo, solo simulamos la existencia
                     console.log('Iniciando gráficos...');
                 },
 
@@ -2009,15 +1589,14 @@
                 viewAccountDetails(account) {
                     Swal.fire({
                         title: account.customer_name || 'Cliente',
-                        html: `
-<div class="text-left space-y-2">
-<p><strong>Fecha límite de pago:</strong> ${formatDate(account.payment_date)}</p>
-<p><strong>Total:</strong> $${(account.total_amount || 0).toFixed(2)}</p>
-<p><strong>Pagado:</strong> $${(account.paid_amount || 0).toFixed(2)}</p>
-<p><strong>Pendiente:</strong> $${(account.remaining_amount || 0).toFixed(2)}</p>
-<p><strong>Estado:</strong> ${account.status}</p>
-${account.notes ? `<p><strong>Notas:</strong> ${account.notes}</p>` : ''}
-</div>`,
+                        html: `<div class="text-left space-y-2">
+                            <p><strong>Fecha límite de pago:</strong> ${formatDate(account.payment_date)}</p>
+                            <p><strong>Total:</strong> $${(account.total_amount || 0).toFixed(2)}</p>
+                            <p><strong>Pagado:</strong> $${(account.paid_amount || 0).toFixed(2)}</p>
+                            <p><strong>Pendiente:</strong> $${(account.remaining_amount || 0).toFixed(2)}</p>
+                            <p><strong>Estado:</strong> ${account.status}</p>
+                            ${account.notes ? `<p><strong>Notas:</strong> ${account.notes}</p>` : ''}
+                        </div>`,
                         confirmButtonText: 'Cerrar'
                     });
                 },
@@ -2029,7 +1608,6 @@ ${account.notes ? `<p><strong>Notas:</strong> ${account.notes}</p>` : ''}
             };
         }
 
-        // Inicializar el componente
         document.addEventListener('DOMContentLoaded', function () {
             if (window.Alpine) {
                 window.Alpine.data('reportesApp', reportesApp);
