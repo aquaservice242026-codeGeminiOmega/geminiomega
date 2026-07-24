@@ -139,14 +139,14 @@
                 </p>
             </div>
 
-            <!-- Delivery Section -->
-            <div class="mb-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-300 rounded-lg p-3">
-                <h2 class="text-sm font-bold text-indigo-800 mb-2"><i class="fas fa-truck mr-2"></i>DELIVERY REALIZADOS
+            <!-- ✅ Delivery Section - Altura reducida 50% -->
+            <div class="mb-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-300 rounded-lg p-1.5">
+                <h2 class="text-xs font-bold text-indigo-800 mb-1"><i class="fas fa-truck mr-1"></i>DELIVERY REALIZADOS
                 </h2>
                 <div class="flex items-center justify-center">
-                    <div class="bg-white rounded-lg px-6 py-3 text-center border-2 border-indigo-200">
-                        <p class="text-xs text-gray-600 mb-1">Total Deliverys:</p>
-                        <p class="text-3xl font-bold text-indigo-600" x-text="stats.totalDeliverys"></p>
+                    <div class="bg-white rounded-lg px-3 py-1.5 text-center border-2 border-indigo-200">
+                        <p class="text-[10px] text-gray-600 mb-0.5">Total Deliverys:</p>
+                        <p class="text-2xl font-bold text-indigo-600" x-text="stats.totalDeliverys"></p>
                     </div>
                 </div>
             </div>
@@ -231,16 +231,49 @@
                     <h3 class="font-bold text-blue-800 mb-2 text-sm border-b border-blue-200 pb-1">DESGLLOSE POR MÉTODO
                         DE PAGO</h3>
                     <div class="space-y-1 text-xs">
-                        <div class="flex justify-between"><span>Efectivo Bs:</span><span class="font-bold"
-                                x-text="formatVE(stats.efectivoBs)"></span></div>
-                        <div class="flex justify-between"><span>Efectivo $:</span><span class="font-bold"
-                                x-text="formatVE(stats.efectivoUsd)"></span></div>
-                        <div class="flex justify-between"><span>Pago Móvil:</span><span class="font-bold"
-                                x-text="formatVE(stats.pagoMovil)"></span></div>
-                        <div class="flex justify-between"><span>Punto de Venta:</span><span class="font-bold"
-                                x-text="formatVE(stats.punto)"></span></div>
-                        <div class="flex justify-between"><span>Transferencia:</span><span class="font-bold"
-                                x-text="formatVE(stats.transferencia)"></span></div>
+                        <!-- ✅ Efectivo Bs con conversión -->
+                        <div class="flex justify-between items-center">
+                            <span>Efectivo Bs:</span>
+                            <div class="text-right">
+                                <span class="font-bold"
+                                    x-text="'Bs. ' + formatVE(stats.efectivoBs * exchangeRate)"></span>
+                                <span class="text-gray-500 ml-1"
+                                    x-text="'(' + formatVE(stats.efectivoBs) + ' $)'"></span>
+                            </div>
+                        </div>
+                        <!-- Efectivo $ -->
+                        <div class="flex justify-between items-center">
+                            <span>Efectivo $:</span>
+                            <span class="font-bold" x-text="formatVE(stats.efectivoUsd) + ' $'"></span>
+                        </div>
+                        <!-- ✅ Pago Móvil con conversión -->
+                        <div class="flex justify-between items-center">
+                            <span>Pago Móvil:</span>
+                            <div class="text-right">
+                                <span class="font-bold"
+                                    x-text="'Bs. ' + formatVE(stats.pagoMovil * exchangeRate)"></span>
+                                <span class="text-gray-500 ml-1"
+                                    x-text="'(' + formatVE(stats.pagoMovil) + ' $)'"></span>
+                            </div>
+                        </div>
+                        <!-- ✅ Punto de Venta con conversión -->
+                        <div class="flex justify-between items-center">
+                            <span>Punto de Venta:</span>
+                            <div class="text-right">
+                                <span class="font-bold" x-text="'Bs. ' + formatVE(stats.punto * exchangeRate)"></span>
+                                <span class="text-gray-500 ml-1" x-text="'(' + formatVE(stats.punto) + ' $)'"></span>
+                            </div>
+                        </div>
+                        <!-- ✅ Transferencia con conversión -->
+                        <div class="flex justify-between items-center">
+                            <span>Transferencia:</span>
+                            <div class="text-right">
+                                <span class="font-bold"
+                                    x-text="'Bs. ' + formatVE(stats.transferencia * exchangeRate)"></span>
+                                <span class="text-gray-500 ml-1"
+                                    x-text="'(' + formatVE(stats.transferencia) + ' $)'"></span>
+                            </div>
+                        </div>
                         <div
                             class="border-t border-blue-200 pt-1 mt-1 flex justify-between bg-blue-50 px-2 py-1 rounded">
                             <span class="font-semibold text-blue-800">Total Digital (Bs):</span>
@@ -258,10 +291,15 @@
                             <span class="font-bold text-green-700 text-base"
                                 x-text="formatVE(stats.totalContadoUSD)"></span>
                         </div>
+                        <!-- ✅ Total Crédito con contador de transacciones -->
                         <div class="flex justify-between items-center p-2 bg-amber-50 rounded">
                             <span class="font-semibold text-amber-800">Total Crédito (Por Cobrar):</span>
-                            <span class="font-bold text-amber-700 text-base"
-                                x-text="formatVE(stats.totalCreditoUSD)"></span>
+                            <div class="text-right">
+                                <span class="font-bold text-amber-700 text-base block"
+                                    x-text="formatVE(stats.totalCreditoUSD)"></span>
+                                <span class="text-xs text-amber-600"
+                                    x-text="stats.totalCreditSales + ' transaccion(es)'"></span>
+                            </div>
                         </div>
                         <div class="border-t-2 border-gray-300 pt-2">
                             <div class="flex justify-between items-center">
@@ -315,8 +353,8 @@
                     class="bg-gradient-to-br from-amber-100 to-amber-200 border-2 border-amber-400 rounded-lg p-3 text-center">
                     <p class="text-xs text-gray-700 mb-1 font-semibold">TOTAL CRÉDITO (Cuentas x Cobrar)</p>
                     <p class="text-2xl font-bold text-amber-700" x-text="formatVE(stats.totalCreditoUSD)"></p>
-                    <p class="text-[10px] text-gray-600 mt-1"
-                        x-text="'Bs. ' + formatVE(stats.totalCreditoUSD * exchangeRate)"></p>
+                    <p class="text-[10px] text-gray-600 mt-1" x-text="stats.totalCreditSales + ' venta(s) a crédito'">
+                    </p>
                 </div>
             </div>
 
@@ -353,8 +391,9 @@
                     date: new Date().toLocaleDateString('en-CA', { timeZone: 'America/Caracas' })
                 },
                 stats: {
-                    totalContadoUSD: 0,      // ✅ NUEVO: Solo dinero que entra hoy
-                    totalCreditoUSD: 0,      // ✅ NUEVO: Dinero que se debe cobrar después
+                    totalContadoUSD: 0,
+                    totalCreditoUSD: 0,
+                    totalCreditSales: 0,  // ✅ NUEVO: Contador de ventas a crédito
                     totalTransactions: 0,
                     totalDeliverys: 0,
                     efectivoBs: 0,
@@ -421,7 +460,7 @@
 
                 resetStats() {
                     this.stats = {
-                        totalContadoUSD: 0, totalCreditoUSD: 0, totalTransactions: 0, totalDeliverys: 0,
+                        totalContadoUSD: 0, totalCreditoUSD: 0, totalCreditSales: 0, totalTransactions: 0, totalDeliverys: 0,
                         efectivoBs: 0, efectivoUsd: 0, pagoMovil: 0, punto: 0, transferencia: 0,
                         digitalPayments: 0, digitalPaymentsBs: 0, products: [],
                         percentages: { efectivoBs: 0, efectivoUsd: 0, pagoMovil: 0, punto: 0, transferencia: 0 }
@@ -439,11 +478,11 @@
                             this.stats.totalDeliverys++;
                         }
 
-                        // ✅ SEPARACIÓN CLAVE: ¿Es venta a crédito?
                         const esCredito = sale.payment_method === 'credito';
 
                         if (esCredito) {
                             this.stats.totalCreditoUSD += saleTotal;
+                            this.stats.totalCreditSales++;  // ✅ Contar transacciones de crédito
                         } else {
                             this.stats.totalContadoUSD += saleTotal;
 
