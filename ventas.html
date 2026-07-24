@@ -1580,7 +1580,7 @@
         }
         async function fetchBCVRate() {
             try {
-                console.log('🏛️ Consultando tasa BCV desde API oficial...');
+                console.log('️ Consultando tasa BCV desde API oficial...');
                 const response = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
@@ -1589,9 +1589,17 @@
                 console.log('✅ Tasa BCV obtenida:', rate);
                 return { rate: rate, date: data.fechaActualizacion, source: 'BCV Oficial' };
             } catch (err) {
-                console.error(' Error obteniendo tasa BCV:', err);
+                console.error('❌ Error obteniendo tasa BCV:', err);
                 return null;
             }
+        }
+        // ✅ FUNCIÓN PARA OBTENER FECHA DE CARACAS
+        function getCaracasDate() {
+            const now = new Date();
+            const caracasTime = new Date(now.toLocaleString('en-US', {
+                timeZone: 'America/Caracas'
+            }));
+            return caracasTime;
         }
         function ventasApp() {
             return {
@@ -1765,7 +1773,7 @@
                             const fullAddress = this.buildFullAddress(customer);
                             if (fullAddress && this.deliveryType === 'delivery') {
                                 this.deliveryAddress = fullAddress;
-                                console.log('📍 Dirección autocompletada del cliente:', this.deliveryAddress);
+                                console.log(' Dirección autocompletada del cliente:', this.deliveryAddress);
                             }
                         }
                     }
@@ -1777,7 +1785,7 @@
                             const fullAddress = this.buildFullAddress(customer);
                             if (fullAddress) {
                                 this.deliveryAddress = fullAddress;
-                                console.log(' Dirección autocompletada al activar delivery:', this.deliveryAddress);
+                                console.log('📍 Dirección autocompletada al activar delivery:', this.deliveryAddress);
                             }
                         }
                     }
@@ -1842,14 +1850,14 @@
                 },
                 async loadExchangeRate() {
                     try {
-                        console.log(' Consultando tasa centralizada de Supabase');
+                        console.log('🔄 Consultando tasa centralizada de Supabase');
                         const { data, error } = await supabase.rpc('get_active_exchange_rate');
                         if (!error && data) {
                             const rate = ensureValidRate(data);
                             this.exchangeRate = rate;
                             console.log('✅ Tasa cargada desde Supabase:', this.exchangeRate);
                         } else {
-                            console.warn('⚠️ No se encontró tasa en BD, usando 700.22');
+                            console.warn('️ No se encontró tasa en BD, usando 700.22');
                             this.exchangeRate = 700.22;
                         }
                     } catch (err) {
@@ -1903,51 +1911,101 @@
                         showToast('Error al actualizar tasa', 'error');
                     }
                 },
+                // ✅ FUNCIÓN ROBUSTA CON REINTENTOS Y LOGGING DETALLADO
                 async loadProducts() {
                     this.loading = true;
-                    try {
-                        console.log(' Cargando productos para sucursal:', this.userBranch);
-                        const { data: virtualInventory, error } = await supabase.rpc('calculate_virtual_inventory', { branch_param: this.userBranch });
-                        if (error) {
-                            console.error('❌ Error en calculate_virtual_inventory:', error);
-                            throw error;
+                    const MAX_RETRIES = 3;
+                    const RETRY_DELAY_MS = [100, 200, 400]; // Backoff exponencial
+                    let lastError = null;
+
+                    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+                        try {
+                            console.log(`🔄 [Intento ${attempt}/${MAX_RETRIES}] Cargando productos para sucursal: ${this.userBranch}`);
+
+                            // Espera entre reintentos (excepto en el primer intento)
+                            if (attempt > 1) {
+                                const delay = RETRY_DELAY_MS[attempt - 2];
+                                console.log(` Esperando ${delay}ms antes del reintento...`);
+                                await new Promise(resolve => setTimeout(resolve, delay));
+                            }
+
+                            const { data: virtualInventory, error } = await supabase.rpc('calculate_virtual_inventory', {
+                                branch_param: this.userBranch
+                            });
+
+                            if (error) {
+                                console.error(`❌ [Intento ${attempt}] Error de Supabase:`, {
+                                    code: error.code,
+                                    message: error.message,
+                                    details: error.details,
+                                    hint: error.hint
+                                });
+                                lastError = error;
+
+                                // Si es error de permisos o autenticación, no reintentar
+                                if (error.code === '42501' || error.code === 'PGRST301') {
+                                    console.error('🚫 Error de permisos/autenticación - No reintentar');
+                                    break;
+                                }
+                                continue; // Reintentar
+                            }
+
+                            console.log(`✅ [Intento ${attempt}] Datos recibidos: ${virtualInventory?.length || 0} registros`);
+
+                            if (!virtualInventory || virtualInventory.length === 0) {
+                                console.warn('⚠️ No hay inventario disponible para esta sucursal');
+                                this.products = [];
+                                showToast('No hay productos en inventario', 'warning');
+                                return; // Éxito, pero sin datos
+                            }
+
+                            const productsToShow = virtualInventory.filter(item => {
+                                const stock = item.virtual_stock || item.stock || 0;
+                                const size = item.size_liters || item.size;
+                                const productType = item.product_type || item.type;
+                                const hasStock = stock > 0;
+                                const hasValidSize = size !== null && size !== undefined && size > 0;
+                                const isNotCap = productType !== 'cap';
+                                const isValidProduct = (productType === 'bottle' || productType === 'empty_bottle');
+                                return hasStock && hasValidSize && isNotCap && isValidProduct;
+                            });
+
+                            console.log(`✅ Productos filtrados: ${productsToShow.length}`);
+
+                            this.products = productsToShow.map(item => {
+                                const stock = item.virtual_stock || item.stock || 0;
+                                const size = item.size_liters || item.size;
+                                const productType = item.product_type || item.type;
+                                return {
+                                    id: productType === 'empty_bottle' ? 'empty_' + size : 'size_' + size,
+                                    product_id: item.product_id,
+                                    name: item.product_name || item.name,
+                                    size_liters: size,
+                                    product_type: productType,
+                                    price: round2(parseFloat(item.price) || 0),
+                                    stock: parseInt(stock) || 0
+                                };
+                            });
+
+                            console.log(`✅ Productos cargados exitosamente: ${this.products.length}`);
+                            return; // Éxito total
+
+                        } catch (err) {
+                            console.error(`❌ [Intento ${attempt}] Error inesperado:`, err);
+                            lastError = err;
+
+                            if (attempt === MAX_RETRIES) {
+                                console.error('🚨 Todos los reintentos fallaron. Último error:', lastError);
+                                showToast('Error al cargar productos. Verifica tu conexión.', 'error');
+                                this.products = [];
+                            } else {
+                                showToast(`Reintentando... (${attempt}/${MAX_RETRIES})`, 'info');
+                            }
                         }
-                        if (!virtualInventory || virtualInventory.length === 0) {
-                            console.warn('⚠️ No hay inventario disponible');
-                            this.products = [];
-                            return;
-                        }
-                        const productsToShow = virtualInventory.filter(item => {
-                            const stock = item.virtual_stock || item.stock || 0;
-                            const size = item.size_liters || item.size;
-                            const productType = item.product_type || item.type;
-                            const hasStock = stock > 0;
-                            const hasValidSize = size !== null && size !== undefined && size > 0;
-                            const isNotCap = productType !== 'cap';
-                            const isValidProduct = (productType === 'bottle' || productType === 'empty_bottle');
-                            return hasStock && hasValidSize && isNotCap && isValidProduct;
-                        });
-                        this.products = productsToShow.map(item => {
-                            const stock = item.virtual_stock || item.stock || 0;
-                            const size = item.size_liters || item.size;
-                            const productType = item.product_type || item.type;
-                            return {
-                                id: productType === 'empty_bottle' ? 'empty_' + size : 'size_' + size,
-                                product_id: item.product_id,
-                                name: item.product_name || item.name,
-                                size_liters: size,
-                                product_type: productType,
-                                price: round2(parseFloat(item.price) || 0),
-                                stock: parseInt(stock) || 0
-                            };
-                        });
-                    } catch (err) {
-                        console.error('Error cargando productos:', err);
-                        showToast('Error al cargar productos', 'error');
-                        this.products = [];
-                    } finally {
-                        this.loading = false;
                     }
+
+                    // Si llegamos aquí, todos los intentos fallaron
+                    this.loading = false;
                 },
                 async loadCustomers() {
                     try {
@@ -2283,6 +2341,9 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                                 notes.push(`Cambio USD: $${(round2(this.amountReceivedUsd) - this.totalUSD).toFixed(2)}`);
                             }
                         }
+                        // ✅ CORRECCIÓN: Usar fecha de Caracas en lugar de UTC
+                        const caracasDate = getCaracasDate();
+                        const rateDateStr = caracasDate.toISOString().split('T')[0];
                         const { data: sale, error: saleError } = await supabase.from('sales').insert({
                             branch: this.userBranch,
                             customer_id: this.selectedCustomer || null,
@@ -2297,7 +2358,7 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                             delivery_coordinates: this.deliveryType === 'delivery' ? this.deliveryCoordinates : null,
                             notes: notes.join('\n') || null,
                             exchange_rate_used: this.exchangeRate,
-                            rate_date: new Date().toISOString().split('T')[0],
+                            rate_date: rateDateStr, // ← AHORA USA FECHA DE CARACAS
                             created_by: session.user.id
                         }).select().single();
                         if (saleError) throw saleError;
@@ -2348,17 +2409,14 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                         }
                         // ✅ FIX: Filtrar productos por tipo para evitar conflicto de size_liters
                         const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters, product_type').eq('is_active', true);
-
                         // ✅ FIX: Solo productos tipo 'bottle' para el mapeo de botellones con agua
                         const bottleProducts = productsFromDB.filter(p => p.product_type === 'bottle');
                         const sizeToProductId = {};
                         bottleProducts.forEach(p => {
                             if (p.size_liters) sizeToProductId[p.size_liters] = p.id;
                         });
-
                         const capProduct = productsFromDB.find(p => p.product_type === 'cap');
                         const emptyBottleProducts = productsFromDB.filter(p => p.product_type === 'empty_bottle');
-
                         const saleItems = this.cart.map(item => ({
                             sale_id: sale.id,
                             product_id: item.product_type === 'empty_bottle' ?
@@ -2370,11 +2428,14 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                         }));
                         const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
                         if (itemsError) throw itemsError;
+                        // ✅ DESCUENTO DE INVENTARIO - Simplificado y directo
                         let totalCapsNeeded = 0;
+                        // ✅ BUCLE 1: Botellones CON AGUA (5L, 13L, 20L)
                         for (const item of this.cart) {
                             if (item.product_type !== 'empty_bottle') {
                                 const realProductId = sizeToProductId[item.size_liters];
                                 if (!realProductId) continue;
+                                console.log(`💧 Procesando botellón con agua ${item.size_liters}L - Cantidad: ${item.quantity}`);
                                 const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
                                     branch_param: this.userBranch,
                                     product_id_param: realProductId,
@@ -2383,18 +2444,23 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                                 });
                                 if (tankError) throw tankError;
                                 if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
+                                // Contar tapas para 13L y 20L con agua
                                 if (item.size_liters === 13 || item.size_liters === 20) {
                                     totalCapsNeeded += item.quantity;
+                                    console.log(`🔴 Contando ${item.quantity} tapa(s) para botellón con agua ${item.size_liters}L`);
                                 }
                             }
                         }
+                        // ✅ BUCLE 2: Botellones VACÍOS (15L y 20L)
                         for (const item of this.cart) {
                             if (item.product_type === 'empty_bottle') {
                                 const emptyProduct = emptyBottleProducts.find(p => p.size_liters === item.size_liters);
                                 if (!emptyProduct) continue;
+                                console.log(`🏺 Procesando botellón vacío ${item.size_liters}L - Cantidad: ${item.quantity}`);
+                                // ✅ NUEVO: Descontar agua del tanque (15L o 20L según el producto)
                                 const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
                                     branch_param: this.userBranch,
-                                    product_id_param: emptyProduct.id,
+                                    product_id_param: emptyProduct.id, // ← ID del producto vacío (tiene size_liters = 15 o 20)
                                     quantity_param: item.quantity,
                                     user_id_param: session.user.id
                                 });
@@ -2402,7 +2468,10 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                                     console.warn('⚠️ Error descontando agua del tanque:', tankError.message);
                                 } else if (!tankResult || !tankResult.success) {
                                     showToast(`️ Agua insuficiente en el tanque para ${item.size_liters}L`, 'warning');
+                                } else {
+                                    console.log(`✅ ${item.quantity * item.size_liters}L descontados del tanque (botellón vacío ${item.size_liters}L)`);
                                 }
+                                // Descontar del inventario físico (botellón vacío)
                                 const { data: emptyInventory, error: emptyInvError } = await supabase
                                     .from('inventory')
                                     .select('quantity')
@@ -2413,7 +2482,7 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                                     console.warn('️ Error consultando inventario de botellón vacío:', emptyInvError.message);
                                 } else if (emptyInventory) {
                                     if (emptyInventory.quantity < item.quantity) {
-                                        showToast(`️ Stock bajo de botellón vacío ${item.size_liters}L`, 'warning');
+                                        showToast(`⚠️ Stock bajo de botellón vacío ${item.size_liters}L`, 'warning');
                                     }
                                     const { error: updateEmptyError } = await supabase
                                         .from('inventory')
@@ -2425,14 +2494,20 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                                         .eq('branch', this.userBranch);
                                     if (updateEmptyError) {
                                         console.warn('⚠️ Error actualizando botellón vacío:', updateEmptyError.message);
+                                    } else {
+                                        console.log(`✅ ${item.quantity} botellón(es) vacío(s) ${item.size_liters}L descontado(s) del inventario`);
                                     }
                                 }
+                                // Contar tapas para botellones vacíos de 15L y 20L
                                 if (item.size_liters === 15 || item.size_liters === 20) {
                                     totalCapsNeeded += item.quantity;
+                                    console.log(`🔴 Contando ${item.quantity} tapa(s) para botellón vacío ${item.size_liters}L`);
                                 }
                             }
                         }
+                        // ✅ DESCUENTO DE TAPAS
                         if (totalCapsNeeded > 0 && capProduct) {
+                            console.log(` Descontando ${totalCapsNeeded} tapas del inventario`);
                             const { data: capInventory, error: capInventoryError } = await supabase
                                 .from('inventory')
                                 .select('quantity, product_id')
@@ -2565,6 +2640,9 @@ ${successDetails}
                     this.processing = true;
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
+                        // ✅ CORRECCIÓN: Usar fecha de Caracas para créditos también
+                        const caracasDate = getCaracasDate();
+                        const rateDateStr = caracasDate.toISOString().split('T')[0];
                         const { data: sale, error: saleError } = await supabase.from('sales').insert({
                             branch: this.userBranch,
                             customer_id: this.creditForm.customer_id,
@@ -2576,20 +2654,18 @@ ${successDetails}
                             status: creditAmount > 0 ? 'pending' : 'completed',
                             notes: `Crédito - Pago inicial: $${round2(this.creditForm.initial_payment).toFixed(2)}\n${this.creditForm.notes || ''}`,
                             exchange_rate_used: this.exchangeRate,
-                            rate_date: new Date().toISOString().split('T')[0],
+                            rate_date: rateDateStr, // ← AHORA USA FECHA DE CARACAS
                             created_by: session.user.id
                         }).select().single();
                         if (saleError) throw saleError;
                         // ✅ FIX: Filtrar productos por tipo para evitar conflicto de size_liters
                         const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters, product_type').eq('is_active', true);
-
                         // ✅ FIX: Solo productos tipo 'bottle' para el mapeo de botellones con agua
                         const bottleProducts = productsFromDB.filter(p => p.product_type === 'bottle');
                         const sizeToProductId = {};
                         bottleProducts.forEach(p => {
                             if (p.size_liters) sizeToProductId[p.size_liters] = p.id;
                         });
-
                         const capProduct = productsFromDB.find(p => p.product_type === 'cap');
                         const saleItems = this.cart.map(item => ({
                             sale_id: sale.id,
