@@ -16,20 +16,70 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        [x-cloak] { display: none !important; }
-        body { font-family: 'Inter', sans-serif; }
-        .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 50; }
-        .card-hover { transition: all 0.3s ease; }
-        .card-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
-        .sidebar-mobile { transform: translateX(-100%); transition: transform 0.3s ease-in-out; }
-        .sidebar-mobile.open { transform: translateX(0); }
-        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 39; }
-        .sidebar-overlay.show { display: block; }
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-mobile {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar-mobile.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 39;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
         @media (min-width: 1024px) {
-            .sidebar-mobile { transform: translateX(0) !important; }
-            .sidebar-overlay { display: none !important; }
-            .menu-toggle { display: none !important; }
+            .sidebar-mobile {
+                transform: translateX(0) !important;
+            }
+
+            .sidebar-overlay {
+                display: none !important;
+            }
+
+            .menu-toggle {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -40,7 +90,8 @@
     <div class="sidebar-overlay" :class="{ 'show': mobileMenuOpen }" @click="mobileMenuOpen = false"></div>
 
     <!-- Sidebar -->
-    <aside class="sidebar-mobile fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 lg:block" :class="{ 'open': mobileMenuOpen }">
+    <aside class="sidebar-mobile fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 lg:block"
+        :class="{ 'open': mobileMenuOpen }">
         <div class="p-6">
             <div class="mb-6">
                 <div class="flex items-center space-x-3 mb-3">
@@ -56,35 +107,48 @@
                 </div>
             </div>
             <nav class="space-y-2">
-                <a href="index.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition bg-white bg-opacity-20">
+                <a href="index.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition bg-white bg-opacity-20">
                     <i class="fas fa-home w-5"></i><span>Dashboard</span>
                 </a>
-                <a href="ventas.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
+                <a href="ventas.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
                     <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
                 </a>
-                <a href="cuentas-cobrar.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
+                <a href="cuentas-cobrar.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
                     <i class="fas fa-file-invoice-dollar w-5"></i><span>Cuentas por Cobrar</span>
                 </a>
-                <a href="clientes.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
+                <a href="clientes.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
                     <i class="fas fa-users w-5"></i><span>Clientes</span>
                 </a>
-                <a href="inventario.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
+                <a href="inventario.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
                     <i class="fas fa-boxes w-5"></i><span>Inventario</span>
                 </a>
-                <a href="usuarios.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
+                <a href="usuarios.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
                     <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
                 </a>
-                <a href="reportes.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
+                <a href="reportes.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
                     <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
                 </a>
-                <a href="resumen-diario.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                <a href="resumen-diario.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-file-alt w-5"></i><span>Resumen Diario</span>
+                </a>
+                <a href="gastos.html" @click="mobileMenuOpen = false"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-file-alt w-5"></i><span>Gastos</span>
                 </a>
             </nav>
         </div>
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold" x-text="userInitials"></div>
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
+                    x-text="userInitials"></div>
                 <div>
                     <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
                     <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
@@ -97,7 +161,8 @@
     <div class="lg:ml-64 min-h-screen flex flex-col">
         <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-4">
-                <button @click="mobileMenuOpen = !mobileMenuOpen" class="menu-toggle lg:hidden text-gray-600 hover:text-gray-800">
+                <button @click="mobileMenuOpen = !mobileMenuOpen"
+                    class="menu-toggle lg:hidden text-gray-600 hover:text-gray-800">
                     <i class="fas fa-bars text-2xl"></i>
                 </button>
                 <div>
@@ -117,17 +182,19 @@
                         </template>
                     </select>
                 </div>
-                
+
                 <div class="hidden md:flex items-center bg-blue-50 px-4 py-2 rounded-lg">
                     <i class="fas fa-dollar-sign text-green-600 mr-2"></i>
                     <span class="text-sm text-gray-600">Tasa: </span>
-                    <span class="text-sm font-bold text-blue-600 ml-1" x-text="'Bs. ' + (parseFloat(exchangeRate) || 700.22).toFixed(2)"></span>
+                    <span class="text-sm font-bold text-blue-600 ml-1"
+                        x-text="'Bs. ' + (parseFloat(exchangeRate) || 700.22).toFixed(2)"></span>
                 </div>
                 <button class="relative p-2 text-gray-400 hover:text-gray-600">
                     <i class="fas fa-bell text-xl"></i>
                     <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                 </button>
-                <button onclick="logout()" class="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition shadow-sm">
+                <button onclick="logout()"
+                    class="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition shadow-sm">
                     <i class="fas fa-sign-out-alt"></i>
                     <span class="font-medium">Salir</span>
                 </button>
@@ -163,9 +230,11 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm text-gray-600 mb-1">Ingresos Hoy</p>
-                                <p class="text-3xl font-bold text-gray-900" x-text="'$' + stats.todayRevenue.toFixed(2)"></p>
+                                <p class="text-3xl font-bold text-gray-900"
+                                    x-text="'$' + stats.todayRevenue.toFixed(2)"></p>
                                 <p class="text-xs text-gray-500 mt-2">
-                                    <span x-text="'Bs. ' + (stats.todayRevenue * (parseFloat(exchangeRate) || 700.22)).toFixed(2)"></span>
+                                    <span
+                                        x-text="'Bs. ' + (stats.todayRevenue * (parseFloat(exchangeRate) || 700.22)).toFixed(2)"></span>
                                 </p>
                             </div>
                             <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
@@ -191,7 +260,8 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm text-gray-600 mb-1">Cuentas por Cobrar</p>
-                                <p class="text-3xl font-bold text-gray-900" x-text="'$' + stats.creditAccounts.toFixed(2)"></p>
+                                <p class="text-3xl font-bold text-gray-900"
+                                    x-text="'$' + stats.creditAccounts.toFixed(2)"></p>
                                 <p class="text-xs text-red-600 mt-2">
                                     <i class="fas fa-exclamation-circle"></i>
                                     <span x-text="stats.creditCustomers + ' clientes'"></span>
@@ -279,7 +349,9 @@
                                     <div class="flex justify-between items-start mb-3">
                                         <div>
                                             <h4 class="font-semibold text-gray-800" x-text="tank.name"></h4>
-                                            <p class="text-sm text-gray-500" x-text="'Capacidad: ' + tank.capacity_liters.toLocaleString() + 'L'"></p>
+                                            <p class="text-sm text-gray-500"
+                                                x-text="'Capacidad: ' + tank.capacity_liters.toLocaleString() + 'L'">
+                                            </p>
                                         </div>
                                         <span class="px-3 py-1 rounded-full text-xs font-semibold" :class="{
                                                 'bg-green-100 text-green-800': tank.percentage > 70,
@@ -295,14 +367,17 @@
                                             }" :style="'width: ' + tank.percentage + '%'"></div>
                                     </div>
                                     <div class="flex justify-between text-sm">
-                                        <span class="text-gray-600" x-text="tank.current_liters.toLocaleString() + 'L disponibles'"></span>
+                                        <span class="text-gray-600"
+                                            x-text="tank.current_liters.toLocaleString() + 'L disponibles'"></span>
                                         <span class="font-semibold" :class="{
                                                 'text-blue-600': tank.percentage > 70,
                                                 'text-yellow-600': tank.percentage > 40 && tank.percentage <= 70,
                                                 'text-red-600': tank.percentage <= 40
-                                            }" x-text="(tank.capacity_liters - tank.current_liters).toLocaleString() + 'L usados'"></span>
+                                            }"
+                                            x-text="(tank.capacity_liters - tank.current_liters).toLocaleString() + 'L usados'"></span>
                                     </div>
-                                    <div x-show="tank.current_liters < tank.min_level" class="mt-2 text-xs text-red-600">
+                                    <div x-show="tank.current_liters < tank.min_level"
+                                        class="mt-2 text-xs text-red-600">
                                         <i class="fas fa-exclamation-triangle mr-1"></i>
                                         Nivel bajo - Mínimo: <span x-text="tank.min_level + 'L'"></span>
                                     </div>
@@ -387,9 +462,9 @@
                 exchangeRate: 700.22,
                 salesChart: null,
                 productChart: null,
-                
+
                 // Control de sucursales
-                selectedBranch: 'all', 
+                selectedBranch: 'all',
                 availableBranches: [],
 
                 stats: {
@@ -435,7 +510,7 @@
                             this.userRole = profile.role;
                             this.userBranch = profile.branch;
                             this.userInitials = this.getInitials(profile.full_name);
-                            
+
                             // ✅ CONSOLIDADO POR DEFECTO PARA ADMIN, SUCURSAL PARA VENDEDORES
                             this.selectedBranch = (profile.role === 'admin') ? 'all' : profile.branch;
                         }
@@ -531,7 +606,7 @@
 
                         this.stats.totalBottlesSold = saleItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
                         this.stats.bottlesBySize = { 5: 0, 13: 0, 20: 0 };
-                        
+
                         saleItems?.forEach(item => {
                             const size = item.products.size_liters;
                             if (this.stats.bottlesBySize[size] !== undefined) {
@@ -550,7 +625,7 @@
                         const now = new Date();
                         const caracasTimeStr = now.toLocaleString('en-US', { timeZone: 'America/Caracas' });
                         const caracasDate = new Date(caracasTimeStr);
-                        
+
                         const dayOfWeek = caracasDate.getDay() || 7; // 1 = Lunes, 7 = Domingo
                         const monday = new Date(caracasDate);
                         monday.setDate(caracasDate.getDate() - dayOfWeek + 1);
@@ -582,7 +657,7 @@
                     try {
                         const todayStr = DateUtils.getStartOfDay(new Date());
                         let query = supabase.from('sale_items').select(`quantity, products!inner(size_liters), sales!inner(branch, created_at)`).gte('sales.created_at', todayStr);
-                        
+
                         if (this.selectedBranch !== 'all') {
                             query = query.eq('sales.branch', this.selectedBranch);
                         }
@@ -748,4 +823,5 @@
         }
     </script>
 </body>
+
 </html>
