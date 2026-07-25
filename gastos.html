@@ -1131,15 +1131,9 @@
             };
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log('🔍 DOMContentLoaded - Iniciando Alpine.js');
-            if (window.Alpine) {
-                window.Alpine.data('gastosApp', gastosApp);
-                window.Alpine.start();
-                console.log('✅ Alpine.js iniciado correctamente');
-            } else {
-                console.error('❌ Alpine.js no está cargado');
-            }
+        document.addEventListener('alpine:init', () => {
+            console.log('🔍 Registrando componente gastosApp en Alpine.js');
+            Alpine.data('gastosApp', gastosApp);
         });
     </script>
 </body>
