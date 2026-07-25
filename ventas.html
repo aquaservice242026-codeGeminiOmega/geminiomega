@@ -1410,7 +1410,25 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div class="col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Límite *</label>
+                            <div class="flex gap-2 mb-2">
+                                <button type="button" @click="setCreditDays(7)"
+                                    :class="creditForm.selectedDays === 7 ? 'bg-yellow-500 text-white' : 'bg-white text-gray-700 border border-gray-300'"
+                                    class="flex-1 py-2 rounded-lg text-xs font-semibold touch-btn transition-colors">
+                                    7 días
+                                </button>
+                                <button type="button" @click="setCreditDays(15)"
+                                    :class="creditForm.selectedDays === 15 ? 'bg-yellow-500 text-white' : 'bg-white text-gray-700 border border-gray-300'"
+                                    class="flex-1 py-2 rounded-lg text-xs font-semibold touch-btn transition-colors">
+                                    15 días
+                                </button>
+                                <button type="button" @click="setCreditDays(30)"
+                                    :class="creditForm.selectedDays === 30 ? 'bg-yellow-500 text-white' : 'bg-white text-gray-700 border border-gray-300'"
+                                    class="flex-1 py-2 rounded-lg text-xs font-semibold touch-btn transition-colors">
+                                    30 días
+                                </button>
+                            </div>
                             <input type="date" x-model="creditForm.payment_date"
+                                @change="creditForm.selectedDays = null"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white">
                         </div>
                         <div class="col-span-2">
@@ -1536,7 +1554,7 @@
                         { "id": "la-fuentidueno", "nombre": "La Fuentidueño" },
                         { "id": "la-guardia", "nombre": "La Guardia" },
                         { "id": "las-barras", "nombre": "Las Barras" },
-                        { "id": "las-guardias", "nombre": "Las Guardias" },
+                        { "id": "las-guardias", "nombre": "La Guardia" },
                         { "id": "san-juan-bautista", "nombre": "San Juan Bautista" }
                     ]
                 }
@@ -1666,7 +1684,7 @@
                     direccion_especifica: '',
                     recommended_by: ''
                 },
-                creditForm: { customer_id: '', customer_phone: '', customer_id_card: '', payment_date: '', payment_terms: '', initial_payment: 0, initial_payment_method: 'efectivo', notes: '' },
+                creditForm: { customer_id: '', customer_phone: '', customer_id_card: '', payment_date: '', payment_terms: '', initial_payment: 0, initial_payment_method: 'efectivo', notes: '', selectedDays: null },
                 useMultiplePayments: false,
                 multiplePayments: [],
                 newPayment: { method: 'efectivo_divisas', amountUsd: 0, amountBs: 0, reference: '' },
@@ -2200,11 +2218,18 @@
                     const defaultDate = new Date();
                     defaultDate.setDate(defaultDate.getDate() + 30);
                     this.creditForm.payment_date = defaultDate.toISOString().split('T')[0];
+                    this.creditForm.selectedDays = 30;
                     this.showCreditModal = true;
+                },
+                setCreditDays(days) {
+                    const targetDate = new Date();
+                    targetDate.setDate(targetDate.getDate() + days);
+                    this.creditForm.payment_date = targetDate.toISOString().split('T')[0];
+                    this.creditForm.selectedDays = days;
                 },
                 closeCreditModal() {
                     this.showCreditModal = false;
-                    this.creditForm = { customer_id: '', customer_phone: '', customer_id_card: '', payment_date: '', payment_terms: '', initial_payment: 0, initial_payment_method: 'efectivo', notes: '' };
+                    this.creditForm = { customer_id: '', customer_phone: '', customer_id_card: '', payment_date: '', payment_terms: '', initial_payment: 0, initial_payment_method: 'efectivo', notes: '', selectedDays: null };
                 },
                 loadCustomerData() {
                     const customer = this.customers.find(c => c.id === this.creditForm.customer_id);
@@ -2623,10 +2648,74 @@ ${successDetails}
                         showToast('El carrito está vacío', 'error');
                         return;
                     }
-                    this.paymentMethod = 'efectivo_bs';
-                    this.amountReceivedBs = this.totalBs;
+                    const { value: formValues } = await Swal.fire({
+                        title: '⚡ Venta Rápida',
+                        html: `
+<div class="text-left space-y-3">
+<div>
+<label class="block text-xs font-semibold text-gray-700 mb-1">Método de Pago</label>
+<select id="quickSalePaymentMethod" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+<option value="efectivo_bs">Efectivo Bs</option>
+<option value="efectivo_divisas">Efectivo Divisas</option>
+<option value="pago_movil">Pago Móvil</option>
+<option value="transferencia">Transferencia</option>
+<option value="punto_venta">Punto de Venta</option>
+</select>
+</div>
+<div id="quickSaleReferenceWrapper" style="display:none;">
+<label class="block text-xs font-semibold text-gray-700 mb-1 mt-2">Número de Referencia</label>
+<input id="quickSaleReference" type="text" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white" placeholder="Últimos 4 dígitos" maxlength="20">
+</div>
+<div class="bg-blue-50 rounded-lg p-3 mt-3">
+<div class="flex justify-between items-center">
+<span class="text-xs text-gray-600">Total a cobrar:</span>
+<span class="text-lg font-bold text-blue-600">$${this.totalUSD.toFixed(2)}</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-xs text-gray-500">Equivale:</span>
+<span class="text-xs font-semibold text-gray-600">Bs. ${this.totalBs.toFixed(2)}</span>
+</div>
+</div>
+</div>`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: '<i class="fas fa-bolt mr-1"></i>Cobrar',
+                        cancelButtonText: 'Cancelar',
+                        reverseButtons: true,
+                        didOpen: () => {
+                            const methodSelect = document.getElementById('quickSalePaymentMethod');
+                            const refWrapper = document.getElementById('quickSaleReferenceWrapper');
+                            const toggleRef = () => {
+                                refWrapper.style.display = ['pago_movil', 'transferencia', 'punto_venta'].includes(methodSelect.value) ? 'block' : 'none';
+                            };
+                            methodSelect.addEventListener('change', toggleRef);
+                            toggleRef();
+                        },
+                        preConfirm: () => {
+                            const method = document.getElementById('quickSalePaymentMethod').value;
+                            const referenceInput = document.getElementById('quickSaleReference');
+                            const reference = referenceInput ? referenceInput.value.trim().toUpperCase() : '';
+                            if (['pago_movil', 'transferencia'].includes(method) && !reference) {
+                                Swal.showValidationMessage('Debes ingresar el número de referencia');
+                                return false;
+                            }
+                            return { method, reference };
+                        }
+                    });
+
+                    if (!formValues) return;
+
+                    this.paymentMethod = formValues.method;
+                    this.paymentReference = formValues.reference || '';
                     this.selectedCustomer = '';
                     this.useMultiplePayments = false;
+
+                    if (formValues.method === 'efectivo_bs') {
+                        this.amountReceivedBs = this.totalBs;
+                    } else if (formValues.method === 'efectivo_divisas') {
+                        this.amountReceivedUsd = this.totalUSD;
+                    }
+
                     await this.processSale();
                 },
                 async processCreditSale() {
