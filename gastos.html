@@ -578,7 +578,7 @@
             <div class="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-end space-x-3 sticky bottom-0">
                 <button @click="closeModal()" class="px-4 py-2 text-gray-600 touch-btn">Cancelar</button>
                 <button @click="saveExpense()" :disabled="saving"
-                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 touch-btn">
+                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed touch-btn">
                     <i class="fas fa-save mr-2" x-show="!saving"></i>
                     <i class="fas fa-circle-notch fa-spin mr-2" x-show="saving"></i>
                     <span x-text="saving ? 'Guardando...' : 'Guardar'"></span>
@@ -723,7 +723,6 @@
                         console.error('Error obteniendo perfil:', err);
                     }
 
-                    // Inicializar filtros con hoy
                     const today = getCaracasDateString();
                     this.filters.dateFrom = today;
                     this.filters.dateTo = today;
@@ -876,14 +875,27 @@
                 closeModal() {
                     this.showModal = false;
                     this.editingExpense = null;
+                    // ✅ Limpieza completa del formulario para evitar datos residuales
+                    this.formData = {
+                        category_id: '',
+                        description: '',
+                        amount: 0,
+                        expense_date: getCaracasDateString(),
+                        payment_method: 'efectivo_bs',
+                        reference: '',
+                        notes: ''
+                    };
                 },
 
                 async saveExpense() {
+                    // ✅ BLOQUEO ANTI-DOBLE CLIC: Si ya está guardando, ignorar el clic
+                    if (this.saving) return;
+
                     if (!this.formData.category_id) {
                         showToast('Debe seleccionar una categoría', 'error');
                         return;
                     }
-                    if (!this.formData.description) {
+                    if (!this.formData.description || this.formData.description.trim() === '') {
                         showToast('La descripción es obligatoria', 'error');
                         return;
                     }
@@ -902,13 +914,13 @@
                         const expenseData = {
                             branch: this.userBranch,
                             category_id: this.formData.category_id,
-                            description: this.formData.description.toUpperCase(),
+                            description: this.formData.description.trim().toUpperCase(),
                             amount: round2(this.formData.amount),
                             amount_bs: round2(this.formData.amount * this.exchangeRate),
                             expense_date: this.formData.expense_date,
                             payment_method: this.formData.payment_method,
-                            reference: this.formData.reference ? this.formData.reference.toUpperCase() : null,
-                            notes: this.formData.notes ? this.formData.notes.toUpperCase() : null,
+                            reference: this.formData.reference ? this.formData.reference.trim().toUpperCase() : null,
+                            notes: this.formData.notes ? this.formData.notes.trim().toUpperCase() : null,
                             created_by: session.user.id
                         };
 
