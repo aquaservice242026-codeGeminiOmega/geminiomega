@@ -1096,13 +1096,10 @@
             });
         }
 
-        // ✅ NUEVA FUNCIÓN: Obtener fecha de Caracas
-        function getCaracasDate() {
-            const now = new Date();
-            const caracasTime = new Date(now.toLocaleString('en-US', {
-                timeZone: 'America/Caracas'
-            }));
-            return caracasTime;
+        // ✅ FUNCIÓN BLINDADA: Obtener fecha de Caracas en formato YYYY-MM-DD
+        // Esto evita el problema de .toISOString() que convierte a UTC y adelanta el día
+        function getCaracasDateString() {
+            return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Caracas' });
         }
 
         function formatDate(dateString) {
@@ -1164,9 +1161,9 @@
                 exchangeRate: 700.22,
                 reportType: 'resumen', // ✅ CAMBIADO: Por defecto Resumen Diario
                 viewMode: 'table',
-                // ✅ CAMBIADO: Fechas por defecto = hoy (zona horaria Caracas)
-                startDate: getCaracasDate().toISOString().split('T')[0],
-                endDate: getCaracasDate().toISOString().split('T')[0],
+                // ✅ CAMBIADO: Fechas por defecto = hoy (zona horaria Caracas blindada)
+                startDate: getCaracasDateString(),
+                endDate: getCaracasDateString(),
                 selectedBranch: '',
                 paymentMethod: '',
                 currentPage: 1,
@@ -1690,27 +1687,29 @@
                 },
 
                 setDateRange(range) {
-                    const today = getCaracasDate();
+                    // ✅ BLINDADO: Usar getCaracasDateString() para evitar desfases por UTC
+                    const todayStr = getCaracasDateString();
+                    const today = new Date(todayStr + 'T12:00:00-04:00');
                     const date = new Date(today);
                     switch (range) {
                         case 'today':
-                            this.startDate = today.toISOString().split('T')[0];
-                            this.endDate = today.toISOString().split('T')[0];
+                            this.startDate = todayStr;
+                            this.endDate = todayStr;
                             break;
                         case 'week':
                             date.setDate(today.getDate() - 7);
-                            this.startDate = date.toISOString().split('T')[0];
-                            this.endDate = today.toISOString().split('T')[0];
+                            this.startDate = date.toLocaleDateString('en-CA', { timeZone: 'America/Caracas' });
+                            this.endDate = todayStr;
                             break;
                         case 'month':
                             date.setMonth(today.getMonth() - 1);
-                            this.startDate = date.toISOString().split('T')[0];
-                            this.endDate = today.toISOString().split('T')[0];
+                            this.startDate = date.toLocaleDateString('en-CA', { timeZone: 'America/Caracas' });
+                            this.endDate = todayStr;
                             break;
                         case 'year':
                             date.setFullYear(today.getFullYear() - 1);
-                            this.startDate = date.toISOString().split('T')[0];
-                            this.endDate = today.toISOString().split('T')[0];
+                            this.startDate = date.toLocaleDateString('en-CA', { timeZone: 'America/Caracas' });
+                            this.endDate = todayStr;
                             break;
                     }
                     this.generateReport();
