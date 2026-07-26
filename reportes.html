@@ -469,6 +469,7 @@
                                 <option value="inventario">Inventario</option>
                                 <option value="cuentas">Cuentas por Cobrar</option>
                                 <option value="resumen">Resumen Diario</option>
+                                <option value="deliverys">Deliverys</option>
                             </select>
                         </div>
                         <div>
@@ -615,6 +616,15 @@
                                                 class="fas fa-file-invoice-dollar"></i></div>
                                         <h4 class="font-semibold">Cuentas por Cobrar</h4>
                                         <p class="text-xs text-gray-500">Estado de pagos</p>
+                                    </div>
+                                </div>
+                                <div @click="setReportType('deliverys')"
+                                    class="report-type-card p-4 rounded-xl cursor-pointer border border-gray-200"
+                                    :class="{'active': reportType === 'deliverys'}">
+                                    <div class="text-center">
+                                        <div class="text-3xl text-cyan-500 mb-2"><i class="fas fa-truck"></i></div>
+                                        <h4 class="font-semibold">Deliverys</h4>
+                                        <p class="text-xs text-gray-500">Zonas más solicitadas</p>
                                     </div>
                                 </div>
                             </div>
@@ -1017,6 +1027,53 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- ✅ NUEVO: Panel de Deliverys -->
+                        <div x-show="reportType === 'deliverys'">
+                            <div class="report-card">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Deliverys Realizados</h3>
+                                <div class="stat-card mb-6" style="max-width: 320px;">
+                                    <div class="text-sm text-gray-500">Total Deliverys (rango seleccionado)</div>
+                                    <div class="stat-value text-cyan-600" x-text="totalDeliverys"></div>
+                                    <div class="text-sm text-gray-500">Del <span x-text="formatDate(startDate)"></span>
+                                        al <span x-text="formatDate(endDate)"></span></div>
+                                </div>
+                                <h4 class="text-sm font-semibold text-gray-700 mb-2">Top 8 Zonas / Sectores con Más
+                                    Solicitudes</h4>
+                                <div class="table-container">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Zona / Sector</th>
+                                                <th>Solicitudes</th>
+                                                <th>% del Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template x-if="topDeliveryZones && topDeliveryZones.length > 0">
+                                                <template x-for="(zone, index) in topDeliveryZones" :key="zone.zone">
+                                                    <tr>
+                                                        <td x-text="index + 1"></td>
+                                                        <td x-text="zone.zone"></td>
+                                                        <td x-text="zone.count"></td>
+                                                        <td x-text="zone.percentage + '%'"></td>
+                                                    </tr>
+                                                </template>
+                                            </template>
+                                            <template x-if="!topDeliveryZones || topDeliveryZones.length === 0">
+                                                <tr>
+                                                    <td colspan="4" class="text-center py-8 text-gray-500">
+                                                        <i class="fas fa-truck text-4xl mb-2 block"></i>
+                                                        No hay deliverys en el período seleccionado
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>
@@ -1216,6 +1273,10 @@
                 topSellingProducts: [],
                 dailyHours: [],
 
+                // ✅ NUEVO: Datos de Deliverys
+                totalDeliverys: 0,
+                topDeliveryZones: [],
+
                 // Inicialización
                 async initReportes() {
                     const { data: { session } } = await supabase.auth.getSession();
@@ -1246,12 +1307,32 @@
                         }
 
                         this.$nextTick(() => this.initDatePickers());
+                        this.initDateGuard();
                         await this.generateReport();
                         this.initCharts();
 
                     } catch (err) {
                         console.error('Error obteniendo perfil:', err);
                     }
+                },
+
+                // ✅ NUEVO: Si el navegador restaura la página desde caché (bfcache, muy común en
+                // móviles al volver a abrir la app sin recargar), esto asegura que la fecha "Hoy"
+                // se actualice a la fecha actual de Caracas en vez de quedarse con la fecha vieja.
+                // Solo actúa si el filtro estaba en modo "Hoy" (start === end); si el usuario tenía
+                // un rango personalizado, no lo toca.
+                initDateGuard() {
+                    window.addEventListener('pageshow', (event) => {
+                        if (!event.persisted) return;
+                        const freshToday = getCaracasDateString();
+                        if (this.startDate === this.endDate && this.startDate !== freshToday) {
+                            this.startDate = freshToday;
+                            this.endDate = freshToday;
+                            if (this.startPicker) this.startPicker.setDate(freshToday, false);
+                            if (this.endPicker) this.endPicker.setDate(freshToday, false);
+                            this.generateReport();
+                        }
+                    });
                 },
 
                 // ✅ NUEVO: Inicializa los selectores de fecha en formato DD/MM/AAAA
@@ -1390,6 +1471,9 @@
                                 break;
                             case 'resumen':
                                 await this.generateDailyReport();
+                                break;
+                            case 'deliverys':
+                                await this.generateDeliveryReport();
                                 break;
                         }
                         this.initCharts();
@@ -1760,6 +1844,52 @@
                         products_sold: h.products_sold,
                         total_sales: round2(h.total_sales * this.exchangeRate)
                     })).sort((a, b) => parseInt(a.hour) - parseInt(b.hour));
+                },
+
+                // ✅ Reporte de Deliverys - total del rango y top 8 zonas/sectores con más solicitudes.
+                // La zona se extrae de "delivery_address" (tabla sales): es el segundo texto separado
+                // por comas. Ej: "DÍAZ, COTOPERIZ, COTOPERIZ 2 CALLE 1" -> "COTOPERIZ".
+                extractDeliveryZone(address) {
+                    if (!address) return 'Sin especificar';
+                    const parts = address.split(',');
+                    if (parts.length >= 2 && parts[1].trim()) {
+                        return parts[1].trim().toUpperCase();
+                    }
+                    return address.trim().toUpperCase();
+                },
+
+                async generateDeliveryReport() {
+                    let query = supabase
+                        .from('sales')
+                        .select('id, delivery_address, delivery_type, payment_method')
+                        .eq('delivery_type', 'delivery')
+                        .gte('created_at', this.rangeStart())
+                        .lte('created_at', this.rangeEnd());
+
+                    if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
+                    if (this.paymentMethod) query = query.eq('payment_method', this.paymentMethod);
+
+                    const { data, error } = await query;
+                    if (error) throw error;
+                    const deliveries = data || [];
+
+                    this.totalDeliverys = deliveries.length;
+
+                    const zoneCounts = {};
+                    deliveries.forEach(d => {
+                        const zone = this.extractDeliveryZone(d.delivery_address);
+                        zoneCounts[zone] = (zoneCounts[zone] || 0) + 1;
+                    });
+
+                    const totalWithZone = deliveries.length;
+                    this.topDeliveryZones = Object.entries(zoneCounts)
+                        .map(([zone, count]) => ({
+                            zone,
+                            count,
+                            percentage: totalWithZone > 0 ? Math.round((count / totalWithZone) * 100) : 0
+                        }))
+                        .sort((a, b) => b.count - a.count)
+                        .slice(0, 8);
                 },
 
                 setReportType(type) {
