@@ -1673,6 +1673,7 @@
                 userName: '',
                 userRole: '',
                 userBranch: '',
+                defaultCustomerId: null,
                 userInitials: '??',
                 // ✅ ACTUALIZADO: Nuevos campos para ubicación
                 newCustomer: {
@@ -2071,6 +2072,13 @@
                             .order('full_name');
                         if (error) throw error;
                         this.customers = data || [];
+
+                        // ✅ Cliente por defecto de la sucursal activa (PÚBLICO GENERAL)
+                        const defaultCustomer = this.customers.find(c => c.full_name === 'PÚBLICO GENERAL');
+                        this.defaultCustomerId = defaultCustomer ? defaultCustomer.id : null;
+                        if (!this.defaultCustomerId) {
+                            console.warn('⚠️ No se encontró el cliente "PÚBLICO GENERAL" para la sucursal', this.userBranch);
+                        }
                     } catch (err) {
                         console.error('Error cargando clientes:', err);
                     }
@@ -2412,7 +2420,7 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                         const rateDateStr = caracasDate.toISOString().split('T')[0];
                         const { data: sale, error: saleError } = await supabase.from('sales').insert({
                             branch: this.userBranch,
-                            customer_id: this.selectedCustomer || null,
+                            customer_id: this.selectedCustomer || this.defaultCustomerId || null,
                             customer_name: customerName,
                             subtotal: this.subtotal,
                             tax: 0,
