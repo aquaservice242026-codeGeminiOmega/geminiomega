@@ -1689,7 +1689,9 @@
                     if (error) throw error;
                     const salesList = sales || [];
 
-                    const rawDailySalesUSD = salesList.reduce((sum, s) => sum + (s.total || 0), 0);
+                    // ✅ "Ventas del Día" = solo dinero realmente recibido, sin ventas a crédito
+                    const cashSalesList = salesList.filter(s => s.payment_method !== 'credito');
+                    const rawDailySalesUSD = cashSalesList.reduce((sum, s) => sum + (s.total || 0), 0);
                     this.dailySales = round2(rawDailySalesUSD * this.exchangeRate);
 
                     const uniqueCustomers = new Set(salesList.filter(s => s.customer_id).map(s => s.customer_id));
@@ -1741,7 +1743,10 @@
                         }
                         hoursMap[hour].sales_count++;
                         if (sale.customer_id) hoursMap[hour].clientsSet.add(sale.customer_id);
-                        hoursMap[hour].total_sales += sale.total || 0;
+                        // ✅ El ingreso por hora tampoco cuenta ventas a crédito (solo dinero recibido)
+                        if (sale.payment_method !== 'credito') {
+                            hoursMap[hour].total_sales += sale.total || 0;
+                        }
                     });
                     items.forEach(item => {
                         const hour = saleHourMap[item.sale_id];
