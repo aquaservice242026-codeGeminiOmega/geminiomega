@@ -38,7 +38,7 @@
 
             @page {
                 size: letter;
-                margin: 1.25cm 1.25cm 1.25cm 1.25cm;
+                margin: 1.5cm;
             }
         }
     </style>
@@ -393,7 +393,7 @@
                 stats: {
                     totalContadoUSD: 0,
                     totalCreditoUSD: 0,
-                    totalCreditSales: 0,  // ✅ NUEVO: Contador de ventas a crédito
+                    totalCreditSales: 0,
                     totalTransactions: 0,
                     totalDeliverys: 0,
                     efectivoBs: 0,
@@ -424,8 +424,11 @@
                         this.userRole = profile.role || 'vendedor';
                     } else { console.error('Error cargando perfil:', error); }
 
-                    await this.loadExchangeRate();
-                    await this.loadReportData();
+                    // ✅ Tasa de cambio y datos del reporte en paralelo (antes eran secuenciales)
+                    await Promise.all([
+                        this.loadExchangeRate(),
+                        this.loadReportData()
+                    ]);
                 },
 
                 updateCurrentDateTime() {
@@ -447,10 +450,31 @@
                         const startOfDay = dateStr + 'T00:00:00-04:00';
                         const endOfDay = dateStr + 'T23:59:59-04:00';
 
-                        let query = supabase.from('sales').select('*').gte('created_at', startOfDay).lte('created_at', endOfDay).eq('branch', this.userBranch);
-                        const { data: sales, error } = await query;
+                        // ✅ UNA SOLA CONSULTA con joins anidados en vez de 1 + N + N consultas.
+                        // Requiere que las foreign keys sale_payments.sale_id -> sales.id,
+                        // sale_items.sale_id -> sales.id y sale_items.product_id -> products.id
+                        // ya existan (normalmente ya están si usas esas columnas como FK).
+                        const { data: sales, error } = await supabase
+                            .from('sales')
+                            .select(`
+                                id,
+                                total,
+                                payment_method,
+                                delivery_type,
+                                created_at,
+                                sale_payments ( payment_method, amount_usd ),
+                                sale_items (
+                                    quantity,
+                                    total,
+                                    products ( name, size_liters )
+                                )
+                            `)
+                            .gte('created_at', startOfDay)
+                            .lte('created_at', endOfDay)
+                            .eq('branch', this.userBranch);
+
                         if (error) throw error;
-                        await this.processSales(sales || []);
+                        this.processSales(sales || []);
                     } catch (err) {
                         console.error('Error cargando reporte:', err);
                     } finally {
@@ -467,7 +491,8 @@
                     };
                 },
 
-                async processSales(sales) {
+                // ✅ Ahora es síncrono: ya no hace await por cada venta/ítem, todo llegó en una sola consulta.
+                processSales(sales) {
                     const productMap = {};
 
                     for (const sale of sales) {
@@ -482,23 +507,21 @@
 
                         if (esCredito) {
                             this.stats.totalCreditoUSD += saleTotal;
-                            this.stats.totalCreditSales++;  // ✅ Contar transacciones de crédito
+                            this.stats.totalCreditSales++;
                         } else {
                             this.stats.totalContadoUSD += saleTotal;
 
-                            const { data: payments } = await supabase.from('sale_payments').select('*').eq('sale_id', sale.id);
                             let saleEfectivoBs = 0, saleEfectivoUsd = 0, salePagoMovil = 0, salePunto = 0, saleTransferencia = 0;
 
-                            if (payments) {
-                                for (const payment of payments) {
-                                    const amount = payment.amount_usd || 0;
-                                    switch (payment.payment_method) {
-                                        case 'efectivo_bs': saleEfectivoBs += amount; break;
-                                        case 'efectivo_divisas': saleEfectivoUsd += amount; break;
-                                        case 'pago_movil': salePagoMovil += amount; break;
-                                        case 'punto_venta': salePunto += amount; break;
-                                        case 'transferencia': saleTransferencia += amount; break;
-                                    }
+                            const payments = sale.sale_payments || [];
+                            for (const payment of payments) {
+                                const amount = payment.amount_usd || 0;
+                                switch (payment.payment_method) {
+                                    case 'efectivo_bs': saleEfectivoBs += amount; break;
+                                    case 'efectivo_divisas': saleEfectivoUsd += amount; break;
+                                    case 'pago_movil': salePagoMovil += amount; break;
+                                    case 'punto_venta': salePunto += amount; break;
+                                    case 'transferencia': saleTransferencia += amount; break;
                                 }
                             }
 
@@ -508,26 +531,24 @@
                             this.stats.punto += salePunto;
                             this.stats.transferencia += saleTransferencia;
 
-                            const { data: items } = await supabase.from('sale_items').select('product_id, quantity, total').eq('sale_id', sale.id);
-                            if (items) {
-                                for (const item of items) {
-                                    const { data: product } = await supabase.from('products').select('name, size_liters').eq('id', item.product_id).single();
-                                    if (product) {
-                                        const name = product.name || `Botellón ${product.size_liters}L`;
-                                        const itemTotal = item.total || 0;
-                                        const proportion = itemTotal / (saleTotal || 1);
+                            const items = sale.sale_items || [];
+                            for (const item of items) {
+                                const product = item.products;
+                                if (product) {
+                                    const name = product.name || `Botellón ${product.size_liters}L`;
+                                    const itemTotal = item.total || 0;
+                                    const proportion = itemTotal / (saleTotal || 1);
 
-                                        if (!productMap[name]) {
-                                            productMap[name] = { name, quantity: 0, efectivoBs: 0, efectivoUsd: 0, pagoMovil: 0, punto: 0, transferencia: 0, total: 0 };
-                                        }
-                                        productMap[name].quantity += item.quantity || 0;
-                                        productMap[name].efectivoBs += saleEfectivoBs * proportion;
-                                        productMap[name].efectivoUsd += saleEfectivoUsd * proportion;
-                                        productMap[name].pagoMovil += salePagoMovil * proportion;
-                                        productMap[name].punto += salePunto * proportion;
-                                        productMap[name].transferencia += saleTransferencia * proportion;
-                                        productMap[name].total += itemTotal;
+                                    if (!productMap[name]) {
+                                        productMap[name] = { name, quantity: 0, efectivoBs: 0, efectivoUsd: 0, pagoMovil: 0, punto: 0, transferencia: 0, total: 0 };
                                     }
+                                    productMap[name].quantity += item.quantity || 0;
+                                    productMap[name].efectivoBs += saleEfectivoBs * proportion;
+                                    productMap[name].efectivoUsd += saleEfectivoUsd * proportion;
+                                    productMap[name].pagoMovil += salePagoMovil * proportion;
+                                    productMap[name].punto += salePunto * proportion;
+                                    productMap[name].transferencia += saleTransferencia * proportion;
+                                    productMap[name].total += itemTotal;
                                 }
                             }
                         }
