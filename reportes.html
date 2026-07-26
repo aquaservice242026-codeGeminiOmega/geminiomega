@@ -13,6 +13,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- ✅ Flatpickr: selector de fechas que siempre muestra DD/MM/AAAA sin importar el idioma del navegador -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <style>
@@ -469,13 +473,16 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
-                            <input type="date" x-model="startDate" @change="generateReport()"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                            <!-- ✅ Ahora usa Flatpickr forzado a DD/MM/AAAA (el input type="date" mostraba el formato según el navegador) -->
+                            <input type="text" id="startDateInput"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                                placeholder="DD/MM/AAAA">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
-                            <input type="date" x-model="endDate" @change="generateReport()"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                            <input type="text" id="endDateInput"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                                placeholder="DD/MM/AAAA">
                         </div>
                     </div>
 
@@ -521,7 +528,7 @@
                 <!-- Estadísticas Principales - ACTUALIZADO: Mostrar USD y Bs -->
                 <div class="report-stats-grid">
                     <div class="stat-card">
-                        <div class="text-sm text-gray-500">Ventas Totales</div>
+                        <div class="text-sm text-gray-500">Ventas Totales (dinero recibido)</div>
                         <div class="stat-value text-blue-600" x-text="'$' + formatNumber(totalSales / exchangeRate)">
                         </div>
                         <div class="text-lg font-semibold text-green-600" x-text="formatCurrency(totalSales)"></div>
@@ -1159,9 +1166,9 @@
                 userRole: '',
                 userInitials: '??',
                 exchangeRate: 700.22,
-                reportType: 'resumen', // ✅ CAMBIADO: Por defecto Resumen Diario
+                reportType: 'resumen', // ✅ Por defecto Resumen Diario
                 viewMode: 'table',
-                // ✅ CAMBIADO: Fechas por defecto = hoy (zona horaria Caracas blindada)
+                // ✅ Fechas por defecto = hoy (zona horaria Caracas blindada). Formato interno siempre YYYY-MM-DD.
                 startDate: getCaracasDateString(),
                 endDate: getCaracasDateString(),
                 selectedBranch: '',
@@ -1169,10 +1176,14 @@
                 currentPage: 1,
                 itemsPerPage: 10,
 
+                // ✅ Instancias de los date pickers (formato visual DD/MM/AAAA)
+                startPicker: null,
+                endPicker: null,
+
                 // Datos de Ventas
                 salesData: [],
-                productSalesSummary: [], // ✅ NUEVO: Para ventas por producto
-                paymentMethodSummary: [], // ✅ NUEVO: Para ventas por método
+                productSalesSummary: [],
+                paymentMethodSummary: [],
                 totalSales: 0,
                 newCustomers: 0,
                 totalInventory: 0,
@@ -1214,10 +1225,12 @@
                     }
 
                     try {
-                        const { data: profile } = await supabase.from('profiles')
-                            .select('full_name, role, branch')
-                            .eq('id', session.user.id)
-                            .single();
+                        // ✅ Perfil y tasa de cambio en paralelo (antes eran secuenciales, uno esperaba al otro)
+                        const [profileResult] = await Promise.all([
+                            supabase.from('profiles').select('full_name, role, branch').eq('id', session.user.id).single(),
+                            this.loadExchangeRate()
+                        ]);
+                        const profile = profileResult.data;
 
                         if (profile) {
                             this.userName = profile.full_name;
@@ -1225,21 +1238,57 @@
                             this.userBranch = profile.branch;
                             this.userInitials = this.getInitials(profile.full_name);
 
-                            // ✅ NUEVO: Configurar sucursal seleccionada según el rol
                             if (this.userRole === 'admin') {
-                                this.selectedBranch = ''; // Admin ve todas por defecto
+                                this.selectedBranch = '';
                             } else {
-                                this.selectedBranch = this.userBranch; // Vendedor solo ve la suya
+                                this.selectedBranch = this.userBranch;
                             }
                         }
 
-                        await this.loadExchangeRate();
-                        await this.generateReport(); // ✅ Generar reporte al iniciar
+                        this.$nextTick(() => this.initDatePickers());
+                        await this.generateReport();
                         this.initCharts();
 
                     } catch (err) {
                         console.error('Error obteniendo perfil:', err);
                     }
+                },
+
+                // ✅ NUEVO: Inicializa los selectores de fecha en formato DD/MM/AAAA
+                initDatePickers() {
+                    if (typeof flatpickr === 'undefined') return;
+                    if (flatpickr.l10ns && flatpickr.l10ns.es) {
+                        flatpickr.localize(flatpickr.l10ns.es);
+                    }
+                    const baseOptions = { dateFormat: 'd/m/Y', allowInput: true };
+
+                    this.startPicker = flatpickr('#startDateInput', {
+                        ...baseOptions,
+                        defaultDate: this.startDate,
+                        onChange: (selectedDates) => {
+                            if (!selectedDates[0]) return;
+                            this.startDate = this.toISODate(selectedDates[0]);
+                            this.generateReport();
+                        }
+                    });
+
+                    this.endPicker = flatpickr('#endDateInput', {
+                        ...baseOptions,
+                        defaultDate: this.endDate,
+                        onChange: (selectedDates) => {
+                            if (!selectedDates[0]) return;
+                            this.endDate = this.toISODate(selectedDates[0]);
+                            this.generateReport();
+                        }
+                    });
+                },
+
+                // ✅ NUEVO: Convierte una fecha del picker (local) a YYYY-MM-DD sin desfases de zona horaria
+                toISODate(date) {
+                    const y = date.getFullYear();
+                    const m = String(date.getMonth() + 1).padStart(2, '0');
+                    const d = String(date.getDate()).padStart(2, '0');
+                    return `${y}-${m}-${d}`;
                 },
 
                 getInitials(name) {
@@ -1375,19 +1424,37 @@
                     const salesList = sales || [];
                     const saleIds = salesList.map(s => s.id);
 
-                    let items = [];
-                    if (saleIds.length > 0) {
-                        const { data: itemsData, error: itemsError } = await supabase
-                            .from('sale_items')
-                            .select('sale_id, product_id, quantity, unit_price, total')
-                            .in('sale_id', saleIds);
-                        if (itemsError) throw itemsError;
-                        items = itemsData || [];
-                    }
+                    // ✅ Preparar las consultas independientes (ítems, productos, clientes nuevos,
+                    // inventario, cuentas por cobrar) para dispararlas TODAS en paralelo en vez de
+                    // esperarlas una detrás de otra.
+                    let custQuery = supabase.from('customers')
+                        .select('id', { count: 'exact', head: true })
+                        .gte('created_at', this.rangeStart())
+                        .lte('created_at', this.rangeEnd());
+                    if (this.selectedBranch) custQuery = custQuery.eq('branch', this.selectedBranch);
 
-                    const { data: productsData } = await supabase.from('products').select('id, name, size_liters');
+                    let invQuery = supabase.from('inventory').select('quantity');
+                    if (this.selectedBranch) invQuery = invQuery.eq('branch', this.selectedBranch);
+
+                    let credQuery = supabase.from('credit_accounts').select('remaining_amount, status').neq('status', 'completed');
+                    if (this.selectedBranch) credQuery = credQuery.eq('branch', this.selectedBranch);
+
+                    const [itemsResult, productsResult, custResult, invResult, credResult] = await Promise.all([
+                        saleIds.length > 0
+                            ? supabase.from('sale_items').select('sale_id, product_id, quantity, unit_price, total').in('sale_id', saleIds)
+                            : Promise.resolve({ data: [] }),
+                        supabase.from('products').select('id, name, size_liters'),
+                        custQuery,
+                        invQuery,
+                        credQuery
+                    ]);
+
+                    if (itemsResult.error) throw itemsResult.error;
+                    const items = itemsResult.data || [];
+                    const productsData = productsResult.data || [];
+
                     const productMap = {};
-                    (productsData || []).forEach(p => {
+                    productsData.forEach(p => {
                         productMap[p.id] = p.name || `Botellón ${p.size_liters}L`;
                     });
 
@@ -1408,32 +1475,21 @@
                         };
                     }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-                    const rawSalesTotalUSD = salesList.reduce((sum, s) => sum + (s.total || 0), 0);
+                    // ✅ "Ventas Totales" = solo dinero realmente recibido, sin ventas a crédito
+                    const cashSalesList = salesList.filter(s => s.payment_method !== 'credito');
+                    const rawSalesTotalUSD = cashSalesList.reduce((sum, s) => sum + (s.total || 0), 0);
                     this.totalSales = round2(rawSalesTotalUSD * this.exchangeRate);
+
                     this.currentPage = 1;
                     this.totalPages = Math.max(1, Math.ceil(this.salesData.length / this.itemsPerPage));
 
-                    let custQuery = supabase.from('customers')
-                        .select('id', { count: 'exact', head: true })
-                        .gte('created_at', this.rangeStart())
-                        .lte('created_at', this.rangeEnd());
-                    if (this.selectedBranch) custQuery = custQuery.eq('branch', this.selectedBranch);
-                    const { count: newCustomersCount } = await custQuery;
-                    this.newCustomers = newCustomersCount || 0;
-
-                    let invQuery = supabase.from('inventory').select('quantity');
-                    if (this.selectedBranch) invQuery = invQuery.eq('branch', this.selectedBranch);
-                    const { data: invData } = await invQuery;
-                    this.totalInventory = (invData || []).reduce((sum, i) => sum + (i.quantity || 0), 0);
-
-                    let credQuery = supabase.from('credit_accounts').select('remaining_amount, status').neq('status', 'completed');
-                    if (this.selectedBranch) credQuery = credQuery.eq('branch', this.selectedBranch);
-                    const { data: credData } = await credQuery;
-                    const rawPendingUSD = (credData || []).reduce((sum, c) => sum + (c.remaining_amount || 0), 0);
+                    this.newCustomers = custResult.count || 0;
+                    this.totalInventory = (invResult.data || []).reduce((sum, i) => sum + (i.quantity || 0), 0);
+                    const rawPendingUSD = (credResult.data || []).reduce((sum, c) => sum + (c.remaining_amount || 0), 0);
                     this.pendingAccounts = round2(rawPendingUSD * this.exchangeRate);
                 },
 
-                // ✅ NUEVO: Reporte de Ventas por Producto
+                // Reporte de Ventas por Producto
                 async generateSalesByProductReport() {
                     let query = supabase
                         .from('sales')
@@ -1449,18 +1505,18 @@
                     const salesList = sales || [];
                     const saleIds = salesList.map(s => s.id);
 
-                    let items = [];
-                    if (saleIds.length > 0) {
-                        const { data: itemsData } = await supabase
-                            .from('sale_items')
-                            .select('sale_id, product_id, quantity, total')
-                            .in('sale_id', saleIds);
-                        items = itemsData || [];
-                    }
+                    // ✅ Ítems y productos en paralelo (antes eran secuenciales)
+                    const [itemsResult, productsResult] = await Promise.all([
+                        saleIds.length > 0
+                            ? supabase.from('sale_items').select('sale_id, product_id, quantity, total').in('sale_id', saleIds)
+                            : Promise.resolve({ data: [] }),
+                        supabase.from('products').select('id, name, size_liters')
+                    ]);
+                    const items = itemsResult.data || [];
+                    const productsData = productsResult.data || [];
 
-                    const { data: productsData } = await supabase.from('products').select('id, name, size_liters');
                     const productMap = {};
-                    (productsData || []).forEach(p => {
+                    productsData.forEach(p => {
                         productMap[p.id] = p.name || `Botellón ${p.size_liters}L`;
                     });
 
@@ -1477,12 +1533,13 @@
 
                     this.productSalesSummary = Object.values(productSummary).sort((a, b) => b.total - a.total);
 
-                    // Calcular totales generales
-                    const rawSalesTotalUSD = salesList.reduce((sum, s) => sum + (s.total || 0), 0);
+                    // ✅ "Ventas Totales" = solo dinero realmente recibido, sin ventas a crédito
+                    const cashSalesList = salesList.filter(s => s.payment_method !== 'credito');
+                    const rawSalesTotalUSD = cashSalesList.reduce((sum, s) => sum + (s.total || 0), 0);
                     this.totalSales = round2(rawSalesTotalUSD * this.exchangeRate);
                 },
 
-                // ✅ NUEVO: Reporte de Ventas por Método de Pago
+                // Reporte de Ventas por Método de Pago
                 async generateSalesByPaymentMethodReport() {
                     let query = supabase
                         .from('sales')
@@ -1491,6 +1548,8 @@
                         .lte('created_at', this.rangeEnd());
 
                     if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
+                    // ✅ Ahora sí respeta el filtro de Método de Pago (antes lo ignoraba en este reporte)
+                    if (this.paymentMethod) query = query.eq('payment_method', this.paymentMethod);
 
                     const { data: sales, error } = await query;
                     if (error) throw error;
@@ -1509,24 +1568,26 @@
 
                     this.paymentMethodSummary = Object.values(methodSummary).sort((a, b) => b.total - a.total);
 
-                    // Calcular totales generales
-                    const rawSalesTotalUSD = salesList.reduce((sum, s) => sum + (s.total || 0), 0);
+                    // ✅ "Ventas Totales" = solo dinero realmente recibido, sin ventas a crédito
+                    const cashSalesList = salesList.filter(s => s.payment_method !== 'credito');
+                    const rawSalesTotalUSD = cashSalesList.reduce((sum, s) => sum + (s.total || 0), 0);
                     this.totalSales = round2(rawSalesTotalUSD * this.exchangeRate);
                 },
 
                 async generateClientsReport() {
                     let query = supabase.from('customers').select('*').order('full_name');
                     if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
-                    const { data: customers, error } = await query;
-                    if (error) throw error;
-                    const customersList = customers || [];
 
                     let salesQuery = supabase.from('sales').select('customer_id, total')
                         .gte('created_at', this.rangeStart())
                         .lte('created_at', this.rangeEnd())
                         .not('customer_id', 'is', null);
                     if (this.selectedBranch) salesQuery = salesQuery.eq('branch', this.selectedBranch);
-                    const { data: salesForClients } = await salesQuery;
+
+                    // ✅ Clientes y sus compras en paralelo (son consultas independientes)
+                    const [{ data: customers, error }, { data: salesForClients }] = await Promise.all([query, salesQuery]);
+                    if (error) throw error;
+                    const customersList = customers || [];
 
                     const spentMap = {};
                     (salesForClients || []).forEach(s => {
@@ -1552,13 +1613,20 @@
                     const branches = this.selectedBranch ? [this.selectedBranch] : ['geminis', 'omega'];
                     const combined = {};
 
-                    for (const branch of branches) {
-                        const { data, error } = await supabase.rpc('calculate_virtual_inventory', { branch_param: branch });
-                        if (error) {
-                            console.error('Error cargando inventario de', branch, error);
-                            continue;
+                    // ✅ Ambas sucursales en paralelo (antes una esperaba a que terminara la otra)
+                    const results = await Promise.all(
+                        branches.map(branch =>
+                            supabase.rpc('calculate_virtual_inventory', { branch_param: branch })
+                                .then(res => ({ branch, res }))
+                        )
+                    );
+
+                    results.forEach(({ branch, res }) => {
+                        if (res.error) {
+                            console.error('Error cargando inventario de', branch, res.error);
+                            return;
                         }
-                        (data || []).forEach(item => {
+                        (res.data || []).forEach(item => {
                             const key = item.product_id || item.id;
                             const stock = parseInt(item.virtual_stock || item.stock || 0) || 0;
                             if (!combined[key]) {
@@ -1572,7 +1640,7 @@
                             }
                             combined[key].stock += stock;
                         });
-                    }
+                    });
 
                     this.inventoryData = Object.values(combined);
                     this.totalProducts = this.inventoryData.length;
@@ -1615,6 +1683,8 @@
 
                     let query = supabase.from('sales').select('*').gte('created_at', startOfDay).lte('created_at', endOfDay);
                     if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
+                    // ✅ Ahora sí respeta el filtro de Método de Pago (antes lo ignoraba en este reporte)
+                    if (this.paymentMethod) query = query.eq('payment_method', this.paymentMethod);
                     const { data: sales, error } = await query;
                     if (error) throw error;
                     const salesList = sales || [];
@@ -1625,20 +1695,26 @@
                     const uniqueCustomers = new Set(salesList.filter(s => s.customer_id).map(s => s.customer_id));
                     this.dailyClients = uniqueCustomers.size;
 
+                    const saleIds = salesList.map(s => s.id);
+
                     let invQuery = supabase.from('inventory').select('quantity');
                     if (this.selectedBranch) invQuery = invQuery.eq('branch', this.selectedBranch);
-                    const { data: invData } = await invQuery;
-                    this.dailyInventory = (invData || []).reduce((sum, i) => sum + (i.quantity || 0), 0);
 
-                    const saleIds = salesList.map(s => s.id);
-                    let items = [];
-                    if (saleIds.length > 0) {
-                        const { data: itemsData } = await supabase.from('sale_items').select('sale_id, product_id, quantity, total').in('sale_id', saleIds);
-                        items = itemsData || [];
-                    }
-                    const { data: productsData } = await supabase.from('products').select('id, name, size_liters');
+                    // ✅ Ítems, productos e inventario en paralelo (antes eran secuenciales)
+                    const [itemsResult, productsResult, invResult] = await Promise.all([
+                        saleIds.length > 0
+                            ? supabase.from('sale_items').select('sale_id, product_id, quantity, total').in('sale_id', saleIds)
+                            : Promise.resolve({ data: [] }),
+                        supabase.from('products').select('id, name, size_liters'),
+                        invQuery
+                    ]);
+
+                    const items = itemsResult.data || [];
+                    const productsData = productsResult.data || [];
+                    this.dailyInventory = (invResult.data || []).reduce((sum, i) => sum + (i.quantity || 0), 0);
+
                     const productMap = {};
-                    (productsData || []).forEach(p => productMap[p.id] = p.name || `Botellón ${p.size_liters}L`);
+                    productsData.forEach(p => productMap[p.id] = p.name || `Botellón ${p.size_liters}L`);
 
                     const productTotals = {};
                     let totalQty = 0;
@@ -1712,6 +1788,9 @@
                             this.endDate = todayStr;
                             break;
                     }
+                    // ✅ Sincronizar visualmente los date pickers (sin disparar su propio onChange)
+                    if (this.startPicker) this.startPicker.setDate(this.startDate, false);
+                    if (this.endPicker) this.endPicker.setDate(this.endDate, false);
                     this.generateReport();
                 },
 
