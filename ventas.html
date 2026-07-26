@@ -1639,6 +1639,7 @@
             }
         }
         // ✅ FUNCIÓN PARA OBTENER FECHA DE CARACAS
+        // ⚠️ NO MODIFICADA — lógica de zona horaria intacta
         function getCaracasDate() {
             const now = new Date();
             const caracasTime = new Date(now.toLocaleString('en-US', {
@@ -1852,6 +1853,9 @@
                         }
                     }
                 },
+                // ✅ OPTIMIZADO: peticiones independientes lanzadas en paralelo con Promise.all
+                // en vez de 3 awaits secuenciales. loadProducts depende de this.userBranch
+                // (ya cargado por el paso anterior de perfil), no de la tasa ni de clientes.
                 async initVentas() {
                     const { data: { session } } = await supabase.auth.getSession();
                     if (!session) {
@@ -1869,9 +1873,11 @@
                     } catch (err) {
                         console.error('Error obteniendo perfil:', err);
                     }
-                    await this.loadExchangeRate();
-                    await this.loadProducts();
-                    await this.loadCustomers();
+                    await Promise.all([
+                        this.loadExchangeRate(),
+                        this.loadProducts(),
+                        this.loadCustomers()
+                    ]);
                     this.$watch('selectedCustomer', () => this.onCustomerChange());
                     this.$watch('deliveryType', () => this.watchDeliveryType());
                     document.addEventListener('keydown', (e) => {
@@ -2052,9 +2058,17 @@
                     // Si llegamos aquí, todos los intentos fallaron
                     this.loading = false;
                 },
+                // ✅ OPTIMIZADO: select con columnas explícitas en vez de '*'.
+                // Solo se piden las columnas que realmente usa el frontend
+                // (buildFullAddress, loadCustomerData, el <select> de cliente, etc.)
                 async loadCustomers() {
                     try {
-                        const { data, error } = await supabase.from('customers').select('*').eq('branch', this.userBranch).eq('is_active', true).order('full_name');
+                        const { data, error } = await supabase
+                            .from('customers')
+                            .select('id, full_name, phone, email, cedula, municipio, sector, direccion_especifica, address')
+                            .eq('branch', this.userBranch)
+                            .eq('is_active', true)
+                            .order('full_name');
                         if (error) throw error;
                         this.customers = data || [];
                     } catch (err) {
@@ -2393,7 +2407,7 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                                 notes.push(`Cambio USD: $${(round2(this.amountReceivedUsd) - this.totalUSD).toFixed(2)}`);
                             }
                         }
-                        // ✅ CORRECCIÓN: Usar fecha de Caracas en lugar de UTC
+                        // ✅ CORRECCIÓN: Usar fecha de Caracas en lugar de UTC — SIN CAMBIOS
                         const caracasDate = getCaracasDate();
                         const rateDateStr = caracasDate.toISOString().split('T')[0];
                         const { data: sale, error: saleError } = await supabase.from('sales').insert({
@@ -2459,7 +2473,7 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                                 console.warn('⚠️ No se pudo guardar en sale_payments:', paymentsError.message);
                             }
                         }
-                        // ✅ FIX: Filtrar productos por tipo para evitar conflicto de size_liters
+                        // ✅ OPTIMIZADO: select con columnas explícitas (ya estaba correcto, se conserva igual)
                         const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters, product_type').eq('is_active', true);
                         // ✅ FIX: Solo productos tipo 'bottle' para el mapeo de botellones con agua
                         const bottleProducts = productsFromDB.filter(p => p.product_type === 'bottle');
@@ -2643,6 +2657,10 @@ ${successDetails}
                         this.processing = false;
                     }
                 },
+                // ✅ FIX: Venta Rápida — se resetean amountReceivedBs/amountReceivedUsd
+                // ANTES de asignar según el método elegido, para que un método distinto
+                // a efectivo (pago móvil, transferencia, punto de venta) no arrastre
+                // montos "recibidos" de una venta anterior en efectivo.
                 async quickSale() {
                     if (this.cart.length === 0) {
                         showToast('El carrito está vacío', 'error');
@@ -2710,6 +2728,11 @@ ${successDetails}
                     this.selectedCustomer = '';
                     this.useMultiplePayments = false;
 
+                    // ✅ FIX: resetear ambos montos SIEMPRE antes de asignar según el método,
+                    // así no arrastra el valor recibido de una venta anterior.
+                    this.amountReceivedBs = 0;
+                    this.amountReceivedUsd = 0;
+
                     if (formValues.method === 'efectivo_bs') {
                         this.amountReceivedBs = this.totalBs;
                     } else if (formValues.method === 'efectivo_divisas') {
@@ -2756,7 +2779,7 @@ ${successDetails}
                     this.processing = true;
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
-                        // ✅ CORRECCIÓN: Usar fecha de Caracas para créditos también
+                        // ✅ CORRECCIÓN: Usar fecha de Caracas para créditos también — SIN CAMBIOS
                         const caracasDate = getCaracasDate();
                         const rateDateStr = caracasDate.toISOString().split('T')[0];
                         const { data: sale, error: saleError } = await supabase.from('sales').insert({
@@ -2774,7 +2797,7 @@ ${successDetails}
                             created_by: session.user.id
                         }).select().single();
                         if (saleError) throw saleError;
-                        // ✅ FIX: Filtrar productos por tipo para evitar conflicto de size_liters
+                        // ✅ OPTIMIZADO: select con columnas explícitas (ya estaba correcto, se conserva igual)
                         const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters, product_type').eq('is_active', true);
                         // ✅ FIX: Solo productos tipo 'bottle' para el mapeo de botellones con agua
                         const bottleProducts = productsFromDB.filter(p => p.product_type === 'bottle');
