@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,51 +16,164 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        [x-cloak] { display: none !important; }
-        body { font-family: 'Inter', sans-serif; }
-        .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 50; }
-        .sidebar-mobile { transform: translateX(-100%); transition: transform 0.3s ease-in-out; }
-        .sidebar-mobile.open { transform: translateX(0); }
-        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 39; }
-        .sidebar-overlay.show { display: block; }
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .sidebar-mobile {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar-mobile.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 39;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
         @media (min-width: 1024px) {
-            .sidebar-mobile { transform: translateX(0) !important; }
-            .sidebar-overlay { display: none !important; }
-            .menu-toggle { display: none !important; }
+            .sidebar-mobile {
+                transform: translateX(0) !important;
+            }
+
+            .sidebar-overlay {
+                display: none !important;
+            }
+
+            .menu-toggle {
+                display: none !important;
+            }
         }
+
         .toastify {
-            font-family: 'Inter', sans-serif !important; font-weight: 500 !important;
-            border-radius: 12px !important; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
-            padding: 14px 20px !important; min-width: 280px; font-size: 14px !important;
-            color: white !important; display: flex !important; align-items: center !important;
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 500 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
+            padding: 14px 20px !important;
+            min-width: 280px;
+            font-size: 14px !important;
+            color: white !important;
+            display: flex !important;
+            align-items: center !important;
         }
-        .toastify-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; }
-        .toastify-error { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important; }
-        .toastify-warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important; }
-        .toastify-info { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
-        .swal2-popup { font-family: 'Inter', sans-serif !important; border-radius: 16px !important; padding: 2rem !important; }
-        .swal2-title { font-size: 1.5rem !important; font-weight: 700 !important; color: #1f2937 !important; }
-        .swal2-html-container { font-size: 0.95rem !important; color: #4b5563 !important; }
+
+        .toastify-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        }
+
+        .toastify-error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+        }
+
+        .toastify-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+        }
+
+        .toastify-info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+        }
+
+        .swal2-popup {
+            font-family: 'Inter', sans-serif !important;
+            border-radius: 16px !important;
+            padding: 2rem !important;
+        }
+
+        .swal2-title {
+            font-size: 1.5rem !important;
+            font-weight: 700 !important;
+            color: #1f2937 !important;
+        }
+
+        .swal2-html-container {
+            font-size: 0.95rem !important;
+            color: #4b5563 !important;
+        }
+
         .swal2-confirm {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%) !important; border: none !important;
-            border-radius: 12px !important; padding: 0.75rem 2rem !important; font-weight: 600 !important;
-            font-size: 1rem !important; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3) !important; transition: all 0.2s !important;
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%) !important;
+            border: none !important;
+            border-radius: 12px !important;
+            padding: 0.75rem 2rem !important;
+            font-weight: 600 !important;
+            font-size: 1rem !important;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3) !important;
+            transition: all 0.2s !important;
         }
-        .swal2-confirm:hover { transform: translateY(-2px) !important; box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4) !important; }
+
+        .swal2-confirm:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4) !important;
+        }
+
         .swal2-cancel {
-            background: #f3f4f6 !important; color: #4b5563 !important; border: none !important;
-            border-radius: 12px !important; padding: 0.75rem 2rem !important; font-weight: 600 !important;
-            font-size: 1rem !important; transition: all 0.2s !important;
+            background: #f3f4f6 !important;
+            color: #4b5563 !important;
+            border: none !important;
+            border-radius: 12px !important;
+            padding: 0.75rem 2rem !important;
+            font-weight: 600 !important;
+            font-size: 1rem !important;
+            transition: all 0.2s !important;
         }
-        .swal2-cancel:hover { background: #e5e7eb !important; transform: translateY(-2px) !important; }
+
+        .swal2-cancel:hover {
+            background: #e5e7eb !important;
+            transform: translateY(-2px) !important;
+        }
+
         @keyframes bounce-in {
-            0% { transform: scale(0.3); opacity: 0; }
-            50% { transform: scale(1.05); }
-            70% { transform: scale(0.9); }
-            100% { transform: scale(1); opacity: 1; }
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            70% {
+                transform: scale(0.9);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
-        .animate-bounce-in { animation: bounce-in 0.4s ease-out; }
+
+        .animate-bounce-in {
+            animation: bounce-in 0.4s ease-out;
+        }
     </style>
 </head>
 
@@ -69,7 +183,8 @@
     <div class="sidebar-overlay" :class="{ 'show': mobileMenuOpen }" @click="mobileMenuOpen = false"></div>
 
     <!-- Sidebar -->
-    <aside class="sidebar-mobile fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 lg:block" :class="{ 'open': mobileMenuOpen }">
+    <aside class="sidebar-mobile fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 lg:block"
+        :class="{ 'open': mobileMenuOpen }">
         <div class="p-6">
             <div class="mb-6">
                 <div class="flex items-center space-x-3 mb-3">
@@ -86,33 +201,40 @@
             </div>
 
             <nav class="space-y-2">
-                <a href="index.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-home w-5"></i><span>Dashboard</span>
-                </a>
-                <a href="ventas.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-shopping-cart w-5"></i><span>Ventas</span>
-                </a>
-                <a href="cuentas-cobrar.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-file-invoice-dollar w-5"></i><span>Cuentas por Cobrar</span>
-                </a>
-                <a href="clientes.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-users w-5"></i><span>Clientes</span>
-                </a>
-                <a href="inventario.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
-                    <i class="fas fa-boxes w-5"></i><span class="font-medium">Inventario</span>
-                </a>
-                <a href="usuarios.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
-                </a>
-                <a href="reportes.html" @click="mobileMenuOpen = false" class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
-                </a>
+                <a href="index.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-home w-5"></i><span>Dashboard</span></a>
+                <a href="ventas.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-shopping-cart w-5"></i><span>Ventas</span></a>
+                <a href="cuentas-cobrar.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-file-invoice-dollar w-5"></i><span>Cuentas por Cobrar</span></a>
+                <a href="clientes.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-users w-5"></i><span>Clientes</span></a>
+                <a href="inventario.html"
+                    class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg"><i
+                        class="fas fa-boxes w-5"></i><span class="font-medium">Inventario</span></a>
+                <a href="gastos.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-receipt w-5"></i><span>Gastos</span></a>
+                <a href="usuarios.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-user-cog w-5"></i><span>Usuarios</span></a>
+                <a href="reportes.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-chart-line w-5"></i><span>Reportes</span></a>
+                <a href="resumen-diario.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
+                        class="fas fa-file-alt w-5"></i><span>Resumen Diario</span></a>
             </nav>
         </div>
 
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold" x-text="userInitials"></div>
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
+                    x-text="userInitials"></div>
                 <div>
                     <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
                     <p class="text-xs text-blue-200 capitalize" x-text="userRole || 'Cargando...'"></p>
@@ -126,12 +248,15 @@
         <!-- Header -->
         <header class="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-4">
-                <button @click="mobileMenuOpen = !mobileMenuOpen" class="menu-toggle lg:hidden text-gray-600 hover:text-gray-800">
+                <button @click="mobileMenuOpen = !mobileMenuOpen"
+                    class="menu-toggle lg:hidden text-gray-600 hover:text-gray-800">
                     <i class="fas fa-bars text-2xl"></i>
                 </button>
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800">Inventario</h2>
-                    <p class="text-sm text-gray-500" x-text="'Control de productos y tanques - ' + (selectedBranch === 'all' ? 'Consolidado' : userBranch) + ' | ' + DateUtils.formatDateLong(new Date())"></p>
+                    <p class="text-sm text-gray-500"
+                        x-text="'Control de productos y tanques - ' + (selectedBranch === 'all' ? 'Consolidado' : userBranch) + ' | ' + DateUtils.formatDateLong(new Date())">
+                    </p>
                 </div>
             </div>
             <div class="flex items-center space-x-2">
@@ -146,15 +271,18 @@
                     </select>
                 </div>
 
-                <button @click="openManageInventoryModal()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                <button @click="openManageInventoryModal()"
+                    class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
                     <i class="fas fa-plus"></i>
                     <span class="hidden sm:inline">Gestionar Inventario</span>
                 </button>
-                <button @click="openRefillTankModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                <button @click="openRefillTankModal()"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
                     <i class="fas fa-plus"></i>
                     <span class="hidden sm:inline">Recargar Tanque</span>
                 </button>
-                <button @click="openFillBottlesModal()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                <button @click="openFillBottlesModal()"
+                    class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
                     <i class="fas fa-tint"></i>
                     <span class="hidden sm:inline">Llenar Botellones</span>
                 </button>
@@ -179,7 +307,8 @@
                         <div>
                             <h4 class="font-semibold text-blue-900">Inventario Virtual y Físico</h4>
                             <p class="text-sm text-blue-700 mt-1">
-                                El inventario de botellones con agua se calcula automáticamente basado en el agua disponible en los tanques.
+                                El inventario de botellones con agua se calcula automáticamente basado en el agua
+                                disponible en los tanques.
                                 Los botellones vacíos y tapas se gestionan por stock físico real.
                             </p>
                         </div>
@@ -216,11 +345,14 @@
                                                item.product_type === 'cap' ? '#9333ea' : '#d97706'
                                     }"></i>
                                 </div>
-                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">Disponible</span>
+                                <span
+                                    class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">Disponible</span>
                             </div>
                             <h3 class="text-lg font-semibold text-gray-800" x-text="item.product_name"></h3>
                             <p class="text-4xl font-bold text-gray-900 mt-2" x-text="item.virtual_stock"></p>
-                            <p class="text-sm text-gray-500 mt-1" x-text="item.product_type === 'cap' || item.product_type === 'empty_bottle' ? 'unidades disponibles' : 'botellones disponibles'"></p>
+                            <p class="text-sm text-gray-500 mt-1"
+                                x-text="item.product_type === 'cap' || item.product_type === 'empty_bottle' ? 'unidades disponibles' : 'botellones disponibles'">
+                            </p>
                         </div>
                     </template>
                 </div>
@@ -232,7 +364,8 @@
                             <i class="fas fa-database text-blue-500 mr-2"></i>
                             Tanques de Almacenamiento
                         </span>
-                        <button @click="openRefillTankModal()" class="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg">
+                        <button @click="openRefillTankModal()"
+                            class="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg">
                             <i class="fas fa-plus mr-1"></i>Recargar
                         </button>
                     </h3>
@@ -242,29 +375,34 @@
                                 <div class="flex justify-between items-start mb-3">
                                     <div>
                                         <h4 class="font-semibold text-gray-800" x-text="tank.name"></h4>
-                                        <p class="text-sm text-gray-500" x-text="'Capacidad: ' + tank.capacity_liters.toLocaleString() + 'L'"></p>
+                                        <p class="text-sm text-gray-500"
+                                            x-text="'Capacidad: ' + tank.capacity_liters.toLocaleString() + 'L'"></p>
                                     </div>
                                     <span class="px-3 py-1 rounded-full text-xs font-semibold" :class="{
                                             'bg-green-100 text-green-800': (tank.current_liters / tank.capacity_liters) > 0.7,
                                             'bg-yellow-100 text-yellow-800': (tank.current_liters / tank.capacity_liters) > 0.4 && (tank.current_liters / tank.capacity_liters) <= 0.7,
                                             'bg-red-100 text-red-800': (tank.current_liters / tank.capacity_liters) <= 0.4
-                                        }" x-text="Math.round((tank.current_liters / tank.capacity_liters) * 100) + '%'"></span>
+                                        }"
+                                        x-text="Math.round((tank.current_liters / tank.capacity_liters) * 100) + '%'"></span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
                                     <div class="h-4 rounded-full transition-all duration-500" :class="{
                                             'bg-gradient-to-r from-blue-400 to-blue-600': (tank.current_liters / tank.capacity_liters) > 0.7,
                                             'bg-gradient-to-r from-yellow-400 to-yellow-600': (tank.current_liters / tank.capacity_liters) > 0.4 && (tank.current_liters / tank.capacity_liters) <= 0.7,
                                             'bg-gradient-to-r from-red-400 to-red-600': (tank.current_liters / tank.capacity_liters) <= 0.4
-                                        }" :style="'width: ' + ((tank.current_liters / tank.capacity_liters) * 100) + '%'">
+                                        }"
+                                        :style="'width: ' + ((tank.current_liters / tank.capacity_liters) * 100) + '%'">
                                     </div>
                                 </div>
                                 <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600" x-text="tank.current_liters.toLocaleString() + 'L disponibles'"></span>
+                                    <span class="text-gray-600"
+                                        x-text="tank.current_liters.toLocaleString() + 'L disponibles'"></span>
                                     <span class="font-semibold" :class="{
                                             'text-blue-600': (tank.current_liters / tank.capacity_liters) > 0.7,
                                             'text-yellow-600': (tank.current_liters / tank.capacity_liters) > 0.4 && (tank.current_liters / tank.capacity_liters) <= 0.7,
                                             'text-red-600': (tank.current_liters / tank.capacity_liters) <= 0.4
-                                        }" x-text="(tank.capacity_liters - tank.current_liters).toLocaleString() + 'L usados'"></span>
+                                        }"
+                                        x-text="(tank.capacity_liters - tank.current_liters).toLocaleString() + 'L usados'"></span>
                                 </div>
                                 <div class="mt-2 text-xs text-gray-500" x-show="tank.current_liters < tank.min_level">
                                     <i class="fas fa-exclamation-triangle text-red-500 mr-1"></i>
@@ -292,7 +430,8 @@
                             <p class="text-sm text-blue-700">
                                 <span x-text="Math.round(totalWater * 0.70).toLocaleString()"></span>L disponibles
                             </p>
-                            <p class="text-2xl font-bold text-blue-900 mt-2" x-text="Math.round((totalWater * 0.70) / 20) + ' botellones'"></p>
+                            <p class="text-2xl font-bold text-blue-900 mt-2"
+                                x-text="Math.round((totalWater * 0.70) / 20) + ' botellones'"></p>
                         </div>
 
                         <div class="bg-cyan-50 rounded-xl p-4 border-2 border-cyan-200">
@@ -303,7 +442,8 @@
                             <p class="text-sm text-cyan-700">
                                 <span x-text="Math.round(totalWater * 0.20).toLocaleString()"></span>L disponibles
                             </p>
-                            <p class="text-2xl font-bold text-cyan-900 mt-2" x-text="Math.round((totalWater * 0.20) / 5) + ' botellones'"></p>
+                            <p class="text-2xl font-bold text-cyan-900 mt-2"
+                                x-text="Math.round((totalWater * 0.20) / 5) + ' botellones'"></p>
                         </div>
 
                         <div class="bg-indigo-50 rounded-xl p-4 border-2 border-indigo-200">
@@ -314,7 +454,8 @@
                             <p class="text-sm text-indigo-700">
                                 <span x-text="Math.round(totalWater * 0.10).toLocaleString()"></span>L disponibles
                             </p>
-                            <p class="text-2xl font-bold text-indigo-900 mt-2" x-text="Math.round((totalWater * 0.10) / 13) + ' botellones'"></p>
+                            <p class="text-2xl font-bold text-indigo-900 mt-2"
+                                x-text="Math.round((totalWater * 0.10) / 13) + ' botellones'"></p>
                         </div>
                     </div>
                 </div>
@@ -323,8 +464,11 @@
     </div>
 
     <!-- Modal Gestionar Inventario -->
-    <div x-show="showManageInventoryModal" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="closeManageInventoryModal()">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-bounce-in" @click.stop>
+    <div x-show="showManageInventoryModal" x-cloak
+        class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        @click.self="closeManageInventoryModal()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-bounce-in"
+            @click.stop>
             <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white">
                 <h3 class="text-xl font-bold text-gray-800">
                     <i class="fas fa-boxes text-purple-600 mr-2"></i>Gestionar Inventario
@@ -337,10 +481,12 @@
             <div class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Producto *</label>
-                    <select x-model="manageForm.productId" @change="loadProductData()" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-purple-500">
+                    <select x-model="manageForm.productId" @change="loadProductData()"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-purple-500">
                         <option value="">Seleccionar producto...</option>
                         <template x-for="item in virtualInventory" :key="item.product_id">
-                            <option :value="item.product_id" x-text="item.product_name + ' (Stock: ' + item.virtual_stock + ')'"></option>
+                            <option :value="item.product_id"
+                                x-text="item.product_name + ' (Stock: ' + item.virtual_stock + ')'"></option>
                         </template>
                     </select>
                 </div>
@@ -369,7 +515,8 @@
                         </div>
                         <div class="flex justify-between pt-2 border-t border-purple-200">
                             <span class="text-gray-800 font-semibold">Nuevo stock:</span>
-                            <span class="font-bold text-green-600" x-text="(selectedProduct?.virtual_stock || 0) + (manageForm.quantity || 0)"></span>
+                            <span class="font-bold text-green-600"
+                                x-text="(selectedProduct?.virtual_stock || 0) + (manageForm.quantity || 0)"></span>
                         </div>
                     </div>
                 </div>
@@ -388,8 +535,11 @@
     </div>
 
     <!-- Modal Recargar Tanque -->
-    <div x-show="showRefillTankModal" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="closeRefillTankModal()">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-bounce-in" @click.stop>
+    <div x-show="showRefillTankModal" x-cloak
+        class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        @click.self="closeRefillTankModal()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-bounce-in"
+            @click.stop>
             <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white">
                 <h3 class="text-xl font-bold text-gray-800">
                     <i class="fas fa-plus-circle text-blue-600 mr-2"></i>Recargar Tanque
@@ -402,10 +552,13 @@
             <div class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Tanque *</label>
-                    <select x-model="refillForm.tankId" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500">
+                    <select x-model="refillForm.tankId"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500">
                         <option value="">Seleccionar tanque...</option>
                         <template x-for="tank in tanks" :key="tank.id">
-                            <option :value="tank.id" x-text="tank.name + ' (' + tank.current_liters + 'L / ' + tank.capacity_liters + 'L)'"></option>
+                            <option :value="tank.id"
+                                x-text="tank.name + ' (' + tank.current_liters + 'L / ' + tank.capacity_liters + 'L)'">
+                            </option>
                         </template>
                     </select>
                 </div>
@@ -433,15 +586,18 @@
                     <div class="space-y-1 text-sm">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Nivel actual:</span>
-                            <span class="font-semibold" x-text="(getCurrentTankLevel() || 0).toLocaleString() + 'L'"></span>
+                            <span class="font-semibold"
+                                x-text="(getCurrentTankLevel() || 0).toLocaleString() + 'L'"></span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">A agregar:</span>
-                            <span class="font-semibold text-blue-600" x-text="(refillForm.liters || 0).toLocaleString() + 'L'"></span>
+                            <span class="font-semibold text-blue-600"
+                                x-text="(refillForm.liters || 0).toLocaleString() + 'L'"></span>
                         </div>
                         <div class="flex justify-between pt-2 border-t border-blue-200">
                             <span class="text-gray-800 font-semibold">Nuevo nivel:</span>
-                            <span class="font-bold text-green-600" x-text="(getCurrentTankLevel() + (refillForm.liters || 0)).toLocaleString() + 'L'"></span>
+                            <span class="font-bold text-green-600"
+                                x-text="(getCurrentTankLevel() + (refillForm.liters || 0)).toLocaleString() + 'L'"></span>
                         </div>
                     </div>
                 </div>
@@ -460,8 +616,11 @@
     </div>
 
     <!-- Modal Llenar Botellones -->
-    <div x-show="showFillBottlesModal" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="closeFillBottlesModal()">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-bounce-in" @click.stop>
+    <div x-show="showFillBottlesModal" x-cloak
+        class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        @click.self="closeFillBottlesModal()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-bounce-in"
+            @click.stop>
             <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white">
                 <h3 class="text-xl font-bold text-gray-800">
                     <i class="fas fa-tint text-cyan-600 mr-2"></i>Llenar Botellones
@@ -474,7 +633,8 @@
             <div class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Botellón *</label>
-                    <select x-model="fillForm.sizeLiters" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500">
+                    <select x-model="fillForm.sizeLiters"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500">
                         <option value="">Seleccionar...</option>
                         <option value="5">Botellón 5 Litros</option>
                         <option value="13">Botellón 13 Litros</option>
@@ -491,10 +651,12 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Tanque de Origen *</label>
-                    <select x-model="fillForm.tankId" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500">
+                    <select x-model="fillForm.tankId"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500">
                         <option value="">Seleccionar tanque...</option>
                         <template x-for="tank in tanks" :key="tank.id">
-                            <option :value="tank.id" x-text="tank.name + ' (' + tank.current_liters + 'L disponibles)'"></option>
+                            <option :value="tank.id" x-text="tank.name + ' (' + tank.current_liters + 'L disponibles)'">
+                            </option>
                         </template>
                     </select>
                 </div>
@@ -512,7 +674,8 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Agua requerida:</span>
-                            <span class="font-semibold text-cyan-600" x-text="((fillForm.quantity || 0) * (fillForm.sizeLiters || 0)).toLocaleString() + 'L'"></span>
+                            <span class="font-semibold text-cyan-600"
+                                x-text="((fillForm.quantity || 0) * (fillForm.sizeLiters || 0)).toLocaleString() + 'L'"></span>
                         </div>
                     </div>
                 </div>
@@ -592,7 +755,7 @@
                 userRole: '',
                 userBranch: '',
                 userInitials: '??',
-                
+
                 selectedBranch: 'all',
                 availableBranches: [],
 
@@ -652,7 +815,7 @@
                     try {
                         console.log('🔍 ========== INICIO CARGA INVENTARIO ==========');
                         console.log('📍 Sucursal seleccionada:', this.selectedBranch);
-                        
+
                         let inventoryQuery = supabase.from('inventory')
                             .select(`
                                 id,
@@ -668,39 +831,39 @@
                                     description
                                 )
                             `);
-                        
+
                         if (this.selectedBranch !== 'all') {
                             inventoryQuery = inventoryQuery.eq('branch', this.selectedBranch);
                         }
-                        
+
                         const { data: inventoryData, error: inventoryError } = await inventoryQuery;
-                        
+
                         if (inventoryError) {
                             console.error('❌ Error consultando inventory:', inventoryError);
                             throw inventoryError;
                         }
-                        
+
                         let pricesQuery = supabase.from('product_prices')
                             .select(`id, product_id, price_usd, branch, is_active`);
-                        
+
                         if (this.selectedBranch !== 'all') {
                             pricesQuery = pricesQuery.eq('branch', this.selectedBranch);
                         }
-                        
+
                         const { data: pricesData, error: pricesError } = await pricesQuery.eq('is_active', true);
-                        
+
                         const priceMap = {};
                         (pricesData || []).forEach(price => {
                             const key = `${price.product_id}_${price.branch}`;
                             priceMap[key] = price.price_usd;
                         });
-                        
+
                         const combinedData = inventoryData.map(item => {
                             const priceKey = `${item.product_id}_${item.branch}`;
                             const price = priceMap[priceKey] || 0;
                             const isCap = item.products.product_type === 'cap';
                             const isEmptyBottle = item.products.product_type === 'empty_bottle';
-                            
+
                             return {
                                 product_id: item.product_id,
                                 product_name: item.products.name,
@@ -712,9 +875,9 @@
                                 water_assigned: (isCap || isEmptyBottle) ? 0 : (item.quantity * (item.products.size_liters || 0))
                             };
                         });
-                        
+
                         this.virtualInventory = combinedData;
-                        
+
                     } catch (err) {
                         console.error('❌ Error cargando inventario virtual:', err);
                         showToast('Error al cargar inventario: ' + err.message, 'error');
@@ -725,14 +888,14 @@
                 async loadTanks() {
                     try {
                         let query = supabase.from('tanks').select('*').order('name');
-                        
+
                         if (this.selectedBranch !== 'all') {
                             query = query.eq('branch', this.selectedBranch);
                         }
 
                         const { data, error } = await query;
                         if (error) throw error;
-                        
+
                         this.tanks = data || [];
                         this.totalWater = this.tanks.reduce((sum, tank) => sum + tank.current_liters, 0);
                     } catch (err) {
@@ -756,7 +919,7 @@
                     this.showManageInventoryModal = true;
                 },
                 closeManageInventoryModal() { this.showManageInventoryModal = false; },
-                
+
                 loadProductData() {
                     this.selectedProduct = this.virtualInventory.find(item => item.product_id === this.manageForm.productId) || null;
                 },
@@ -783,7 +946,7 @@
                     this.processing = true;
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
-                        
+
                         // Actualizar inventario
                         const { error: updateError } = await supabase.from('inventory')
                             .update({
@@ -792,7 +955,7 @@
                             })
                             .eq('product_id', this.manageForm.productId)
                             .eq('branch', this.selectedBranch === 'all' ? this.userBranch : this.selectedBranch);
-                        
+
                         if (updateError) throw updateError;
 
                         showToast(`Inventario actualizado: ${newStock} unidades`, 'success');
@@ -938,4 +1101,5 @@
         }
     </script>
 </body>
+
 </html>
