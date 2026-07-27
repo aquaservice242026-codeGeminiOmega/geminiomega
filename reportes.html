@@ -17,6 +17,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    <!-- ✅ NUEVO: Librerías para generar el reporte de Ventas en PDF y Excel con el estilo solicitado -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <style>
@@ -1166,6 +1170,15 @@
             return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Caracas' });
         }
 
+        // ✅ NUEVO: Convierte 'YYYY-MM-DD' a un objeto Date "local" (año, mes, día) sin pasar
+        // por ningún parseo de string basado en dateFormat ni por conversión UTC. Esto evita que
+        // Flatpickr (u otros parseos de fecha) interprete mal la fecha y muestre un día incorrecto
+        // al abrir el reporte.
+        function isoToLocalDate(isoStr) {
+            const [y, m, d] = isoStr.split('-').map(Number);
+            return new Date(y, m - 1, d);
+        }
+
         function formatDate(dateString) {
             if (!dateString) return '';
             const date = new Date(dateString);
@@ -1328,8 +1341,8 @@
                         if (this.startDate === this.endDate && this.startDate !== freshToday) {
                             this.startDate = freshToday;
                             this.endDate = freshToday;
-                            if (this.startPicker) this.startPicker.setDate(freshToday, false);
-                            if (this.endPicker) this.endPicker.setDate(freshToday, false);
+                            if (this.startPicker) this.startPicker.setDate(isoToLocalDate(freshToday), false);
+                            if (this.endPicker) this.endPicker.setDate(isoToLocalDate(freshToday), false);
                             this.generateReport();
                         }
                     });
@@ -1345,7 +1358,7 @@
 
                     this.startPicker = flatpickr('#startDateInput', {
                         ...baseOptions,
-                        defaultDate: this.startDate,
+                        defaultDate: isoToLocalDate(this.startDate),
                         onChange: (selectedDates) => {
                             if (!selectedDates[0]) return;
                             this.startDate = this.toISODate(selectedDates[0]);
@@ -1355,13 +1368,18 @@
 
                     this.endPicker = flatpickr('#endDateInput', {
                         ...baseOptions,
-                        defaultDate: this.endDate,
+                        defaultDate: isoToLocalDate(this.endDate),
                         onChange: (selectedDates) => {
                             if (!selectedDates[0]) return;
                             this.endDate = this.toISODate(selectedDates[0]);
                             this.generateReport();
                         }
                     });
+
+                    // ✅ Refuerzo: fija explícitamente la fecha visible en ambos inputs justo después
+                    // de crear el picker, por si el render inicial no reflejó defaultDate correctamente.
+                    this.startPicker.setDate(isoToLocalDate(this.startDate), false);
+                    this.endPicker.setDate(isoToLocalDate(this.endDate), false);
                 },
 
                 // ✅ NUEVO: Convierte una fecha del picker (local) a YYYY-MM-DD sin desfases de zona horaria
@@ -1538,8 +1556,10 @@
                     const productsData = productsResult.data || [];
 
                     const productMap = {};
+                    const productSizeMap = {};
                     productsData.forEach(p => {
                         productMap[p.id] = p.name || `Botellón ${p.size_liters}L`;
+                        productSizeMap[p.id] = p.size_liters || null;
                     });
 
                     const salesById = {};
@@ -1552,10 +1572,13 @@
                             created_at: sale.created_at,
                             customer_name: sale.customer_name,
                             product_name: productMap[item.product_id] || 'Producto',
+                            size_liters: productSizeMap[item.product_id] || null,
                             quantity: item.quantity || 0,
                             price: item.unit_price || 0,
                             total: item.total || 0,
-                            payment_method: sale.payment_method
+                            payment_method: sale.payment_method,
+                            exchange_rate_used: sale.exchange_rate_used || null,
+                            delivery_type: sale.delivery_type || 'pickup'
                         };
                     }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
@@ -1924,8 +1947,8 @@
                             break;
                     }
                     // ✅ Sincronizar visualmente los date pickers (sin disparar su propio onChange)
-                    if (this.startPicker) this.startPicker.setDate(this.startDate, false);
-                    if (this.endPicker) this.endPicker.setDate(this.endDate, false);
+                    if (this.startPicker) this.startPicker.setDate(isoToLocalDate(this.startDate), false);
+                    if (this.endPicker) this.endPicker.setDate(isoToLocalDate(this.endDate), false);
                     this.generateReport();
                 },
 
@@ -1947,6 +1970,16 @@
                 },
 
                 exportReport(format) {
+                    // ✅ NUEVO: El reporte de Ventas usa un PDF/Excel con formato propio (estilo
+                    // "Relación de Ventas"). El resto de los reportes conserva su comportamiento actual.
+                    if (this.reportType === 'ventas') {
+                        if (format === 'pdf') {
+                            this.generateVentasPDF();
+                        } else if (format === 'excel') {
+                            this.generateVentasExcel();
+                        }
+                        return;
+                    }
                     if (format === 'pdf') {
                         showToast('Preparando impresión...', 'info');
                         setTimeout(() => window.print(), 300);
@@ -1955,6 +1988,211 @@
                     if (format === 'excel') {
                         this.exportCSV();
                         return;
+                    }
+                },
+
+                // ✅ NUEVO: Etiqueta legible de la sucursal activa para encabezados de reportes
+                branchLabel() {
+                    if (!this.selectedBranch) return 'Géminis - Omega (Todas las sucursales)';
+                    if (this.selectedBranch === 'geminis') return 'Géminis';
+                    if (this.selectedBranch === 'omega') return 'Omega';
+                    return this.selectedBranch;
+                },
+
+                // ✅ NUEVO: Genera el PDF de "Relación de Ventas" con el estilo solicitado
+                generateVentasPDF() {
+                    const datos = this.salesData;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para generar el PDF', 'warning');
+                        return;
+                    }
+                    try {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
+
+                        doc.setFontSize(20);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(30, 58, 95);
+                        doc.text('GÉMINIS - OMEGA', 14, 15);
+
+                        doc.setFontSize(11);
+                        doc.setTextColor(0, 0, 0);
+                        doc.text('RELACIÓN DE VENTAS', 14, 22);
+
+                        doc.setFontSize(9);
+                        doc.setFont('helvetica', 'normal');
+                        doc.text(`Sucursal: ${this.branchLabel()}`, 14, 28);
+                        doc.text(`Del ${formatDate(this.startDate)} al ${formatDate(this.endDate)}`, 14, 33);
+
+                        doc.setFontSize(8);
+                        doc.setTextColor(120, 120, 120);
+                        doc.text(`Generado por ${this.userName || ''} el ${formatDate(getCaracasDateString())}`, 14, 38);
+
+                        const head = [['Fecha', 'Cliente', 'Cant', 'Tasa', 'Presentación', 'P.V.P', 'Total Bs.', 'Total ($)', 'Forma de Pago', 'Servicio']];
+                        const body = datos.map(s => {
+                            const rate = s.exchange_rate_used || this.exchangeRate;
+                            const presentacion = s.size_liters ? `${s.size_liters} Litros` : s.product_name;
+                            return [
+                                formatDate(s.created_at),
+                                s.customer_name || 'Cliente Anónimo',
+                                s.quantity,
+                                formatNumber(rate),
+                                presentacion,
+                                formatNumber(s.price),
+                                formatNumber(s.total * rate),
+                                formatNumber(s.total),
+                                getPaymentMethodName(s.payment_method),
+                                s.delivery_type === 'delivery' ? 'Delivery' : 'Tienda'
+                            ];
+                        });
+
+                        doc.autoTable({
+                            head, body, startY: 43, theme: 'grid',
+                            headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold', halign: 'center', fontSize: 8 },
+                            styles: { fontSize: 7.5, cellPadding: 1.5, halign: 'center' },
+                            columnStyles: { 1: { halign: 'left' }, 4: { halign: 'left' } },
+                            alternateRowStyles: { fillColor: [245, 249, 255] },
+                            margin: { left: 10, right: 10 }
+                        });
+
+                        const totalUSD = datos.reduce((sum, s) => sum + (s.total || 0), 0);
+                        const totalBs = datos.reduce((sum, s) => sum + (s.total || 0) * (s.exchange_rate_used || this.exchangeRate), 0);
+                        const finalY = doc.lastAutoTable.finalY + 6;
+                        doc.setFontSize(9);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(`Total registros: ${datos.length}   |   Total Bs.: ${formatNumber(totalBs)}   |   Total ($): ${formatNumber(totalUSD)}`, 14, finalY);
+
+                        doc.save(`reporte_ventas_${this.startDate}_a_${this.endDate}.pdf`);
+                        showToast('PDF generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando PDF de ventas:', err);
+                        showToast('Error al generar el PDF', 'error');
+                    }
+                },
+
+                // ✅ NUEVO: Genera el Excel de "Relación de Ventas" con el estilo solicitado
+                async generateVentasExcel() {
+                    const datos = this.salesData;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para exportar', 'warning');
+                        return;
+                    }
+                    try {
+                        if (typeof ExcelJS === 'undefined') {
+                            showToast('La librería de Excel no está cargada', 'error');
+                            return;
+                        }
+                        const workbook = new ExcelJS.Workbook();
+                        workbook.creator = this.userName || 'Sistema';
+                        workbook.created = new Date();
+
+                        const colores = {
+                            headerBg: 'FF1E3A5F',
+                            headerText: 'FFFFFFFF',
+                            altRow: 'FFF5F9FF',
+                            border: 'FFCCCCCC'
+                        };
+                        const borde = {
+                            top: { style: 'thin', color: { argb: colores.border } },
+                            left: { style: 'thin', color: { argb: colores.border } },
+                            bottom: { style: 'thin', color: { argb: colores.border } },
+                            right: { style: 'thin', color: { argb: colores.border } }
+                        };
+
+                        const ws = workbook.addWorksheet('Ventas', { views: [{ state: 'frozen', ySplit: 6 }] });
+
+                        ws.mergeCells('A1:J1');
+                        ws.getCell('A1').value = 'GÉMINIS - OMEGA';
+                        ws.getCell('A1').font = { name: 'Calibri', size: 18, bold: true, color: { argb: colores.headerBg } };
+                        ws.getCell('A1').alignment = { horizontal: 'center' };
+                        ws.getRow(1).height = 28;
+
+                        ws.mergeCells('A2:J2');
+                        ws.getCell('A2').value = 'RELACIÓN DE VENTAS';
+                        ws.getCell('A2').font = { name: 'Calibri', size: 12, bold: true };
+                        ws.getCell('A2').alignment = { horizontal: 'center' };
+
+                        ws.mergeCells('A3:J3');
+                        ws.getCell('A3').value = `Sucursal: ${this.branchLabel()}`;
+                        ws.getCell('A3').alignment = { horizontal: 'center' };
+                        ws.getCell('A3').font = { name: 'Calibri', size: 10 };
+
+                        ws.mergeCells('A4:J4');
+                        ws.getCell('A4').value = `Del ${formatDate(this.startDate)} al ${formatDate(this.endDate)}`;
+                        ws.getCell('A4').alignment = { horizontal: 'center' };
+                        ws.getCell('A4').font = { name: 'Calibri', size: 10, italic: true };
+
+                        const headers = ['Fecha', 'Cliente', 'Cant', 'Tasa', 'Presentación', 'P.V.P', 'Total Bs.', 'Total ($)', 'Forma de Pago', 'Servicio'];
+                        const headerRowNum = 6;
+                        headers.forEach((h, idx) => {
+                            const cell = ws.getRow(headerRowNum).getCell(idx + 1);
+                            cell.value = h;
+                            cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: colores.headerText } };
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colores.headerBg } };
+                            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                            cell.border = borde;
+                        });
+                        ws.getRow(headerRowNum).height = 20;
+
+                        let rowNum = headerRowNum + 1;
+                        datos.forEach((s, idx) => {
+                            const rate = s.exchange_rate_used || this.exchangeRate;
+                            const presentacion = s.size_liters ? `${s.size_liters} Litros` : s.product_name;
+                            const row = ws.getRow(rowNum);
+                            row.getCell(1).value = formatDate(s.created_at);
+                            row.getCell(2).value = s.customer_name || 'Cliente Anónimo';
+                            row.getCell(3).value = s.quantity;
+                            row.getCell(4).value = round2(rate);
+                            row.getCell(5).value = presentacion;
+                            row.getCell(6).value = round2(s.price);
+                            row.getCell(7).value = round2(s.total * rate);
+                            row.getCell(8).value = round2(s.total);
+                            row.getCell(9).value = getPaymentMethodName(s.payment_method);
+                            row.getCell(10).value = s.delivery_type === 'delivery' ? 'Delivery' : 'Tienda';
+
+                            row.eachCell(c => { c.border = borde; c.alignment = { horizontal: 'center' }; });
+                            row.getCell(2).alignment = { horizontal: 'left' };
+                            row.getCell(5).alignment = { horizontal: 'left' };
+
+                            if (idx % 2 === 1) {
+                                row.eachCell(c => {
+                                    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colores.altRow } };
+                                });
+                            }
+                            rowNum++;
+                        });
+
+                        const totalUSD = datos.reduce((sum, s) => sum + (s.total || 0), 0);
+                        const totalBs = datos.reduce((sum, s) => sum + (s.total || 0) * (s.exchange_rate_used || this.exchangeRate), 0);
+                        const totalRow = ws.getRow(rowNum);
+                        totalRow.getCell(6).value = 'TOTALES:';
+                        totalRow.getCell(7).value = round2(totalBs);
+                        totalRow.getCell(8).value = round2(totalUSD);
+                        [6, 7, 8].forEach(c => {
+                            totalRow.getCell(c).font = { bold: true };
+                            totalRow.getCell(c).border = borde;
+                            totalRow.getCell(c).alignment = { horizontal: 'center' };
+                        });
+
+                        ws.columns = [
+                            { width: 12 }, { width: 24 }, { width: 8 }, { width: 10 },
+                            { width: 16 }, { width: 10 }, { width: 14 }, { width: 12 },
+                            { width: 16 }, { width: 12 }
+                        ];
+
+                        const buffer = await workbook.xlsx.writeBuffer();
+                        const blob = new Blob([buffer], { type: 'application/octet-stream' });
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = `reporte_ventas_${this.startDate}_a_${this.endDate}.xlsx`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        showToast('Excel generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando Excel de ventas:', err);
+                        showToast('Error al generar el Excel', 'error');
                     }
                 },
 
