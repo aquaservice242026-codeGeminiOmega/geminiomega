@@ -1969,25 +1969,25 @@
                     console.log('Iniciando gráficos...');
                 },
 
+                // ✅ ACTUALIZADO: Ahora TODOS los tipos de reporte tienen su propio PDF y Excel
+                // con el mismo formato ("GÉMINIS - OMEGA" + subtítulo + tabla estilizada) que
+                // ya se usaba para Ventas, en vez de usar window.print() / CSV genérico.
                 exportReport(format) {
-                    // ✅ NUEVO: El reporte de Ventas usa un PDF/Excel con formato propio (estilo
-                    // "Relación de Ventas"). El resto de los reportes conserva su comportamiento actual.
-                    if (this.reportType === 'ventas') {
-                        if (format === 'pdf') {
-                            this.generateVentasPDF();
-                        } else if (format === 'excel') {
-                            this.generateVentasExcel();
-                        }
-                        return;
-                    }
-                    if (format === 'pdf') {
-                        showToast('Preparando impresión...', 'info');
-                        setTimeout(() => window.print(), 300);
-                        return;
-                    }
-                    if (format === 'excel') {
-                        this.exportCSV();
-                        return;
+                    const generators = {
+                        ventas: { pdf: 'generateVentasPDF', excel: 'generateVentasExcel' },
+                        ventas_producto: { pdf: 'generateVentasProductoPDF', excel: 'generateVentasProductoExcel' },
+                        ventas_metodo: { pdf: 'generateVentasMetodoPDF', excel: 'generateVentasMetodoExcel' },
+                        clientes: { pdf: 'generateClientesPDF', excel: 'generateClientesExcel' },
+                        inventario: { pdf: 'generateInventarioPDF', excel: 'generateInventarioExcel' },
+                        cuentas: { pdf: 'generateCuentasPDF', excel: 'generateCuentasExcel' },
+                        resumen: { pdf: 'generateResumenPDF', excel: 'generateResumenExcel' },
+                        deliverys: { pdf: 'generateDeliverysPDF', excel: 'generateDeliverysExcel' }
+                    };
+                    const config = generators[this.reportType];
+                    if (!config) return;
+                    const fnName = format === 'pdf' ? config.pdf : config.excel;
+                    if (typeof this[fnName] === 'function') {
+                        this[fnName]();
                     }
                 },
 
@@ -1997,6 +1997,145 @@
                     if (this.selectedBranch === 'geminis') return 'Géminis';
                     if (this.selectedBranch === 'omega') return 'Omega';
                     return this.selectedBranch;
+                },
+
+                // ---------- Helpers genéricos de estilo para PDF/Excel (mismo formato que Ventas) ----------
+
+                // Encabezado común de PDF: título, subtítulo, sucursal, rango de fechas, autor
+                pdfHeader(doc, subtitle) {
+                    doc.setFontSize(20);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(30, 58, 95);
+                    doc.text('GÉMINIS - OMEGA', 14, 15);
+
+                    doc.setFontSize(11);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(subtitle, 14, 22);
+
+                    doc.setFontSize(9);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`Sucursal: ${this.branchLabel()}`, 14, 28);
+                    doc.text(`Del ${formatDate(this.startDate)} al ${formatDate(this.endDate)}`, 14, 33);
+
+                    doc.setFontSize(8);
+                    doc.setTextColor(120, 120, 120);
+                    doc.text(`Generado por ${this.userName || ''} el ${formatDate(getCaracasDateString())}`, 14, 38);
+                },
+
+                // Convierte un número de columna (1-based) a letra de Excel (1 -> A, 27 -> AA, etc.)
+                excelColLetter(n) {
+                    let s = '';
+                    while (n > 0) {
+                        const rem = (n - 1) % 26;
+                        s = String.fromCharCode(65 + rem) + s;
+                        n = Math.floor((n - 1) / 26);
+                    }
+                    return s;
+                },
+
+                // Colores/bordes reutilizados en todas las hojas de Excel
+                excelStyleKit() {
+                    const colores = {
+                        headerBg: 'FF1E3A5F',
+                        headerText: 'FFFFFFFF',
+                        altRow: 'FFF5F9FF',
+                        border: 'FFCCCCCC'
+                    };
+                    const borde = {
+                        top: { style: 'thin', color: { argb: colores.border } },
+                        left: { style: 'thin', color: { argb: colores.border } },
+                        bottom: { style: 'thin', color: { argb: colores.border } },
+                        right: { style: 'thin', color: { argb: colores.border } }
+                    };
+                    return { colores, borde };
+                },
+
+                // Encabezado común de Excel: título, subtítulo, sucursal, rango de fechas (filas 1-4)
+                excelHeader(ws, subtitle, numCols) {
+                    const lastCol = this.excelColLetter(numCols);
+                    const { colores } = this.excelStyleKit();
+
+                    ws.mergeCells(`A1:${lastCol}1`);
+                    ws.getCell('A1').value = 'GÉMINIS - OMEGA';
+                    ws.getCell('A1').font = { name: 'Calibri', size: 18, bold: true, color: { argb: colores.headerBg } };
+                    ws.getCell('A1').alignment = { horizontal: 'center' };
+                    ws.getRow(1).height = 28;
+
+                    ws.mergeCells(`A2:${lastCol}2`);
+                    ws.getCell('A2').value = subtitle;
+                    ws.getCell('A2').font = { name: 'Calibri', size: 12, bold: true };
+                    ws.getCell('A2').alignment = { horizontal: 'center' };
+
+                    ws.mergeCells(`A3:${lastCol}3`);
+                    ws.getCell('A3').value = `Sucursal: ${this.branchLabel()}`;
+                    ws.getCell('A3').alignment = { horizontal: 'center' };
+                    ws.getCell('A3').font = { name: 'Calibri', size: 10 };
+
+                    ws.mergeCells(`A4:${lastCol}4`);
+                    ws.getCell('A4').value = `Del ${formatDate(this.startDate)} al ${formatDate(this.endDate)}`;
+                    ws.getCell('A4').alignment = { horizontal: 'center' };
+                    ws.getCell('A4').font = { name: 'Calibri', size: 10, italic: true };
+                },
+
+                // Escribe la fila de encabezados de tabla (fila 6) + filas de datos, con
+                // bandas de color alternadas, igual que la hoja de Ventas.
+                // leftAlignCols: índices (0-based) de columnas que deben ir alineadas a la izquierda.
+                excelWriteRows(ws, headers, rows, leftAlignCols = []) {
+                    const { colores, borde } = this.excelStyleKit();
+                    const headerRowNum = 6;
+                    headers.forEach((h, idx) => {
+                        const cell = ws.getRow(headerRowNum).getCell(idx + 1);
+                        cell.value = h;
+                        cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: colores.headerText } };
+                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colores.headerBg } };
+                        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                        cell.border = borde;
+                    });
+                    ws.getRow(headerRowNum).height = 20;
+
+                    let rowNum = headerRowNum + 1;
+                    rows.forEach((r, idx) => {
+                        const row = ws.getRow(rowNum);
+                        r.forEach((val, cIdx) => {
+                            const cell = row.getCell(cIdx + 1);
+                            cell.value = val;
+                            cell.border = borde;
+                            cell.alignment = { horizontal: leftAlignCols.includes(cIdx) ? 'left' : 'center' };
+                        });
+                        if (idx % 2 === 1) {
+                            row.eachCell(c => {
+                                c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colores.altRow } };
+                            });
+                        }
+                        rowNum++;
+                    });
+                    return rowNum; // primera fila libre después de los datos (para totales)
+                },
+
+                // Descarga el workbook como archivo .xlsx
+                async excelDownload(workbook, filenameBase) {
+                    const buffer = await workbook.xlsx.writeBuffer();
+                    const blob = new Blob([buffer], { type: 'application/octet-stream' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `${filenameBase}_${this.startDate}_a_${this.endDate}.xlsx`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                },
+
+                // ✅ NUEVO: Determina el texto de "Presentación" para una venta.
+                // Antes solo mostraba "20 Litros" sin importar si era un botellón lleno
+                // o la devolución/cambio de un envase vacío. Ahora, si el nombre del
+                // producto indica que es un envase vacío ("Vacío", "Vacio", "Envase Vacío",
+                // etc.), se antepone "Vacío" a la presentación.
+                getPresentacion(s) {
+                    const nombre = s.product_name || '';
+                    const esVacio = /vac[ií]o/i.test(nombre);
+                    if (s.size_liters) {
+                        return esVacio ? `Vacío ${s.size_liters} Litros` : `${s.size_liters} Litros`;
+                    }
+                    return nombre;
                 },
 
                 // ✅ NUEVO: Genera el PDF de "Relación de Ventas" con el estilo solicitado
@@ -2031,7 +2170,7 @@
                         const head = [['Fecha', 'Cliente', 'Cant', 'Tasa', 'Presentación', 'P.V.P', 'Total Bs.', 'Total ($)', 'Forma de Pago', 'Servicio']];
                         const body = datos.map(s => {
                             const rate = s.exchange_rate_used || this.exchangeRate;
-                            const presentacion = s.size_liters ? `${s.size_liters} Litros` : s.product_name;
+                            const presentacion = this.getPresentacion(s);
                             return [
                                 formatDate(s.created_at),
                                 s.customer_name || 'Cliente Anónimo',
@@ -2138,7 +2277,7 @@
                         let rowNum = headerRowNum + 1;
                         datos.forEach((s, idx) => {
                             const rate = s.exchange_rate_used || this.exchangeRate;
-                            const presentacion = s.size_liters ? `${s.size_liters} Litros` : s.product_name;
+                            const presentacion = this.getPresentacion(s);
                             const row = ws.getRow(rowNum);
                             row.getCell(1).value = formatDate(s.created_at);
                             row.getCell(2).value = s.customer_name || 'Cliente Anónimo';
@@ -2192,6 +2331,616 @@
                         showToast('Excel generado', 'success');
                     } catch (err) {
                         console.error('Error generando Excel de ventas:', err);
+                        showToast('Error al generar el Excel', 'error');
+                    }
+                },
+
+                // ================= VENTAS POR PRODUCTO =================
+                generateVentasProductoPDF() {
+                    const datos = this.productSalesSummary;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para generar el PDF', 'warning');
+                        return;
+                    }
+                    try {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
+                        this.pdfHeader(doc, 'VENTAS POR PRODUCTO');
+
+                        const head = [['Producto', 'Cantidad Vendida', 'Total ($)', 'Total Bs.']];
+                        const body = datos.map(p => [
+                            p.name, p.quantity, formatNumber(p.total), formatNumber(p.total * this.exchangeRate)
+                        ]);
+
+                        doc.autoTable({
+                            head, body, startY: 43, theme: 'grid',
+                            headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold', halign: 'center', fontSize: 8 },
+                            styles: { fontSize: 8, cellPadding: 2, halign: 'center' },
+                            columnStyles: { 0: { halign: 'left' } },
+                            alternateRowStyles: { fillColor: [245, 249, 255] },
+                            margin: { left: 10, right: 10 }
+                        });
+
+                        const totalCantidad = datos.reduce((sum, p) => sum + (p.quantity || 0), 0);
+                        const totalUSD = datos.reduce((sum, p) => sum + (p.total || 0), 0);
+                        const finalY = doc.lastAutoTable.finalY + 6;
+                        doc.setFontSize(9);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(`Total productos: ${datos.length}   |   Cantidad total: ${totalCantidad}   |   Total ($): ${formatNumber(totalUSD)}   |   Total Bs.: ${formatNumber(totalUSD * this.exchangeRate)}`, 14, finalY);
+
+                        doc.save(`reporte_ventas_producto_${this.startDate}_a_${this.endDate}.pdf`);
+                        showToast('PDF generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando PDF de ventas por producto:', err);
+                        showToast('Error al generar el PDF', 'error');
+                    }
+                },
+
+                async generateVentasProductoExcel() {
+                    const datos = this.productSalesSummary;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para exportar', 'warning');
+                        return;
+                    }
+                    try {
+                        if (typeof ExcelJS === 'undefined') {
+                            showToast('La librería de Excel no está cargada', 'error');
+                            return;
+                        }
+                        const workbook = new ExcelJS.Workbook();
+                        workbook.creator = this.userName || 'Sistema';
+                        workbook.created = new Date();
+                        const ws = workbook.addWorksheet('Ventas por Producto', { views: [{ state: 'frozen', ySplit: 6 }] });
+                        this.excelHeader(ws, 'VENTAS POR PRODUCTO', 4);
+
+                        const headers = ['Producto', 'Cantidad Vendida', 'Total ($)', 'Total Bs.'];
+                        const rows = datos.map(p => [p.name, p.quantity, round2(p.total), round2(p.total * this.exchangeRate)]);
+                        let rowNum = this.excelWriteRows(ws, headers, rows, [0]);
+
+                        const totalCantidad = datos.reduce((sum, p) => sum + (p.quantity || 0), 0);
+                        const totalUSD = datos.reduce((sum, p) => sum + (p.total || 0), 0);
+                        const totalRow = ws.getRow(rowNum);
+                        totalRow.getCell(1).value = 'TOTALES:';
+                        totalRow.getCell(2).value = totalCantidad;
+                        totalRow.getCell(3).value = round2(totalUSD);
+                        totalRow.getCell(4).value = round2(totalUSD * this.exchangeRate);
+                        [1, 2, 3, 4].forEach(c => {
+                            totalRow.getCell(c).font = { bold: true };
+                            totalRow.getCell(c).alignment = { horizontal: 'center' };
+                        });
+
+                        ws.columns = [{ width: 30 }, { width: 16 }, { width: 14 }, { width: 14 }];
+
+                        await this.excelDownload(workbook, 'reporte_ventas_producto');
+                        showToast('Excel generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando Excel de ventas por producto:', err);
+                        showToast('Error al generar el Excel', 'error');
+                    }
+                },
+
+                // ================= VENTAS POR MÉTODO DE PAGO =================
+                generateVentasMetodoPDF() {
+                    const datos = this.paymentMethodSummary;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para generar el PDF', 'warning');
+                        return;
+                    }
+                    try {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
+                        this.pdfHeader(doc, 'VENTAS POR MÉTODO DE PAGO');
+
+                        const head = [['Método de Pago', 'Transacciones', 'Total ($)', 'Total Bs.']];
+                        const body = datos.map(m => [
+                            getPaymentMethodName(m.method), m.count, formatNumber(m.total), formatNumber(m.total * this.exchangeRate)
+                        ]);
+
+                        doc.autoTable({
+                            head, body, startY: 43, theme: 'grid',
+                            headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold', halign: 'center', fontSize: 8 },
+                            styles: { fontSize: 8, cellPadding: 2, halign: 'center' },
+                            columnStyles: { 0: { halign: 'left' } },
+                            alternateRowStyles: { fillColor: [245, 249, 255] },
+                            margin: { left: 10, right: 10 }
+                        });
+
+                        const totalTrans = datos.reduce((sum, m) => sum + (m.count || 0), 0);
+                        const totalUSD = datos.reduce((sum, m) => sum + (m.total || 0), 0);
+                        const finalY = doc.lastAutoTable.finalY + 6;
+                        doc.setFontSize(9);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(`Transacciones: ${totalTrans}   |   Total ($): ${formatNumber(totalUSD)}   |   Total Bs.: ${formatNumber(totalUSD * this.exchangeRate)}`, 14, finalY);
+
+                        doc.save(`reporte_ventas_metodo_${this.startDate}_a_${this.endDate}.pdf`);
+                        showToast('PDF generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando PDF de ventas por método de pago:', err);
+                        showToast('Error al generar el PDF', 'error');
+                    }
+                },
+
+                async generateVentasMetodoExcel() {
+                    const datos = this.paymentMethodSummary;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para exportar', 'warning');
+                        return;
+                    }
+                    try {
+                        if (typeof ExcelJS === 'undefined') {
+                            showToast('La librería de Excel no está cargada', 'error');
+                            return;
+                        }
+                        const workbook = new ExcelJS.Workbook();
+                        workbook.creator = this.userName || 'Sistema';
+                        workbook.created = new Date();
+                        const ws = workbook.addWorksheet('Ventas por Método', { views: [{ state: 'frozen', ySplit: 6 }] });
+                        this.excelHeader(ws, 'VENTAS POR MÉTODO DE PAGO', 4);
+
+                        const headers = ['Método de Pago', 'Transacciones', 'Total ($)', 'Total Bs.'];
+                        const rows = datos.map(m => [getPaymentMethodName(m.method), m.count, round2(m.total), round2(m.total * this.exchangeRate)]);
+                        let rowNum = this.excelWriteRows(ws, headers, rows, [0]);
+
+                        const totalTrans = datos.reduce((sum, m) => sum + (m.count || 0), 0);
+                        const totalUSD = datos.reduce((sum, m) => sum + (m.total || 0), 0);
+                        const totalRow = ws.getRow(rowNum);
+                        totalRow.getCell(1).value = 'TOTALES:';
+                        totalRow.getCell(2).value = totalTrans;
+                        totalRow.getCell(3).value = round2(totalUSD);
+                        totalRow.getCell(4).value = round2(totalUSD * this.exchangeRate);
+                        [1, 2, 3, 4].forEach(c => {
+                            totalRow.getCell(c).font = { bold: true };
+                            totalRow.getCell(c).alignment = { horizontal: 'center' };
+                        });
+
+                        ws.columns = [{ width: 26 }, { width: 16 }, { width: 14 }, { width: 14 }];
+
+                        await this.excelDownload(workbook, 'reporte_ventas_metodo');
+                        showToast('Excel generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando Excel de ventas por método de pago:', err);
+                        showToast('Error al generar el Excel', 'error');
+                    }
+                },
+
+                // ================= CLIENTES =================
+                generateClientesPDF() {
+                    const datos = this.clientsData;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para generar el PDF', 'warning');
+                        return;
+                    }
+                    try {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
+                        this.pdfHeader(doc, 'REPORTE DE CLIENTES');
+
+                        const head = [['Nombre', 'Teléfono', 'Email', 'Fecha Registro', 'Total Compras ($)', 'Total Compras Bs.', 'Estado']];
+                        const body = datos.map(c => [
+                            c.full_name, c.phone || 'N/A', c.email || 'N/A', formatDate(c.created_at),
+                            formatNumber(c.total_spent), formatNumber(c.total_spent * this.exchangeRate),
+                            c.is_active ? 'Activo' : 'Inactivo'
+                        ]);
+
+                        doc.autoTable({
+                            head, body, startY: 43, theme: 'grid',
+                            headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold', halign: 'center', fontSize: 8 },
+                            styles: { fontSize: 7.5, cellPadding: 1.5, halign: 'center' },
+                            columnStyles: { 0: { halign: 'left' }, 2: { halign: 'left' } },
+                            alternateRowStyles: { fillColor: [245, 249, 255] },
+                            margin: { left: 10, right: 10 }
+                        });
+
+                        const activos = datos.filter(c => c.is_active).length;
+                        const finalY = doc.lastAutoTable.finalY + 6;
+                        doc.setFontSize(9);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(`Total clientes: ${datos.length}   |   Activos: ${activos}   |   Inactivos: ${datos.length - activos}`, 14, finalY);
+
+                        doc.save(`reporte_clientes_${this.startDate}_a_${this.endDate}.pdf`);
+                        showToast('PDF generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando PDF de clientes:', err);
+                        showToast('Error al generar el PDF', 'error');
+                    }
+                },
+
+                async generateClientesExcel() {
+                    const datos = this.clientsData;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para exportar', 'warning');
+                        return;
+                    }
+                    try {
+                        if (typeof ExcelJS === 'undefined') {
+                            showToast('La librería de Excel no está cargada', 'error');
+                            return;
+                        }
+                        const workbook = new ExcelJS.Workbook();
+                        workbook.creator = this.userName || 'Sistema';
+                        workbook.created = new Date();
+                        const ws = workbook.addWorksheet('Clientes', { views: [{ state: 'frozen', ySplit: 6 }] });
+                        this.excelHeader(ws, 'REPORTE DE CLIENTES', 7);
+
+                        const headers = ['Nombre', 'Teléfono', 'Email', 'Fecha Registro', 'Total Compras ($)', 'Total Compras Bs.', 'Estado'];
+                        const rows = datos.map(c => [
+                            c.full_name, c.phone || 'N/A', c.email || 'N/A', formatDate(c.created_at),
+                            round2(c.total_spent), round2(c.total_spent * this.exchangeRate),
+                            c.is_active ? 'Activo' : 'Inactivo'
+                        ]);
+                        let rowNum = this.excelWriteRows(ws, headers, rows, [0, 2]);
+
+                        const activos = datos.filter(c => c.is_active).length;
+                        const totalRow = ws.getRow(rowNum);
+                        totalRow.getCell(1).value = 'TOTALES:';
+                        totalRow.getCell(4).value = `Activos: ${activos} / Inactivos: ${datos.length - activos}`;
+                        [1, 4].forEach(c => {
+                            totalRow.getCell(c).font = { bold: true };
+                            totalRow.getCell(c).alignment = { horizontal: 'center' };
+                        });
+
+                        ws.columns = [
+                            { width: 26 }, { width: 16 }, { width: 26 }, { width: 16 },
+                            { width: 16 }, { width: 16 }, { width: 12 }
+                        ];
+
+                        await this.excelDownload(workbook, 'reporte_clientes');
+                        showToast('Excel generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando Excel de clientes:', err);
+                        showToast('Error al generar el Excel', 'error');
+                    }
+                },
+
+                // ================= INVENTARIO =================
+                generateInventarioPDF() {
+                    const datos = this.inventoryData;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para generar el PDF', 'warning');
+                        return;
+                    }
+                    try {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
+                        this.pdfHeader(doc, 'REPORTE DE INVENTARIO');
+
+                        const head = [['Producto', 'Tamaño', 'Stock Actual', 'Stock Mínimo', 'Estado']];
+                        const body = datos.map(p => [
+                            p.name, p.size_liters ? `${p.size_liters}L` : 'N/A', p.stock, p.min_stock,
+                            p.stock <= p.min_stock ? 'Bajo Stock' : 'Adecuado'
+                        ]);
+
+                        doc.autoTable({
+                            head, body, startY: 43, theme: 'grid',
+                            headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold', halign: 'center', fontSize: 8 },
+                            styles: { fontSize: 8, cellPadding: 2, halign: 'center' },
+                            columnStyles: { 0: { halign: 'left' } },
+                            alternateRowStyles: { fillColor: [245, 249, 255] },
+                            margin: { left: 10, right: 10 }
+                        });
+
+                        const bajoStock = datos.filter(p => p.stock <= p.min_stock).length;
+                        const totalStock = datos.reduce((sum, p) => sum + (p.stock || 0), 0);
+                        const finalY = doc.lastAutoTable.finalY + 6;
+                        doc.setFontSize(9);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(`Total productos: ${datos.length}   |   Stock total: ${totalStock}   |   Bajo stock: ${bajoStock}`, 14, finalY);
+
+                        doc.save(`reporte_inventario_${this.startDate}_a_${this.endDate}.pdf`);
+                        showToast('PDF generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando PDF de inventario:', err);
+                        showToast('Error al generar el PDF', 'error');
+                    }
+                },
+
+                async generateInventarioExcel() {
+                    const datos = this.inventoryData;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para exportar', 'warning');
+                        return;
+                    }
+                    try {
+                        if (typeof ExcelJS === 'undefined') {
+                            showToast('La librería de Excel no está cargada', 'error');
+                            return;
+                        }
+                        const workbook = new ExcelJS.Workbook();
+                        workbook.creator = this.userName || 'Sistema';
+                        workbook.created = new Date();
+                        const ws = workbook.addWorksheet('Inventario', { views: [{ state: 'frozen', ySplit: 6 }] });
+                        this.excelHeader(ws, 'REPORTE DE INVENTARIO', 5);
+
+                        const headers = ['Producto', 'Tamaño', 'Stock Actual', 'Stock Mínimo', 'Estado'];
+                        const rows = datos.map(p => [
+                            p.name, p.size_liters ? `${p.size_liters}L` : 'N/A', p.stock, p.min_stock,
+                            p.stock <= p.min_stock ? 'Bajo Stock' : 'Adecuado'
+                        ]);
+                        let rowNum = this.excelWriteRows(ws, headers, rows, [0]);
+
+                        const bajoStock = datos.filter(p => p.stock <= p.min_stock).length;
+                        const totalStock = datos.reduce((sum, p) => sum + (p.stock || 0), 0);
+                        const totalRow = ws.getRow(rowNum);
+                        totalRow.getCell(1).value = 'TOTALES:';
+                        totalRow.getCell(3).value = totalStock;
+                        totalRow.getCell(5).value = `Bajo stock: ${bajoStock}`;
+                        [1, 3, 5].forEach(c => {
+                            totalRow.getCell(c).font = { bold: true };
+                            totalRow.getCell(c).alignment = { horizontal: 'center' };
+                        });
+
+                        ws.columns = [{ width: 28 }, { width: 12 }, { width: 14 }, { width: 14 }, { width: 14 }];
+
+                        await this.excelDownload(workbook, 'reporte_inventario');
+                        showToast('Excel generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando Excel de inventario:', err);
+                        showToast('Error al generar el Excel', 'error');
+                    }
+                },
+
+                // ================= CUENTAS POR COBRAR =================
+                generateCuentasPDF() {
+                    const datos = this.accountsData;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para generar el PDF', 'warning');
+                        return;
+                    }
+                    try {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
+                        this.pdfHeader(doc, 'CUENTAS POR COBRAR');
+
+                        const head = [['Cliente', 'Fecha Vencimiento', 'Total ($)', 'Total Bs.', 'Pagado ($)', 'Pendiente ($)', 'Estado']];
+                        const body = datos.map(a => [
+                            a.customer_name, formatDate(a.payment_date),
+                            formatNumber(a.total_amount || 0), formatNumber((a.total_amount || 0) * this.exchangeRate),
+                            formatNumber(a.paid_amount || 0), formatNumber(a.remaining_amount || 0), a.status
+                        ]);
+
+                        doc.autoTable({
+                            head, body, startY: 43, theme: 'grid',
+                            headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold', halign: 'center', fontSize: 8 },
+                            styles: { fontSize: 7.5, cellPadding: 1.5, halign: 'center' },
+                            columnStyles: { 0: { halign: 'left' } },
+                            alternateRowStyles: { fillColor: [245, 249, 255] },
+                            margin: { left: 10, right: 10 }
+                        });
+
+                        const totalUSD = datos.reduce((sum, a) => sum + (a.total_amount || 0), 0);
+                        const totalPendiente = datos.reduce((sum, a) => sum + (a.remaining_amount || 0), 0);
+                        const finalY = doc.lastAutoTable.finalY + 6;
+                        doc.setFontSize(9);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(`Total cuentas: ${datos.length}   |   Total ($): ${formatNumber(totalUSD)}   |   Pendiente ($): ${formatNumber(totalPendiente)}`, 14, finalY);
+
+                        doc.save(`reporte_cuentas_cobrar_${this.startDate}_a_${this.endDate}.pdf`);
+                        showToast('PDF generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando PDF de cuentas por cobrar:', err);
+                        showToast('Error al generar el PDF', 'error');
+                    }
+                },
+
+                async generateCuentasExcel() {
+                    const datos = this.accountsData;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para exportar', 'warning');
+                        return;
+                    }
+                    try {
+                        if (typeof ExcelJS === 'undefined') {
+                            showToast('La librería de Excel no está cargada', 'error');
+                            return;
+                        }
+                        const workbook = new ExcelJS.Workbook();
+                        workbook.creator = this.userName || 'Sistema';
+                        workbook.created = new Date();
+                        const ws = workbook.addWorksheet('Cuentas por Cobrar', { views: [{ state: 'frozen', ySplit: 6 }] });
+                        this.excelHeader(ws, 'CUENTAS POR COBRAR', 7);
+
+                        const headers = ['Cliente', 'Fecha Vencimiento', 'Total ($)', 'Total Bs.', 'Pagado ($)', 'Pendiente ($)', 'Estado'];
+                        const rows = datos.map(a => [
+                            a.customer_name, formatDate(a.payment_date),
+                            round2(a.total_amount || 0), round2((a.total_amount || 0) * this.exchangeRate),
+                            round2(a.paid_amount || 0), round2(a.remaining_amount || 0), a.status
+                        ]);
+                        let rowNum = this.excelWriteRows(ws, headers, rows, [0]);
+
+                        const totalUSD = datos.reduce((sum, a) => sum + (a.total_amount || 0), 0);
+                        const totalPendiente = datos.reduce((sum, a) => sum + (a.remaining_amount || 0), 0);
+                        const totalRow = ws.getRow(rowNum);
+                        totalRow.getCell(1).value = 'TOTALES:';
+                        totalRow.getCell(3).value = round2(totalUSD);
+                        totalRow.getCell(4).value = round2(totalUSD * this.exchangeRate);
+                        totalRow.getCell(6).value = round2(totalPendiente);
+                        [1, 3, 4, 6].forEach(c => {
+                            totalRow.getCell(c).font = { bold: true };
+                            totalRow.getCell(c).alignment = { horizontal: 'center' };
+                        });
+
+                        ws.columns = [
+                            { width: 26 }, { width: 16 }, { width: 14 }, { width: 14 },
+                            { width: 14 }, { width: 14 }, { width: 14 }
+                        ];
+
+                        await this.excelDownload(workbook, 'reporte_cuentas_cobrar');
+                        showToast('Excel generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando Excel de cuentas por cobrar:', err);
+                        showToast('Error al generar el Excel', 'error');
+                    }
+                },
+
+                // ================= RESUMEN DIARIO =================
+                generateResumenPDF() {
+                    const datos = this.dailyHours;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para generar el PDF', 'warning');
+                        return;
+                    }
+                    try {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
+                        this.pdfHeader(doc, 'RESUMEN DIARIO');
+
+                        const head = [['Hora', 'Ventas', 'Clientes', 'Productos Vendidos', 'Ingreso ($)', 'Ingreso Bs.']];
+                        const body = datos.map(h => [
+                            `${h.hour}:00`, h.sales_count, h.clients_count, h.products_sold,
+                            formatNumber(h.total_sales / this.exchangeRate), formatNumber(h.total_sales)
+                        ]);
+
+                        doc.autoTable({
+                            head, body, startY: 43, theme: 'grid',
+                            headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold', halign: 'center', fontSize: 8 },
+                            styles: { fontSize: 8, cellPadding: 2, halign: 'center' },
+                            alternateRowStyles: { fillColor: [245, 249, 255] },
+                            margin: { left: 10, right: 10 }
+                        });
+
+                        const totalVentas = datos.reduce((sum, h) => sum + (h.sales_count || 0), 0);
+                        const totalIngresoBs = datos.reduce((sum, h) => sum + (h.total_sales || 0), 0);
+                        const finalY = doc.lastAutoTable.finalY + 6;
+                        doc.setFontSize(9);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(`Total ventas: ${totalVentas}   |   Ingreso Bs.: ${formatNumber(totalIngresoBs)}   |   Ingreso ($): ${formatNumber(totalIngresoBs / this.exchangeRate)}`, 14, finalY);
+
+                        doc.save(`resumen_diario_${this.startDate}_a_${this.endDate}.pdf`);
+                        showToast('PDF generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando PDF de resumen diario:', err);
+                        showToast('Error al generar el PDF', 'error');
+                    }
+                },
+
+                async generateResumenExcel() {
+                    const datos = this.dailyHours;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para exportar', 'warning');
+                        return;
+                    }
+                    try {
+                        if (typeof ExcelJS === 'undefined') {
+                            showToast('La librería de Excel no está cargada', 'error');
+                            return;
+                        }
+                        const workbook = new ExcelJS.Workbook();
+                        workbook.creator = this.userName || 'Sistema';
+                        workbook.created = new Date();
+                        const ws = workbook.addWorksheet('Resumen Diario', { views: [{ state: 'frozen', ySplit: 6 }] });
+                        this.excelHeader(ws, 'RESUMEN DIARIO', 6);
+
+                        const headers = ['Hora', 'Ventas', 'Clientes', 'Productos Vendidos', 'Ingreso ($)', 'Ingreso Bs.'];
+                        const rows = datos.map(h => [
+                            `${h.hour}:00`, h.sales_count, h.clients_count, h.products_sold,
+                            round2(h.total_sales / this.exchangeRate), round2(h.total_sales)
+                        ]);
+                        let rowNum = this.excelWriteRows(ws, headers, rows);
+
+                        const totalVentas = datos.reduce((sum, h) => sum + (h.sales_count || 0), 0);
+                        const totalIngresoBs = datos.reduce((sum, h) => sum + (h.total_sales || 0), 0);
+                        const totalRow = ws.getRow(rowNum);
+                        totalRow.getCell(1).value = 'TOTALES:';
+                        totalRow.getCell(2).value = totalVentas;
+                        totalRow.getCell(5).value = round2(totalIngresoBs / this.exchangeRate);
+                        totalRow.getCell(6).value = round2(totalIngresoBs);
+                        [1, 2, 5, 6].forEach(c => {
+                            totalRow.getCell(c).font = { bold: true };
+                            totalRow.getCell(c).alignment = { horizontal: 'center' };
+                        });
+
+                        ws.columns = [
+                            { width: 10 }, { width: 12 }, { width: 12 }, { width: 18 },
+                            { width: 14 }, { width: 14 }
+                        ];
+
+                        await this.excelDownload(workbook, 'resumen_diario');
+                        showToast('Excel generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando Excel de resumen diario:', err);
+                        showToast('Error al generar el Excel', 'error');
+                    }
+                },
+
+                // ================= DELIVERYS =================
+                generateDeliverysPDF() {
+                    const datos = this.topDeliveryZones;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para generar el PDF', 'warning');
+                        return;
+                    }
+                    try {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
+                        this.pdfHeader(doc, 'DELIVERYS - TOP ZONAS / SECTORES');
+
+                        const head = [['#', 'Zona / Sector', 'Solicitudes', '% del Total']];
+                        const body = datos.map((z, idx) => [idx + 1, z.zone, z.count, `${z.percentage}%`]);
+
+                        doc.autoTable({
+                            head, body, startY: 43, theme: 'grid',
+                            headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold', halign: 'center', fontSize: 8 },
+                            styles: { fontSize: 9, cellPadding: 2, halign: 'center' },
+                            columnStyles: { 1: { halign: 'left' } },
+                            alternateRowStyles: { fillColor: [245, 249, 255] },
+                            margin: { left: 10, right: 10 }
+                        });
+
+                        const finalY = doc.lastAutoTable.finalY + 6;
+                        doc.setFontSize(9);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(`Total deliverys en el período: ${this.totalDeliverys}`, 14, finalY);
+
+                        doc.save(`reporte_deliverys_${this.startDate}_a_${this.endDate}.pdf`);
+                        showToast('PDF generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando PDF de deliverys:', err);
+                        showToast('Error al generar el PDF', 'error');
+                    }
+                },
+
+                async generateDeliverysExcel() {
+                    const datos = this.topDeliveryZones;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para exportar', 'warning');
+                        return;
+                    }
+                    try {
+                        if (typeof ExcelJS === 'undefined') {
+                            showToast('La librería de Excel no está cargada', 'error');
+                            return;
+                        }
+                        const workbook = new ExcelJS.Workbook();
+                        workbook.creator = this.userName || 'Sistema';
+                        workbook.created = new Date();
+                        const ws = workbook.addWorksheet('Deliverys', { views: [{ state: 'frozen', ySplit: 6 }] });
+                        this.excelHeader(ws, 'DELIVERYS - TOP ZONAS / SECTORES', 4);
+
+                        const headers = ['#', 'Zona / Sector', 'Solicitudes', '% del Total'];
+                        const rows = datos.map((z, idx) => [idx + 1, z.zone, z.count, `${z.percentage}%`]);
+                        let rowNum = this.excelWriteRows(ws, headers, rows, [1]);
+
+                        const totalRow = ws.getRow(rowNum);
+                        totalRow.getCell(1).value = 'Total deliverys:';
+                        totalRow.getCell(2).value = this.totalDeliverys;
+                        [1, 2].forEach(c => {
+                            totalRow.getCell(c).font = { bold: true };
+                            totalRow.getCell(c).alignment = { horizontal: 'center' };
+                        });
+
+                        ws.columns = [{ width: 8 }, { width: 28 }, { width: 14 }, { width: 14 }];
+
+                        await this.excelDownload(workbook, 'reporte_deliverys');
+                        showToast('Excel generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando Excel de deliverys:', err);
                         showToast('Error al generar el Excel', 'error');
                     }
                 },
@@ -2296,12 +3045,17 @@
             };
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            if (window.Alpine) {
-                window.Alpine.data('reportesApp', reportesApp);
-                window.Alpine.start();
-            }
-        });
+        // ✅ CORREGIDO: NO llamar Alpine.start() manualmente aquí.
+        // El script de Alpine se carga con "defer", así que Alpine ya se auto-inicializa
+        // solo una vez que el documento termina de parsear. Llamarlo de nuevo en
+        // DOMContentLoaded lo iniciaba DOS VECES, duplicando todos los listeners
+        // (@click, @change, x-init, etc.). Eso era la causa real de:
+        //  - Los reportes en Excel/PDF se generaban 2 veces con un solo click.
+        //  - El panel se quedaba en blanco al cambiar de tipo de reporte y solo
+        //    se actualizaba correctamente al cambiarlo una segunda vez.
+        // La función reportesApp ya está definida arriba (en el scope global) antes de
+        // que Alpine se inicialice, así que x-data="reportesApp()" la encuentra sin
+        // necesidad de registrarla con Alpine.data().
     </script>
 </body>
 
