@@ -106,6 +106,25 @@
                     <p class="font-semibold capitalize text-sm" x-text="userBranch || 'Cargando...'"></p>
                 </div>
             </div>
+            <!--
+                CONTROL DE ACCESO POR ROL (sidebar)
+                ------------------------------------
+                Se usa x-show="userRole === 'admin'" (mismo patrón ya usado en el
+                selector de sucursales del header) para ocultar del DOM visual las
+                opciones "Usuarios" y "Precios Personalizados" cuando el usuario
+                logueado tiene role = 'vendedor'. userRole se carga de forma
+                asíncrona en initDashboard() desde profiles.role, por lo que estos
+                enlaces permanecen ocultos mientras loading = true y solo se
+                muestran si el rol confirmado es 'admin'.
+
+                IMPORTANTE: esto es solo control de UI/UX (evita que el vendedor
+                vea o navegue a esas opciones por accidente). NO reemplaza la
+                validación de permisos en el backend: usuarios.html y
+                precios-personalizados.html deben seguir validando el rol contra
+                Supabase (por ejemplo con RLS policies o un chequeo de
+                profiles.role al cargar la página), ya que un usuario con
+                conocimientos técnicos podría acceder directamente a esas URLs.
+            -->
             <nav class="space-y-2">
                 <a href="index.html" class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg"><i
                         class="fas fa-home w-5"></i><span class="font-medium">Dashboard</span></a>
@@ -124,7 +143,8 @@
                 <a href="gastos.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
                         class="fas fa-receipt w-5"></i><span>Gastos</span></a>
-                <a href="usuarios.html"
+                <!-- Usuarios: solo visible para admin. Los vendedores no gestionan cuentas de usuario. -->
+                <a href="usuarios.html" x-show="userRole === 'admin'"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
                         class="fas fa-user-cog w-5"></i><span>Usuarios</span></a>
                 <a href="reportes.html"
@@ -133,7 +153,8 @@
                 <a href="resumen-diario.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
                         class="fas fa-file-alt w-5"></i><span>Resumen Diario</span></a>
-                <a href="precios-personalizados.html"
+                <!-- Precios Personalizados: solo visible para admin. Define condiciones comerciales por cliente. -->
+                <a href="precios-personalizados.html" x-show="userRole === 'admin'"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
                         class="fas fa-file-alt w-5"></i><span>Precios Personalizados</span></a>
             </nav>
