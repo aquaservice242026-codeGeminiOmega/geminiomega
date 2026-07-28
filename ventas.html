@@ -1827,7 +1827,7 @@
                     if (customer.direccion_especifica) parts.push(customer.direccion_especifica);
                     return parts.join(', ').toUpperCase();
                 },
-                onCustomerChange() {
+                async onCustomerChange() {
                     if (this.selectedCustomer) {
                         const customer = this.customers.find(c => c.id === this.selectedCustomer);
                         if (customer) {
@@ -1838,12 +1838,29 @@
                                 console.log('📍 Dirección autocompletada del cliente:', this.deliveryAddress);
                             }
                             // ✅ NUEVO: Cargar precios personalizados del cliente
-                            this.loadCustomerPrices(customer.id);
+                            await this.loadCustomerPrices(customer.id);
                         }
                     } else {
                         // ✅ Si no hay cliente, limpiar precios personalizados
                         this.customerPrices = {};
                     }
+                    // ✅ FIX: Reaplicar precios personalizados a los productos que ya estén
+                    // en el carrito (cubre el caso de agregar producto primero y cliente después)
+                    this.applyCustomerPricesToCart();
+                },
+                // ✅ FIX: Recalcula el precio de los items ya agregados al carrito
+                // según el cliente seleccionado. Si el cliente tiene precio especial
+                // para ese producto lo aplica; si no, restaura el precio original.
+                applyCustomerPricesToCart() {
+                    this.cart.forEach(item => {
+                        if (this.selectedCustomer && this.customerPrices[item.product_id]) {
+                            item.price = this.customerPrices[item.product_id];
+                            item.hasCustomPrice = true;
+                        } else if (item.hasCustomPrice) {
+                            item.price = item.originalPrice;
+                            item.hasCustomPrice = false;
+                        }
+                    });
                 },
                 watchDeliveryType() {
                     if (this.deliveryType === 'delivery' && this.selectedCustomer) {
