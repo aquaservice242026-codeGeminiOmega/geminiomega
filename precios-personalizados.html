@@ -987,16 +987,11 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log('🔍 DOMContentLoaded - Iniciando Alpine.js');
-            if (window.Alpine) {
-                window.Alpine.data('preciosApp', preciosApp);
-                window.Alpine.start();
-                console.log('✅ Alpine.js iniciado correctamente');
-            } else {
-                console.error('❌ Alpine.js no está cargado');
-            }
-        });
+        // ✅ CORRECCIÓN: Solo registrar el componente antes del auto-inicio de Alpine
+        // Eliminar completamente el bloque DOMContentLoaded que tenía Alpine.start()
+        if (window.Alpine) {
+            window.Alpine.data('preciosApp', preciosApp);
+        }
     </script>
 </body>
 
