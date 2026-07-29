@@ -2277,6 +2277,12 @@
                         showToast('El nombre es obligatorio', 'error');
                         return;
                     }
+                    // ✅ NUEVO: Exigir nombre y apellido (mínimo dos palabras)
+                    const nameParts = this.newCustomer.full_name.trim().split(/\s+/).filter(p => p.length > 0);
+                    if (nameParts.length < 2) {
+                        showToast('Debe colocar nombre y apellido. Ej: JUAN MARTINEZ', 'error');
+                        return;
+                    }
                     this.savingCustomer = true;
                     try {
                         // ✅ ACTUALIZADO: Guardar los nuevos campos
