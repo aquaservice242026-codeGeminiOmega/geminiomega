@@ -593,12 +593,35 @@
                             </div>
                         </div>
                         <div x-show="deliveryType === 'delivery'" class="mt-3 space-y-3">
+                            <!-- ✅ NUEVO: Dropdowns anidados Municipio y Sector (igual que modal de cliente) -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Municipio *</label>
+                                    <select x-model="deliveryMunicipio" @change="onDeliveryMunicipioChange()"
+                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Seleccione...</option>
+                                        <template x-for="mun in locationData.municipios" :key="mun.id">
+                                            <option :value="mun.id" x-text="mun.nombre"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Sector *</label>
+                                    <select x-model="deliverySector" :disabled="!deliveryMunicipio"
+                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed">
+                                        <option value="">Seleccione...</option>
+                                        <template x-for="sec in filteredSectoresDelivery" :key="sec.id">
+                                            <option :value="sec.id" x-text="sec.nombre"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Dirección de entrega
-                                    *</label>
-                                <textarea x-model="deliveryAddress"
-                                    @input="deliveryAddress = deliveryAddress.toUpperCase()"
-                                    placeholder="Dirección completa..."
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Dirección Específica
+                                    (Calle, Casa, Ref.)</label>
+                                <textarea x-model="deliveryDireccionEspecifica"
+                                    @input="deliveryDireccionEspecifica = deliveryDireccionEspecifica.toUpperCase()"
+                                    placeholder="Ej: CALLE PRINCIPAL, CASA #15, FRENTE A LA FARMACIA"
                                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"
                                     rows="2"></textarea>
                             </div>
@@ -1040,10 +1063,35 @@
                     </button>
                 </div>
                 <div x-show="deliveryType === 'delivery'" class="mt-2 space-y-2">
+                    <!-- ✅ NUEVO: Dropdowns anidados Municipio y Sector (igual que modal de cliente) -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-medium text-gray-700 mb-1">Municipio *</label>
+                            <select x-model="deliveryMunicipio" @change="onDeliveryMunicipioChange()"
+                                class="w-full px-2 py-1 text-xs border border-gray-300 rounded bg-white">
+                                <option value="">Seleccione...</option>
+                                <template x-for="mun in locationData.municipios" :key="mun.id">
+                                    <option :value="mun.id" x-text="mun.nombre"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-medium text-gray-700 mb-1">Sector *</label>
+                            <select x-model="deliverySector" :disabled="!deliveryMunicipio"
+                                class="w-full px-2 py-1 text-xs border border-gray-300 rounded bg-white disabled:bg-gray-100 disabled:cursor-not-allowed">
+                                <option value="">Seleccione...</option>
+                                <template x-for="sec in filteredSectoresDelivery" :key="sec.id">
+                                    <option :value="sec.id" x-text="sec.nombre"></option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
                     <div>
-                        <label class="block text-[10px] font-medium text-gray-700 mb-1">Dirección de entrega *</label>
-                        <textarea x-model="deliveryAddress" @input="deliveryAddress = deliveryAddress.toUpperCase()"
-                            placeholder="Dirección completa..."
+                        <label class="block text-[10px] font-medium text-gray-700 mb-1">Dirección Específica (Calle,
+                            Casa, Ref.)</label>
+                        <textarea x-model="deliveryDireccionEspecifica"
+                            @input="deliveryDireccionEspecifica = deliveryDireccionEspecifica.toUpperCase()"
+                            placeholder="Ej: CALLE PRINCIPAL, CASA #15, FRENTE A LA FARMACIA"
                             class="w-full px-2 py-1 text-xs border border-gray-300 rounded bg-white"
                             rows="2"></textarea>
                     </div>
@@ -1679,6 +1727,10 @@
                 deliveryType: 'pickup',
                 deliveryAddress: '',
                 deliveryCoordinates: '',
+                // ✅ NUEVO: Municipio/Sector/Dirección específica para Delivery (igual que modal de cliente)
+                deliveryMunicipio: '',
+                deliverySector: '',
+                deliveryDireccionEspecifica: '',
                 selectedCustomer: '',
                 paymentMethod: 'efectivo_bs',
                 paymentReference: '',
@@ -1808,6 +1860,25 @@
                 onMunicipioChange() {
                     this.newCustomer.sector = '';
                 },
+                // ✅ NUEVO: Filtrar sectores según municipio seleccionado (panel de Delivery)
+                get filteredSectoresDelivery() {
+                    if (!this.deliveryMunicipio) return [];
+                    const mun = this.locationData.municipios.find(m => m.id === this.deliveryMunicipio);
+                    return mun ? mun.sectores : [];
+                },
+                // ✅ NUEVO: Cuando cambia el municipio del Delivery, resetear el sector y recalcular dirección
+                onDeliveryMunicipioChange() {
+                    this.deliverySector = '';
+                    this.updateDeliveryFullAddress();
+                },
+                // ✅ NUEVO: Reconstruye deliveryAddress a partir de Municipio + Sector + Dirección específica
+                updateDeliveryFullAddress() {
+                    this.deliveryAddress = this.buildFullAddress({
+                        municipio: this.deliveryMunicipio,
+                        sector: this.deliverySector,
+                        direccion_especifica: this.deliveryDireccionEspecifica
+                    });
+                },
                 // ✅ NUEVO: Obtener nombre del municipio
                 getMunicipioName(id) {
                     const mun = this.locationData.municipios.find(m => m.id === id);
@@ -1836,6 +1907,10 @@
                             const fullAddress = this.buildFullAddress(customer);
                             if (fullAddress && this.deliveryType === 'delivery') {
                                 this.deliveryAddress = fullAddress;
+                                // ✅ NUEVO: Precargar también los dropdowns de Municipio/Sector del delivery
+                                this.deliveryMunicipio = customer.municipio || '';
+                                this.deliverySector = customer.sector || '';
+                                this.deliveryDireccionEspecifica = customer.direccion_especifica || '';
                                 console.log('📍 Dirección autocompletada del cliente:', this.deliveryAddress);
                             }
                             // ✅ NUEVO: Cargar precios personalizados del cliente
@@ -1870,6 +1945,10 @@
                             const fullAddress = this.buildFullAddress(customer);
                             if (fullAddress) {
                                 this.deliveryAddress = fullAddress;
+                                // ✅ NUEVO: Precargar también los dropdowns de Municipio/Sector del delivery
+                                this.deliveryMunicipio = customer.municipio || '';
+                                this.deliverySector = customer.sector || '';
+                                this.deliveryDireccionEspecifica = customer.direccion_especifica || '';
                                 console.log(' Dirección autocompletada al activar delivery:', this.deliveryAddress);
                             }
                         }
@@ -1919,6 +1998,9 @@
                     ]);
                     this.$watch('selectedCustomer', () => this.onCustomerChange());
                     this.$watch('deliveryType', () => this.watchDeliveryType());
+                    // ✅ NUEVO: Mantener deliveryAddress sincronizado con los dropdowns de Delivery
+                    this.$watch('deliverySector', () => this.updateDeliveryFullAddress());
+                    this.$watch('deliveryDireccionEspecifica', () => this.updateDeliveryFullAddress());
                     document.addEventListener('keydown', (e) => {
                         if (e.key === 'Escape') {
                             this.closeCart();
@@ -2730,6 +2812,9 @@ ${successDetails}
                         this.cart = [];
                         this.deliveryAddress = '';
                         this.deliveryCoordinates = '';
+                        this.deliveryMunicipio = '';
+                        this.deliverySector = '';
+                        this.deliveryDireccionEspecifica = '';
                         this.selectedCustomer = '';
                         this.paymentReference = '';
                         this.amountReceivedBs = 0;
