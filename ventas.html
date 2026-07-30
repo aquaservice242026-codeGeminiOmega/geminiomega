@@ -618,7 +618,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Dirección Específica
-                                    (Calle, Casa, Ref.)</label>
+                                    (Calle, Casa, Ref.) *</label>
                                 <textarea x-model="deliveryDireccionEspecifica"
                                     @input="deliveryDireccionEspecifica = deliveryDireccionEspecifica.toUpperCase()"
                                     placeholder="Ej: CALLE PRINCIPAL, CASA #15, FRENTE A LA FARMACIA"
@@ -1088,7 +1088,7 @@
                     </div>
                     <div>
                         <label class="block text-[10px] font-medium text-gray-700 mb-1">Dirección Específica (Calle,
-                            Casa, Ref.)</label>
+                            Casa, Ref.) *</label>
                         <textarea x-model="deliveryDireccionEspecifica"
                             @input="deliveryDireccionEspecifica = deliveryDireccionEspecifica.toUpperCase()"
                             placeholder="Ej: CALLE PRINCIPAL, CASA #15, FRENTE A LA FARMACIA"
@@ -2434,9 +2434,19 @@
                         showToast('El carrito está vacío', 'error');
                         return;
                     }
-                    if (this.deliveryType === 'delivery' && !this.deliveryAddress) {
-                        showToast('Debe ingresar la dirección', 'error');
-                        return;
+                    if (this.deliveryType === 'delivery') {
+                        if (!this.deliveryMunicipio) {
+                            showToast('Debe seleccionar el Municipio de entrega', 'error');
+                            return;
+                        }
+                        if (!this.deliverySector) {
+                            showToast('Debe seleccionar el Sector de entrega', 'error');
+                            return;
+                        }
+                        if (!this.deliveryDireccionEspecifica || !this.deliveryDireccionEspecifica.trim()) {
+                            showToast('Debe ingresar la Dirección Específica de entrega', 'error');
+                            return;
+                        }
                     }
                     const customer = this.customers.find(c => c.id === this.selectedCustomer);
                     const customerName = customer?.full_name || 'Cliente no registrado';
