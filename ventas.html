@@ -1538,46 +1538,6 @@
         const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // ✅ FIX JWT expired: envuelve cualquier consulta de Supabase y, si falla
-        // por token vencido, refresca la sesión y reintenta la petición una sola vez.
-        // Uso: const { data, error } = await supaQuery(() => supabase.from('tabla').select());
-        async function supaQuery(queryFn) {
-            let result = await queryFn();
-            if (result && result.error && /jwt/i.test(result.error.message || '')) {
-                console.warn('JWT expirado, intentando refrescar sesión...');
-                const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-                if (refreshError || !refreshData.session) {
-                    console.error('No se pudo refrescar la sesión:', refreshError);
-                    if (typeof showToast === 'function') {
-                        showToast('Tu sesión expiró. Inicia sesión de nuevo.', 'error');
-                    }
-                    await supabase.auth.signOut();
-                    setTimeout(() => { window.location.href = 'login.html'; }, 1500);
-                    return result;
-                }
-                result = await queryFn();
-            }
-            return result;
-        }
-
-        // ✅ FIX JWT expired: cuando el usuario vuelve a la pestaña (por ejemplo tras
-        // bloquear el celular), revisa si el token está por vencer o ya venció y lo
-        // refresca de forma proactiva, antes de que el usuario intente una acción.
-        document.addEventListener('visibilitychange', async () => {
-            if (document.visibilityState !== 'visible') return;
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session && session.expires_at) {
-                    const msLeft = session.expires_at * 1000 - Date.now();
-                    if (msLeft < 5 * 60 * 1000) { // menos de 5 min de vida (o ya vencido)
-                        await supabase.auth.refreshSession();
-                    }
-                }
-            } catch (err) {
-                console.error('Error verificando/refrescando sesión:', err);
-            }
-        });
         // ✅ DATOS DE UBICACIÓN - Municipios y Sectores de Nueva Esparta
         const LOCATION_DATA = {
             "estado": "Nueva Esparta",
@@ -1997,10 +1957,10 @@
                 async updateCustomerAddress() {
                     if (this.selectedCustomer && this.deliveryAddress && this.deliveryType === 'delivery') {
                         try {
-                            const { error } = await supaQuery(() => supabase
+                            const { error } = await supabase
                                 .from('customers')
                                 .update({ address: this.deliveryAddress })
-                                .eq('id', this.selectedCustomer));
+                                .eq('id', this.selectedCustomer);
                             if (!error) {
                                 const customer = this.customers.find(c => c.id === this.selectedCustomer);
                                 if (customer) customer.address = this.deliveryAddress;
@@ -2021,7 +1981,7 @@
                         return;
                     }
                     try {
-                        const { data: profile } = await supaQuery(() => supabase.from('profiles').select('full_name, role, branch').eq('id', session.user.id).single());
+                        const { data: profile } = await supabase.from('profiles').select('full_name, role, branch').eq('id', session.user.id).single();
                         if (profile) {
                             this.userName = profile.full_name;
                             this.userRole = profile.role;
@@ -2063,7 +2023,7 @@
                 async loadExchangeRate() {
                     try {
                         console.log('🔄 Consultando tasa centralizada de Supabase');
-                        const { data, error } = await supaQuery(() => supabase.rpc('get_active_exchange_rate'));
+                        const { data, error } = await supabase.rpc('get_active_exchange_rate');
                         if (!error && data) {
                             const rate = ensureValidRate(data);
                             this.exchangeRate = rate;
@@ -2115,8 +2075,8 @@
                     try {
                         const validRate = round2(ensureValidRate(this.exchangeRate));
                         this.exchangeRate = validRate;
-                        await supaQuery(() => supabase.from('exchange_rates').update({ is_active: false }).eq('is_active', true));
-                        await supaQuery(() => supabase.from('exchange_rates').insert({ rate: validRate, is_active: true }));
+                        await supabase.from('exchange_rates').update({ is_active: false }).eq('is_active', true);
+                        await supabase.from('exchange_rates').insert({ rate: validRate, is_active: true });
                         showToast('Tasa actualizada en Supabase', 'success');
                     } catch (err) {
                         console.error('Error actualizando tasa:', err);
@@ -2138,9 +2098,9 @@
                                 console.log(`⏳ Esperando ${delay}ms antes del reintento...`);
                                 await new Promise(resolve => setTimeout(resolve, delay));
                             }
-                            const { data: virtualInventory, error } = await supaQuery(() => supabase.rpc('calculate_virtual_inventory', {
+                            const { data: virtualInventory, error } = await supabase.rpc('calculate_virtual_inventory', {
                                 branch_param: this.userBranch
-                            }));
+                            });
                             if (error) {
                                 console.error(`❌ [Intento ${attempt}] Error de Supabase:`, {
                                     code: error.code,
@@ -2210,12 +2170,12 @@
                 // (buildFullAddress, loadCustomerData, el <select> de cliente, etc.)
                 async loadCustomers() {
                     try {
-                        const { data, error } = await supaQuery(() => supabase
+                        const { data, error } = await supabase
                             .from('customers')
                             .select('id, full_name, phone, email, cedula, municipio, sector, direccion_especifica, address')
                             .eq('branch', this.userBranch)
                             .eq('is_active', true)
-                            .order('full_name'));
+                            .order('full_name');
                         if (error) throw error;
                         this.customers = data || [];
                         // ✅ Cliente por defecto de la sucursal activa (PÚBLICO GENERAL)
@@ -2235,11 +2195,11 @@
                         return;
                     }
                     try {
-                        const { data, error } = await supaQuery(() => supabase
+                        const { data, error } = await supabase
                             .from('customer_prices')
                             .select('product_id, custom_price')
                             .eq('customer_id', customerId)
-                            .eq('is_active', true));
+                            .eq('is_active', true);
                         if (error) throw error;
                         // Convertir a objeto para búsqueda rápida: { product_id: custom_price }
                         this.customerPrices = {};
@@ -2408,7 +2368,7 @@
                     this.savingCustomer = true;
                     try {
                         // ✅ ACTUALIZADO: Guardar los nuevos campos
-                        const { data, error } = await supaQuery(() => supabase.from('customers').insert({
+                        const { data, error } = await supabase.from('customers').insert({
                             full_name: this.newCustomer.full_name.toUpperCase(),
                             cedula: this.newCustomer.cedula ? this.newCustomer.cedula.toUpperCase() : null,
                             phone: this.newCustomer.phone,
@@ -2420,7 +2380,7 @@
                             address: this.buildFullAddress(this.newCustomer) || null,
                             recommended_by: this.newCustomer.recommended_by ? this.newCustomer.recommended_by.toUpperCase() : null,
                             branch: this.userBranch
-                        }).select().single());
+                        }).select().single();
                         if (error) throw error;
                         showToast('Cliente creado', 'success');
                         this.customers.push(data);
@@ -2630,7 +2590,7 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                         // ✅ CORRECCIÓN: Usar fecha de Caracas en lugar de UTC — SIN CAMBIOS
                         const caracasDate = getCaracasDate();
                         const rateDateStr = caracasDate.toISOString().split('T')[0];
-                        const { data: sale, error: saleError } = await supaQuery(() => supabase.from('sales').insert({
+                        const { data: sale, error: saleError } = await supabase.from('sales').insert({
                             branch: this.userBranch,
                             customer_id: this.selectedCustomer || this.defaultCustomerId || null,
                             customer_name: customerName,
@@ -2646,7 +2606,7 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                             exchange_rate_used: this.exchangeRate,
                             rate_date: rateDateStr, // ← AHORA USA FECHA DE CARACAS
                             created_by: session.user.id
-                        }).select().single());
+                        }).select().single();
                         if (saleError) throw saleError;
                         if (this.deliveryType === 'delivery' && this.selectedCustomer) {
                             await this.updateCustomerAddress();
@@ -2688,13 +2648,13 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                             });
                         }
                         if (paymentsToInsert.length > 0) {
-                            const { error: paymentsError } = await supaQuery(() => supabase.from('sale_payments').insert(paymentsToInsert));
+                            const { error: paymentsError } = await supabase.from('sale_payments').insert(paymentsToInsert);
                             if (paymentsError) {
                                 console.warn('⚠️ No se pudo guardar en sale_payments:', paymentsError.message);
                             }
                         }
                         // ✅ OPTIMIZADO: select con columnas explícitas (ya estaba correcto, se conserva igual)
-                        const { data: productsFromDB } = await supaQuery(() => supabase.from('products').select('id, name, size_liters, product_type').eq('is_active', true));
+                        const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters, product_type').eq('is_active', true);
                         // ✅ FIX: Solo productos tipo 'bottle' para el mapeo de botellones con agua
                         const bottleProducts = productsFromDB.filter(p => p.product_type === 'bottle');
                         const sizeToProductId = {};
@@ -2712,7 +2672,7 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                             unit_price: item.price,
                             total: round2(item.price * item.quantity)
                         }));
-                        const { error: itemsError } = await supaQuery(() => supabase.from('sale_items').insert(saleItems));
+                        const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
                         if (itemsError) throw itemsError;
                         // ✅ DESCUENTO DE INVENTARIO - Simplificado y directo
                         let totalCapsNeeded = 0;
@@ -2722,12 +2682,12 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                                 const realProductId = sizeToProductId[item.size_liters];
                                 if (!realProductId) continue;
                                 console.log(`💧 Procesando botellón con agua ${item.size_liters}L - Cantidad: ${item.quantity}`);
-                                const { data: tankResult, error: tankError } = await supaQuery(() => supabase.rpc('sell_and_deduct_from_tank', {
+                                const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
                                     branch_param: this.userBranch,
                                     product_id_param: realProductId,
                                     quantity_param: item.quantity,
                                     user_id_param: session.user.id
-                                }));
+                                });
                                 if (tankError) throw tankError;
                                 if (!tankResult || !tankResult.success) throw new Error('Agua insuficiente');
                                 // Contar tapas para 13L y 20L con agua
@@ -2744,12 +2704,12 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                                 if (!emptyProduct) continue;
                                 console.log(`🏺 Procesando botellón vacío ${item.size_liters}L - Cantidad: ${item.quantity}`);
                                 // ✅ NUEVO: Descontar agua del tanque (15L o 20L según el producto)
-                                const { data: tankResult, error: tankError } = await supaQuery(() => supabase.rpc('sell_and_deduct_from_tank', {
+                                const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
                                     branch_param: this.userBranch,
                                     product_id_param: emptyProduct.id, // ← ID del producto vacío (tiene size_liters = 15 o 20)
                                     quantity_param: item.quantity,
                                     user_id_param: session.user.id
-                                }));
+                                });
                                 if (tankError) {
                                     console.warn('⚠️ Error descontando agua del tanque:', tankError.message);
                                 } else if (!tankResult || !tankResult.success) {
@@ -2758,26 +2718,26 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                                     console.log(`✅ ${item.quantity * item.size_liters}L descontados del tanque (botellón vacío ${item.size_liters}L)`);
                                 }
                                 // Descontar del inventario físico (botellón vacío)
-                                const { data: emptyInventory, error: emptyInvError } = await supaQuery(() => supabase
+                                const { data: emptyInventory, error: emptyInvError } = await supabase
                                     .from('inventory')
                                     .select('quantity')
                                     .eq('product_id', emptyProduct.id)
                                     .eq('branch', this.userBranch)
-                                    .single());
+                                    .single();
                                 if (emptyInvError) {
                                     console.warn('️ Error consultando inventario de botellón vacío:', emptyInvError.message);
                                 } else if (emptyInventory) {
                                     if (emptyInventory.quantity < item.quantity) {
                                         showToast(`⚠️ Stock bajo de botellón vacío ${item.size_liters}L`, 'warning');
                                     }
-                                    const { error: updateEmptyError } = await supaQuery(() => supabase
+                                    const { error: updateEmptyError } = await supabase
                                         .from('inventory')
                                         .update({
                                             quantity: emptyInventory.quantity - item.quantity,
                                             updated_at: new Date().toISOString()
                                         })
                                         .eq('product_id', emptyProduct.id)
-                                        .eq('branch', this.userBranch));
+                                        .eq('branch', this.userBranch);
                                     if (updateEmptyError) {
                                         console.warn('⚠️ Error actualizando botellón vacío:', updateEmptyError.message);
                                     } else {
@@ -2794,26 +2754,26 @@ ${p.reference ? `<p class="text-[10px] text-gray-500">Ref: ${p.reference}</p>` :
                         // ✅ DESCUENTO DE TAPAS
                         if (totalCapsNeeded > 0 && capProduct) {
                             console.log(`🧢 Descontando ${totalCapsNeeded} tapas del inventario`);
-                            const { data: capInventory, error: capInventoryError } = await supaQuery(() => supabase
+                            const { data: capInventory, error: capInventoryError } = await supabase
                                 .from('inventory')
                                 .select('quantity, product_id')
                                 .eq('product_id', capProduct.id)
                                 .eq('branch', this.userBranch)
-                                .single());
+                                .single();
                             if (capInventoryError) {
                                 console.warn('️ Error consultando inventario de tapas:', capInventoryError.message);
                             } else if (capInventory) {
                                 if (capInventory.quantity < totalCapsNeeded) {
                                     showToast(`⚠️ Stock de tapas bajo: ${capInventory.quantity} disponibles`, 'warning');
                                 }
-                                const { error: updateCapError } = await supaQuery(() => supabase
+                                const { error: updateCapError } = await supabase
                                     .from('inventory')
                                     .update({
                                         quantity: capInventory.quantity - totalCapsNeeded,
                                         updated_at: new Date().toISOString()
                                     })
                                     .eq('product_id', capProduct.id)
-                                    .eq('branch', this.userBranch));
+                                    .eq('branch', this.userBranch);
                                 if (updateCapError) {
                                     console.warn('️ Error actualizando tapas:', updateCapError.message);
                                 } else {
@@ -3001,7 +2961,7 @@ ${successDetails}
                         // ✅ CORRECCIÓN: Usar fecha de Caracas para créditos también — SIN CAMBIOS
                         const caracasDate = getCaracasDate();
                         const rateDateStr = caracasDate.toISOString().split('T')[0];
-                        const { data: sale, error: saleError } = await supaQuery(() => supabase.from('sales').insert({
+                        const { data: sale, error: saleError } = await supabase.from('sales').insert({
                             branch: this.userBranch,
                             customer_id: this.creditForm.customer_id,
                             customer_name: customer?.full_name,
@@ -3015,10 +2975,10 @@ ${this.creditForm.notes || ''}`,
                             exchange_rate_used: this.exchangeRate,
                             rate_date: rateDateStr, // ← AHORA USA FECHA DE CARACAS
                             created_by: session.user.id
-                        }).select().single());
+                        }).select().single();
                         if (saleError) throw saleError;
                         // ✅ OPTIMIZADO: select con columnas explícitas (ya estaba correcto, se conserva igual)
-                        const { data: productsFromDB } = await supaQuery(() => supabase.from('products').select('id, name, size_liters, product_type').eq('is_active', true));
+                        const { data: productsFromDB } = await supabase.from('products').select('id, name, size_liters, product_type').eq('is_active', true);
                         // ✅ FIX: Solo productos tipo 'bottle' para el mapeo de botellones con agua
                         const bottleProducts = productsFromDB.filter(p => p.product_type === 'bottle');
                         const sizeToProductId = {};
@@ -3033,34 +2993,34 @@ ${this.creditForm.notes || ''}`,
                             unit_price: item.price,
                             total: round2(item.price * item.quantity)
                         }));
-                        const { error: itemsError } = await supaQuery(() => supabase.from('sale_items').insert(saleItems));
+                        const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
                         if (itemsError) throw itemsError;
                         let totalCapsNeeded = 0;
                         for (const item of this.cart) {
                             const realProductId = sizeToProductId[item.size_liters];
                             if (!realProductId) continue;
-                            const { data: tankResult, error: tankError } = await supaQuery(() => supabase.rpc('sell_and_deduct_from_tank', {
+                            const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
                                 branch_param: this.userBranch,
                                 product_id_param: realProductId,
                                 quantity_param: item.quantity,
                                 user_id_param: session.user.id
-                            }));
+                            });
                             if (tankError) throw tankError;
                             if (item.size_liters === 13 || item.size_liters === 20) {
                                 totalCapsNeeded += item.quantity;
                             }
                         }
                         if (totalCapsNeeded > 0 && capProduct) {
-                            const { data: capInventory } = await supaQuery(() => supabase.from('inventory').select('quantity').eq('product_id', capProduct.id).eq('branch', this.userBranch).single());
+                            const { data: capInventory } = await supabase.from('inventory').select('quantity').eq('product_id', capProduct.id).eq('branch', this.userBranch).single();
                             if (capInventory) {
-                                await supaQuery(() => supabase.from('inventory').update({
+                                await supabase.from('inventory').update({
                                     quantity: capInventory.quantity - totalCapsNeeded,
                                     updated_at: new Date().toISOString()
-                                }).eq('product_id', capProduct.id).eq('branch', this.userBranch));
+                                }).eq('product_id', capProduct.id).eq('branch', this.userBranch);
                             }
                         }
                         if (creditAmount > 0) {
-                            await supaQuery(() => supabase.from('credit_accounts').insert({
+                            await supabase.from('credit_accounts').insert({
                                 sale_id: sale.id,
                                 customer_id: this.creditForm.customer_id,
                                 customer_name: customer?.full_name,
@@ -3075,17 +3035,17 @@ ${this.creditForm.notes || ''}`,
                                 status: this.creditForm.initial_payment > 0 ? 'partial' : 'pending',
                                 created_by: session.user.id,
                                 branch: this.userBranch
-                            }));
+                            });
                             if (this.creditForm.initial_payment > 0) {
-                                const { data: creditAccount } = await supaQuery(() => supabase.from('credit_accounts').select('id').eq('sale_id', sale.id).single());
+                                const { data: creditAccount } = await supabase.from('credit_accounts').select('id').eq('sale_id', sale.id).single();
                                 if (creditAccount) {
-                                    await supaQuery(() => supabase.from('credit_payments').insert({
+                                    await supabase.from('credit_payments').insert({
                                         credit_account_id: creditAccount.id,
                                         amount: round2(this.creditForm.initial_payment),
                                         payment_method: this.creditForm.initial_payment_method,
                                         notes: 'Pago inicial',
                                         created_by: session.user.id
-                                    }));
+                                    });
                                 }
                             }
                         }
