@@ -328,6 +328,45 @@
                 </div>
             </div>
 
+            <!-- ✅ Cobros de Créditos del Día (abonos pagados hoy, de cuentas por cobrar de cualquier fecha) -->
+            <div class="mb-4 border-2 border-teal-300 rounded-lg p-3 bg-teal-50">
+                <h3 class="font-bold text-teal-800 mb-2 text-sm flex items-center"><i
+                        class="fas fa-hand-holding-usd mr-2"></i>COBROS DE CRÉDITOS DEL DÍA <span
+                        class="font-normal text-[10px] text-teal-600 ml-2">(abonos recibidos hoy, de cuentas de
+                        cualquier fecha)</span></h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1 text-xs bg-white rounded-lg p-2 border border-teal-200">
+                        <div class="flex justify-between"><span>Efectivo Bs:</span><span class="font-bold"
+                                x-text="formatVE(stats.cobrosEfectivoBs) + ' $'"></span></div>
+                        <div class="flex justify-between"><span>Efectivo $:</span><span class="font-bold"
+                                x-text="formatVE(stats.cobrosEfectivoUsd) + ' $'"></span></div>
+                        <div class="flex justify-between"><span>Pago Móvil:</span><span class="font-bold"
+                                x-text="formatVE(stats.cobrosPagoMovil) + ' $'"></span></div>
+                        <div class="flex justify-between"><span>Punto de Venta:</span><span class="font-bold"
+                                x-text="formatVE(stats.cobrosPunto) + ' $'"></span></div>
+                        <div class="flex justify-between"><span>Transferencia:</span><span class="font-bold"
+                                x-text="formatVE(stats.cobrosTransferencia) + ' $'"></span></div>
+                    </div>
+                    <div
+                        class="flex flex-col justify-center items-center bg-white rounded-lg p-2 border border-teal-200">
+                        <p class="text-xs text-gray-600 font-semibold">Total Cobrado en Créditos:</p>
+                        <p class="text-2xl font-bold text-teal-700"
+                            x-text="'$' + formatVE(stats.totalCobrosCreditoUSD)">
+                        </p>
+                        <p class="text-[10px] text-gray-500"
+                            x-text="stats.totalCobrosCreditoCount + ' pago(s) recibido(s)'">
+                        </p>
+                    </div>
+                </div>
+                <div
+                    class="border-t border-teal-300 mt-2 pt-2 flex justify-between items-center bg-white rounded-lg px-3 py-2">
+                    <span class="font-bold text-sm text-gray-800">TOTAL EN CAJA HOY (Ventas Contado + Cobros de
+                        Créditos):</span>
+                    <span class="font-bold text-lg text-teal-700"
+                        x-text="'$' + formatVE(stats.totalContadoUSD + stats.totalCobrosCreditoUSD)"></span>
+                </div>
+            </div>
+
             <!-- Distribución por Método de Pago -->
             <div class="border-2 border-purple-300 rounded-lg p-3 mb-4">
                 <h3 class="font-bold text-purple-800 mb-2 text-center text-sm">DISTRIBUCIÓN POR MÉTODO DE PAGO (SOLO
@@ -420,7 +459,15 @@
                     digitalPayments: 0,
                     digitalPaymentsBs: 0,
                     products: [],
-                    percentages: { efectivoBs: 0, efectivoUsd: 0, pagoMovil: 0, punto: 0, transferencia: 0 }
+                    percentages: { efectivoBs: 0, efectivoUsd: 0, pagoMovil: 0, punto: 0, transferencia: 0 },
+                    // ✅ Cobros de créditos (abonos pagados HOY sobre cuentas por cobrar de cualquier fecha)
+                    totalCobrosCreditoUSD: 0,
+                    totalCobrosCreditoCount: 0,
+                    cobrosEfectivoBs: 0,
+                    cobrosEfectivoUsd: 0,
+                    cobrosPagoMovil: 0,
+                    cobrosPunto: 0,
+                    cobrosTransferencia: 0
                 },
 
                 formatVE(num) {
@@ -470,27 +517,47 @@
                         // Requiere que las foreign keys sale_payments.sale_id -> sales.id,
                         // sale_items.sale_id -> sales.id y sale_items.product_id -> products.id
                         // ya existan (normalmente ya están si usas esas columnas como FK).
-                        const { data: sales, error } = await supabase
-                            .from('sales')
-                            .select(`
-                                id,
-                                total,
-                                payment_method,
-                                delivery_type,
-                                created_at,
-                                sale_payments ( payment_method, amount_usd ),
-                                sale_items (
-                                    quantity,
+                        //
+                        // ✅ Cobros de créditos: se consulta credit_payments (abonos pagados HOY,
+                        // sin importar de qué fecha sea la venta/crédito original) filtrando por
+                        // sucursal a través de credit_accounts. Se pide en paralelo con "sales".
+                        const [salesResult, creditPaymentsResult] = await Promise.all([
+                            supabase
+                                .from('sales')
+                                .select(`
+                                    id,
                                     total,
-                                    products ( name, size_liters )
-                                )
-                            `)
-                            .gte('created_at', startOfDay)
-                            .lte('created_at', endOfDay)
-                            .eq('branch', this.userBranch);
+                                    payment_method,
+                                    delivery_type,
+                                    created_at,
+                                    sale_payments ( payment_method, amount_usd ),
+                                    sale_items (
+                                        quantity,
+                                        total,
+                                        products ( name, size_liters )
+                                    )
+                                `)
+                                .gte('created_at', startOfDay)
+                                .lte('created_at', endOfDay)
+                                .eq('branch', this.userBranch),
+                            supabase
+                                .from('credit_payments')
+                                .select(`
+                                    payment_method,
+                                    amount,
+                                    payment_date,
+                                    credit_accounts!inner ( branch )
+                                `)
+                                .gte('payment_date', startOfDay)
+                                .lte('payment_date', endOfDay)
+                                .eq('credit_accounts.branch', this.userBranch)
+                        ]);
 
-                        if (error) throw error;
-                        this.processSales(sales || []);
+                        if (salesResult.error) throw salesResult.error;
+                        if (creditPaymentsResult.error) throw creditPaymentsResult.error;
+
+                        this.processSales(salesResult.data || []);
+                        this.processCreditPayments(creditPaymentsResult.data || []);
                     } catch (err) {
                         console.error('Error cargando reporte:', err);
                     } finally {
@@ -503,7 +570,10 @@
                         totalContadoUSD: 0, totalCreditoUSD: 0, totalCreditSales: 0, totalTransactions: 0, totalDeliverys: 0,
                         efectivoBs: 0, efectivoUsd: 0, pagoMovil: 0, punto: 0, transferencia: 0,
                         digitalPayments: 0, digitalPaymentsBs: 0, products: [],
-                        percentages: { efectivoBs: 0, efectivoUsd: 0, pagoMovil: 0, punto: 0, transferencia: 0 }
+                        percentages: { efectivoBs: 0, efectivoUsd: 0, pagoMovil: 0, punto: 0, transferencia: 0 },
+                        // ✅ Cobros de créditos del día
+                        totalCobrosCreditoUSD: 0, totalCobrosCreditoCount: 0,
+                        cobrosEfectivoBs: 0, cobrosEfectivoUsd: 0, cobrosPagoMovil: 0, cobrosPunto: 0, cobrosTransferencia: 0
                     };
                 },
 
@@ -596,6 +666,32 @@
                         this.stats.percentages.punto = Math.round((this.stats.punto / total) * 100);
                         this.stats.percentages.transferencia = Math.round((this.stats.transferencia / total) * 100);
                     }
+                },
+
+                // ✅ Procesa los abonos/pagos de créditos recibidos HOY (tabla credit_payments).
+                // Esto es dinero real que entró a caja hoy, independientemente de cuándo se
+                // originó la venta a crédito, por lo que se mantiene separado de "Ventas del Día".
+                processCreditPayments(payments) {
+                    for (const payment of payments) {
+                        const amount = payment.amount || 0;
+                        this.stats.totalCobrosCreditoUSD += amount;
+                        this.stats.totalCobrosCreditoCount++;
+
+                        switch (payment.payment_method) {
+                            case 'efectivo_bs': this.stats.cobrosEfectivoBs += amount; break;
+                            case 'efectivo_divisas': this.stats.cobrosEfectivoUsd += amount; break;
+                            case 'pago_movil': this.stats.cobrosPagoMovil += amount; break;
+                            case 'punto_venta': this.stats.cobrosPunto += amount; break;
+                            case 'transferencia': this.stats.cobrosTransferencia += amount; break;
+                        }
+                    }
+
+                    this.stats.totalCobrosCreditoUSD = Math.round(this.stats.totalCobrosCreditoUSD * 100) / 100;
+                    this.stats.cobrosEfectivoBs = Math.round(this.stats.cobrosEfectivoBs * 100) / 100;
+                    this.stats.cobrosEfectivoUsd = Math.round(this.stats.cobrosEfectivoUsd * 100) / 100;
+                    this.stats.cobrosPagoMovil = Math.round(this.stats.cobrosPagoMovil * 100) / 100;
+                    this.stats.cobrosPunto = Math.round(this.stats.cobrosPunto * 100) / 100;
+                    this.stats.cobrosTransferencia = Math.round(this.stats.cobrosTransferencia * 100) / 100;
                 },
 
                 formatDate(dateStr) {
