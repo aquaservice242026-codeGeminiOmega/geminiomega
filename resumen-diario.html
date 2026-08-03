@@ -2,848 +2,1279 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Resumen Diario - Servicios Agua Potable</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- ======================================================================
+     ✅ CAMBIOS SOLICITADOS (busca estos comentarios en el código):
+     CAMBIO 1: Eliminadas tarjetas "Lote Punto de Venta" y "Anulaciones / Dev."
+     CAMBIO 2: Fechas en formato DD/MM/AAAA
+     CAMBIO 3: Sección "Cobros de Créditos del Día" oculta sin movimiento
+     CAMBIO 4: Impresión tamaño carta, márgenes 1 cm, idéntica a pantalla
+====================================================================== -->
     <style>
-        [x-cloak] {
-            display: none !important;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Verdana, sans-serif;
+            background: #eef2f7;
+            color: #1e293b;
+            font-size: 13px
         }
 
-        .gradient-bg {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+        a {
+            text-decoration: none
         }
 
+        /* ---------- Nav y toolbar (NO se imprimen) ---------- */
+        .nav {
+            background: #0f172a;
+            padding: 10px 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap
+        }
+
+        .nav .brand {
+            color: #fff;
+            font-weight: 700;
+            font-size: 13px
+        }
+
+        .nav small {
+            color: #64748b;
+            font-size: 11px
+        }
+
+        .nav a {
+            color: #cbd5e1;
+            font-size: 12px
+        }
+
+        .nav a.active {
+            color: #7dd3fc;
+            font-weight: 600
+        }
+
+        .toolbar {
+            max-width: 1000px;
+            margin: 16px auto 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 0 14px
+        }
+
+        .toolbar label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 6px 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 12px
+        }
+
+        .btn {
+            padding: 7px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer
+        }
+
+        .btn-azul {
+            background: #2563eb;
+            color: #fff
+        }
+
+        .btn-gris {
+            background: #e2e8f0;
+            color: #0f172a
+        }
+
+        .btn-rojo {
+            background: #dc2626;
+            color: #fff
+        }
+
+        .loading {
+            max-width: 1000px;
+            margin: 6px auto;
+            color: #64748b;
+            font-size: 12px;
+            padding: 0 14px
+        }
+
+        /* ---------- Hoja del reporte ---------- */
+        #pagina {
+            max-width: 1000px;
+            margin: 0 auto 40px;
+            background: #fff;
+            padding: 26px 30px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, .06)
+        }
+
+        .report-header {
+            text-align: center;
+            margin-bottom: 12px
+        }
+
+        .report-header h1 {
+            font-size: 20px;
+            letter-spacing: 1.5px;
+            color: #0f172a
+        }
+
+        .report-header h2 {
+            font-size: 12.5px;
+            color: #2563eb;
+            letter-spacing: .8px;
+            margin: 4px 0 8px
+        }
+
+        .meta {
+            font-size: 10.5px;
+            color: #475569;
+            padding-bottom: 8px;
+            border-bottom: 3px double #94a3b8
+        }
+
+        /* ---------- Tarjetas superiores (CAMBIO 1: solo quedan 2) ---------- */
+        .stat-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin: 14px 0
+        }
+
+        .stat-card {
+            border-radius: 8px;
+            padding: 10px 12px;
+            text-align: center;
+            border: 1px solid
+        }
+
+        .stat-card h3 {
+            font-size: 9px;
+            letter-spacing: .4px;
+            margin-bottom: 6px
+        }
+
+        .stat-card .big {
+            font-size: 20px;
+            font-weight: 800
+        }
+
+        .stat-card .sub {
+            font-size: 10px;
+            margin-top: 4px
+        }
+
+        .st-del {
+            background: #eef1fb;
+            border-color: #c9d2f2
+        }
+
+        .st-del h3,
+        .st-del .sub {
+            color: #4338ca
+        }
+
+        .st-est {
+            background: #eafaf0;
+            border-color: #bfe8cf
+        }
+
+        .st-est h3,
+        .st-est .sub {
+            color: #15803d
+        }
+
+        .estado-txt {
+            color: #16a34a;
+            font-size: 16px !important;
+            font-weight: 800
+        }
+
+        /* ---------- Tabla de ventas ---------- */
+        .tabla-ventas {
+            margin: 14px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0
+        }
+
+        .dark-head {
+            background: #1e293b;
+            color: #fff;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 700
+        }
+
+        .total-head {
+            color: #4ade80
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff
+        }
+
+        thead th {
+            background: #f1f5f9;
+            font-size: 11px;
+            padding: 7px 8px;
+            text-align: right;
+            color: #334155;
+            border-bottom: 1px solid #e2e8f0
+        }
+
+        thead th:first-child {
+            text-align: left
+        }
+
+        thead th:nth-child(2) {
+            text-align: center
+        }
+
+        thead th:nth-child(3),
+        tbody td:nth-child(3) {
+            background: #faf7ff
+        }
+
+        thead th:nth-child(4),
+        tbody td:nth-child(4) {
+            background: #f2fbf5
+        }
+
+        thead th:nth-child(5),
+        tbody td:nth-child(5) {
+            background: #f0f6fe
+        }
+
+        thead th:nth-child(6),
+        tbody td:nth-child(6) {
+            background: #fef7ec
+        }
+
+        thead th:nth-child(7),
+        tbody td:nth-child(7) {
+            background: #fefce8
+        }
+
+        thead th:nth-child(8),
+        tbody td:nth-child(8) {
+            background: #f8fafc
+        }
+
+        tbody td {
+            padding: 7px 8px;
+            font-size: 12px;
+            border-bottom: 1px solid #edf2f7;
+            text-align: right
+        }
+
+        tbody td:first-child {
+            text-align: left
+        }
+
+        tbody td:nth-child(2) {
+            text-align: center;
+            color: #2563eb;
+            font-weight: 600
+        }
+
+        tbody td:nth-child(8) {
+            font-weight: 700
+        }
+
+        .fila-pagos td {
+            background: #e8f1fd;
+            color: #1d4ed8;
+            font-weight: 700;
+            font-size: 11.5px;
+            padding: 7px 8px;
+            text-align: left
+        }
+
+        .fila-pagos td.pago-conv,
+        .fila-pagos td:last-child {
+            text-align: right
+        }
+
+        .fila-subtotal td {
+            background: #e2e8f0;
+            font-weight: 800;
+            font-size: 12px;
+            padding: 7px 8px;
+            text-align: right;
+            border-top: 2px solid #cbd5e1
+        }
+
+        .fila-subtotal td.lbl {
+            text-align: left;
+            background: #dde3ea
+        }
+
+        .fila-subtotal td:nth-child(3) {
+            background: #ece4f7
+        }
+
+        .fila-subtotal td:nth-child(4) {
+            background: #e3f6ea
+        }
+
+        .fila-subtotal td:nth-child(5) {
+            background: #e0ebfa
+        }
+
+        .fila-subtotal td:nth-child(6) {
+            background: #faeeda
+        }
+
+        .fila-subtotal td:nth-child(7) {
+            background: #faf5d7
+        }
+
+        .fila-subtotal td:nth-child(8) {
+            background: #e5f6ee
+        }
+
+        /* ---------- Cards desglose / totales ---------- */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin: 14px 0
+        }
+
+        .card {
+            border: 1px solid #cfe0f4;
+            border-radius: 8px;
+            background: #fbfdff;
+            padding: 12px 14px
+        }
+
+        .card h4 {
+            color: #1d4ed8;
+            font-size: 11px;
+            letter-spacing: .3px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            gap: 8px
+        }
+
+        .nota {
+            color: #2563eb;
+            font-weight: 500;
+            font-size: 10px
+        }
+
+        .linea {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 2px;
+            font-size: 12px;
+            border-bottom: 1px dashed #e2e8f0
+        }
+
+        .linea b {
+            color: #0f172a
+        }
+
+        .linea i {
+            color: #94a3b8;
+            font-style: normal;
+            font-size: 10px
+        }
+
+        .tot-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 12px
+        }
+
+        .tot-row .der {
+            text-align: right
+        }
+
+        .verde {
+            background: #e5f8ec;
+            color: #166534
+        }
+
+        .verde b {
+            color: #16a34a;
+            font-size: 14px
+        }
+
+        .amarillo {
+            background: #fdf3d7;
+            color: #92400e
+        }
+
+        .amarillo b {
+            color: #d97706
+        }
+
+        .amarillo i {
+            display: block;
+            font-style: normal;
+            font-size: 9px;
+            color: #b45309
+        }
+
+        .gran {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 4px;
+            font-weight: 800;
+            font-size: 13px;
+            border-top: 1px solid #e2e8f0
+        }
+
+        /* ---------- ✅ CAMBIO 3: Cobros de créditos (ocultable) ---------- */
+        .sec-cobros {
+            border: 1px solid #9fdccf;
+            background: #f2fcfa;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin: 14px 0
+        }
+
+        .cobros-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            color: #0f766e;
+            font-weight: 700;
+            font-size: 11.5px;
+            margin-bottom: 10px
+        }
+
+        .cobros-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px
+        }
+
+        .cobros-lista {
+            background: #fff;
+            border: 1px solid #d1e7e2;
+            border-radius: 6px;
+            padding: 8px 10px
+        }
+
+        .cobros-lista .linea {
+            border-bottom: none
+        }
+
+        .cobros-total {
+            background: #fff;
+            border: 1px solid #d1e7e2;
+            border-radius: 6px;
+            text-align: center;
+            padding: 10px
+        }
+
+        .cobros-total p {
+            font-size: 11px;
+            color: #334155
+        }
+
+        .cobros-total .big {
+            color: #0d9488;
+            font-size: 20px;
+            font-weight: 800;
+            margin: 4px 0
+        }
+
+        .cobros-total .sub {
+            font-size: 9.5px;
+            color: #64748b
+        }
+
+        /* ---------- Distribución ---------- */
+        .sec-dist {
+            margin: 14px 0;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #fff;
+            padding: 12px
+        }
+
+        .sec-dist h5 {
+            text-align: center;
+            color: #7c3aed;
+            font-size: 11px;
+            letter-spacing: .4px;
+            margin-bottom: 10px
+        }
+
+        .dist-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px
+        }
+
+        .dist-box {
+            border-radius: 6px;
+            text-align: center;
+            padding: 8px 6px
+        }
+
+        .dist-box .lbl {
+            display: block;
+            font-size: 8.5px;
+            font-weight: 700;
+            letter-spacing: .3px
+        }
+
+        .dist-box .val {
+            display: block;
+            font-size: 15px;
+            font-weight: 800;
+            margin-top: 2px
+        }
+
+        .d-bs {
+            background: #f3e8fd
+        }
+
+        .d-bs .lbl,
+        .d-bs .val {
+            color: #7c3aed
+        }
+
+        .d-usd {
+            background: #e3f9e9
+        }
+
+        .d-usd .lbl,
+        .d-usd .val {
+            color: #16a34a
+        }
+
+        .d-pm {
+            background: #e0e9fd
+        }
+
+        .d-pm .lbl,
+        .d-pm .val {
+            color: #2563eb
+        }
+
+        .d-pos {
+            background: #fdeede
+        }
+
+        .d-pos .lbl,
+        .d-pos .val {
+            color: #ea580c
+        }
+
+        .d-tr {
+            background: #fdf7d9
+        }
+
+        .d-tr .lbl,
+        .d-tr .val {
+            color: #a16207
+        }
+
+        /* ---------- Arqueo ---------- */
+        .sec-arqueo {
+            background: #f6f3fd;
+            border: 1px solid #ddd0f5;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin: 14px 0
+        }
+
+        .arqueo-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            color: #334155;
+            font-weight: 700;
+            font-size: 11.5px;
+            margin-bottom: 10px
+        }
+
+        .arqueo-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr 1fr;
+            gap: 12px
+        }
+
+        .arqueo-grid .box {
+            background: #fff;
+            border: 1px solid #e4ddf6;
+            border-radius: 6px;
+            padding: 10px
+        }
+
+        .box label {
+            display: block;
+            font-size: 10.5px;
+            color: #334155;
+            margin: 4px 0
+        }
+
+        .box input {
+            width: 100%;
+            padding: 5px 6px;
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
+            font-size: 12px
+        }
+
+        .box .linea {
+            border-bottom: none;
+            padding: 3px 2px;
+            font-size: 11.5px
+        }
+
+        .dif-ok {
+            background: #dcfce7;
+            border-color: #bbf7d0 !important;
+            text-align: center
+        }
+
+        .dif-ok .lbl {
+            font-size: 9px;
+            color: #166534;
+            font-weight: 700;
+            letter-spacing: .4px
+        }
+
+        .dif-ok .big {
+            color: #16a34a;
+            font-size: 18px;
+            font-weight: 800
+        }
+
+        .dif-ok .sub {
+            color: #166534;
+            font-size: 9.5px;
+            font-weight: 700;
+            letter-spacing: .4px
+        }
+
+        .dif-bad {
+            background: #fee2e2;
+            border-color: #fecaca !important;
+            text-align: center
+        }
+
+        .dif-bad .lbl {
+            font-size: 9px;
+            color: #991b1b;
+            font-weight: 700
+        }
+
+        .dif-bad .big {
+            color: #dc2626;
+            font-size: 18px;
+            font-weight: 800
+        }
+
+        .dif-bad .sub {
+            color: #991b1b;
+            font-size: 9.5px;
+            font-weight: 700
+        }
+
+        /* ---------- Total y firmas ---------- */
+        .total-bar {
+            margin: 16px 0 8px;
+            background: #0d9488;
+            color: #fff;
+            border-radius: 8px;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 800
+        }
+
+        .total-bar b {
+            font-size: 16px
+        }
+
+        .firmas {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin: 28px 4px 6px
+        }
+
+        .firma {
+            text-align: center;
+            font-size: 10.5px;
+            color: #334155;
+            padding-top: 30px;
+            border-top: 1px solid #334155
+        }
+
+        /* ==================================================================
+   ✅ CAMBIO 4 — IMPRESIÓN: hoja CARTA, márgenes 1 cm en los 4 lados,
+   idéntica a la vista de pantalla y ajustada a UNA sola página.
+================================================================== */
         @media print {
-            .no-print {
-                display: none !important;
+            @page {
+                size: letter portrait;
+                margin: 1cm
             }
 
-            .print-container {
-                display: block !important;
-                box-shadow: none;
-                width: 100% !important;
-                max-width: 100% !important;
-                padding: 0 !important;
+            html,
+            body {
+                background: #fff !important
             }
 
             body {
-                background: white;
+                font-size: 9px
             }
 
-            @page {
-                size: letter;
-                margin: 1cm;
+            * {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact
             }
-        }
 
-        .thermal-ticket {
-            width: 80mm;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 11px;
+            .nav,
+            .toolbar,
+            .loading,
+            .no-print {
+                display: none !important
+            }
+
+            #pagina {
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+                border: none;
+                box-shadow: none
+            }
+
+            .report-header h1 {
+                font-size: 15px
+            }
+
+            .report-header h2 {
+                font-size: 9.5px
+            }
+
+            .meta {
+                font-size: 8px
+            }
+
+            .stat-cards {
+                gap: 8px;
+                margin: 8px 0
+            }
+
+            .stat-card {
+                padding: 6px
+            }
+
+            .stat-card h3 {
+                font-size: 7.5px
+            }
+
+            .stat-card .big {
+                font-size: 14px
+            }
+
+            .estado-txt {
+                font-size: 12px !important
+            }
+
+            .stat-card .sub {
+                font-size: 7.5px
+            }
+
+            .dark-head {
+                font-size: 9.5px;
+                padding: 5px 8px
+            }
+
+            thead th {
+                font-size: 8px;
+                padding: 3px 5px
+            }
+
+            tbody td {
+                font-size: 8px;
+                padding: 3px 5px
+            }
+
+            .fila-pagos td {
+                font-size: 8px;
+                padding: 3px 5px
+            }
+
+            .fila-subtotal td {
+                font-size: 8.5px;
+                padding: 3px 5px
+            }
+
+            .grid-2 {
+                gap: 8px;
+                margin: 8px 0
+            }
+
+            .card {
+                padding: 8px 10px
+            }
+
+            .card h4 {
+                font-size: 8.5px
+            }
+
+            .linea {
+                font-size: 8px;
+                padding: 2px 2px
+            }
+
+            .tot-row {
+                padding: 5px 8px;
+                font-size: 8.5px;
+                margin-bottom: 5px
+            }
+
+            .verde b {
+                font-size: 10px
+            }
+
+            .gran {
+                font-size: 9.5px
+            }
+
+            .sec-cobros {
+                padding: 8px 10px;
+                margin: 8px 0
+            }
+
+            .cobros-head {
+                font-size: 8.5px;
+                margin-bottom: 6px
+            }
+
+            .cobros-lista .linea {
+                font-size: 8px
+            }
+
+            .cobros-total p {
+                font-size: 8px
+            }
+
+            .cobros-total .big {
+                font-size: 13px
+            }
+
+            .cobros-total .sub {
+                font-size: 7.5px
+            }
+
+            .sec-dist {
+                padding: 8px;
+                margin: 8px 0
+            }
+
+            .sec-dist h5 {
+                font-size: 8.5px;
+                margin-bottom: 6px
+            }
+
+            .dist-grid {
+                gap: 6px
+            }
+
+            .dist-box {
+                padding: 4px
+            }
+
+            .dist-box .lbl {
+                font-size: 6.5px
+            }
+
+            .dist-box .val {
+                font-size: 10px
+            }
+
+            .sec-arqueo {
+                padding: 8px 10px;
+                margin: 8px 0
+            }
+
+            .arqueo-head {
+                font-size: 8.5px;
+                margin-bottom: 6px
+            }
+
+            .arqueo-grid {
+                gap: 8px
+            }
+
+            .box label {
+                font-size: 7.5px
+            }
+
+            .box input {
+                padding: 2px 4px;
+                font-size: 8px
+            }
+
+            .box .linea {
+                font-size: 8px
+            }
+
+            .dif-ok .big,
+            .dif-bad .big {
+                font-size: 12px
+            }
+
+            .total-bar {
+                padding: 6px 10px;
+                font-size: 9.5px;
+                margin: 10px 0 6px
+            }
+
+            .total-bar b {
+                font-size: 12px
+            }
+
+            .firmas {
+                gap: 20px;
+                margin: 18px 4px 4px
+            }
+
+            .firma {
+                font-size: 8px;
+                padding-top: 20px
+            }
+
+            .report-header,
+            .stat-cards,
+            .tabla-ventas,
+            .grid-2,
+            .sec-cobros,
+            .sec-dist,
+            .sec-arqueo,
+            .total-bar,
+            .firmas {
+                break-inside: avoid
+            }
         }
     </style>
 </head>
 
-<body class="bg-gray-50" x-data="reporteApp()" x-init="initReporte()">
+<body>
 
-    <!-- Sidebar -->
-    <aside class="hidden lg:block fixed left-0 top-0 h-full w-64 gradient-bg text-white z-40 no-print">
-        <div class="p-6">
-            <div class="mb-6">
-                <h1 class="text-xl font-bold">Servicios Agua Potable</h1>
-                <p class="text-xs text-blue-200">Sistema de Gestión</p>
+    <!-- Controles de pantalla (NO se imprimen) -->
+    <nav class="nav no-print">
+        <span class="brand">Servicios Agua Potable</span><small>Sistema de Gestión</small>
+        <a href="index.html">Dashboard</a><a href="ventas.html">Ventas</a><a href="cuentas-cobrar.html">Cuentas por
+            Cobrar</a>
+        <a href="clientes.html">Clientes</a><a href="inventario.html">Inventario</a><a href="gastos.html">Gastos</a>
+        <a href="usuarios.html">Usuarios</a><a href="reportes.html">Reportes</a><a class="active"
+            href="resumen-diario.html">Resumen Diario</a>
+    </nav>
+    <div class="toolbar no-print">
+        <label>Fecha</label><input type="date" id="fechaInput" value="2026-08-03">
+        <label>Sucursal</label>
+        <select id="sucursalSelect">
+            <option>Geminis</option>
+            <option>Omega</option>
+        </select>
+        <!-- ✅ Conecte aquí sus funciones existentes de producción -->
+        <button class="btn btn-azul" id="btnActualizar">Actualizar</button>
+        <button class="btn btn-gris" id="btnTicket">PDF Ticket 80mm</button>
+        <button class="btn btn-rojo" id="btnCerrar">Cerrar Día</button>
+    </div>
+    <div class="loading no-print" id="loading" hidden>Procesando auditoría y cuadre de caja...</div>
+
+    <!-- ==================== HOJA DEL REPORTE ==================== -->
+    <div id="pagina">
+        <header class="report-header">
+            <h1>SERVICIOS AGUA POTABLE</h1>
+            <h2>RESUMEN DIARIO DE VENTAS Y AUDITORÍA DE CAJA</h2>
+            <p class="meta">🕐 Generado: <span id="txtGenerado"></span> | Fecha: <span id="txtFecha"></span> | Sucursal:
+                <span id="txtSucursal"></span> | Tasa Oficial: Bs. <span id="txtTasa"></span>
+            </p>
+        </header>
+
+        <!-- ✅ CAMBIO 1: Se eliminaron las tarjetas "Lote Punto de Venta" y "Anulaciones / Dev." -->
+        <div class="stat-cards">
+            <div class="stat-card st-del">
+                <h3>DELIVERIES REALIZADOS</h3>
+                <div class="big" id="numDeliveries">0</div>
+                <div class="sub">Ticket Prom: <span id="ticketProm"></span></div>
             </div>
-            <nav class="space-y-2">
-                <a href="index.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
-                        class="fas fa-home w-5"></i><span>Dashboard</span></a>
-                <a href="ventas.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
-                        class="fas fa-shopping-cart w-5"></i><span>Ventas</span></a>
-                <a href="cuentas-cobrar.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
-                        class="fas fa-file-invoice-dollar w-5"></i><span>Cuentas por Cobrar</span></a>
-                <a href="clientes.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
-                        class="fas fa-users w-5"></i><span>Clientes</span></a>
-                <a href="inventario.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
-                        class="fas fa-boxes w-5"></i><span>Inventario</span></a>
-                <a href="gastos.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
-                        class="fas fa-receipt w-5"></i><span>Gastos</span></a>
-                <a href="usuarios.html" x-show="userRole === 'admin'"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
-                        class="fas fa-user-cog w-5"></i><span>Usuarios</span></a>
-                <a href="reportes.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
-                        class="fas fa-chart-line w-5"></i><span>Reportes</span></a>
-                <a href="resumen-diario.html"
-                    class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg"><i
-                        class="fas fa-file-alt w-5"></i><span class="font-medium">Resumen Diario</span></a>
-            </nav>
-        </div>
-        <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold text-sm"
-                    x-text="userName ? userName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '??'">
-                </div>
-                <div>
-                    <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
-                    <p class="text-xs text-blue-200 capitalize"><span
-                            x-text="userRole === 'admin' ? 'Administrador' : 'Vendedor'"></span> | <span
-                            x-text="userBranch"></span></p>
-                </div>
-            </div>
-        </div>
-    </aside>
-
-    <!-- Main Content -->
-    <div class="lg:ml-64 min-h-screen p-4 lg:p-6">
-
-        <!-- Header con Filtros -->
-        <div class="bg-white rounded-lg shadow-sm p-4 mb-6 no-print border-l-4"
-            :class="isClosed ? 'border-red-500' : 'border-green-500'">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h2 class="text-2xl font-bold text-gray-800">Resumen Diario de Ventas</h2>
-                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wide uppercase"
-                            :class="isClosed ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'"
-                            x-text="isClosed ? 'JORNADA CERRADA' : 'EN PROCESO (ABIERTA)'"></span>
-                    </div>
-                    <p class="text-xs text-gray-500">Auditoría, Conciliación de Caja y Métricas Operativas</p>
-                </div>
-
-                <div class="flex flex-wrap items-end gap-2">
-                    <div>
-                        <label class="block text-xs text-gray-600 mb-1">Fecha</label>
-                        <input type="date" x-model="filters.date" @change="loadReportData()"
-                            class="px-3 py-1.5 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div x-show="userRole === 'admin'">
-                        <label class="block text-xs text-gray-600 mb-1">Sucursal</label>
-                        <select x-model="userBranch" @change="loadReportData()"
-                            class="px-3 py-1.5 border rounded-lg text-sm capitalize focus:ring-2 focus:ring-blue-500">
-                            <option value="geminis">Geminis</option>
-                            <option value="omega">Omega</option>
-                        </select>
-                    </div>
-                    <button @click="loadReportData()"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm transition"><i
-                            class="fas fa-sync-alt mr-1"></i> Actualizar</button>
-                    <button @click="exportToPDF()"
-                        class="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1.5 rounded-lg text-sm transition"><i
-                            class="fas fa-file-pdf mr-1"></i> PDF</button>
-                    <button @click="printThermal()"
-                        class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-sm transition"><i
-                            class="fas fa-print mr-1"></i> Ticket 80mm</button>
-                    <button x-show="!isClosed" @click="cerrarJornada()"
-                        class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-semibold transition"><i
-                            class="fas fa-lock mr-1"></i> Cerrar Día</button>
-                </div>
+            <div class="stat-card st-est">
+                <h3>ESTADO DEL REGISTRO</h3>
+                <div class="estado-txt" id="estadoRegistro">ABIERTO</div>
+                <div class="sub" id="estadoSub">Registrando ventas</div>
             </div>
         </div>
 
-        <!-- Loading -->
-        <div x-show="loading" class="text-center py-12">
-            <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500"></i>
-            <p class="mt-4 text-gray-600 font-medium">Procesando auditoría y cuadre de caja...</p>
+        <section class="tabla-ventas">
+            <div class="dark-head"><span>🧾 VENTAS DEL DÍA (CONTADO)</span><span class="total-head">Total: <span
+                        id="totalVentas"></span></span></div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cant.</th>
+                        <th>Efect. Bs</th>
+                        <th>Efect. $</th>
+                        <th>P. Móvil</th>
+                        <th>Punto</th>
+                        <th>Transf.</th>
+                        <th>Total $</th>
+                    </tr>
+                </thead>
+                <tbody id="tbVentas"></tbody>
+                <tfoot>
+                    <tr class="fila-pagos">
+                        <td colspan="6">📱 PAGOS DIGITALES TOTALES:</td>
+                        <td class="pago-conv" id="pagosConv"></td>
+                        <td id="pagosTotal"></td>
+                    </tr>
+                    <tr class="fila-subtotal">
+                        <td class="lbl" colspan="2">SUBTOTAL CONTADO:</td>
+                        <td id="scBs"></td>
+                        <td id="scUsd"></td>
+                        <td id="scPm"></td>
+                        <td id="scPos"></td>
+                        <td id="scTr"></td>
+                        <td id="scTotal"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </section>
+
+        <div class="grid-2">
+            <section class="card">
+                <h4>DESGLOSE POR MÉTODO DE PAGO <span class="nota">(Conversión Tasa BCV)</span></h4>
+                <div class="linea"><span>Efectivo Bs:</span><b id="dBs"></b></div>
+                <div class="linea"><span>Efectivo $:</span><b id="dUsd"></b></div>
+                <div class="linea"><span>Pago Móvil:</span><b id="dPm"></b></div>
+                <div class="linea"><span>Punto de Venta:</span><b id="dPos"></b></div>
+                <div class="linea"><span>Transferencia:</span><b id="dTr"></b></div>
+            </section>
+            <section class="card">
+                <h4>TOTALES GENERALES</h4>
+                <div class="tot-row verde"><span>Total Contado (Caja / Bancos):</span><span class="der"><b
+                            id="tContado"></b></span></div>
+                <div class="tot-row amarillo"><span>Total Crédito (Por Cobrar):</span><span class="der"><b
+                            id="tCredito"></b><i id="tCreditoTx"></i></span></div>
+                <div class="gran"><span>GRAN TOTAL VENDIDO:</span><b id="granTotal"></b></div>
+            </section>
         </div>
 
-        <!-- Report Content -->
-        <div x-show="!loading" x-cloak
-            class="print-container max-w-5xl mx-auto bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-
-            <!-- Header del Reporte -->
-            <div class="text-center mb-4 border-b-2 border-blue-600 pb-3">
-                <h1 class="text-2xl font-black text-gray-900 tracking-wider">SERVICIOS AGUA POTABLE</h1>
-                <p class="text-md font-bold text-blue-600 uppercase tracking-wide">RESUMEN DIARIO DE VENTAS Y AUDITORÍA
-                    DE CAJA</p>
-                <p class="text-xs text-gray-600 mt-1">
-                    <i class="far fa-clock mr-1"></i>Generado: <span x-text="currentDateTime"
-                        class="font-semibold"></span> |
-                    Fecha: <span x-text="formatDate(filters.date)" class="font-bold"></span> |
-                    Sucursal: <span class="capitalize font-bold text-blue-700" x-text="userBranch"></span> |
-                    Tasa Oficial: <span class="font-bold">Bs. <span x-text="formatVE(exchangeRate)"></span></span>
-                </p>
-            </div>
-
-            <!-- MÉTICAS OPERATIVAS & AUDITORÍA -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
-                <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-2.5 text-center">
-                    <p class="text-[11px] font-semibold text-indigo-700 uppercase">Deliveries Realizados</p>
-                    <p class="text-2xl font-black text-indigo-900" x-text="stats.totalDeliverys"></p>
-                    <p class="text-[10px] text-indigo-600 mt-0.5">Ticket Prom: <span class="font-bold"
-                            x-text="'$' + formatVE(stats.totalDeliverys > 0 ? stats.totalContadoUSD / stats.totalDeliverys : 0)"></span>
-                    </p>
+        <!-- ✅ CAMBIO 3: esta sección se oculta sola si no hay movimientos -->
+        <section class="sec-cobros" id="secCobros">
+            <div class="cobros-head"><span>💧 COBROS DE CRÉDITOS DEL DÍA (Abonos Ingresados Hoy)</span><span
+                    class="nota">Cuentas recuperadas de cualquier fecha</span></div>
+            <div class="cobros-grid">
+                <div class="cobros-lista">
+                    <div class="linea"><span>Efectivo Bs:</span><b id="cBs"></b></div>
+                    <div class="linea"><span>Efectivo $:</span><b id="cUsd"></b></div>
+                    <div class="linea"><span>Pago Móvil:</span><b id="cPm"></b></div>
+                    <div class="linea"><span>Punto de Venta:</span><b id="cPos"></b></div>
+                    <div class="linea"><span>Transferencia:</span><b id="cTr"></b></div>
                 </div>
-
-                <div class="bg-orange-50 border border-orange-200 rounded-lg p-2.5 text-center">
-                    <p class="text-[11px] font-semibold text-orange-700 uppercase">Lote Punto de Venta</p>
-                    <div class="flex items-center justify-center gap-1 mt-1">
-                        <input type="text" x-model="posBatch" placeholder="N° Lote POS"
-                            class="no-print w-24 text-center text-xs font-bold border border-orange-300 rounded px-1 py-0.5">
-                        <span class="hidden print:inline font-bold text-sm text-gray-800"
-                            x-text="posBatch || 'N/A'"></span>
-                    </div>
-                    <p class="text-[10px] text-orange-600 mt-1">Total POS: <span class="font-bold"
-                            x-text="'$' + formatVE(stats.punto)"></span></p>
-                </div>
-
-                <div class="bg-rose-50 border border-rose-200 rounded-lg p-2.5 text-center">
-                    <p class="text-[11px] font-semibold text-rose-700 uppercase">Anulaciones / Dev.</p>
-                    <p class="text-2xl font-black text-rose-800" x-text="stats.voidCount"></p>
-                    <p class="text-[10px] text-rose-600 mt-0.5">Monto Anulado: <span class="font-bold"
-                            x-text="'$' + formatVE(stats.voidAmount)"></span></p>
-                </div>
-
-                <div class="border rounded-lg p-2.5 text-center flex flex-col justify-center items-center"
-                    :class="isClosed ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'">
-                    <p class="text-[11px] font-semibold uppercase"
-                        :class="isClosed ? 'text-red-700' : 'text-green-700'">Estado del Registro</p>
-                    <span class="text-base font-black uppercase mt-0.5"
-                        :class="isClosed ? 'text-red-800' : 'text-green-800'"
-                        x-text="isClosed ? 'BLOQUEADO' : 'ABIERTO'"></span>
-                    <p class="text-[10px] text-gray-500" x-text="isClosed ? 'Cierre congelado' : 'Registrando ventas'">
-                    </p>
+                <div class="cobros-total">
+                    <p>Total Recaudado por Créditos:</p>
+                    <div class="big" id="totalCobros"></div>
+                    <div class="sub" id="numAbonos"></div>
                 </div>
             </div>
+        </section>
 
-            <!-- TABLA DE VENTAS POR PRODUCTO -->
-            <div class="mb-4 border border-gray-300 rounded-lg overflow-hidden shadow-sm">
-                <div class="bg-gray-800 text-white px-3 py-2 font-bold text-xs flex justify-between items-center">
-                    <span><i class="fas fa-shopping-basket mr-1"></i> VENTAS DEL DÍA (CONTADO)</span>
-                    <span class="text-sm font-bold text-green-400"
-                        x-text="'Total: $' + formatVE(stats.totalContadoUSD)"></span>
+        <section class="sec-dist">
+            <h5>DISTRIBUCIÓN POR MÉTODO DE PAGO (SOLO CONTADO)</h5>
+            <div class="dist-grid">
+                <div class="dist-box d-bs"><span class="lbl">EFECTIVO Bs</span><span class="val" id="pBs"></span></div>
+                <div class="dist-box d-usd"><span class="lbl">EFECTIVO $</span><span class="val" id="pUsd"></span></div>
+                <div class="dist-box d-pm"><span class="lbl">PAGO MÓVIL</span><span class="val" id="pPm"></span></div>
+                <div class="dist-box d-pos"><span class="lbl">PUNTO POS</span><span class="val" id="pPos"></span></div>
+                <div class="dist-box d-tr"><span class="lbl">TRANSF.</span><span class="val" id="pTr"></span></div>
+            </div>
+        </section>
+
+        <section class="sec-arqueo">
+            <div class="arqueo-head"><span>🧮 ARQUEO DE CAJA FÍSICA (CONTEO REAL DE EFECTIVO)</span><span
+                    class="nota">Control de Faltantes y Sobrantes</span></div>
+            <div class="arqueo-grid">
+                <div class="box">
+                    <label>Efectivo $ Físico en Caja:</label>
+                    <input type="number" id="inpUsd" value="0" min="0" step="0.01">
+                    <label>Efectivo Bs Físico en Caja:</label>
+                    <input type="number" id="inpBs" value="0" min="0" step="1">
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-xs">
-                        <thead class="bg-gray-100 text-gray-700 border-b border-gray-300">
-                            <tr>
-                                <th class="px-2 py-2 text-left font-bold">Producto</th>
-                                <th class="px-2 py-2 text-center font-bold">Cant.</th>
-                                <th class="px-2 py-2 text-right font-semibold bg-purple-50">Efect. Bs</th>
-                                <th class="px-2 py-2 text-right font-semibold bg-green-50">Efect. $</th>
-                                <th class="px-2 py-2 text-right font-semibold bg-blue-50">P. Móvil</th>
-                                <th class="px-2 py-2 text-right font-semibold bg-orange-50">Punto</th>
-                                <th class="px-2 py-2 text-right font-semibold bg-yellow-50">Transf.</th>
-                                <th class="px-2 py-2 text-right font-bold">Total $</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            <template x-for="product in stats.products" :key="product.name">
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-2 py-1.5 font-medium text-gray-800" x-text="product.name"></td>
-                                    <td class="px-2 py-1.5 text-center font-bold text-blue-900"
-                                        x-text="product.quantity"></td>
-                                    <td class="px-2 py-1.5 text-right bg-purple-50/30"
-                                        x-text="formatVE(product.efectivoBs)"></td>
-                                    <td class="px-2 py-1.5 text-right bg-green-50/30"
-                                        x-text="formatVE(product.efectivoUsd)"></td>
-                                    <td class="px-2 py-1.5 text-right bg-blue-50/30"
-                                        x-text="formatVE(product.pagoMovil)"></td>
-                                    <td class="px-2 py-1.5 text-right bg-orange-50/30" x-text="formatVE(product.punto)">
-                                    </td>
-                                    <td class="px-2 py-1.5 text-right bg-yellow-50/30"
-                                        x-text="formatVE(product.transferencia)"></td>
-                                    <td class="px-2 py-1.5 text-right font-bold text-gray-900"
-                                        x-text="formatVE(product.total)"></td>
-                                </tr>
-                            </template>
-                            <tr x-show="stats.products.length === 0">
-                                <td colspan="8" class="px-3 py-4 text-center text-gray-500 italic">No hay registros de
-                                    ventas de contado para esta fecha.</td>
-                            </tr>
-                            <tr class="bg-blue-50 font-bold border-t border-blue-200 text-blue-900">
-                                <td class="px-2 py-1.5" colspan="2"><i class="fas fa-mobile-alt mr-1"></i> PAGOS
-                                    DIGITALES TOTALES:</td>
-                                <td class="px-2 py-1.5 text-right" colspan="5">
-                                    <span>$<span x-text="formatVE(stats.digitalPayments)"></span> = Bs. <span
-                                            x-text="formatVE(stats.digitalPaymentsBs)"></span></span>
-                                </td>
-                                <td class="px-2 py-1.5 text-right text-blue-900"><span
-                                        x-text="formatVE(stats.pagoMovil + stats.punto + stats.transferencia)"></span>
-                                </td>
-                            </tr>
-                            <tr class="bg-gray-200 font-black border-t-2 border-gray-400 text-gray-900">
-                                <td class="px-2 py-2" colspan="2">SUBTOTAL CONTADO:</td>
-                                <td class="px-2 py-2 text-right bg-purple-100/50" x-text="formatVE(stats.efectivoBs)">
-                                </td>
-                                <td class="px-2 py-2 text-right bg-green-100/50" x-text="formatVE(stats.efectivoUsd)">
-                                </td>
-                                <td class="px-2 py-2 text-right bg-blue-100/50" x-text="formatVE(stats.pagoMovil)"></td>
-                                <td class="px-2 py-2 text-right bg-orange-100/50" x-text="formatVE(stats.punto)"></td>
-                                <td class="px-2 py-2 text-right bg-yellow-100/50"
-                                    x-text="formatVE(stats.transferencia)"></td>
-                                <td class="px-2 py-2 text-right text-sm" x-text="formatVE(stats.totalContadoUSD)"></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="box">
+                    <div class="linea"><span>Sistema Espera ($):</span><b id="espUsd"></b></div>
+                    <div class="linea"><span>Sistema Espera (Bs):</span><b id="espBs"></b></div>
+                    <div class="linea"><span>Conteo Real ($):</span><b id="conteoReal"></b></div>
+                </div>
+                <div class="box dif-ok" id="boxDif">
+                    <span class="lbl">DIFERENCIA DE ARQUEO</span>
+                    <div class="big" id="difArqueo"></div>
+                    <div class="sub" id="difEstado"></div>
                 </div>
             </div>
+        </section>
 
-            <!-- DESGLOSE MÉTODOS DE PAGO Y CONSOLIDADO -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div class="border border-blue-300 rounded-lg p-3 bg-blue-50/30">
-                    <h3 class="font-bold text-blue-900 mb-2 text-xs border-b border-blue-200 pb-1 flex justify-between">
-                        <span>DESGLOSE POR MÉTODO DE PAGO</span>
-                        <span class="text-[10px] text-blue-600">(Conversión Tasa BCV)</span>
-                    </h3>
-                    <div class="space-y-1.5 text-xs">
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-700">Efectivo Bs:</span>
-                            <div>
-                                <span class="font-bold"
-                                    x-text="'Bs. ' + formatVE(stats.efectivoBs * exchangeRate)"></span>
-                                <span class="text-gray-500 text-[10px]"
-                                    x-text="'(' + formatVE(stats.efectivoBs) + ' $)'"></span>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-700">Efectivo $:</span>
-                            <span class="font-bold" x-text="formatVE(stats.efectivoUsd) + ' $'"></span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-700">Pago Móvil:</span>
-                            <div>
-                                <span class="font-bold"
-                                    x-text="'Bs. ' + formatVE(stats.pagoMovil * exchangeRate)"></span>
-                                <span class="text-gray-500 text-[10px]"
-                                    x-text="'(' + formatVE(stats.pagoMovil) + ' $)'"></span>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-700">Punto de Venta:</span>
-                            <div>
-                                <span class="font-bold" x-text="'Bs. ' + formatVE(stats.punto * exchangeRate)"></span>
-                                <span class="text-gray-500 text-[10px]"
-                                    x-text="'(' + formatVE(stats.punto) + ' $)'"></span>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-700">Transferencia:</span>
-                            <div>
-                                <span class="font-bold"
-                                    x-text="'Bs. ' + formatVE(stats.transferencia * exchangeRate)"></span>
-                                <span class="text-gray-500 text-[10px]"
-                                    x-text="'(' + formatVE(stats.transferencia) + ' $)'"></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div class="total-bar"><span>TOTAL EN CAJA HOY (VENTAS CONTADO + COBROS CRÉDITO):</span><b id="totalCaja"></b>
+        </div>
 
-                <div class="border border-gray-300 rounded-lg p-3 bg-gray-50/50">
-                    <h3 class="font-bold text-gray-800 mb-2 text-xs border-b border-gray-200 pb-1">TOTALES GENERALES
-                    </h3>
-                    <div class="space-y-2 text-xs">
-                        <div class="flex justify-between items-center p-2 bg-green-100/70 rounded">
-                            <span class="font-bold text-green-900">Total Contado (Caja / Bancos):</span>
-                            <span class="font-black text-green-800 text-sm"
-                                x-text="'$' + formatVE(stats.totalContadoUSD)"></span>
-                        </div>
-                        <div class="flex justify-between items-center p-2 bg-amber-100/70 rounded">
-                            <span class="font-bold text-amber-900">Total Crédito (Por Cobrar):</span>
-                            <div class="text-right">
-                                <span class="font-black text-amber-800 text-sm block"
-                                    x-text="'$' + formatVE(stats.totalCreditoUSD)"></span>
-                                <span class="text-[10px] text-amber-700"
-                                    x-text="stats.totalCreditSales + ' transacción(es)'"></span>
-                            </div>
-                        </div>
-                        <div class="border-t-2 border-gray-300 pt-1.5 flex justify-between items-center">
-                            <span class="font-black text-xs text-gray-800">GRAN TOTAL VENDIDO:</span>
-                            <span class="font-black text-gray-900 text-base"
-                                x-text="'$' + formatVE(stats.totalContadoUSD + stats.totalCreditoUSD)"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- COBROS DE CRÉDITOS DEL DÍA -->
-            <div class="mb-4 border border-teal-300 rounded-lg p-3 bg-teal-50/40">
-                <h3
-                    class="font-bold text-teal-900 mb-2 text-xs flex items-center justify-between border-b border-teal-200 pb-1">
-                    <span><i class="fas fa-hand-holding-usd mr-1"></i> COBROS DE CRÉDITOS DEL DÍA (Abonos Ingresados
-                        Hoy)</span>
-                    <span class="text-[10px] font-normal text-teal-700">Cuentas recuperadas de cualquier fecha</span>
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="space-y-1 text-xs bg-white rounded-lg p-2 border border-teal-200">
-                        <div class="flex justify-between"><span>Efectivo Bs:</span><span class="font-bold"
-                                x-text="'$' + formatVE(stats.cobrosEfectivoBs)"></span></div>
-                        <div class="flex justify-between"><span>Efectivo $:</span><span class="font-bold"
-                                x-text="'$' + formatVE(stats.cobrosEfectivoUsd)"></span></div>
-                        <div class="flex justify-between"><span>Pago Móvil:</span><span class="font-bold"
-                                x-text="'$' + formatVE(stats.cobrosPagoMovil)"></span></div>
-                        <div class="flex justify-between"><span>Punto de Venta:</span><span class="font-bold"
-                                x-text="'$' + formatVE(stats.cobrosPunto)"></span></div>
-                        <div class="flex justify-between"><span>Transferencia:</span><span class="font-bold"
-                                x-text="'$' + formatVE(stats.cobrosTransferencia)"></span></div>
-                    </div>
-                    <div
-                        class="flex flex-col justify-center items-center bg-white rounded-lg p-2 border border-teal-200">
-                        <p class="text-xs text-gray-600 font-semibold">Total Recaudado por Créditos:</p>
-                        <p class="text-2xl font-black text-teal-700"
-                            x-text="'$' + formatVE(stats.totalCobrosCreditoUSD)"></p>
-                        <p class="text-[10px] text-gray-500"
-                            x-text="stats.totalCobrosCreditoCount + ' abono(s) recibido(s)'"></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- DISTRIBUCIÓN POR MÉTODO DE PAGO -->
-            <div class="border border-purple-200 rounded-lg p-3 mb-4 bg-purple-50/20">
-                <h3 class="font-bold text-purple-900 mb-2 text-center text-xs">DISTRIBUCIÓN POR MÉTODO DE PAGO (SOLO
-                    CONTADO)</h3>
-                <div class="grid grid-cols-5 gap-2 text-center">
-                    <div class="bg-purple-100/60 rounded p-1.5">
-                        <p class="text-[9px] font-bold text-purple-700">EFECTIVO Bs</p>
-                        <p class="text-base font-black text-purple-800" x-text="stats.percentages.efectivoBs + '%'"></p>
-                    </div>
-                    <div class="bg-green-100/60 rounded p-1.5">
-                        <p class="text-[9px] font-bold text-green-700">EFECTIVO $</p>
-                        <p class="text-base font-black text-green-800" x-text="stats.percentages.efectivoUsd + '%'"></p>
-                    </div>
-                    <div class="bg-blue-100/60 rounded p-1.5">
-                        <p class="text-[9px] font-bold text-blue-700">PAGO MÓVIL</p>
-                        <p class="text-base font-black text-blue-800" x-text="stats.percentages.pagoMovil + '%'"></p>
-                    </div>
-                    <div class="bg-orange-100/60 rounded p-1.5">
-                        <p class="text-[9px] font-bold text-orange-700">PUNTO POS</p>
-                        <p class="text-base font-black text-orange-800" x-text="stats.percentages.punto + '%'"></p>
-                    </div>
-                    <div class="bg-yellow-100/60 rounded p-1.5">
-                        <p class="text-[9px] font-bold text-yellow-700">TRANSF.</p>
-                        <p class="text-base font-black text-yellow-800" x-text="stats.percentages.transferencia + '%'">
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ARQUEO DE CAJA FÍSICA -->
-            <div class="border-2 border-indigo-400 rounded-lg p-3 mb-6 bg-indigo-50/40">
-                <h3
-                    class="font-bold text-indigo-900 mb-2 text-xs flex items-center justify-between border-b border-indigo-200 pb-1">
-                    <span><i class="fas fa-calculator mr-1"></i> ARQUEO DE CAJA FÍSICA (CONTEO REAL DE EFECTIVO)</span>
-                    <span class="text-[10px] text-indigo-700">Control de Faltantes y Sobrantes</span>
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="space-y-2 bg-white p-2.5 rounded border border-indigo-200">
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-700 mb-0.5">Efectivo $ Físico en
-                                Caja:</label>
-                            <input type="number" step="0.01" x-model.number="cashCount.usd" :disabled="isClosed"
-                                class="w-full text-xs font-bold border rounded px-2 py-1 text-right focus:ring-2 focus:ring-indigo-500">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-700 mb-0.5">Efectivo Bs Físico en
-                                Caja:</label>
-                            <input type="number" step="0.01" x-model.number="cashCount.bs" :disabled="isClosed"
-                                class="w-full text-xs font-bold border rounded px-2 py-1 text-right focus:ring-2 focus:ring-indigo-500">
-                        </div>
-                    </div>
-
-                    <div
-                        class="space-y-1.5 text-xs bg-white p-2.5 rounded border border-indigo-200 flex flex-col justify-center">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Sistema Espera ($):</span>
-                            <span class="font-bold"
-                                x-text="'$' + formatVE(stats.efectivoUsd + stats.cobrosEfectivoUsd)"></span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Sistema Espera (Bs):</span>
-                            <span class="font-bold"
-                                x-text="'Bs. ' + formatVE((stats.efectivoBs + stats.cobrosEfectivoBs) * exchangeRate)"></span>
-                        </div>
-                        <div class="flex justify-between border-t pt-1 font-bold">
-                            <span>Conteo Real ($):</span>
-                            <span class="text-indigo-900"
-                                x-text="'$' + formatVE((cashCount.usd || 0) + ((cashCount.bs || 0) / (exchangeRate || 1)))"></span>
-                        </div>
-                    </div>
-
-                    <div class="p-2.5 rounded border flex flex-col justify-center items-center text-center"
-                        :class="cashDifference === 0 ? 'bg-green-100 border-green-300' : (cashDifference > 0 ? 'bg-blue-100 border-blue-300' : 'bg-red-100 border-red-300')">
-                        <p class="text-[10px] font-bold uppercase text-gray-700">Diferencia de Arqueo</p>
-                        <p class="text-xl font-black mt-0.5"
-                            :class="cashDifference === 0 ? 'text-green-800' : (cashDifference > 0 ? 'text-blue-800' : 'text-red-800')"
-                            x-text="(cashDifference >= 0 ? '+$' : '-$') + formatVE(Math.abs(cashDifference))"></p>
-                        <p class="text-[10px] font-bold mt-0.5"
-                            :class="cashDifference === 0 ? 'text-green-700' : (cashDifference > 0 ? 'text-blue-700' : 'text-red-700')"
-                            x-text="cashDifference === 0 ? 'CAJA CUADRADA' : (cashDifference > 0 ? 'SOBRANTE EN CAJA' : 'FALTANTE EN CAJA')">
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TOTAL CAJA HOY -->
-            <div
-                class="border-2 border-teal-500 bg-teal-600 text-white rounded-lg p-3 mb-6 flex justify-between items-center shadow-sm">
-                <span class="font-black text-sm uppercase">TOTAL EN CAJA HOY (Ventas Contado + Cobros Crédito):</span>
-                <span class="font-black text-2xl"
-                    x-text="'$' + formatVE(stats.totalContadoUSD + stats.totalCobrosCreditoUSD)"></span>
-            </div>
-
-            <!-- FIRMAS -->
-            <div class="grid grid-cols-2 gap-8 mt-10 pt-4 border-t-2 border-gray-300">
-                <div class="text-center">
-                    <div class="border-b-2 border-gray-400 pb-2 mb-2"></div>
-                    <p class="text-xs font-bold text-gray-800">Elaborado por</p>
-                    <p class="text-[10px] text-gray-500" x-text="userName"></p>
-                </div>
-                <div class="text-center">
-                    <div class="border-b-2 border-gray-400 pb-2 mb-2"></div>
-                    <p class="text-xs font-bold text-gray-800">Revisado por</p>
-                    <p class="text-[10px] text-gray-500">Gerente / Supervisor</p>
-                </div>
-            </div>
+        <div class="firmas">
+            <div class="firma">Elaborado por</div>
+            <div class="firma">Revisado por</div>
+            <div class="firma">Gerente / Supervisor</div>
         </div>
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const TASA = 748.79;
 
-        function reporteApp() {
-            return {
-                loading: true,
-                userBranch: 'geminis',
-                userRole: 'vendedor',
-                userName: 'Usuario',
-                exchangeRate: 736.93,
-                currentDateTime: '',
-                isClosed: false,
-                posBatch: '',
-                filters: {
-                    date: new Date().toLocaleDateString('en-CA', { timeZone: 'America/Caracas' })
-                },
-                cashCount: {
-                    usd: 0,
-                    bs: 0
-                },
-                stats: {
-                    totalContadoUSD: 0,
-                    totalCreditoUSD: 0,
-                    totalCreditSales: 0,
-                    totalTransactions: 0,
-                    totalDeliverys: 0,
-                    voidCount: 0,
-                    voidAmount: 0,
-                    efectivoBs: 0,
-                    efectivoUsd: 0,
-                    pagoMovil: 0,
-                    punto: 0,
-                    transferencia: 0,
-                    digitalPayments: 0,
-                    digitalPaymentsBs: 0,
-                    products: [],
-                    percentages: { efectivoBs: 0, efectivoUsd: 0, pagoMovil: 0, punto: 0, transferencia: 0 },
-                    totalCobrosCreditoUSD: 0,
-                    totalCobrosCreditoCount: 0,
-                    cobrosEfectivoBs: 0,
-                    cobrosEfectivoUsd: 0,
-                    cobrosPagoMovil: 0,
-                    cobrosPunto: 0,
-                    cobrosTransferencia: 0
-                },
+        /* Datos de ejemplo (en producción los aporta su lógica existente) */
+        const estado = {
+            fecha: new Date(2026, 7, 3),
+            sucursal: 'Geminis',
+            deliveries: 1,
+            ventas: [
+                { producto: 'Botellón 20 Litros', cant: 15, efBs: 0, 'ef$': 0, pm: 9.00, punto: 13.50, transf: 0 },
+                { producto: 'Botellón 5 Litros', cant: 3, efBs: 0, 'ef$': 0, pm: 0.00, punto: 1.50, transf: 0 }
+            ],
+            credito: { total: 0, tx: 0 },
+            cobros: { efBs: 0, 'ef$': 0, pm: 0, punto: 0, transf: 0, abonos: 0 }
+        };
 
-                get cashDifference() {
-                    const esperadoUSD = this.stats.efectivoUsd + this.stats.cobrosEfectivoUsd;
-                    const esperadoBsUSD = this.stats.efectivoBs + this.stats.cobrosEfectivoBs;
-                    const totalEsperado = esperadoUSD + esperadoBsUSD;
+        const $ = id => document.getElementById(id);
+        const fmt = (v, d = 2) => v.toLocaleString('es-VE', { minimumFractionDigits: d, maximumFractionDigits: d });
+        const fmt$ = v => '$' + fmt(v);
+        const fmtBs = v => 'Bs. ' + fmt(v);
 
-                    const conteoRealUsd = (this.cashCount.usd || 0) + ((this.cashCount.bs || 0) / (this.exchangeRate || 1));
-                    return Math.round((conteoRealUsd - totalEsperado) * 100) / 100;
-                },
-
-                formatVE(num) {
-                    if (num === null || num === undefined || isNaN(num)) return '0,00';
-                    return new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
-                },
-
-                async initReporte() {
-                    this.updateCurrentDateTime();
-                    try {
-                        const { data: { session } } = await supabase.auth.getSession();
-                        if (session) {
-                            const { data: profile } = await supabase.from('profiles').select('branch, full_name, role').eq('id', session.user.id).single();
-                            if (profile) {
-                                this.userBranch = profile.branch || 'geminis';
-                                this.userName = profile.full_name || 'Usuario';
-                                this.userRole = profile.role || 'vendedor';
-                            }
-                        }
-                    } catch (e) {
-                        console.warn("Autenticación no bloqueante:", e);
-                    }
-
-                    await Promise.all([
-                        this.loadExchangeRate(),
-                        this.loadReportData()
-                    ]);
-                },
-
-                updateCurrentDateTime() {
-                    const now = new Date();
-                    this.currentDateTime = now.toLocaleString('es-VE', { timeZone: 'America/Caracas', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                },
-
-                async loadExchangeRate() {
-                    try {
-                        const { data } = await supabase.rpc('get_active_exchange_rate');
-                        if (data) this.exchangeRate = parseFloat(data) || 736.93;
-                    } catch (e) {
-                        console.warn("Usando tasa por defecto:", e);
-                    }
-                },
-
-                async loadReportData() {
-                    this.loading = true;
-                    this.updateCurrentDateTime();
-                    try {
-                        this.resetStats();
-                        const dateStr = this.filters.date;
-                        const startOfDay = dateStr + 'T00:00:00-04:00';
-                        const endOfDay = dateStr + 'T23:59:59-04:00';
-
-                        // 1. Cargar Ventas
-                        const salesQuery = await supabase
-                            .from('sales')
-                            .select(`
-                                id, total, payment_method, delivery_type, created_at, status,
-                                sale_payments ( payment_method, amount_usd ),
-                                sale_items ( quantity, total, products ( name, size_liters ) )
-                            `)
-                            .gte('created_at', startOfDay)
-                            .lte('created_at', endOfDay)
-                            .eq('branch', this.userBranch);
-
-                        if (salesQuery.data) {
-                            this.processSales(salesQuery.data);
-                        }
-
-                        // 2. Cargar Cobros de Créditos
-                        try {
-                            const creditQuery = await supabase
-                                .from('credit_payments')
-                                .select(`
-                                    payment_method, amount, payment_date,
-                                    credit_accounts!inner ( branch )
-                                `)
-                                .gte('payment_date', startOfDay)
-                                .lte('payment_date', endOfDay)
-                                .eq('credit_accounts.branch', this.userBranch);
-
-                            if (creditQuery.data) {
-                                this.processCreditPayments(creditQuery.data);
-                            }
-                        } catch (e) {
-                            console.warn("Tabla credit_payments no encontrada o vacía:", e);
-                        }
-
-                        // 3. Cargar Cierre Diario (Aislado de forma segura)
-                        try {
-                            const closureQuery = await supabase
-                                .from('daily_closures')
-                                .select('*')
-                                .eq('closing_date', dateStr)
-                                .eq('branch', this.userBranch)
-                                .maybeSingle();
-
-                            if (closureQuery.data) {
-                                this.isClosed = closureQuery.data.status === 'closed';
-                                this.cashCount.usd = closureStatus.data.cash_usd_counted || 0;
-                                this.cashCount.bs = closureStatus.data.cash_bs_counted || 0;
-                                this.posBatch = closureStatus.data.pos_batch || '';
-                            } else {
-                                this.isClosed = false;
-                            }
-                        } catch (e) {
-                            this.isClosed = false;
-                        }
-
-                    } catch (err) {
-                        console.error('Error cargando reporte:', err);
-                    } finally {
-                        this.loading = false;
-                    }
-                },
-
-                resetStats() {
-                    this.stats = {
-                        totalContadoUSD: 0, totalCreditoUSD: 0, totalCreditSales: 0, totalTransactions: 0, totalDeliverys: 0,
-                        voidCount: 0, voidAmount: 0,
-                        efectivoBs: 0, efectivoUsd: 0, pagoMovil: 0, punto: 0, transferencia: 0,
-                        digitalPayments: 0, digitalPaymentsBs: 0, products: [],
-                        percentages: { efectivoBs: 0, efectivoUsd: 0, pagoMovil: 0, punto: 0, transferencia: 0 },
-                        totalCobrosCreditoUSD: 0, totalCobrosCreditoCount: 0,
-                        cobrosEfectivoBs: 0, cobrosEfectivoUsd: 0, cobrosPagoMovil: 0, cobrosPunto: 0, cobrosTransferencia: 0
-                    };
-                },
-
-                processSales(sales) {
-                    const productMap = {};
-
-                    for (const sale of sales) {
-                        if (sale.status === 'voided' || sale.status === 'anulada') {
-                            this.stats.voidCount++;
-                            this.stats.voidAmount += (sale.total || 0);
-                            continue;
-                        }
-
-                        this.stats.totalTransactions++;
-                        const saleTotal = sale.total || 0;
-
-                        if (sale.delivery_type === 'delivery') {
-                            this.stats.totalDeliverys++;
-                        }
-
-                        if (sale.payment_method === 'credito') {
-                            this.stats.totalCreditoUSD += saleTotal;
-                            this.stats.totalCreditSales++;
-                        } else {
-                            this.stats.totalContadoUSD += saleTotal;
-
-                            let saleEfectivoBs = 0, saleEfectivoUsd = 0, salePagoMovil = 0, salePunto = 0, saleTransferencia = 0;
-
-                            for (const payment of (sale.sale_payments || [])) {
-                                const amount = payment.amount_usd || 0;
-                                switch (payment.payment_method) {
-                                    case 'efectivo_bs': saleEfectivoBs += amount; break;
-                                    case 'efectivo_divisas': saleEfectivoUsd += amount; break;
-                                    case 'pago_movil': salePagoMovil += amount; break;
-                                    case 'punto_venta': salePunto += amount; break;
-                                    case 'transferencia': saleTransferencia += amount; break;
-                                }
-                            }
-
-                            this.stats.efectivoBs += saleEfectivoBs;
-                            this.stats.efectivoUsd += saleEfectivoUsd;
-                            this.stats.pagoMovil += salePagoMovil;
-                            this.stats.punto += salePunto;
-                            this.stats.transferencia += saleTransferencia;
-
-                            for (const item of (sale.sale_items || [])) {
-                                const product = item.products;
-                                if (product) {
-                                    const name = product.name || `Botellón ${product.size_liters}L`;
-                                    const itemTotal = item.total || 0;
-                                    const proportion = itemTotal / (saleTotal || 1);
-
-                                    if (!productMap[name]) {
-                                        productMap[name] = { name, quantity: 0, efectivoBs: 0, efectivoUsd: 0, pagoMovil: 0, punto: 0, transferencia: 0, total: 0 };
-                                    }
-                                    productMap[name].quantity += item.quantity || 0;
-                                    productMap[name].efectivoBs += saleEfectivoBs * proportion;
-                                    productMap[name].efectivoUsd += saleEfectivoUsd * proportion;
-                                    productMap[name].pagoMovil += salePagoMovil * proportion;
-                                    productMap[name].punto += salePunto * proportion;
-                                    productMap[name].transferencia += saleTransferencia * proportion;
-                                    productMap[name].total += itemTotal;
-                                }
-                            }
-                        }
-                    }
-
-                    this.stats.efectivoBs = Math.round(this.stats.efectivoBs * 100) / 100;
-                    this.stats.efectivoUsd = Math.round(this.stats.efectivoUsd * 100) / 100;
-                    this.stats.pagoMovil = Math.round(this.stats.pagoMovil * 100) / 100;
-                    this.stats.punto = Math.round(this.stats.punto * 100) / 100;
-                    this.stats.transferencia = Math.round(this.stats.transferencia * 100) / 100;
-                    this.stats.totalContadoUSD = Math.round(this.stats.totalContadoUSD * 100) / 100;
-                    this.stats.totalCreditoUSD = Math.round(this.stats.totalCreditoUSD * 100) / 100;
-
-                    this.stats.digitalPayments = Math.round((this.stats.pagoMovil + this.stats.punto + this.stats.transferencia) * 100) / 100;
-                    this.stats.digitalPaymentsBs = Math.round(this.stats.digitalPayments * this.exchangeRate * 100) / 100;
-
-                    this.stats.products = Object.values(productMap).map(p => ({
-                        ...p,
-                        efectivoBs: Math.round(p.efectivoBs * 100) / 100,
-                        efectivoUsd: Math.round(p.efectivoUsd * 100) / 100,
-                        pagoMovil: Math.round(p.pagoMovil * 100) / 100,
-                        punto: Math.round(p.punto * 100) / 100,
-                        transferencia: Math.round(p.transferencia * 100) / 100,
-                        total: Math.round(p.total * 100) / 100
-                    })).sort((a, b) => b.total - a.total);
-
-                    if (this.stats.totalContadoUSD > 0) {
-                        const total = this.stats.totalContadoUSD;
-                        this.stats.percentages.efectivoBs = Math.round((this.stats.efectivoBs / total) * 100);
-                        this.stats.percentages.efectivoUsd = Math.round((this.stats.efectivoUsd / total) * 100);
-                        this.stats.percentages.pagoMovil = Math.round((this.stats.pagoMovil / total) * 100);
-                        this.stats.percentages.punto = Math.round((this.stats.punto / total) * 100);
-                        this.stats.percentages.transferencia = Math.round((this.stats.transferencia / total) * 100);
-                    }
-                },
-
-                processCreditPayments(payments) {
-                    for (const payment of payments) {
-                        const amount = payment.amount || 0;
-                        this.stats.totalCobrosCreditoUSD += amount;
-                        this.stats.totalCobrosCreditoCount++;
-
-                        switch (payment.payment_method) {
-                            case 'efectivo_bs': this.stats.cobrosEfectivoBs += amount; break;
-                            case 'efectivo_divisas': this.stats.cobrosEfectivoUsd += amount; break;
-                            case 'pago_movil': this.stats.cobrosPagoMovil += amount; break;
-                            case 'punto_venta': this.stats.cobrosPunto += amount; break;
-                            case 'transferencia': this.stats.cobrosTransferencia += amount; break;
-                        }
-                    }
-
-                    this.stats.totalCobrosCreditoUSD = Math.round(this.stats.totalCobrosCreditoUSD * 100) / 100;
-                },
-
-                async cerrarJornada() {
-                    if (!confirm('¿Desea congelar la jornada diaria?')) return;
-
-                    try {
-                        const payload = {
-                            closing_date: this.filters.date,
-                            branch: this.userBranch,
-                            total_cash_usd: this.stats.efectivoUsd,
-                            total_cash_bs: this.stats.efectivoBs,
-                            total_digital_usd: this.stats.digitalPayments,
-                            cash_usd_counted: this.cashCount.usd,
-                            cash_bs_counted: this.cashCount.bs,
-                            difference_usd: this.cashDifference,
-                            pos_batch: this.posBatch,
-                            status: 'closed',
-                            closed_by: this.userName
-                        };
-
-                        const { error } = await supabase.from('daily_closures').upsert(payload, { onConflict: 'closing_date,branch' });
-                        if (error) throw error;
-
-                        this.isClosed = true;
-                        alert('¡Jornada cerrada con éxito!');
-                    } catch (err) {
-                        alert('Error al congelar la jornada: ' + err.message);
-                    }
-                },
-
-                formatDate(dateStr) {
-                    if (!dateStr) return '';
-                    const [year, month, day] = dateStr.split('-');
-                    return `${day}/${month}/${year}`;
-                },
-
-                exportToPDF() { window.print(); },
-
-                printThermal() { window.print(); }
-            }
+        /* ✅ CAMBIO 2: formato de fecha DD/MM/AAAA */
+        function fmtFecha(d) {
+            const dd = String(d.getDate()).padStart(2, '0');
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            return dd + '/' + mm + '/' + d.getFullYear();
         }
+        const fmtHora = d => d.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+
+        function render() {
+            const now = new Date();
+            $('txtGenerado').textContent = fmtFecha(now) + ', ' + fmtHora(now);   /* ✅ CAMBIO 2 */
+            $('txtFecha').textContent = fmtFecha(estado.fecha);               /* ✅ CAMBIO 2 */
+            $('txtSucursal').textContent = estado.sucursal;
+            $('txtTasa').textContent = fmt(TASA);
+
+            const sum = k => estado.ventas.reduce((a, v) => a + (v[k] || 0), 0);
+            const efBs = sum('efBs'), efUsd = sum('ef$'), pm = sum('pm'), punto = sum('punto'), transf = sum('transf');
+            const totalContado = efBs / TASA + efUsd + pm + punto + transf;
+
+            $('totalVentas').textContent = fmt$(totalContado);
+            $('numDeliveries').textContent = estado.deliveries;
+            $('ticketProm').textContent = fmt$(estado.deliveries ? totalContado / estado.deliveries : 0);
+
+            const tb = $('tbVentas');
+            if (!estado.ventas.length) {
+                tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:14px">No hay registros de ventas de contado para esta fecha.</td></tr>';
+            } else {
+                tb.innerHTML = estado.ventas.map(v => {
+                    const t = v.efBs / TASA + v['ef$'] + v.pm + v.punto + v.transf;
+                    return `<tr><td>${v.producto}</td><td>${v.cant}</td><td>${fmt(v.efBs)}</td><td>${fmt(v['ef$'])}</td><td>${fmt(v.pm)}</td><td>${fmt(v.punto)}</td><td>${fmt(v.transf)}</td><td>${fmt(t)}</td></tr>`;
+                }).join('');
+            }
+
+            const pagos = pm + punto + transf;
+            $('pagosConv').textContent = fmt$(pagos) + ' = Bs. ' + fmt(pagos * TASA);
+            $('pagosTotal').textContent = fmt(pagos);
+            $('scBs').textContent = fmt(efBs); $('scUsd').textContent = fmt(efUsd); $('scPm').textContent = fmt(pm);
+            $('scPos').textContent = fmt(punto); $('scTr').textContent = fmt(transf); $('scTotal').textContent = fmt(totalContado);
+
+            $('dBs').innerHTML = fmtBs(efBs) + ' <i>(' + fmt(efBs / TASA) + ' $)</i>';
+            $('dUsd').innerHTML = fmt(efUsd) + ' $';
+            $('dPm').innerHTML = fmtBs(pm * TASA) + ' <i>(' + fmt(pm) + ' $)</i>';
+            $('dPos').innerHTML = fmtBs(punto * TASA) + ' <i>(' + fmt(punto) + ' $)</i>';
+            $('dTr').innerHTML = fmtBs(transf * TASA) + ' <i>(' + fmt(transf) + ' $)</i>';
+
+            $('tContado').textContent = fmt$(totalContado);
+            $('tCredito').textContent = fmt$(estado.credito.total);
+            $('tCreditoTx').textContent = estado.credito.tx + ' transacción(es)';
+            $('granTotal').textContent = fmt$(totalContado + estado.credito.total);
+
+            /* ----- Cobros de créditos ----- */
+            const c = estado.cobros;
+            const totalCobros = c.efBs / TASA + c['ef$'] + c.pm + c.punto + c.transf;
+            $('cBs').textContent = fmt$(c.efBs / TASA); $('cUsd').textContent = fmt$(c['ef$']); $('cPm').textContent = fmt$(c.pm);
+            $('cPos').textContent = fmt$(c.punto); $('cTr').textContent = fmt$(c.transf);
+            $('totalCobros').textContent = fmt$(totalCobros);
+            $('numAbonos').textContent = c.abonos + ' abono(s) recibido(s)';
+
+            /* ✅ CAMBIO 3: ocultar la sección si no hubo movimiento en el día */
+            $('secCobros').style.display = (totalCobros > 0.004 || c.abonos > 0) ? '' : 'none';
+
+            /* ----- Distribución ----- */
+            const pct = v => totalContado ? Math.round((v / totalContado) * 100) + '%' : '0%';
+            $('pBs').textContent = pct(efBs / TASA); $('pUsd').textContent = pct(efUsd); $('pPm').textContent = pct(pm);
+            $('pPos').textContent = pct(punto); $('pTr').textContent = pct(transf);
+
+            /* ----- Arqueo ----- */
+            const fisUsd = parseFloat($('inpUsd').value) || 0;
+            const fisBs = parseFloat($('inpBs').value) || 0;
+            const espUsd = efUsd + c['ef$'];
+            const espBs = efBs + c.efBs;
+            const conteo = fisUsd + fisBs / TASA;
+            const dif = conteo - (espUsd + espBs / TASA);
+            $('espUsd').textContent = fmt$(espUsd); $('espBs').textContent = fmtBs(espBs); $('conteoReal').textContent = fmt$(conteo);
+            $('difArqueo').textContent = (dif < 0 ? '-' : '+') + '$' + fmt(Math.abs(dif));
+            const ok = Math.abs(dif) < 0.005;
+            $('difEstado').textContent = ok ? 'CAJA CUADRADA' : (dif < 0 ? 'FALTANTE DE CAJA' : 'SOBRANTE DE CAJA');
+            $('boxDif').className = 'box ' + (ok ? 'dif-ok' : 'dif-bad');
+
+            $('totalCaja').textContent = fmt$(totalContado + totalCobros);
+        }
+
+        /* Eventos */
+        $('btnActualizar').addEventListener('click', () => {
+            const [y, m, d] = ($('fechaInput').value || '2026-08-03').split('-').map(Number);
+            estado.fecha = new Date(y, m - 1, d);
+            estado.sucursal = $('sucursalSelect').value;
+            render();
+        });
+        $('inpUsd').addEventListener('input', render);
+        $('inpBs').addEventListener('input', render);
+        /* ✅ Producción: conecte aquí generarTicket80mm() y cerrarDia() existentes */
+
+        render();
     </script>
 </body>
 
