@@ -22,7 +22,6 @@
             background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
         }
 
-        /* Estilos de Impresión Estándar (Carta) */
         @media print {
             .no-print {
                 display: none !important;
@@ -46,7 +45,6 @@
             }
         }
 
-        /* Estilos para Ticket Térmico 80mm */
         .thermal-ticket {
             width: 80mm;
             font-family: 'Courier New', Courier, monospace;
@@ -112,7 +110,7 @@
     <!-- Main Content -->
     <div class="lg:ml-64 min-h-screen p-4 lg:p-6">
 
-        <!-- Header con Filtros y Estado de Cierre -->
+        <!-- Header con Filtros -->
         <div class="bg-white rounded-lg shadow-sm p-4 mb-6 no-print border-l-4"
             :class="isClosed ? 'border-red-500' : 'border-green-500'">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -145,12 +143,10 @@
                             class="fas fa-sync-alt mr-1"></i> Actualizar</button>
                     <button @click="exportToPDF()"
                         class="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1.5 rounded-lg text-sm transition"><i
-                            class="fas fa-file-pdf mr-1"></i> PDF Carta</button>
+                            class="fas fa-file-pdf mr-1"></i> PDF</button>
                     <button @click="printThermal()"
                         class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-sm transition"><i
                             class="fas fa-print mr-1"></i> Ticket 80mm</button>
-
-                    <!-- Botón Cierre de Jornada -->
                     <button x-show="!isClosed" @click="cerrarJornada()"
                         class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-semibold transition"><i
                             class="fas fa-lock mr-1"></i> Cerrar Día</button>
@@ -165,35 +161,33 @@
         </div>
 
         <!-- Report Content -->
-        <div x-show="!loading"
+        <div x-show="!loading" x-cloak
             class="print-container max-w-5xl mx-auto bg-white rounded-lg shadow-sm p-6 border border-gray-200">
 
             <!-- Header del Reporte -->
             <div class="text-center mb-4 border-b-2 border-blue-600 pb-3">
                 <h1 class="text-2xl font-black text-gray-900 tracking-wider">SERVICIOS AGUA POTABLE</h1>
-                <p class="text-md font-bold text-blue-600 uppercase tracking-wide">BALANCE Y RESUMEN DIARIO DE CAJA Y
-                    OPERACIONES</p>
+                <p class="text-md font-bold text-blue-600 uppercase tracking-wide">RESUMEN DIARIO DE VENTAS Y AUDITORÍA
+                    DE CAJA</p>
                 <p class="text-xs text-gray-600 mt-1">
                     <i class="far fa-clock mr-1"></i>Generado: <span x-text="currentDateTime"
                         class="font-semibold"></span> |
-                    Fecha Cierre: <span x-text="formatDate(filters.date)" class="font-bold"></span> |
+                    Fecha: <span x-text="formatDate(filters.date)" class="font-bold"></span> |
                     Sucursal: <span class="capitalize font-bold text-blue-700" x-text="userBranch"></span> |
                     Tasa Oficial: <span class="font-bold">Bs. <span x-text="formatVE(exchangeRate)"></span></span>
                 </p>
             </div>
 
-            <!-- 🛠️ METRICAS OPERATIVAS & AUDITORÍA DE SALUD -->
+            <!-- MÉTICAS OPERATIVAS & AUDITORÍA -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
-                <!-- Delivery Ticket Promedio -->
                 <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-2.5 text-center">
                     <p class="text-[11px] font-semibold text-indigo-700 uppercase">Deliveries Realizados</p>
                     <p class="text-2xl font-black text-indigo-900" x-text="stats.totalDeliverys"></p>
-                    <p class="text-[10px] text-indigo-600 mt-0.5">Promedio: <span class="font-bold"
+                    <p class="text-[10px] text-indigo-600 mt-0.5">Ticket Prom: <span class="font-bold"
                             x-text="'$' + formatVE(stats.totalDeliverys > 0 ? stats.totalContadoUSD / stats.totalDeliverys : 0)"></span>
-                        / env.</p>
+                    </p>
                 </div>
 
-                <!-- Lote POS -->
                 <div class="bg-orange-50 border border-orange-200 rounded-lg p-2.5 text-center">
                     <p class="text-[11px] font-semibold text-orange-700 uppercase">Lote Punto de Venta</p>
                     <div class="flex items-center justify-center gap-1 mt-1">
@@ -206,7 +200,6 @@
                             x-text="'$' + formatVE(stats.punto)"></span></p>
                 </div>
 
-                <!-- Anulaciones y Devoluciones -->
                 <div class="bg-rose-50 border border-rose-200 rounded-lg p-2.5 text-center">
                     <p class="text-[11px] font-semibold text-rose-700 uppercase">Anulaciones / Dev.</p>
                     <p class="text-2xl font-black text-rose-800" x-text="stats.voidCount"></p>
@@ -214,7 +207,6 @@
                             x-text="'$' + formatVE(stats.voidAmount)"></span></p>
                 </div>
 
-                <!-- Estado del Cierre -->
                 <div class="border rounded-lg p-2.5 text-center flex flex-col justify-center items-center"
                     :class="isClosed ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'">
                     <p class="text-[11px] font-semibold uppercase"
@@ -272,7 +264,6 @@
                                 <td colspan="8" class="px-3 py-4 text-center text-gray-500 italic">No hay registros de
                                     ventas de contado para esta fecha.</td>
                             </tr>
-                            <!-- Sub-total Pagos Digitales -->
                             <tr class="bg-blue-50 font-bold border-t border-blue-200 text-blue-900">
                                 <td class="px-2 py-1.5" colspan="2"><i class="fas fa-mobile-alt mr-1"></i> PAGOS
                                     DIGITALES TOTALES:</td>
@@ -284,7 +275,6 @@
                                         x-text="formatVE(stats.pagoMovil + stats.punto + stats.transferencia)"></span>
                                 </td>
                             </tr>
-                            <!-- Sub-total General Contado -->
                             <tr class="bg-gray-200 font-black border-t-2 border-gray-400 text-gray-900">
                                 <td class="px-2 py-2" colspan="2">SUBTOTAL CONTADO:</td>
                                 <td class="px-2 py-2 text-right bg-purple-100/50" x-text="formatVE(stats.efectivoBs)">
@@ -302,12 +292,12 @@
                 </div>
             </div>
 
-            <!-- DESGLOSE DE MÉTODOS DE PAGO Y TOTALES GENERALES -->
+            <!-- DESGLOSE MÉTODOS DE PAGO Y CONSOLIDADO -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div class="border border-blue-300 rounded-lg p-3 bg-blue-50/30">
                     <h3 class="font-bold text-blue-900 mb-2 text-xs border-b border-blue-200 pb-1 flex justify-between">
                         <span>DESGLOSE POR MÉTODO DE PAGO</span>
-                        <span class="text-[10px] text-blue-600">(Conversión a Tasa BCV)</span>
+                        <span class="text-[10px] text-blue-600">(Conversión Tasa BCV)</span>
                     </h3>
                     <div class="space-y-1.5 text-xs">
                         <div class="flex justify-between items-center">
@@ -353,7 +343,7 @@
                 </div>
 
                 <div class="border border-gray-300 rounded-lg p-3 bg-gray-50/50">
-                    <h3 class="font-bold text-gray-800 mb-2 text-xs border-b border-gray-200 pb-1">CONSOLIDADO DE VENTAS
+                    <h3 class="font-bold text-gray-800 mb-2 text-xs border-b border-gray-200 pb-1">TOTALES GENERALES
                     </h3>
                     <div class="space-y-2 text-xs">
                         <div class="flex justify-between items-center p-2 bg-green-100/70 rounded">
@@ -440,15 +430,14 @@
                 </div>
             </div>
 
-            <!-- 🔒 AUDITORÍA & ARQUEO DE CAJA FÍSICA (CIERRE A CIEGAS) -->
+            <!-- ARQUEO DE CAJA FÍSICA -->
             <div class="border-2 border-indigo-400 rounded-lg p-3 mb-6 bg-indigo-50/40">
                 <h3
                     class="font-bold text-indigo-900 mb-2 text-xs flex items-center justify-between border-b border-indigo-200 pb-1">
-                    <span><i class="fas fa-calculator mr-1"></i> ARQUEO DE CAJA FÍSICA (CONTEO REAL EN EFECTIVO)</span>
+                    <span><i class="fas fa-calculator mr-1"></i> ARQUEO DE CAJA FÍSICA (CONTEO REAL DE EFECTIVO)</span>
                     <span class="text-[10px] text-indigo-700">Control de Faltantes y Sobrantes</span>
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <!-- Ingreso de Efectivo en Conteo Real -->
                     <div class="space-y-2 bg-white p-2.5 rounded border border-indigo-200">
                         <div>
                             <label class="block text-[10px] font-bold text-gray-700 mb-0.5">Efectivo $ Físico en
@@ -464,27 +453,25 @@
                         </div>
                     </div>
 
-                    <!-- Totales Sistema vs Físico -->
                     <div
                         class="space-y-1.5 text-xs bg-white p-2.5 rounded border border-indigo-200 flex flex-col justify-center">
                         <div class="flex justify-between">
-                            <span class="text-gray-600">Total Esperado en Sistema ($):</span>
+                            <span class="text-gray-600">Sistema Espera ($):</span>
                             <span class="font-bold"
                                 x-text="'$' + formatVE(stats.efectivoUsd + stats.cobrosEfectivoUsd)"></span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-600">Total Esperado en Sistema (Bs):</span>
+                            <span class="text-gray-600">Sistema Espera (Bs):</span>
                             <span class="font-bold"
                                 x-text="'Bs. ' + formatVE((stats.efectivoBs + stats.cobrosEfectivoBs) * exchangeRate)"></span>
                         </div>
                         <div class="flex justify-between border-t pt-1 font-bold">
-                            <span>Conteo Real Declarado ($):</span>
+                            <span>Conteo Real ($):</span>
                             <span class="text-indigo-900"
-                                x-text="'$' + formatVE(cashCount.usd + (cashCount.bs / exchangeRate))"></span>
+                                x-text="'$' + formatVE((cashCount.usd || 0) + ((cashCount.bs || 0) / (exchangeRate || 1)))"></span>
                         </div>
                     </div>
 
-                    <!-- Cuadre / Diferencia -->
                     <div class="p-2.5 rounded border flex flex-col justify-center items-center text-center"
                         :class="cashDifference === 0 ? 'bg-green-100 border-green-300' : (cashDifference > 0 ? 'bg-blue-100 border-blue-300' : 'bg-red-100 border-red-300')">
                         <p class="text-[10px] font-bold uppercase text-gray-700">Diferencia de Arqueo</p>
@@ -493,16 +480,16 @@
                             x-text="(cashDifference >= 0 ? '+$' : '-$') + formatVE(Math.abs(cashDifference))"></p>
                         <p class="text-[10px] font-bold mt-0.5"
                             :class="cashDifference === 0 ? 'text-green-700' : (cashDifference > 0 ? 'text-blue-700' : 'text-red-700')"
-                            x-text="cashDifference === 0 ? 'CAJA CUADRADA PERFECTA' : (cashDifference > 0 ? 'SOBRANTE EN CAJA' : 'FALTANTE EN CAJA')">
+                            x-text="cashDifference === 0 ? 'CAJA CUADRADA' : (cashDifference > 0 ? 'SOBRANTE EN CAJA' : 'FALTANTE EN CAJA')">
                         </p>
                     </div>
                 </div>
             </div>
 
-            <!-- TOTAL EN CAJA HOY -->
+            <!-- TOTAL CAJA HOY -->
             <div
                 class="border-2 border-teal-500 bg-teal-600 text-white rounded-lg p-3 mb-6 flex justify-between items-center shadow-sm">
-                <span class="font-black text-sm uppercase">TOTAL INGRESADO A CAJA Y BANCOS HOY:</span>
+                <span class="font-black text-sm uppercase">TOTAL EN CAJA HOY (Ventas Contado + Cobros Crédito):</span>
                 <span class="font-black text-2xl"
                     x-text="'$' + formatVE(stats.totalContadoUSD + stats.totalCobrosCreditoUSD)"></span>
             </div>
@@ -511,49 +498,15 @@
             <div class="grid grid-cols-2 gap-8 mt-10 pt-4 border-t-2 border-gray-300">
                 <div class="text-center">
                     <div class="border-b-2 border-gray-400 pb-2 mb-2"></div>
-                    <p class="text-xs font-bold text-gray-800">Elaborado por (Cajero/Operador)</p>
+                    <p class="text-xs font-bold text-gray-800">Elaborado por</p>
                     <p class="text-[10px] text-gray-500" x-text="userName"></p>
                 </div>
                 <div class="text-center">
                     <div class="border-b-2 border-gray-400 pb-2 mb-2"></div>
-                    <p class="text-xs font-bold text-gray-800">Revisado y Conforme (Contralor/Gerente)</p>
-                    <p class="text-[10px] text-gray-500">Firma y Sello</p>
+                    <p class="text-xs font-bold text-gray-800">Revisado por</p>
+                    <p class="text-[10px] text-gray-500">Gerente / Supervisor</p>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- TICKET TÉRMICO IMPRESIÓN (OCULTO EN PANTALLA, VISIBLE SOLO EN VISTA DE IMPRESIÓN TÉRMICA) -->
-    <div id="thermal-print-area" class="hidden">
-        <div class="thermal-ticket p-2">
-            <p class="text-center font-bold">SERVICIOS AGUA POTABLE</p>
-            <p class="text-center font-bold">RESUMEN DIARIO DE CAJA</p>
-            <p class="text-center">--------------------------------</p>
-            <p>Fecha: <span x-text="formatDate(filters.date)"></span></p>
-            <p>Sucursal: <span x-text="userBranch"></span></p>
-            <p>Cajero: <span x-text="userName"></span></p>
-            <p>Tasa BCV: <span x-text="formatVE(exchangeRate)"></span></p>
-            <p>--------------------------------</p>
-            <p class="font-bold">VENTAS DEL DÍA:</p>
-            <p>Contado Total: $<span x-text="formatVE(stats.totalContadoUSD)"></span></p>
-            <p>Créditos Hoy: $<span x-text="formatVE(stats.totalCreditoUSD)"></span></p>
-            <p>Abonos Recibidos: $<span x-text="formatVE(stats.totalCobrosCreditoUSD)"></span></p>
-            <p>--------------------------------</p>
-            <p class="font-bold">DESGLOSE CONTADO:</p>
-            <p>Efectivo $: $<span x-text="formatVE(stats.efectivoUsd)"></span></p>
-            <p>Efectivo Bs: Bs. <span x-text="formatVE(stats.efectivoBs * exchangeRate)"></span></p>
-            <p>Pago Móvil: Bs. <span x-text="formatVE(stats.pagoMovil * exchangeRate)"></span></p>
-            <p>Punto POS: Bs. <span x-text="formatVE(stats.punto * exchangeRate)"></span></p>
-            <p>--------------------------------</p>
-            <p class="font-bold">ARQUEO DE CAJA:</p>
-            <p>Físico Conteo $: $<span x-text="formatVE(cashCount.usd)"></span></p>
-            <p>Físico Conteo Bs: Bs.<span x-text="formatVE(cashCount.bs)"></span></p>
-            <p class="font-bold">Diferencia: $<span x-text="formatVE(cashDifference)"></span></p>
-            <p>--------------------------------</p>
-            <p class="text-center font-bold">TOTAL CAJA: $<span
-                    x-text="formatVE(stats.totalContadoUSD + stats.totalCobrosCreditoUSD)"></span></p>
-            <p class="text-center font-bold mt-2">*** JORNADA <span x-text="isClosed ? 'CERRADA' : 'ABIERTA'"></span>
-                ***</p>
         </div>
     </div>
 
@@ -565,8 +518,8 @@
         function reporteApp() {
             return {
                 loading: true,
-                userBranch: '',
-                userRole: '',
+                userBranch: 'geminis',
+                userRole: 'vendedor',
                 userName: 'Usuario',
                 exchangeRate: 736.93,
                 currentDateTime: '',
@@ -621,14 +574,18 @@
 
                 async initReporte() {
                     this.updateCurrentDateTime();
-                    const { data: { session } } = await supabase.auth.getSession();
-                    if (!session) { window.location.href = 'login.html'; return; }
-
-                    const { data: profile } = await supabase.from('profiles').select('branch, full_name, role').eq('id', session.user.id).single();
-                    if (profile) {
-                        this.userBranch = profile.branch || 'geminis';
-                        this.userName = profile.full_name || 'Usuario';
-                        this.userRole = profile.role || 'vendedor';
+                    try {
+                        const { data: { session } } = await supabase.auth.getSession();
+                        if (session) {
+                            const { data: profile } = await supabase.from('profiles').select('branch, full_name, role').eq('id', session.user.id).single();
+                            if (profile) {
+                                this.userBranch = profile.branch || 'geminis';
+                                this.userName = profile.full_name || 'Usuario';
+                                this.userRole = profile.role || 'vendedor';
+                            }
+                        }
+                    } catch (e) {
+                        console.warn("Autenticación no bloqueante:", e);
                     }
 
                     await Promise.all([
@@ -643,8 +600,12 @@
                 },
 
                 async loadExchangeRate() {
-                    const { data } = await supabase.rpc('get_active_exchange_rate');
-                    if (data) this.exchangeRate = parseFloat(data) || 736.93;
+                    try {
+                        const { data } = await supabase.rpc('get_active_exchange_rate');
+                        if (data) this.exchangeRate = parseFloat(data) || 736.93;
+                    } catch (e) {
+                        console.warn("Usando tasa por defecto:", e);
+                    }
                 },
 
                 async loadReportData() {
@@ -656,19 +617,25 @@
                         const startOfDay = dateStr + 'T00:00:00-04:00';
                         const endOfDay = dateStr + 'T23:59:59-04:00';
 
-                        // Consulta consolidada
-                        const [salesResult, creditPaymentsResult, closureStatus] = await Promise.all([
-                            supabase
-                                .from('sales')
-                                .select(`
-                                    id, total, payment_method, delivery_type, created_at, status,
-                                    sale_payments ( payment_method, amount_usd ),
-                                    sale_items ( quantity, total, products ( name, size_liters ) )
-                                `)
-                                .gte('created_at', startOfDay)
-                                .lte('created_at', endOfDay)
-                                .eq('branch', this.userBranch),
-                            supabase
+                        // 1. Cargar Ventas
+                        const salesQuery = await supabase
+                            .from('sales')
+                            .select(`
+                                id, total, payment_method, delivery_type, created_at, status,
+                                sale_payments ( payment_method, amount_usd ),
+                                sale_items ( quantity, total, products ( name, size_liters ) )
+                            `)
+                            .gte('created_at', startOfDay)
+                            .lte('created_at', endOfDay)
+                            .eq('branch', this.userBranch);
+
+                        if (salesQuery.data) {
+                            this.processSales(salesQuery.data);
+                        }
+
+                        // 2. Cargar Cobros de Créditos
+                        try {
+                            const creditQuery = await supabase
                                 .from('credit_payments')
                                 .select(`
                                     payment_method, amount, payment_date,
@@ -676,33 +643,39 @@
                                 `)
                                 .gte('payment_date', startOfDay)
                                 .lte('payment_date', endOfDay)
-                                .eq('credit_accounts.branch', this.userBranch),
-                            supabase
+                                .eq('credit_accounts.branch', this.userBranch);
+
+                            if (creditQuery.data) {
+                                this.processCreditPayments(creditQuery.data);
+                            }
+                        } catch (e) {
+                            console.warn("Tabla credit_payments no encontrada o vacía:", e);
+                        }
+
+                        // 3. Cargar Cierre Diario (Aislado de forma segura)
+                        try {
+                            const closureQuery = await supabase
                                 .from('daily_closures')
                                 .select('*')
                                 .eq('closing_date', dateStr)
                                 .eq('branch', this.userBranch)
-                                .maybeSingle()
-                        ]);
+                                .maybeSingle();
 
-                        if (salesResult.error) throw salesResult.error;
-                        if (creditPaymentsResult.error) throw creditPaymentsResult.error;
-
-                        // Verificar si el día ya fue cerrado oficialmente
-                        if (closureStatus.data) {
-                            this.isClosed = closureStatus.data.status === 'closed';
-                            this.cashCount.usd = closureStatus.data.cash_usd_counted || 0;
-                            this.cashCount.bs = closureStatus.data.cash_bs_counted || 0;
-                            this.posBatch = closureStatus.data.pos_batch || '';
-                        } else {
+                            if (closureQuery.data) {
+                                this.isClosed = closureQuery.data.status === 'closed';
+                                this.cashCount.usd = closureStatus.data.cash_usd_counted || 0;
+                                this.cashCount.bs = closureStatus.data.cash_bs_counted || 0;
+                                this.posBatch = closureStatus.data.pos_batch || '';
+                            } else {
+                                this.isClosed = false;
+                            }
+                        } catch (e) {
                             this.isClosed = false;
                         }
 
-                        this.processSales(salesResult.data || []);
-                        this.processCreditPayments(creditPaymentsResult.data || []);
                     } catch (err) {
                         console.error('Error cargando reporte:', err);
-                    } font - semibold {
+                    } finally {
                         this.loading = false;
                     }
                 },
@@ -723,7 +696,6 @@
                     const productMap = {};
 
                     for (const sale of sales) {
-                        // Auditoría de Ventas Anuladas
                         if (sale.status === 'voided' || sale.status === 'anulada') {
                             this.stats.voidCount++;
                             this.stats.voidAmount += (sale.total || 0);
@@ -784,7 +756,6 @@
                         }
                     }
 
-                    // Redondeos de Precisión Financiera
                     this.stats.efectivoBs = Math.round(this.stats.efectivoBs * 100) / 100;
                     this.stats.efectivoUsd = Math.round(this.stats.efectivoUsd * 100) / 100;
                     this.stats.pagoMovil = Math.round(this.stats.pagoMovil * 100) / 100;
@@ -835,7 +806,7 @@
                 },
 
                 async cerrarJornada() {
-                    if (!confirm('¿Está seguro de cerrar la jornada diaria? Una vez cerrada, los registros de este día quedarán congelados para auditoría.')) return;
+                    if (!confirm('¿Desea congelar la jornada diaria?')) return;
 
                     try {
                         const payload = {
@@ -856,9 +827,8 @@
                         if (error) throw error;
 
                         this.isClosed = true;
-                        alert('¡Jornada cerrada y registrada exitosamente!');
+                        alert('¡Jornada cerrada con éxito!');
                     } catch (err) {
-                        console.error('Error al cerrar jornada:', err);
                         alert('Error al congelar la jornada: ' + err.message);
                     }
                 },
@@ -871,14 +841,7 @@
 
                 exportToPDF() { window.print(); },
 
-                printThermal() {
-                    const printContent = document.getElementById('thermal-print-area').innerHTML;
-                    const originalContent = document.body.innerHTML;
-                    document.body.innerHTML = printContent;
-                    window.print();
-                    document.body.innerHTML = originalContent;
-                    window.location.reload();
-                }
+                printThermal() { window.print(); }
             }
         }
     </script>
