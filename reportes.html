@@ -826,7 +826,7 @@
                         <div x-show="reportType === 'clientes'">
                             <div class="report-card">
                                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Análisis de Clientes</h3>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                                     <div class="stat-card">
                                         <div class="text-sm text-gray-500">Clientes Totales</div>
                                         <div class="stat-value" x-text="totalClients"></div>
@@ -837,7 +837,56 @@
                                         <div class="stat-value" x-text="activeClients"></div>
                                         <div class="text-sm text-green-500">+8% vs mes pasado</div>
                                     </div>
+                                    <!-- ✅ NUEVO: Total de clientes nuevos del rango seleccionado -->
+                                    <div class="stat-card">
+                                        <div class="text-sm text-gray-500">Clientes Nuevos (rango seleccionado)</div>
+                                        <div class="stat-value text-cyan-600" x-text="newCustomers"></div>
+                                        <div class="text-sm text-gray-500">Del <span
+                                                x-text="formatDate(startDate)"></span>
+                                            al <span x-text="formatDate(endDate)"></span></div>
+                                    </div>
                                 </div>
+
+                                <!-- ✅ NUEVO: Clientes más concurrentes / que más compran -->
+                                <h4 class="text-sm font-semibold text-gray-700 mb-2">Top 10 Clientes Más Concurrentes
+                                    (por N° de compras en el período)</h4>
+                                <div class="table-container mb-8">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Cliente</th>
+                                                <th>Teléfono</th>
+                                                <th>N° Compras</th>
+                                                <th>Total Gastado USD</th>
+                                                <th>Total Gastado Bs</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template x-if="topCustomers && topCustomers.length > 0">
+                                                <template x-for="(c, index) in topCustomers" :key="index">
+                                                    <tr>
+                                                        <td x-text="index + 1"></td>
+                                                        <td x-text="c.full_name"></td>
+                                                        <td x-text="c.phone || 'N/A'"></td>
+                                                        <td x-text="c.purchases_count"></td>
+                                                        <td x-text="'$' + c.total_spent.toFixed(2)"></td>
+                                                        <td x-text="formatCurrency(c.total_spent * exchangeRate)"></td>
+                                                    </tr>
+                                                </template>
+                                            </template>
+                                            <template x-if="!topCustomers || topCustomers.length === 0">
+                                                <tr>
+                                                    <td colspan="6" class="text-center py-8 text-gray-500">
+                                                        <i class="fas fa-user-friends text-4xl mb-2 block"></i>
+                                                        No hay clientes con compras en el período seleccionado
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+
                                 <div class="table-container">
                                     <table class="data-table">
                                         <thead>
@@ -868,6 +917,61 @@
                                         </tbody>
                                     </table>
                                 </div>
+
+                                <!-- ✅ NUEVO: Detalle de clientes nuevos del período (mostrar en pantalla / imprimir) -->
+                                <div class="flex items-center justify-between mt-8 mb-2">
+                                    <h4 class="text-sm font-semibold text-gray-700">Detalle de Clientes Nuevos</h4>
+                                    <div class="flex items-center space-x-2">
+                                        <button @click="showNewCustomersDetails = !showNewCustomersDetails"
+                                            class="export-btn flex items-center space-x-2">
+                                            <i class="fas"
+                                                :class="showNewCustomersDetails ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                            <span
+                                                x-text="showNewCustomersDetails ? 'Ocultar Detalle' : 'Ver Detalle de Clientes Nuevos'"></span>
+                                        </button>
+                                        <template x-if="showNewCustomersDetails">
+                                            <button @click="generateNewCustomersPDF()"
+                                                class="export-btn flex items-center space-x-2">
+                                                <i class="fas fa-print"></i><span>Imprimir Detalle</span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+                                <template x-if="showNewCustomersDetails">
+                                    <div class="table-container">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nombre</th>
+                                                    <th>Teléfono</th>
+                                                    <th>Email</th>
+                                                    <th>Fecha Registro</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <template x-if="newCustomersDetails && newCustomersDetails.length > 0">
+                                                    <template x-for="(c, index) in newCustomersDetails" :key="index">
+                                                        <tr>
+                                                            <td x-text="c.full_name"></td>
+                                                            <td x-text="c.phone || 'N/A'"></td>
+                                                            <td x-text="c.email || 'N/A'"></td>
+                                                            <td x-text="formatDate(c.created_at)"></td>
+                                                        </tr>
+                                                    </template>
+                                                </template>
+                                                <template
+                                                    x-if="!newCustomersDetails || newCustomersDetails.length === 0">
+                                                    <tr>
+                                                        <td colspan="4" class="text-center py-8 text-gray-500">
+                                                            <i class="fas fa-user-plus text-4xl mb-2 block"></i>
+                                                            No hay clientes nuevos en el período seleccionado
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </template>
                             </div>
                         </div>
 
@@ -1336,6 +1440,10 @@
                 totalClients: 0,
                 activeClients: 0,
                 clientsData: [],
+                // ✅ NUEVO: Clientes nuevos del período (detalle) y ranking de clientes más concurrentes
+                newCustomersDetails: [],
+                topCustomers: [],
+                showNewCustomersDetails: false,
 
                 // Datos de Inventario
                 totalProducts: 0,
@@ -1768,14 +1876,26 @@
                         .not('customer_id', 'is', null);
                     if (this.selectedBranch) salesQuery = salesQuery.eq('branch', this.selectedBranch);
 
-                    // ✅ Clientes y sus compras en paralelo (son consultas independientes)
-                    const [{ data: customers, error }, { data: salesForClients }] = await Promise.all([query, salesQuery]);
+                    // ✅ NUEVO: clientes registrados dentro del período/fechas seleccionadas
+                    // (consulta independiente, en paralelo con las de arriba)
+                    let newCustQuery = supabase.from('customers').select('*')
+                        .gte('created_at', this.rangeStart())
+                        .lte('created_at', this.rangeEnd())
+                        .order('created_at', { ascending: false });
+                    if (this.selectedBranch) newCustQuery = newCustQuery.eq('branch', this.selectedBranch);
+
+                    // ✅ Clientes, sus compras y clientes nuevos en paralelo (consultas independientes)
+                    const [{ data: customers, error }, { data: salesForClients }, { data: newCustomers, error: newCustError }] =
+                        await Promise.all([query, salesQuery, newCustQuery]);
                     if (error) throw error;
+                    if (newCustError) throw newCustError;
                     const customersList = customers || [];
 
                     const spentMap = {};
+                    const purchaseCountMap = {};
                     (salesForClients || []).forEach(s => {
                         spentMap[s.customer_id] = (spentMap[s.customer_id] || 0) + (s.total || 0);
+                        purchaseCountMap[s.customer_id] = (purchaseCountMap[s.customer_id] || 0) + 1;
                     });
 
                     this.clientsData = customersList.map(c => ({
@@ -1790,6 +1910,28 @@
 
                     this.totalClients = customersList.length;
                     this.activeClients = customersList.filter(c => c.is_active).length;
+
+                    // ✅ NUEVO: detalle de clientes nuevos del período seleccionado
+                    this.newCustomers = (newCustomers || []).length;
+                    this.newCustomersDetails = (newCustomers || []).map(c => ({
+                        full_name: c.full_name,
+                        phone: c.phone,
+                        email: c.email,
+                        created_at: c.created_at
+                    }));
+
+                    // ✅ NUEVO: ranking de clientes más concurrentes (por N° de compras) / que más
+                    // compran (por total gastado) en el período seleccionado. Top 10.
+                    this.topCustomers = customersList
+                        .map(c => ({
+                            full_name: c.full_name,
+                            phone: c.phone,
+                            purchases_count: purchaseCountMap[c.id] || 0,
+                            total_spent: round2(spentMap[c.id] || 0)
+                        }))
+                        .filter(c => c.purchases_count > 0)
+                        .sort((a, b) => b.purchases_count - a.purchases_count || b.total_spent - a.total_spent)
+                        .slice(0, 10);
                 },
 
                 async generateInventoryReport() {
@@ -2660,6 +2802,44 @@
                         showToast('PDF generado', 'success');
                     } catch (err) {
                         console.error('Error generando PDF de clientes:', err);
+                        showToast('Error al generar el PDF', 'error');
+                    }
+                },
+
+                // ✅ NUEVO: PDF del detalle de clientes nuevos del período (mismo estilo que el resto de reportes)
+                generateNewCustomersPDF() {
+                    const datos = this.newCustomersDetails;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para generar el PDF', 'warning');
+                        return;
+                    }
+                    try {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
+                        this.pdfHeader(doc, 'CLIENTES NUEVOS - DETALLE');
+
+                        const head = [['Nombre', 'Teléfono', 'Email', 'Fecha Registro']];
+                        const body = datos.map(c => [c.full_name, c.phone || 'N/A', c.email || 'N/A', formatDate(c.created_at)]);
+
+                        doc.autoTable({
+                            head, body, startY: 43, theme: 'grid',
+                            headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold', halign: 'center', fontSize: 8 },
+                            styles: { fontSize: 8, cellPadding: 2, halign: 'center' },
+                            columnStyles: { 0: { halign: 'left' }, 2: { halign: 'left' } },
+                            alternateRowStyles: { fillColor: [245, 249, 255] },
+                            margin: { left: 10, right: 10 }
+                        });
+
+                        const finalY = doc.lastAutoTable.finalY + 6;
+                        doc.setFontSize(9);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(`Total clientes nuevos en el período: ${this.newCustomers}`, 14, finalY);
+
+                        doc.save(`reporte_clientes_nuevos_${this.startDate}_a_${this.endDate}.pdf`);
+                        showToast('PDF generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando PDF de clientes nuevos:', err);
                         showToast('Error al generar el PDF', 'error');
                     }
                 },
