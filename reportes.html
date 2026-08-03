@@ -1039,11 +1039,25 @@
                         <div x-show="reportType === 'deliverys'">
                             <div class="report-card">
                                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Deliverys Realizados</h3>
-                                <div class="stat-card mb-6" style="max-width: 320px;">
-                                    <div class="text-sm text-gray-500">Total Deliverys (rango seleccionado)</div>
-                                    <div class="stat-value text-cyan-600" x-text="totalDeliverys"></div>
-                                    <div class="text-sm text-gray-500">Del <span x-text="formatDate(startDate)"></span>
-                                        al <span x-text="formatDate(endDate)"></span></div>
+                                <div class="flex flex-wrap gap-4 mb-6">
+                                    <div class="stat-card" style="max-width: 320px;">
+                                        <div class="text-sm text-gray-500">Total Deliverys (rango seleccionado)</div>
+                                        <div class="stat-value text-cyan-600" x-text="totalDeliverys"></div>
+                                        <div class="text-sm text-gray-500">Del <span
+                                                x-text="formatDate(startDate)"></span>
+                                            al <span x-text="formatDate(endDate)"></span></div>
+                                    </div>
+                                    <!-- ✅ NUEVO: Total y % de ventas por delivery respecto al total del periodo -->
+                                    <div class="stat-card" style="max-width: 320px;">
+                                        <div class="text-sm text-gray-500">Ventas por Delivery (dinero recibido)</div>
+                                        <div class="stat-value text-cyan-600"
+                                            x-text="'$' + formatNumber(deliverySalesTotal / exchangeRate)"></div>
+                                        <div class="text-lg font-semibold text-green-600"
+                                            x-text="formatCurrency(deliverySalesTotal)"></div>
+                                        <div class="text-sm text-gray-500"><span
+                                                x-text="deliverySalesPercentage"></span>%
+                                            del total de ventas del período</div>
+                                    </div>
                                 </div>
                                 <h4 class="text-sm font-semibold text-gray-700 mb-2">Top 8 Zonas / Sectores con Más
                                     Solicitudes</h4>
@@ -1079,6 +1093,61 @@
                                         </tbody>
                                     </table>
                                 </div>
+
+                                <!-- ✅ NUEVO: Detalle de direcciones de delivery (mostrar en pantalla / imprimir) -->
+                                <div class="flex items-center justify-between mt-8 mb-2">
+                                    <h4 class="text-sm font-semibold text-gray-700">Detalle de Direcciones</h4>
+                                    <div class="flex items-center space-x-2">
+                                        <button @click="showDeliveryDetails = !showDeliveryDetails"
+                                            class="export-btn flex items-center space-x-2">
+                                            <i class="fas" :class="showDeliveryDetails ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                            <span
+                                                x-text="showDeliveryDetails ? 'Ocultar Detalle' : 'Ver Detalle de Direcciones'"></span>
+                                        </button>
+                                        <template x-if="showDeliveryDetails">
+                                            <button @click="generateDeliveryDetallePDF()"
+                                                class="export-btn flex items-center space-x-2">
+                                                <i class="fas fa-print"></i><span>Imprimir Detalle</span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+                                <template x-if="showDeliveryDetails">
+                                    <div class="table-container">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Fecha</th>
+                                                    <th>Cliente</th>
+                                                    <th>Dirección</th>
+                                                    <th>Método de Pago</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <template x-if="deliveryDetails && deliveryDetails.length > 0">
+                                                    <template x-for="(d, index) in deliveryDetails" :key="index">
+                                                        <tr>
+                                                            <td x-text="formatDate(d.created_at)"></td>
+                                                            <td x-text="d.customer_name"></td>
+                                                            <td x-text="d.delivery_address"></td>
+                                                            <td x-text="getPaymentMethodName(d.payment_method)"></td>
+                                                            <td x-text="formatCurrency(d.total)"></td>
+                                                        </tr>
+                                                    </template>
+                                                </template>
+                                                <template x-if="!deliveryDetails || deliveryDetails.length === 0">
+                                                    <tr>
+                                                        <td colspan="5" class="text-center py-8 text-gray-500">
+                                                            <i class="fas fa-map-marker-alt text-4xl mb-2 block"></i>
+                                                            No hay direcciones de delivery en el período seleccionado
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </template>
                             </div>
                         </div>
                     </div>
@@ -1292,6 +1361,11 @@
                 // ✅ NUEVO: Datos de Deliverys
                 totalDeliverys: 0,
                 topDeliveryZones: [],
+                // ✅ NUEVO: Detalle de direcciones + total/porcentaje de ventas por delivery
+                deliveryDetails: [],
+                deliverySalesTotal: 0,
+                deliverySalesPercentage: 0,
+                showDeliveryDetails: false,
 
                 // Inicialización
                 async initReportes() {
@@ -1885,9 +1959,12 @@
                 },
 
                 async generateDeliveryReport() {
+                    // ✅ NUEVO: se agregan customer_name, total y created_at al select (antes solo
+                    // traía delivery_address/delivery_type/payment_method) para poder mostrar el
+                    // detalle de direcciones y calcular el total vendido por delivery.
                     let query = supabase
                         .from('sales')
-                        .select('id, delivery_address, delivery_type, payment_method')
+                        .select('id, customer_name, delivery_address, delivery_type, payment_method, total, created_at')
                         .eq('delivery_type', 'delivery')
                         .gte('created_at', this.rangeStart())
                         .lte('created_at', this.rangeEnd());
@@ -1895,8 +1972,19 @@
                     if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
                     if (this.paymentMethod) query = query.eq('payment_method', this.paymentMethod);
 
-                    const { data, error } = await query;
+                    // ✅ NUEVO: consulta paralela (liviana) con el total de ventas del período
+                    // completo, usada solo como base para calcular el % de ventas por delivery.
+                    let periodQuery = supabase
+                        .from('sales')
+                        .select('total, payment_method')
+                        .gte('created_at', this.rangeStart())
+                        .lte('created_at', this.rangeEnd());
+                    if (this.selectedBranch) periodQuery = periodQuery.eq('branch', this.selectedBranch);
+                    if (this.paymentMethod) periodQuery = periodQuery.eq('payment_method', this.paymentMethod);
+
+                    const [{ data, error }, { data: periodData, error: periodError }] = await Promise.all([query, periodQuery]);
                     if (error) throw error;
+                    if (periodError) throw periodError;
                     const deliveries = data || [];
 
                     this.totalDeliverys = deliveries.length;
@@ -1916,6 +2004,31 @@
                         }))
                         .sort((a, b) => b.count - a.count)
                         .slice(0, 8);
+
+                    // ✅ NUEVO: Detalle de direcciones de delivery, para mostrar en pantalla e imprimir
+                    this.deliveryDetails = deliveries
+                        .map(d => ({
+                            created_at: d.created_at,
+                            customer_name: d.customer_name || 'Cliente Anónimo',
+                            delivery_address: d.delivery_address || 'Sin especificar',
+                            payment_method: d.payment_method,
+                            total: round2((d.total || 0) * this.exchangeRate)
+                        }))
+                        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+                    // ✅ NUEVO: Total y % de ventas por delivery respecto al total de ventas del
+                    // período (mismo criterio "dinero recibido" usado en el resto del reporte: excluye crédito)
+                    const deliveryCashUSD = deliveries
+                        .filter(d => d.payment_method !== 'credito')
+                        .reduce((sum, d) => sum + (d.total || 0), 0);
+                    const periodCashUSD = (periodData || [])
+                        .filter(s => s.payment_method !== 'credito')
+                        .reduce((sum, s) => sum + (s.total || 0), 0);
+
+                    this.deliverySalesTotal = round2(deliveryCashUSD * this.exchangeRate);
+                    this.deliverySalesPercentage = periodCashUSD > 0
+                        ? round2((deliveryCashUSD / periodCashUSD) * 100)
+                        : 0;
                 },
 
                 setReportType(type) {
@@ -2945,6 +3058,47 @@
                     } catch (err) {
                         console.error('Error generando Excel de deliverys:', err);
                         showToast('Error al generar el Excel', 'error');
+                    }
+                },
+
+                // ✅ NUEVO: PDF del detalle de direcciones de delivery (mismo estilo que el resto de reportes)
+                generateDeliveryDetallePDF() {
+                    const datos = this.deliveryDetails;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para generar el PDF', 'warning');
+                        return;
+                    }
+                    try {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
+                        this.pdfHeader(doc, 'DELIVERYS - DETALLE DE DIRECCIONES');
+
+                        const head = [['Fecha', 'Cliente', 'Dirección', 'Método de Pago', 'Total']];
+                        const body = datos.map(d => [
+                            formatDate(d.created_at), d.customer_name, d.delivery_address,
+                            getPaymentMethodName(d.payment_method), formatCurrency(d.total)
+                        ]);
+
+                        doc.autoTable({
+                            head, body, startY: 43, theme: 'grid',
+                            headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold', halign: 'center', fontSize: 8 },
+                            styles: { fontSize: 8, cellPadding: 2, halign: 'center' },
+                            columnStyles: { 1: { halign: 'left' }, 2: { halign: 'left' } },
+                            alternateRowStyles: { fillColor: [245, 249, 255] },
+                            margin: { left: 10, right: 10 }
+                        });
+
+                        const finalY = doc.lastAutoTable.finalY + 6;
+                        doc.setFontSize(9);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(`Total deliverys: ${this.totalDeliverys}    |    Ventas por delivery: ${formatCurrency(this.deliverySalesTotal)} (${this.deliverySalesPercentage}% del total del período)`, 14, finalY);
+
+                        doc.save(`reporte_deliverys_detalle_${this.startDate}_a_${this.endDate}.pdf`);
+                        showToast('PDF generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando PDF de detalle de deliverys:', err);
+                        showToast('Error al generar el PDF', 'error');
                     }
                 },
 
