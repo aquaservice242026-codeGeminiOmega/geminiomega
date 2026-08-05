@@ -1539,6 +1539,7 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         // ✅ DATOS DE UBICACIÓN - Municipios y Sectores de Nueva Esparta
+
         const LOCATION_DATA = {
             "estado": "Nueva Esparta",
             "municipios": [
@@ -1620,14 +1621,112 @@
                         { "id": "las-guardias", "nombre": "La Guardia" },
                         { "id": "san-juan-bautista", "nombre": "San Juan Bautista" }
                     ]
+                },
+                {
+                    "id": "antolin-del-campo",
+                    "nombre": "Antolín del Campo",
+                    "sectores": [
+                        { "id": "la-plaza-paraguachi", "nombre": "La Plaza de Paraguachí" },
+                        { "id": "playa-el-agua", "nombre": "Playa El Agua" },
+                        { "id": "playa-parguito", "nombre": "Playa Parguito" },
+                        { "id": "manzanillo", "nombre": "Manzanillo" },
+                        { "id": "el-cardon", "nombre": "El Cardón" },
+                        { "id": "el-salado", "nombre": "El Salado" },
+                        { "id": "aricagua", "nombre": "Aricagua" },
+                        { "id": "puerto-fermin", "nombre": "Puerto Fermín (El Tirano)" },
+                        { "id": "la-rinconada", "nombre": "La Rinconada" },
+                        { "id": "la-mora", "nombre": "La Mora" }
+                    ]
+                },
+                {
+                    "id": "arismendi",
+                    "nombre": "Arismendi",
+                    "sectores": [
+                        { "id": "la-asuncion", "nombre": "La Asunción (Casco Histórico)" },
+                        { "id": "atamo-norte", "nombre": "Átamo Norte" },
+                        { "id": "atamo-sur", "nombre": "Átamo Sur" },
+                        { "id": "playa-guacuco", "nombre": "Playa Guacuco" },
+                        { "id": "sabana-de-guacuco", "nombre": "Sabana de Guacuco" },
+                        { "id": "la-sierra", "nombre": "La Sierra" },
+                        { "id": "salamanca", "nombre": "Salamanca" },
+                        { "id": "camoruco", "nombre": "Camoruco" },
+                        { "id": "chaguaramal", "nombre": "Chaguaramal" }
+                    ]
+                },
+                {
+                    "id": "gomez",
+                    "nombre": "Gómez",
+                    "sectores": [
+                        { "id": "santa-ana", "nombre": "Santa Ana" },
+                        { "id": "altagracia", "nombre": "Altagracia" },
+                        { "id": "tacarigua", "nombre": "Tacarigua" },
+                        { "id": "pedro-gonzalez", "nombre": "Pedro González" },
+                        { "id": "playa-zaragoza", "nombre": "Playa Zaragoza" },
+                        { "id": "el-maco", "nombre": "El Maco" },
+                        { "id": "la-vecindad", "nombre": "La Vecindad" },
+                        { "id": "guayacan", "nombre": "Guayacán" }
+                    ]
+                },
+                {
+                    "id": "marcano",
+                    "nombre": "Marcano",
+                    "sectores": [
+                        { "id": "juan-griego", "nombre": "Juan Griego (Casco Histórico)" },
+                        { "id": "la-galera", "nombre": "La Galera" },
+                        { "id": "los-millanes", "nombre": "Los Millanes" },
+                        { "id": "pedregales", "nombre": "Pedregales" },
+                        { "id": "las-piedras-de-juan-griego", "nombre": "Las Piedras de Juan Griego" },
+                        { "id": "tacuantar", "nombre": "Tacuantar" },
+                        { "id": "los-cabelleros", "nombre": "Los Cabelleros" }
+                    ]
+                },
+                {
+                    "id": "peninsula-de-macanao",
+                    "nombre": "Península de Macanao",
+                    "sectores": [
+                        { "id": "boca-de-rio", "nombre": "Boca de Río" },
+                        { "id": "san-francisco", "nombre": "San Francisco de Macanao" },
+                        { "id": "boca-de-pozo", "nombre": "Boca de Pozo" },
+                        { "id": "guayacancito", "nombre": "Guayacancito" },
+                        { "id": "robledal", "nombre": "Robledal" },
+                        { "id": "el-manglillo", "nombre": "El Manglillo" },
+                        { "id": "el-horcon", "nombre": "El Horcón" }
+                    ]
+                },
+                {
+                    "id": "tubores",
+                    "nombre": "Tubores",
+                    "sectores": [
+                        { "id": "punta-de-piedras", "nombre": "Punta de Piedras" },
+                        { "id": "el-guamache", "nombre": "El Guamache" },
+                        { "id": "chacachacare", "nombre": "Chacachacare" },
+                        { "id": "los-gomez", "nombre": "Los Gómez" },
+                        { "id": "las-marites", "nombre": "Las Marites" },
+                        { "id": "mata-de-coco", "nombre": "Mata de Coco" },
+                        { "id": "los-vazquez", "nombre": "Los Vázquez" }
+                    ]
+                },
+                {
+                    "id": "villalba",
+                    "nombre": "Villalba (Isla de Coche)",
+                    "sectores": [
+                        { "id": "san-pedro-de-coche", "nombre": "San Pedro de Coche" },
+                        { "id": "el-bichar", "nombre": "El Bichar" },
+                        { "id": "guinima", "nombre": "Guinima" },
+                        { "id": "el-amparo", "nombre": "El Amparo" },
+                        { "id": "el-zubiat", "nombre": "El Zubiat" },
+                        { "id": "la-uva", "nombre": "La Uva" }
+                    ]
                 }
             ]
         };
+
         async function logout() {
             await supabase.auth.signOut();
             localStorage.clear();
             window.location.href = 'login.html';
         }
+
         function showToast(message, type = 'success') {
             const gradients = {
                 success: 'linear-gradient(to right, #10b981, #059669)',
