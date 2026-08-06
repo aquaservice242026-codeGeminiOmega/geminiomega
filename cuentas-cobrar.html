@@ -24,6 +24,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- jsPDF + AutoTable (Exportar PDF) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <!-- ExcelJS (Exportar Excel) -->
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+
     <style>
         [x-cloak] {
             display: none !important;
@@ -402,9 +408,26 @@
                             </select>
                         </div>
                         <button @click="resetFilters()"
-                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 whitespace-nowrap">
                             <i class="fas fa-undo mr-2"></i>Limpiar Filtros
                         </button>
+                        <button @click="exportarPDF()"
+                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 whitespace-nowrap">
+                            <i class="fas fa-file-pdf mr-2"></i>PDF
+                        </button>
+                        <button @click="exportarExcel()"
+                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 whitespace-nowrap">
+                            <i class="fas fa-file-excel mr-2"></i>Excel
+                        </button>
+                    </div>
+                    <div class="mt-3 flex items-center text-xs text-gray-500" x-show="!loading">
+                        <i class="fas fa-list-ol mr-1.5"></i>
+                        <span>Mostrando <strong x-text="filteredCuentas.length"></strong> de <strong
+                                x-text="cuentas.length"></strong> cuentas</span>
+                        <span x-show="filteredCuentas.length < cuentas.length"
+                            class="ml-2 px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full font-semibold">
+                            <i class="fas fa-filter mr-1"></i>Filtrado
+                        </span>
                     </div>
                 </div>
 
@@ -670,26 +693,32 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Monto del Pago *</label>
-                    <input type="number" x-model.number="paymentForm.amount" step="0.01" min="0.01"
-                        :max="selectedAccount?.remaining_amount"
+                    <input type="number" x-model.number="paymentForm.amount" @input="updatePaymentNote()" step="0.01"
+                        min="0.01" :max="selectedAccount?.remaining_amount"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <p class="text-xs text-gray-500 mt-1" x-show="paymentForm.amount > 0">
-                        Equivalente: Bs. <span x-text="(paymentForm.amount * exchangeRate).toFixed(2)"></span>
+                        Equivalente: Bs. <span x-text="formatVE(paymentForm.amount * exchangeRate)"></span>
                     </p>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Método de Pago *</label>
-                    <select x-model="paymentForm.payment_method"
+                    <select x-model="paymentForm.payment_method" @change="onPaymentMethodChange()"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="efectivo">Efectivo</option>
                         <option value="transferencia">Transferencia</option>
                         <option value="pago_movil">Pago Móvil</option>
                         <option value="punto_venta">Punto de Venta</option>
                     </select>
+                    <p class="text-xs text-gray-500 mt-1"
+                        x-show="paymentForm.payment_method !== 'efectivo' && paymentForm.amount > 0">
+                        <i class="fas fa-exchange-alt mr-1"></i>
+                        Se pagará en bolívares a la tasa del día: <strong>Bs.
+                            <span x-text="formatVE(paymentForm.amount * exchangeRate)"></span></strong>
+                    </p>
                 </div>
 
-                <div>
+                <div x-show="paymentForm.payment_method !== 'efectivo'" x-cloak>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Referencia</label>
                     <input type="text" x-model="paymentForm.reference"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -698,9 +727,13 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Notas</label>
-                    <textarea x-model="paymentForm.notes" rows="2"
+                    <textarea x-model="paymentForm.notes" @input="paymentNotesAuto = false" rows="2"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Notas adicionales"></textarea>
+                    <p class="text-xs text-gray-400 mt-1"
+                        x-show="paymentForm.payment_method !== 'efectivo' && paymentNotesAuto">
+                        <i class="fas fa-magic mr-1"></i>Nota generada automáticamente. Puedes editarla.
+                    </p>
                 </div>
             </div>
 
@@ -809,6 +842,7 @@
                 },
                 filters: { search: '', status: '', dateFilter: '' },
                 paymentForm: { amount: 0, payment_method: 'efectivo', reference: '', notes: '' },
+                paymentNotesAuto: true,
 
                 async initCuentas() {
                     const { data: { session } } = await supabase.auth.getSession();
@@ -921,7 +955,6 @@
                         if (error) throw error;
 
                         this.cuentas = data || [];
-                        this.calculateStats();
                         this.filterCuentas();
                     } catch (err) {
                         console.error('Error cargando cuentas:', err);
@@ -931,23 +964,24 @@
                     }
                 },
 
-                calculateStats() {
+                // ✅ Calcula las estadísticas de encabezado sobre el conjunto de datos que se le pase
+                // (se usa con filteredCuentas para que las tarjetas reflejen el filtro/búsqueda activos)
+                calculateStats(dataset) {
+                    const data = dataset || this.cuentas;
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
-                    this.stats.totalCredit = this.cuentas.reduce((sum, c) => sum + c.remaining_amount, 0);
-                    this.stats.totalAccounts = this.cuentas.length;
-                    this.stats.overdueAccounts = this.cuentas.filter(c => {
+                    this.stats.totalCredit = data.reduce((sum, c) => sum + c.remaining_amount, 0);
+                    this.stats.totalAccounts = data.length;
+                    const overdue = data.filter(c => {
                         const paymentDate = new Date(c.payment_date);
                         return c.status !== 'paid' && paymentDate < today;
-                    }).length;
-                    this.stats.overdueAmount = this.cuentas.filter(c => {
-                        const paymentDate = new Date(c.payment_date);
-                        return c.status !== 'paid' && paymentDate < today;
-                    }).reduce((sum, c) => sum + c.remaining_amount, 0);
-                    this.stats.pendingAccounts = this.cuentas.filter(c => c.status === 'pending').length;
-                    this.stats.pendingAmount = this.cuentas.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.remaining_amount, 0);
+                    });
+                    this.stats.overdueAccounts = overdue.length;
+                    this.stats.overdueAmount = overdue.reduce((sum, c) => sum + c.remaining_amount, 0);
+                    this.stats.pendingAccounts = data.filter(c => c.status === 'pending').length;
+                    this.stats.pendingAmount = data.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.remaining_amount, 0);
                     const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-                    this.stats.paidAccounts = this.cuentas.filter(c => {
+                    this.stats.paidAccounts = data.filter(c => {
                         const createdAt = new Date(c.created_at);
                         return c.status === 'paid' && createdAt >= thisMonth;
                     }).length;
@@ -988,11 +1022,234 @@
                         }
                     }
                     this.filteredCuentas = filtered;
+                    // ✅ Las tarjetas de encabezado se recalculan según lo que está filtrado/buscado
+                    this.calculateStats(filtered);
                 },
 
                 resetFilters() {
                     this.filters = { search: '', status: '', dateFilter: '' };
                     this.filterCuentas();
+                },
+
+                // ============================================
+                // 📄 EXPORTAR PDF (respeta filtros/búsqueda activos)
+                // ============================================
+                exportarPDF() {
+                    const datos = this.filteredCuentas;
+                    if (!datos || datos.length === 0) {
+                        Swal.fire('Atención', 'No hay cuentas para generar el reporte', 'warning');
+                        return;
+                    }
+                    try {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
+
+                        const filtrosTexto = [];
+                        if (this.filters.search) filtrosTexto.push(`Búsqueda: "${this.filters.search}"`);
+                        if (this.filters.status) filtrosTexto.push(`Estado: ${this.filters.status}`);
+                        if (this.filters.dateFilter) filtrosTexto.push(`Fecha: ${this.filters.dateFilter}`);
+                        const filtrosAplicados = filtrosTexto.length > 0 ? filtrosTexto.join(' | ') : 'Ninguno (todas las cuentas)';
+
+                        const fechaGeneracion = DateUtils.formatDateLong(new Date());
+                        const stats = {
+                            totalCredit: datos.reduce((s, c) => s + c.remaining_amount, 0),
+                            totalAccounts: datos.length
+                        };
+
+                        doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+                        doc.text('SERVICIOS AGUA POTABLE', 148, 15, { align: 'center' });
+                        doc.setFontSize(11);
+                        doc.text('REPORTE DE CUENTAS POR COBRAR', 148, 21, { align: 'center' });
+                        doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+                        doc.text(`Generado: ${fechaGeneracion}`, 148, 26, { align: 'center' });
+                        doc.setFont('helvetica', 'italic');
+                        doc.text(`Filtros: ${filtrosAplicados}`, 148, 30, { align: 'center' });
+
+                        doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
+                        doc.text(
+                            `Cuentas: ${stats.totalAccounts}   |   Total por Cobrar: $${stats.totalCredit.toFixed(2)} (Bs. ${this.formatVE(stats.totalCredit * this.exchangeRate)})   |   Tasa: Bs. ${this.exchangeRate.toFixed(2)}`,
+                            148, 36, { align: 'center' }
+                        );
+
+                        const head = [['Cliente', 'Cédula', 'Teléfono', 'Total $', 'Pagado $', 'Pendiente $', 'Pendiente Bs.', 'Fecha Límite', 'Estado']];
+                        const body = datos.map(c => [
+                            c.customer_name || '-',
+                            c.customer_id_card || '-',
+                            c.customer_phone || '-',
+                            c.total_amount.toFixed(2),
+                            c.paid_amount.toFixed(2),
+                            c.remaining_amount.toFixed(2),
+                            this.formatVE(c.remaining_amount * this.exchangeRate),
+                            this.formatDate(c.payment_date),
+                            this.getStatusText(c)
+                        ]);
+
+                        doc.autoTable({
+                            head, body, startY: 41, theme: 'striped', margin: { left: 10, right: 10 },
+                            headStyles: { fillColor: [14, 165, 233], textColor: 255, fontStyle: 'bold', halign: 'center', fontSize: 8 },
+                            styles: { fontSize: 7.5, cellPadding: 2, valign: 'middle' },
+                            columnStyles: {
+                                3: { halign: 'right' }, 4: { halign: 'right' },
+                                5: { halign: 'right', fontStyle: 'bold', textColor: [220, 38, 38] },
+                                6: { halign: 'right' }, 8: { halign: 'center' }
+                            },
+                            didDrawPage: (data) => {
+                                const pageCount = doc.internal.getNumberOfPages();
+                                doc.setFontSize(7); doc.setFont('helvetica', 'italic');
+                                doc.text(`Página ${data.pageNumber} de ${pageCount}`, 148, doc.internal.pageSize.height - 8, { align: 'center' });
+                            }
+                        });
+
+                        let nombreArchivo = 'Cuentas_por_Cobrar';
+                        if (this.filters.search) nombreArchivo += `_${this.filters.search.replace(/\s+/g, '_')}`;
+                        if (this.filters.status) nombreArchivo += `_${this.filters.status}`;
+                        nombreArchivo += `_${new Date().toISOString().split('T')[0]}.pdf`;
+                        doc.save(nombreArchivo);
+
+                        showToast('PDF generado correctamente', 'success');
+                    } catch (err) {
+                        console.error('Error generando PDF:', err);
+                        showToast('Error al generar PDF: ' + err.message, 'error');
+                    }
+                },
+
+                // ============================================
+                // 📊 EXPORTAR EXCEL (respeta filtros/búsqueda activos)
+                // ============================================
+                async exportarExcel() {
+                    const datos = this.filteredCuentas;
+                    if (!datos || datos.length === 0) {
+                        Swal.fire('Atención', 'No hay cuentas para exportar', 'warning');
+                        return;
+                    }
+                    try {
+                        if (typeof ExcelJS === 'undefined') {
+                            showToast('La librería ExcelJS no está cargada', 'error');
+                            return;
+                        }
+
+                        const workbook = new ExcelJS.Workbook();
+                        workbook.creator = 'Servicios Agua Potable';
+                        workbook.created = new Date();
+
+                        const colores = {
+                            azulOscuro: 'FF1E3A5F', azulClaro: 'FFB4D4F4', azulMedio: 'FF0EA5E9',
+                            azulMuyClaro: 'FFF5F9FF', rojoClaro: 'FFF8D7DA', rojoTexto: 'FF721C24',
+                            verdeClaro: 'FFD4EDDA', verdeTexto: 'FF155724', grisBorde: 'FFCCCCCC', blanco: 'FFFFFFFF'
+                        };
+                        const bordeGenerico = {
+                            top: { style: 'thin', color: { argb: colores.grisBorde } },
+                            left: { style: 'thin', color: { argb: colores.grisBorde } },
+                            bottom: { style: 'thin', color: { argb: colores.grisBorde } },
+                            right: { style: 'thin', color: { argb: colores.grisBorde } }
+                        };
+
+                        const ws = workbook.addWorksheet('Cuentas por Cobrar', {
+                            properties: { tabColor: { argb: 'FF0EA5E9' } }
+                        });
+
+                        ws.mergeCells('A1:I1');
+                        ws.getCell('A1').value = '💧 SERVICIOS AGUA POTABLE - CUENTAS POR COBRAR';
+                        ws.getCell('A1').font = { name: 'Calibri', size: 14, bold: true, color: { argb: colores.blanco } };
+                        ws.getCell('A1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colores.azulMedio } };
+                        ws.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' };
+                        ws.getRow(1).height = 26;
+
+                        const filtrosTexto = [];
+                        if (this.filters.search) filtrosTexto.push(`Búsqueda: "${this.filters.search}"`);
+                        if (this.filters.status) filtrosTexto.push(`Estado: ${this.filters.status}`);
+                        if (this.filters.dateFilter) filtrosTexto.push(`Fecha: ${this.filters.dateFilter}`);
+                        ws.mergeCells('A2:I2');
+                        ws.getCell('A2').value = `Generado: ${DateUtils.formatDateLong(new Date())}   |   Filtros: ${filtrosTexto.length ? filtrosTexto.join(' | ') : 'Ninguno'}   |   Tasa: Bs. ${this.exchangeRate.toFixed(2)}`;
+                        ws.getCell('A2').font = { name: 'Calibri', size: 9, italic: true, color: { argb: 'FF555555' } };
+                        ws.getCell('A2').alignment = { horizontal: 'center' };
+
+                        const totalCredit = datos.reduce((s, c) => s + c.remaining_amount, 0);
+                        ws.mergeCells('A3:I3');
+                        ws.getCell('A3').value = `Cuentas: ${datos.length}   |   Total por Cobrar: $${totalCredit.toFixed(2)} (Bs. ${this.formatVE(totalCredit * this.exchangeRate)})`;
+                        ws.getCell('A3').font = { name: 'Calibri', size: 10, bold: true, color: { argb: colores.azulOscuro } };
+                        ws.getCell('A3').alignment = { horizontal: 'center' };
+
+                        const headers = ['Cliente', 'Cédula', 'Teléfono', 'Total $', 'Total Bs.', 'Pagado $', 'Pendiente $', 'Pendiente Bs.', 'Fecha Límite', 'Estado'];
+                        const headerRow = ws.getRow(5);
+                        headers.forEach((h, idx) => {
+                            const cell = headerRow.getCell(idx + 1);
+                            cell.value = h;
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colores.azulClaro } };
+                            cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: colores.azulOscuro } };
+                            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                            cell.border = bordeGenerico;
+                        });
+                        headerRow.height = 20;
+
+                        let rowNum = 6;
+                        datos.forEach((c, idx) => {
+                            const row = ws.getRow(rowNum);
+                            row.getCell(1).value = c.customer_name || '-';
+                            row.getCell(2).value = c.customer_id_card || '-';
+                            row.getCell(3).value = c.customer_phone || '-';
+                            row.getCell(4).value = c.total_amount;
+                            row.getCell(5).value = c.total_amount * this.exchangeRate;
+                            row.getCell(6).value = c.paid_amount;
+                            row.getCell(7).value = c.remaining_amount;
+                            row.getCell(8).value = c.remaining_amount * this.exchangeRate;
+                            row.getCell(9).value = this.formatDate(c.payment_date);
+                            row.getCell(10).value = this.getStatusText(c);
+
+                            row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+                                cell.border = bordeGenerico;
+                                cell.font = { name: 'Calibri', size: 10 };
+                                cell.alignment = { vertical: 'middle', horizontal: (colNumber >= 4 && colNumber <= 8) ? 'right' : 'left' };
+                                if ([4, 5, 6, 7, 8].includes(colNumber)) cell.numFmt = '#,##0.00';
+                                if (colNumber === 7) {
+                                    cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: colores.rojoTexto } };
+                                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colores.rojoClaro } };
+                                }
+                                if (idx % 2 === 1 && colNumber !== 7) {
+                                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colores.azulMuyClaro } };
+                                }
+                            });
+                            rowNum++;
+                        });
+
+                        const totalRow = ws.getRow(rowNum);
+                        totalRow.getCell(1).value = 'TOTAL GENERAL';
+                        totalRow.getCell(4).value = datos.reduce((s, c) => s + c.total_amount, 0);
+                        totalRow.getCell(5).value = datos.reduce((s, c) => s + c.total_amount, 0) * this.exchangeRate;
+                        totalRow.getCell(6).value = datos.reduce((s, c) => s + c.paid_amount, 0);
+                        totalRow.getCell(7).value = totalCredit;
+                        totalRow.getCell(8).value = totalCredit * this.exchangeRate;
+                        totalRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colores.azulClaro } };
+                            cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: colores.azulOscuro } };
+                            cell.border = bordeGenerico;
+                            if ([4, 5, 6, 7, 8].includes(colNumber)) { cell.numFmt = '#,##0.00'; cell.alignment = { horizontal: 'right' }; }
+                        });
+
+                        ws.columns = [
+                            { width: 28 }, { width: 14 }, { width: 16 }, { width: 12 }, { width: 14 },
+                            { width: 12 }, { width: 14 }, { width: 16 }, { width: 14 }, { width: 12 }
+                        ];
+
+                        const buffer = await workbook.xlsx.writeBuffer();
+                        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+                        let nombreArchivo = 'Cuentas_por_Cobrar';
+                        if (this.filters.search) nombreArchivo += `_${this.filters.search.replace(/\s+/g, '_')}`;
+                        if (this.filters.status) nombreArchivo += `_${this.filters.status}`;
+                        nombreArchivo += `_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url; a.download = nombreArchivo;
+                        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+
+                        showToast('Excel generado correctamente', 'success');
+                    } catch (err) {
+                        console.error('Error generando Excel:', err);
+                        showToast('Error al generar Excel: ' + err.message, 'error');
+                    }
                 },
 
                 isOverdue(account) {
@@ -1026,12 +1283,38 @@
                 openPaymentModal(account) {
                     this.selectedAccount = account;
                     this.paymentForm = { amount: 0, payment_method: 'efectivo', reference: '', notes: '' };
+                    this.paymentNotesAuto = true;
                     this.showPaymentModal = true;
                 },
 
                 closePaymentModal() {
                     this.showPaymentModal = false;
                     this.selectedAccount = null;
+                },
+
+                formatVE(n) {
+                    return (n || 0).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                },
+
+                onPaymentMethodChange() {
+                    if (this.paymentForm.payment_method === 'efectivo') {
+                        // El efectivo no requiere número de referencia
+                        this.paymentForm.reference = '';
+                    }
+                    this.updatePaymentNote();
+                },
+
+                updatePaymentNote() {
+                    // Solo autogeneramos la nota para métodos que se cobran en bolívares
+                    if (this.paymentForm.payment_method === 'efectivo') return;
+                    if (!this.paymentNotesAuto) return; // el usuario ya editó la nota manualmente
+                    const amount = this.paymentForm.amount;
+                    if (!amount || amount <= 0) {
+                        this.paymentForm.notes = '';
+                        return;
+                    }
+                    const bsAmount = amount * this.exchangeRate;
+                    this.paymentForm.notes = `Pago por ${this.formatVE(amount)} dólares por ${this.formatVE(this.exchangeRate)} igual a ${this.formatVE(bsAmount)}`;
                 },
 
                 canRegisterPayment() {
@@ -1050,6 +1333,7 @@
                         html: `<div class="text-center space-y-2">
                             <p class="text-gray-600">¿Registrar pago de:</p>
                             <p class="text-3xl font-bold text-blue-600">$${this.paymentForm.amount.toFixed(2)}</p>
+                            <p class="text-sm text-gray-500">${this.paymentForm.payment_method !== 'efectivo' ? 'Equivalente: Bs. ' + this.formatVE(this.paymentForm.amount * this.exchangeRate) : ''}</p>
                             <p class="text-sm text-gray-500">Método: ${this.paymentForm.payment_method}</p>
                         </div>`,
                         icon: 'question', showCancelButton: true, confirmButtonText: 'Sí, Registrar', cancelButtonText: 'Cancelar', reverseButtons: true
