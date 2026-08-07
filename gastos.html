@@ -942,7 +942,7 @@
                             if (error) throw error;
                             showToast('Gasto actualizado correctamente', 'success');
                         } else {
-                            expenseData.status = 'pending';
+                            expenseData.status = 'approved'; // expenseData.status = 'pending'; //
                             const { error } = await supabase.from('expenses').insert(expenseData);
                             if (error) throw error;
                             showToast('Gasto registrado correctamente', 'success');
