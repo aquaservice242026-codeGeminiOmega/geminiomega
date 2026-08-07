@@ -887,6 +887,52 @@
                                     </table>
                                 </div>
 
+                                <!-- ✅ NUEVO: Ranking de Mejores Clientes por monto total comprado (agrupado, de mayor a menor) -->
+                                <div class="flex items-center justify-between mt-2 mb-2">
+                                    <h4 class="text-sm font-semibold text-gray-700">Ranking de Mejores Clientes (por
+                                        Monto Total Comprado, de mayor a menor)</h4>
+                                    <button @click="generateTopSpendersPDF()"
+                                        class="export-btn flex items-center space-x-2">
+                                        <i class="fas fa-print"></i><span>Imprimir Ranking</span>
+                                    </button>
+                                </div>
+                                <div class="table-container mb-8">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Cliente</th>
+                                                <th>Teléfono</th>
+                                                <th>N° Compras</th>
+                                                <th>Total Comprado USD</th>
+                                                <th>Total Comprado Bs</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template x-if="topSpenders && topSpenders.length > 0">
+                                                <template x-for="(c, index) in topSpenders" :key="index">
+                                                    <tr>
+                                                        <td x-text="index + 1"></td>
+                                                        <td x-text="c.full_name"></td>
+                                                        <td x-text="c.phone || 'N/A'"></td>
+                                                        <td x-text="c.purchases_count"></td>
+                                                        <td x-text="'$' + c.total_spent.toFixed(2)"></td>
+                                                        <td x-text="formatCurrency(c.total_spent * exchangeRate)"></td>
+                                                    </tr>
+                                                </template>
+                                            </template>
+                                            <template x-if="!topSpenders || topSpenders.length === 0">
+                                                <tr>
+                                                    <td colspan="6" class="text-center py-8 text-gray-500">
+                                                        <i class="fas fa-trophy text-4xl mb-2 block"></i>
+                                                        No hay clientes con compras en el período seleccionado
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+
                                 <div class="table-container">
                                     <table class="data-table">
                                         <thead>
@@ -1355,14 +1401,20 @@
             return new Date(y, m - 1, d);
         }
 
+        // ✅ CORREGIDO: formatDate ahora SIEMPRE muestra la fecha en zona horaria de Caracas,
+        // sin importar en qué zona horaria esté el navegador del usuario.
+        // - Si viene una fecha simple 'YYYY-MM-DD' (sin hora), se arma con isoToLocalDate para
+        //   no perder un día por conversión a UTC (mismo criterio ya usado en el resto del archivo).
+        // - Si viene una fecha/hora completa (created_at, payment_date con timestamp, etc.), se
+        //   fuerza timeZone: 'America/Caracas' para que el día mostrado sea el día calendario de
+        //   Caracas y no el del huso horario local del dispositivo que esté viendo el reporte.
         function formatDate(dateString) {
             if (!dateString) return '';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('es-VE', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
+            const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(dateString);
+            const date = isDateOnly ? isoToLocalDate(dateString) : new Date(dateString);
+            const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+            if (!isDateOnly) options.timeZone = 'America/Caracas';
+            return date.toLocaleDateString('es-VE', options);
         }
 
         function getPaymentMethodName(method) {
@@ -1443,6 +1495,7 @@
                 // ✅ NUEVO: Clientes nuevos del período (detalle) y ranking de clientes más concurrentes
                 newCustomersDetails: [],
                 topCustomers: [],
+                topSpenders: [], // ✅ NUEVO: ranking de clientes por monto total comprado (mayor a menor)
                 showNewCustomersDetails: false,
 
                 // Datos de Inventario
@@ -1623,7 +1676,7 @@
                         return;
                     }
                     const newRate = round2(bcvData.rate);
-                    const rateDate = new Date(bcvData.date).toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' });
+                    const rateDate = new Date(bcvData.date).toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/Caracas' });
                     const confirmed = await Swal.fire({
                         title: '🏛️ Tasa BCV Oficial',
                         html: `<div class="text-center space-y-3">
@@ -1932,6 +1985,19 @@
                         .filter(c => c.purchases_count > 0)
                         .sort((a, b) => b.purchases_count - a.purchases_count || b.total_spent - a.total_spent)
                         .slice(0, 10);
+
+                    // ✅ NUEVO: Ranking de Mejores Clientes agrupado por monto total comprado,
+                    // ordenado de forma decreciente (el que más compra primero). Incluye a todos
+                    // los clientes con al menos una compra en el período, sin límite de cantidad.
+                    this.topSpenders = customersList
+                        .map(c => ({
+                            full_name: c.full_name,
+                            phone: c.phone,
+                            purchases_count: purchaseCountMap[c.id] || 0,
+                            total_spent: round2(spentMap[c.id] || 0)
+                        }))
+                        .filter(c => c.purchases_count > 0)
+                        .sort((a, b) => b.total_spent - a.total_spent);
                 },
 
                 async generateInventoryReport() {
@@ -1986,11 +2052,15 @@
                     this.totalPending = round2(rawTotalPendingUSD * this.exchangeRate);
                     this.totalPaid = round2(rawTotalPaidUSD * this.exchangeRate);
 
-                    const today = new Date();
+                    // ✅ CORREGIDO: "hoy" y la fecha de pago ahora se calculan como día calendario
+                    // de Caracas (no como instante exacto ni como medianoche UTC), para que los
+                    // rangos de vencimiento (1-7, 8-15, +15 días) no varíen según la hora o la
+                    // zona horaria del navegador que esté viendo el reporte.
+                    const today = isoToLocalDate(getCaracasDateString());
                     let due1to7 = 0, due8to15 = 0, over15 = 0;
                     this.accountsData.forEach(a => {
                         if (a.status === 'completed' || !a.payment_date) return;
-                        const paymentDate = new Date(a.payment_date);
+                        const paymentDate = isoToLocalDate(String(a.payment_date).substring(0, 10));
                         const diffDays = Math.ceil((paymentDate - today) / (1000 * 60 * 60 * 24));
                         const amount = a.remaining_amount || 0;
                         if (diffDays >= 1 && diffDays <= 7) due1to7 += amount;
@@ -2840,6 +2910,47 @@
                         showToast('PDF generado', 'success');
                     } catch (err) {
                         console.error('Error generando PDF de clientes nuevos:', err);
+                        showToast('Error al generar el PDF', 'error');
+                    }
+                },
+
+                // ✅ NUEVO: PDF del Ranking de Mejores Clientes por monto total comprado (mismo estilo que el resto de reportes)
+                generateTopSpendersPDF() {
+                    const datos = this.topSpenders;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para generar el PDF', 'warning');
+                        return;
+                    }
+                    try {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
+                        this.pdfHeader(doc, 'RANKING DE MEJORES CLIENTES (POR MONTO COMPRADO)');
+
+                        const head = [['#', 'Cliente', 'Teléfono', 'N° Compras', 'Total Comprado ($)', 'Total Comprado Bs.']];
+                        const body = datos.map((c, index) => [
+                            index + 1, c.full_name, c.phone || 'N/A', c.purchases_count,
+                            formatNumber(c.total_spent), formatNumber(c.total_spent * this.exchangeRate)
+                        ]);
+
+                        doc.autoTable({
+                            head, body, startY: 43, theme: 'grid',
+                            headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold', halign: 'center', fontSize: 8 },
+                            styles: { fontSize: 8, cellPadding: 2, halign: 'center' },
+                            columnStyles: { 1: { halign: 'left' } },
+                            alternateRowStyles: { fillColor: [245, 249, 255] },
+                            margin: { left: 10, right: 10 }
+                        });
+
+                        const finalY = doc.lastAutoTable.finalY + 6;
+                        doc.setFontSize(9);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(`Total de clientes en el ranking: ${datos.length}`, 14, finalY);
+
+                        doc.save(`ranking_mejores_clientes_${this.startDate}_a_${this.endDate}.pdf`);
+                        showToast('PDF generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando PDF del ranking de mejores clientes:', err);
                         showToast('Error al generar el PDF', 'error');
                     }
                 },
