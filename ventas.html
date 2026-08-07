@@ -3138,12 +3138,17 @@ ${this.creditForm.notes || ''}`,
                             if (this.creditForm.initial_payment > 0) {
                                 const { data: creditAccount } = await supabase.from('credit_accounts').select('id').eq('sale_id', sale.id).single();
                                 if (creditAccount) {
+                                    // ✅ Mismo fix que en cuentas-cobrar.html: sin payment_date
+                                    // explícito, Supabase lo rellenaba con CURRENT_DATE en UTC
+                                    // (servidor), desfasando la fecha cuando la venta se hacía de
+                                    // noche en Caracas.
                                     await supabase.from('credit_payments').insert({
                                         credit_account_id: creditAccount.id,
                                         amount: round2(this.creditForm.initial_payment),
                                         payment_method: this.creditForm.initial_payment_method,
                                         notes: 'Pago inicial',
-                                        created_by: session.user.id
+                                        created_by: session.user.id,
+                                        payment_date: getCaracasDate().toISOString().split('T')[0]
                                     });
                                 }
                             }
