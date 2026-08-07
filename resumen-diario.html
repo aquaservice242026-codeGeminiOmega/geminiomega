@@ -702,14 +702,9 @@
     </div>
 
     <script>
-        /* =====================================================================
-           🔑 CONFIGURACIÓN — pega aquí las mismas credenciales de Supabase
-           que usas en tus otras páginas (ventas.html, cuentas-cobrar.html, etc.)
-           Si ya cargas un archivo compartido (ej. supabase-config.js), puedes
-           borrar este bloque y el sistema usará ese cliente existente.
-        ===================================================================== */
-        const SUPABASE_URL = 'https://TU-PROYECTO.supabase.co';
-        const SUPABASE_ANON_KEY = 'PEGA_AQUI_TU_ANON_KEY';
+
+        const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
         if (!window.supabaseClient) {
             window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
