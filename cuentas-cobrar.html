@@ -438,6 +438,9 @@
                             <thead class="bg-gray-50 border-b border-gray-200">
                                 <tr>
                                     <th
+                                        class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        #</th>
+                                    <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Cliente</th>
                                     <th
@@ -454,6 +457,9 @@
                                         Pendiente</th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Fecha Registro</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Fecha Límite</th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -464,8 +470,11 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
-                                <template x-for="account in filteredCuentas" :key="account.id">
+                                <template x-for="(account, index) in filteredCuentas" :key="account.id">
                                     <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-4 text-center">
+                                            <span class="text-sm font-semibold text-gray-500" x-text="index + 1"></span>
+                                        </td>
                                         <td class="px-6 py-4">
                                             <div class="flex flex-col">
                                                 <span class="text-sm font-medium text-gray-900"
@@ -504,6 +513,10 @@
                                         </td>
                                         <td class="px-6 py-4">
                                             <span class="text-sm text-gray-900"
+                                                x-text="formatDateTime(account.created_at)"></span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span class="text-sm text-gray-900"
                                                 x-text="formatDate(account.payment_date)"></span>
                                         </td>
                                         <td class="px-6 py-4">
@@ -527,7 +540,7 @@
 
                                 <!-- Empty State -->
                                 <tr x-show="filteredCuentas.length === 0">
-                                    <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                                    <td colspan="10" class="px-6 py-12 text-center text-gray-500">
                                         <i class="fas fa-inbox text-4xl mb-3 text-gray-300"></i>
                                         <p class="text-lg font-medium">No se encontraron cuentas</p>
                                         <p class="text-sm mt-1">Intenta ajustar los filtros de búsqueda</p>
@@ -611,6 +624,10 @@
                     <h4 class="font-semibold text-yellow-900 mb-3"><i class="fas fa-calendar-alt mr-2"></i>Términos del
                         Crédito</h4>
                     <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs text-gray-600">Fecha de Registro:</p>
+                            <p class="text-sm font-medium" x-text="formatDateTime(selectedAccount.created_at)"></p>
+                        </div>
                         <div>
                             <p class="text-xs text-gray-600">Fecha Límite:</p>
                             <p class="text-sm font-medium" x-text="formatDate(selectedAccount.payment_date)"></p>
@@ -1022,6 +1039,8 @@
                         }
                     }
                     this.filteredCuentas = filtered;
+                    // ✅ Se ordena mostrando siempre el registro más reciente primero
+                    this.filteredCuentas.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
                     // ✅ Las tarjetas de encabezado se recalculan según lo que está filtrado/buscado
                     this.calculateStats(filtered);
                 },
@@ -1071,8 +1090,9 @@
                             148, 36, { align: 'center' }
                         );
 
-                        const head = [['Cliente', 'Cédula', 'Teléfono', 'Total $', 'Pagado $', 'Pendiente $', 'Pendiente Bs.', 'Fecha Límite', 'Estado']];
-                        const body = datos.map(c => [
+                        const head = [['#', 'Cliente', 'Cédula', 'Teléfono', 'Total $', 'Pagado $', 'Pendiente $', 'Pendiente Bs.', 'Fecha Registro', 'Fecha Límite', 'Estado']];
+                        const body = datos.map((c, idx) => [
+                            (idx + 1).toString(),
                             c.customer_name || '-',
                             c.customer_id_card || '-',
                             c.customer_phone || '-',
@@ -1080,6 +1100,7 @@
                             c.paid_amount.toFixed(2),
                             c.remaining_amount.toFixed(2),
                             this.formatVE(c.remaining_amount * this.exchangeRate),
+                            this.formatDateTime(c.created_at),
                             this.formatDate(c.payment_date),
                             this.getStatusText(c)
                         ]);
@@ -1089,9 +1110,10 @@
                             headStyles: { fillColor: [14, 165, 233], textColor: 255, fontStyle: 'bold', halign: 'center', fontSize: 8 },
                             styles: { fontSize: 7.5, cellPadding: 2, valign: 'middle' },
                             columnStyles: {
-                                3: { halign: 'right' }, 4: { halign: 'right' },
-                                5: { halign: 'right', fontStyle: 'bold', textColor: [220, 38, 38] },
-                                6: { halign: 'right' }, 8: { halign: 'center' }
+                                0: { halign: 'center', fontStyle: 'bold', cellWidth: 8 },
+                                4: { halign: 'right' }, 5: { halign: 'right' },
+                                6: { halign: 'right', fontStyle: 'bold', textColor: [220, 38, 38] },
+                                7: { halign: 'right' }, 8: { halign: 'center', fontSize: 6.5 }, 10: { halign: 'center' }
                             },
                             didDrawPage: (data) => {
                                 const pageCount = doc.internal.getNumberOfPages();
@@ -1148,7 +1170,7 @@
                             properties: { tabColor: { argb: 'FF0EA5E9' } }
                         });
 
-                        ws.mergeCells('A1:I1');
+                        ws.mergeCells('A1:L1');
                         ws.getCell('A1').value = '💧 SERVICIOS AGUA POTABLE - CUENTAS POR COBRAR';
                         ws.getCell('A1').font = { name: 'Calibri', size: 14, bold: true, color: { argb: colores.blanco } };
                         ws.getCell('A1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colores.azulMedio } };
@@ -1159,18 +1181,18 @@
                         if (this.filters.search) filtrosTexto.push(`Búsqueda: "${this.filters.search}"`);
                         if (this.filters.status) filtrosTexto.push(`Estado: ${this.filters.status}`);
                         if (this.filters.dateFilter) filtrosTexto.push(`Fecha: ${this.filters.dateFilter}`);
-                        ws.mergeCells('A2:I2');
+                        ws.mergeCells('A2:L2');
                         ws.getCell('A2').value = `Generado: ${DateUtils.formatDateLong(new Date())}   |   Filtros: ${filtrosTexto.length ? filtrosTexto.join(' | ') : 'Ninguno'}   |   Tasa: Bs. ${this.exchangeRate.toFixed(2)}`;
                         ws.getCell('A2').font = { name: 'Calibri', size: 9, italic: true, color: { argb: 'FF555555' } };
                         ws.getCell('A2').alignment = { horizontal: 'center' };
 
                         const totalCredit = datos.reduce((s, c) => s + c.remaining_amount, 0);
-                        ws.mergeCells('A3:I3');
+                        ws.mergeCells('A3:L3');
                         ws.getCell('A3').value = `Cuentas: ${datos.length}   |   Total por Cobrar: $${totalCredit.toFixed(2)} (Bs. ${this.formatVE(totalCredit * this.exchangeRate)})`;
                         ws.getCell('A3').font = { name: 'Calibri', size: 10, bold: true, color: { argb: colores.azulOscuro } };
                         ws.getCell('A3').alignment = { horizontal: 'center' };
 
-                        const headers = ['Cliente', 'Cédula', 'Teléfono', 'Total $', 'Total Bs.', 'Pagado $', 'Pendiente $', 'Pendiente Bs.', 'Fecha Límite', 'Estado'];
+                        const headers = ['#', 'Cliente', 'Cédula', 'Teléfono', 'Total $', 'Total Bs.', 'Pagado $', 'Pendiente $', 'Pendiente Bs.', 'Fecha Registro', 'Fecha Límite', 'Estado'];
                         const headerRow = ws.getRow(5);
                         headers.forEach((h, idx) => {
                             const cell = headerRow.getCell(idx + 1);
@@ -1185,27 +1207,30 @@
                         let rowNum = 6;
                         datos.forEach((c, idx) => {
                             const row = ws.getRow(rowNum);
-                            row.getCell(1).value = c.customer_name || '-';
-                            row.getCell(2).value = c.customer_id_card || '-';
-                            row.getCell(3).value = c.customer_phone || '-';
-                            row.getCell(4).value = c.total_amount;
-                            row.getCell(5).value = c.total_amount * this.exchangeRate;
-                            row.getCell(6).value = c.paid_amount;
-                            row.getCell(7).value = c.remaining_amount;
-                            row.getCell(8).value = c.remaining_amount * this.exchangeRate;
-                            row.getCell(9).value = this.formatDate(c.payment_date);
-                            row.getCell(10).value = this.getStatusText(c);
+                            row.getCell(1).value = idx + 1;
+                            row.getCell(2).value = c.customer_name || '-';
+                            row.getCell(3).value = c.customer_id_card || '-';
+                            row.getCell(4).value = c.customer_phone || '-';
+                            row.getCell(5).value = c.total_amount;
+                            row.getCell(6).value = c.total_amount * this.exchangeRate;
+                            row.getCell(7).value = c.paid_amount;
+                            row.getCell(8).value = c.remaining_amount;
+                            row.getCell(9).value = c.remaining_amount * this.exchangeRate;
+                            row.getCell(10).value = this.formatDateTime(c.created_at);
+                            row.getCell(11).value = this.formatDate(c.payment_date);
+                            row.getCell(12).value = this.getStatusText(c);
 
                             row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
                                 cell.border = bordeGenerico;
                                 cell.font = { name: 'Calibri', size: 10 };
-                                cell.alignment = { vertical: 'middle', horizontal: (colNumber >= 4 && colNumber <= 8) ? 'right' : 'left' };
-                                if ([4, 5, 6, 7, 8].includes(colNumber)) cell.numFmt = '#,##0.00';
-                                if (colNumber === 7) {
+                                cell.alignment = { vertical: 'middle', horizontal: (colNumber >= 5 && colNumber <= 9) ? 'right' : (colNumber === 1 ? 'center' : 'left') };
+                                if ([5, 6, 7, 8, 9].includes(colNumber)) cell.numFmt = '#,##0.00';
+                                if (colNumber === 1) cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF888888' } };
+                                if (colNumber === 8) {
                                     cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: colores.rojoTexto } };
                                     cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colores.rojoClaro } };
                                 }
-                                if (idx % 2 === 1 && colNumber !== 7) {
+                                if (idx % 2 === 1 && colNumber !== 8) {
                                     cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colores.azulMuyClaro } };
                                 }
                             });
@@ -1213,22 +1238,22 @@
                         });
 
                         const totalRow = ws.getRow(rowNum);
-                        totalRow.getCell(1).value = 'TOTAL GENERAL';
-                        totalRow.getCell(4).value = datos.reduce((s, c) => s + c.total_amount, 0);
-                        totalRow.getCell(5).value = datos.reduce((s, c) => s + c.total_amount, 0) * this.exchangeRate;
-                        totalRow.getCell(6).value = datos.reduce((s, c) => s + c.paid_amount, 0);
-                        totalRow.getCell(7).value = totalCredit;
-                        totalRow.getCell(8).value = totalCredit * this.exchangeRate;
+                        totalRow.getCell(2).value = 'TOTAL GENERAL';
+                        totalRow.getCell(5).value = datos.reduce((s, c) => s + c.total_amount, 0);
+                        totalRow.getCell(6).value = datos.reduce((s, c) => s + c.total_amount, 0) * this.exchangeRate;
+                        totalRow.getCell(7).value = datos.reduce((s, c) => s + c.paid_amount, 0);
+                        totalRow.getCell(8).value = totalCredit;
+                        totalRow.getCell(9).value = totalCredit * this.exchangeRate;
                         totalRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
                             cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colores.azulClaro } };
                             cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: colores.azulOscuro } };
                             cell.border = bordeGenerico;
-                            if ([4, 5, 6, 7, 8].includes(colNumber)) { cell.numFmt = '#,##0.00'; cell.alignment = { horizontal: 'right' }; }
+                            if ([5, 6, 7, 8, 9].includes(colNumber)) { cell.numFmt = '#,##0.00'; cell.alignment = { horizontal: 'right' }; }
                         });
 
                         ws.columns = [
-                            { width: 28 }, { width: 14 }, { width: 16 }, { width: 12 }, { width: 14 },
-                            { width: 12 }, { width: 14 }, { width: 16 }, { width: 14 }, { width: 12 }
+                            { width: 6 }, { width: 28 }, { width: 14 }, { width: 16 }, { width: 12 }, { width: 14 },
+                            { width: 12 }, { width: 14 }, { width: 16 }, { width: 18 }, { width: 14 }, { width: 12 }
                         ];
 
                         const buffer = await workbook.xlsx.writeBuffer();
