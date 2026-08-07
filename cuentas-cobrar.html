@@ -1368,13 +1368,20 @@
                     this.processing = true;
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
+                        // ✅ payment_date se envía explícito en hora Caracas: si se deja que la
+                        // base de datos lo rellene por defecto (CURRENT_DATE), Postgres usa la
+                        // zona horaria del servidor (normalmente UTC), y cualquier pago hecho
+                        // después de las 8:00 p.m. hora Caracas quedaba guardado con la fecha
+                        // del día siguiente, haciendo que no apareciera en el Resumen Diario.
+                        const paymentDateCaracas = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Caracas' });
                         const { error: paymentError } = await supabase.from('credit_payments').insert({
                             credit_account_id: this.selectedAccount.id,
                             amount: this.paymentForm.amount,
                             payment_method: this.paymentForm.payment_method,
                             reference: this.paymentForm.reference,
                             notes: this.paymentForm.notes,
-                            created_by: session.user.id
+                            created_by: session.user.id,
+                            payment_date: paymentDateCaracas
                         });
                         if (paymentError) throw paymentError;
 
