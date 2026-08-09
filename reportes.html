@@ -1370,6 +1370,28 @@
             return Math.round((parseFloat(num) + Number.EPSILON) * 100) / 100;
         }
 
+        // ✅ Fix: al consolidar varias sucursales, saleIds puede tener cientos/miles de IDs.
+        // Meterlos todos en un solo filtro .in('sale_id', saleIds) genera una URL demasiado
+        // larga y Supabase/PostgREST responde 400 Bad Request. Esta función trocea la lista
+        // de IDs en lotes pequeños, dispara las consultas en paralelo y une los resultados,
+        // manteniendo exactamente las mismas columnas/tabla que antes.
+        async function fetchSaleItemsChunked(saleIds, columns, chunkSize = 150) {
+            if (!saleIds || saleIds.length === 0) return { data: [], error: null };
+
+            const chunks = [];
+            for (let i = 0; i < saleIds.length; i += chunkSize) {
+                chunks.push(saleIds.slice(i, i + chunkSize));
+            }
+
+            const results = await Promise.all(
+                chunks.map(ids => supabase.from('sale_items').select(columns).in('sale_id', ids))
+            );
+
+            const firstError = results.find(r => r.error)?.error || null;
+            const data = results.flatMap(r => r.data || []);
+            return { data, error: firstError };
+        }
+
         function formatCurrency(num) {
             return round2(num).toLocaleString('es-VE', {
                 style: 'currency',
@@ -1780,9 +1802,7 @@
                     if (this.selectedBranch) credQuery = credQuery.eq('branch', this.selectedBranch);
 
                     const [itemsResult, productsResult, custResult, invResult, credResult] = await Promise.all([
-                        saleIds.length > 0
-                            ? supabase.from('sale_items').select('sale_id, product_id, quantity, unit_price, total').in('sale_id', saleIds)
-                            : Promise.resolve({ data: [] }),
+                        fetchSaleItemsChunked(saleIds, 'sale_id, product_id, quantity, unit_price, total'),
                         supabase.from('products').select('id, name, size_liters'),
                         custQuery,
                         invQuery,
@@ -1852,11 +1872,10 @@
 
                     // ✅ Ítems y productos en paralelo (antes eran secuenciales)
                     const [itemsResult, productsResult] = await Promise.all([
-                        saleIds.length > 0
-                            ? supabase.from('sale_items').select('sale_id, product_id, quantity, total').in('sale_id', saleIds)
-                            : Promise.resolve({ data: [] }),
+                        fetchSaleItemsChunked(saleIds, 'sale_id, product_id, quantity, total'),
                         supabase.from('products').select('id, name, size_liters')
                     ]);
+                    if (itemsResult.error) throw itemsResult.error;
                     const items = itemsResult.data || [];
                     const productsData = productsResult.data || [];
 
@@ -2100,12 +2119,11 @@
 
                     // ✅ Ítems, productos e inventario en paralelo (antes eran secuenciales)
                     const [itemsResult, productsResult, invResult] = await Promise.all([
-                        saleIds.length > 0
-                            ? supabase.from('sale_items').select('sale_id, product_id, quantity, total').in('sale_id', saleIds)
-                            : Promise.resolve({ data: [] }),
+                        fetchSaleItemsChunked(saleIds, 'sale_id, product_id, quantity, total'),
                         supabase.from('products').select('id, name, size_liters'),
                         invQuery
                     ]);
+                    if (itemsResult.error) throw itemsResult.error;
 
                     const items = itemsResult.data || [];
                     const productsData = productsResult.data || [];
