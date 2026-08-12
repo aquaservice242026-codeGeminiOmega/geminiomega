@@ -847,6 +847,72 @@
                                     </div>
                                 </div>
 
+                                <!-- ✅ MOVIDO AL INICIO: Clientes Inactivos / Riesgo de Churn (última compra > 3 días).
+                                     Se prioriza su visibilidad mostrándolo primero dentro del módulo de Clientes.
+                                     Se agrega selector de cantidad de registros (35/50/80) que se envía como
+                                     parámetro a la función RPC (ver explicación de rendimiento adjunta). -->
+                                <div class="flex flex-wrap items-center justify-between gap-2 mt-2 mb-2">
+                                    <h4 class="text-sm font-semibold text-gray-700">
+                                        <i class="fas fa-user-clock text-red-500 mr-1"></i>
+                                        Clientes Inactivos / Riesgo de Churn
+                                        (Top <span x-text="churnLimit"></span> por Monto Acumulado)
+                                    </h4>
+                                    <div class="flex items-center space-x-2">
+                                        <label for="churnLimitSelect" class="text-xs text-gray-500">Mostrar:</label>
+                                        <select id="churnLimitSelect" x-model.number="churnLimit"
+                                            @change="generateChurnReport()"
+                                            class="border border-gray-300 rounded-lg text-xs py-1 px-2">
+                                            <option value="35">35</option>
+                                            <option value="50">50</option>
+                                            <option value="80">80</option>
+                                        </select>
+                                        <button @click="generateChurnExcel()"
+                                            class="export-btn flex items-center space-x-2">
+                                            <i class="fas fa-file-excel"></i><span>Excel</span>
+                                        </button>
+                                        <button @click="generateChurnPDF()"
+                                            class="export-btn flex items-center space-x-2">
+                                            <i class="fas fa-print"></i><span>Imprimir</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-500 mb-2">Clientes sin compras hace 3 días o más, ordenados
+                                    de mayor a menor según su total histórico comprado.</p>
+                                <div class="table-container mb-8">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Cliente</th>
+                                                <th>Teléfono</th>
+                                                <th>Fecha Última Compra</th>
+                                                <th>Total Acumulado ($)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template x-if="churnData && churnData.length > 0">
+                                                <template x-for="(c, index) in churnData" :key="index">
+                                                    <tr>
+                                                        <td x-text="index + 1"></td>
+                                                        <td x-text="c.full_name"></td>
+                                                        <td x-text="c.phone || 'N/A'"></td>
+                                                        <td x-text="formatDate(c.last_purchase_at)"></td>
+                                                        <td x-text="'$' + c.total_spent.toFixed(2)"></td>
+                                                    </tr>
+                                                </template>
+                                            </template>
+                                            <template x-if="!churnData || churnData.length === 0">
+                                                <tr>
+                                                    <td colspan="5" class="text-center py-8 text-gray-500">
+                                                        <i class="fas fa-check-circle text-4xl mb-2 block"></i>
+                                                        No hay clientes inactivos detectados
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+
                                 <!-- ✅ NUEVO: Clientes más concurrentes / que más compran -->
                                 <h4 class="text-sm font-semibold text-gray-700 mb-2">Top 10 Clientes Más Concurrentes
                                     (por N° de compras en el período)</h4>
@@ -926,53 +992,6 @@
                                                     <td colspan="6" class="text-center py-8 text-gray-500">
                                                         <i class="fas fa-trophy text-4xl mb-2 block"></i>
                                                         No hay clientes con compras en el período seleccionado
-                                                    </td>
-                                                </tr>
-                                            </template>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <!-- ✅ NUEVO: Clientes Inactivos / Riesgo de Churn (última compra > 3 días, TOP 35 por monto acumulado histórico) -->
-                                <div class="flex items-center justify-between mt-2 mb-2">
-                                    <h4 class="text-sm font-semibold text-gray-700">
-                                        <i class="fas fa-user-clock text-red-500 mr-1"></i>
-                                        Clientes Inactivos / Riesgo de Churn (Top 35 por Monto Acumulado)
-                                    </h4>
-                                    <button @click="generateChurnPDF()" class="export-btn flex items-center space-x-2">
-                                        <i class="fas fa-print"></i><span>Imprimir</span>
-                                    </button>
-                                </div>
-                                <p class="text-xs text-gray-500 mb-2">Clientes sin compras hace 3 días o más, ordenados
-                                    de mayor a menor según su total histórico comprado.</p>
-                                <div class="table-container mb-8">
-                                    <table class="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Cliente</th>
-                                                <th>Teléfono</th>
-                                                <th>Fecha Última Compra</th>
-                                                <th>Total Acumulado ($)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <template x-if="churnData && churnData.length > 0">
-                                                <template x-for="(c, index) in churnData" :key="index">
-                                                    <tr>
-                                                        <td x-text="index + 1"></td>
-                                                        <td x-text="c.full_name"></td>
-                                                        <td x-text="c.phone || 'N/A'"></td>
-                                                        <td x-text="formatDate(c.last_purchase_at)"></td>
-                                                        <td x-text="'$' + c.total_spent.toFixed(2)"></td>
-                                                    </tr>
-                                                </template>
-                                            </template>
-                                            <template x-if="!churnData || churnData.length === 0">
-                                                <tr>
-                                                    <td colspan="5" class="text-center py-8 text-gray-500">
-                                                        <i class="fas fa-check-circle text-4xl mb-2 block"></i>
-                                                        No hay clientes inactivos detectados
                                                     </td>
                                                 </tr>
                                             </template>
@@ -1567,6 +1586,7 @@
                 topSpenders: [], // ✅ NUEVO: ranking de clientes por monto total comprado (mayor a menor)
                 showNewCustomersDetails: false,
                 churnData: [], // ✅ NUEVO: clientes inactivos / riesgo de churn (TOP 35 por monto acumulado histórico)
+                churnLimit: 35, // ✅ NUEVO: cantidad de registros a mostrar en el reporte de Churn (35/50/80), enviado como parámetro al RPC para aplicar LIMIT en la BD
 
                 // Datos de Inventario
                 totalProducts: 0,
@@ -2073,16 +2093,20 @@
 
                 // ✅ NUEVO: Clientes inactivos / riesgo de churn.
                 // Última compra > 3 días atrás, agrupado por cliente (SUM del total histórico y
-                // MAX de la fecha de compra), ordenado por monto acumulado descendente, TOP 35.
+                // MAX de la fecha de compra), ordenado por monto acumulado descendente, TOP
+                // según el selector (35/50/80, ver churnLimit).
                 // El cálculo (GROUP BY / MAX / SUM) se hace en la base de datos vía la función
                 // get_churn_customers_report (ver script SQL adjunto), no en el navegador, para
                 // no tener que traer todo el historial de ventas al cliente en cada consulta.
+                // ✅ NUEVO: se envía limit_param con el valor elegido en el <select> para que la
+                // función aplique LIMIT en la propia consulta SQL (ver explicación de rendimiento).
                 // Aislado en su propio try/catch: si la función RPC aún no existe en Supabase,
                 // no rompe el resto del reporte de Clientes.
                 async generateChurnReport() {
                     try {
                         const { data, error } = await supabase.rpc('get_churn_customers_report', {
-                            branch_param: this.selectedBranch || null
+                            branch_param: this.selectedBranch || null,
+                            limit_param: this.churnLimit || 35
                         });
                         if (error) throw error;
                         this.churnData = (data || []).map(c => ({
@@ -3061,7 +3085,7 @@
                     try {
                         const { jsPDF } = window.jspdf;
                         const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
-                        this.pdfHeader(doc, 'CLIENTES INACTIVOS / RIESGO DE CHURN (TOP 35)');
+                        this.pdfHeader(doc, `CLIENTES INACTIVOS / RIESGO DE CHURN (TOP ${this.churnLimit})`);
 
                         const head = [['#', 'Cliente', 'Teléfono', 'Fecha Última Compra', 'Total Acumulado ($)']];
                         const body = datos.map((c, index) => [
@@ -3089,6 +3113,53 @@
                     } catch (err) {
                         console.error('Error generando PDF de clientes inactivos:', err);
                         showToast('Error al generar el PDF', 'error');
+                    }
+                },
+
+                // ✅ NUEVO: Excel de clientes inactivos / riesgo de churn, respetando el límite
+                // seleccionado (35/50/80) igual que el PDF. Mismo patrón que el resto de reportes
+                // (excelHeader / excelWriteRows / excelDownload).
+                async generateChurnExcel() {
+                    const datos = this.churnData;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para exportar', 'warning');
+                        return;
+                    }
+                    try {
+                        if (typeof ExcelJS === 'undefined') {
+                            showToast('La librería de Excel no está cargada', 'error');
+                            return;
+                        }
+                        const workbook = new ExcelJS.Workbook();
+                        workbook.creator = this.userName || 'Sistema';
+                        workbook.created = new Date();
+                        const ws = workbook.addWorksheet('Churn', { views: [{ state: 'frozen', ySplit: 6 }] });
+                        this.excelHeader(ws, `CLIENTES INACTIVOS / RIESGO DE CHURN (TOP ${this.churnLimit})`, 5);
+
+                        const headers = ['#', 'Cliente', 'Teléfono', 'Fecha Última Compra', 'Total Acumulado ($)'];
+                        const rows = datos.map((c, index) => [
+                            index + 1, c.full_name, c.phone || 'N/A',
+                            formatDate(c.last_purchase_at), round2(c.total_spent)
+                        ]);
+                        let rowNum = this.excelWriteRows(ws, headers, rows, [1]);
+
+                        const totalRow = ws.getRow(rowNum);
+                        totalRow.getCell(1).value = 'TOTALES:';
+                        totalRow.getCell(4).value = `Clientes en riesgo: ${datos.length}`;
+                        [1, 4].forEach(c => {
+                            totalRow.getCell(c).font = { bold: true };
+                            totalRow.getCell(c).alignment = { horizontal: 'center' };
+                        });
+
+                        ws.columns = [
+                            { width: 6 }, { width: 26 }, { width: 16 }, { width: 20 }, { width: 18 }
+                        ];
+
+                        await this.excelDownload(workbook, 'clientes_inactivos_churn');
+                        showToast('Excel generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando Excel de clientes inactivos:', err);
+                        showToast('Error al generar el Excel', 'error');
                     }
                 },
 
