@@ -933,6 +933,53 @@
                                     </table>
                                 </div>
 
+                                <!-- ✅ NUEVO: Clientes Inactivos / Riesgo de Churn (última compra > 3 días, TOP 35 por monto acumulado histórico) -->
+                                <div class="flex items-center justify-between mt-2 mb-2">
+                                    <h4 class="text-sm font-semibold text-gray-700">
+                                        <i class="fas fa-user-clock text-red-500 mr-1"></i>
+                                        Clientes Inactivos / Riesgo de Churn (Top 35 por Monto Acumulado)
+                                    </h4>
+                                    <button @click="generateChurnPDF()" class="export-btn flex items-center space-x-2">
+                                        <i class="fas fa-print"></i><span>Imprimir</span>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-500 mb-2">Clientes sin compras hace 3 días o más, ordenados
+                                    de mayor a menor según su total histórico comprado.</p>
+                                <div class="table-container mb-8">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Cliente</th>
+                                                <th>Teléfono</th>
+                                                <th>Fecha Última Compra</th>
+                                                <th>Total Acumulado ($)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template x-if="churnData && churnData.length > 0">
+                                                <template x-for="(c, index) in churnData" :key="index">
+                                                    <tr>
+                                                        <td x-text="index + 1"></td>
+                                                        <td x-text="c.full_name"></td>
+                                                        <td x-text="c.phone || 'N/A'"></td>
+                                                        <td x-text="formatDate(c.last_purchase_at)"></td>
+                                                        <td x-text="'$' + c.total_spent.toFixed(2)"></td>
+                                                    </tr>
+                                                </template>
+                                            </template>
+                                            <template x-if="!churnData || churnData.length === 0">
+                                                <tr>
+                                                    <td colspan="5" class="text-center py-8 text-gray-500">
+                                                        <i class="fas fa-check-circle text-4xl mb-2 block"></i>
+                                                        No hay clientes inactivos detectados
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+
                                 <div class="table-container">
                                     <table class="data-table">
                                         <thead>
@@ -1519,6 +1566,7 @@
                 topCustomers: [],
                 topSpenders: [], // ✅ NUEVO: ranking de clientes por monto total comprado (mayor a menor)
                 showNewCustomersDetails: false,
+                churnData: [], // ✅ NUEVO: clientes inactivos / riesgo de churn (TOP 35 por monto acumulado histórico)
 
                 // Datos de Inventario
                 totalProducts: 0,
@@ -2017,6 +2065,36 @@
                         }))
                         .filter(c => c.purchases_count > 0)
                         .sort((a, b) => b.total_spent - a.total_spent);
+
+                    // ✅ NUEVO: clientes inactivos / riesgo de churn (independiente del rango de fechas
+                    // del reporte, ya que el churn se mide siempre contra la fecha actual)
+                    await this.generateChurnReport();
+                },
+
+                // ✅ NUEVO: Clientes inactivos / riesgo de churn.
+                // Última compra > 3 días atrás, agrupado por cliente (SUM del total histórico y
+                // MAX de la fecha de compra), ordenado por monto acumulado descendente, TOP 35.
+                // El cálculo (GROUP BY / MAX / SUM) se hace en la base de datos vía la función
+                // get_churn_customers_report (ver script SQL adjunto), no en el navegador, para
+                // no tener que traer todo el historial de ventas al cliente en cada consulta.
+                // Aislado en su propio try/catch: si la función RPC aún no existe en Supabase,
+                // no rompe el resto del reporte de Clientes.
+                async generateChurnReport() {
+                    try {
+                        const { data, error } = await supabase.rpc('get_churn_customers_report', {
+                            branch_param: this.selectedBranch || null
+                        });
+                        if (error) throw error;
+                        this.churnData = (data || []).map(c => ({
+                            full_name: c.full_name,
+                            phone: c.phone,
+                            last_purchase_at: c.last_purchase_at,
+                            total_spent: round2(c.total_spent || 0)
+                        }));
+                    } catch (err) {
+                        console.error('Error generando reporte de clientes inactivos (churn):', err);
+                        this.churnData = [];
+                    }
                 },
 
                 async generateInventoryReport() {
@@ -2969,6 +3047,47 @@
                         showToast('PDF generado', 'success');
                     } catch (err) {
                         console.error('Error generando PDF del ranking de mejores clientes:', err);
+                        showToast('Error al generar el PDF', 'error');
+                    }
+                },
+
+                // ✅ NUEVO: PDF de clientes inactivos / riesgo de churn (mismo estilo que el resto de reportes)
+                generateChurnPDF() {
+                    const datos = this.churnData;
+                    if (!datos || datos.length === 0) {
+                        showToast('No hay datos para generar el PDF', 'warning');
+                        return;
+                    }
+                    try {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
+                        this.pdfHeader(doc, 'CLIENTES INACTIVOS / RIESGO DE CHURN (TOP 35)');
+
+                        const head = [['#', 'Cliente', 'Teléfono', 'Fecha Última Compra', 'Total Acumulado ($)']];
+                        const body = datos.map((c, index) => [
+                            index + 1, c.full_name, c.phone || 'N/A',
+                            formatDate(c.last_purchase_at), formatNumber(c.total_spent)
+                        ]);
+
+                        doc.autoTable({
+                            head, body, startY: 43, theme: 'grid',
+                            headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold', halign: 'center', fontSize: 8 },
+                            styles: { fontSize: 8, cellPadding: 2, halign: 'center' },
+                            columnStyles: { 1: { halign: 'left' } },
+                            alternateRowStyles: { fillColor: [245, 249, 255] },
+                            margin: { left: 10, right: 10 }
+                        });
+
+                        const finalY = doc.lastAutoTable.finalY + 6;
+                        doc.setFontSize(9);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(`Criterio: sin compras hace 3+ días  |  Clientes en riesgo: ${datos.length}`, 14, finalY);
+
+                        doc.save(`clientes_inactivos_churn_${getCaracasDateString()}.pdf`);
+                        showToast('PDF generado', 'success');
+                    } catch (err) {
+                        console.error('Error generando PDF de clientes inactivos:', err);
                         showToast('Error al generar el PDF', 'error');
                     }
                 },
