@@ -2106,7 +2106,7 @@
                     try {
                         const { data, error } = await supabase.rpc('get_churn_customers_report', {
                             branch_param: this.selectedBranch || null,
-                            limit_param: this.churnLimit || 35
+                            limit_count: this.churnLimit || 35
                         });
                         if (error) throw error;
                         this.churnData = (data || []).map(c => ({
