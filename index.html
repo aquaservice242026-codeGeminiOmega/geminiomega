@@ -109,26 +109,32 @@
             <!--
                 CONTROL DE ACCESO POR ROL (sidebar)
                 ------------------------------------
-                Se usa x-show="userRole === 'admin'" (mismo patrón ya usado en el
-                selector de sucursales del header) para ocultar del DOM visual las
-                opciones "Usuarios" y "Precios Personalizados" cuando el usuario
-                logueado tiene role = 'vendedor'. userRole se carga de forma
-                asíncrona en initDashboard() desde profiles.role, por lo que estos
-                enlaces permanecen ocultos mientras loading = true y solo se
-                muestran si el rol confirmado es 'admin'.
+                Roles: 'admin', 'supervisor', 'vendedor' (y otros operativos como
+                'delivery'/'cajero'). Se usa x-show con userRole (mismo patrón ya
+                usado en el selector de sucursales del header) para ocultar del
+                DOM visual las opciones que no le corresponden a cada rol:
+                  - "Ventas": oculto para 'supervisor' (no vende, solo supervisa).
+                  - "Usuarios": visible para 'admin' y 'supervisor'.
+                  - "Precios Personalizados": visible SOLO para 'admin'.
+                userRole se carga de forma asíncrona en initDashboard() desde
+                profiles.role, por lo que estos enlaces permanecen ocultos
+                mientras loading = true y solo se muestran cuando el rol
+                confirmado cumple la condición.
 
-                IMPORTANTE: esto es solo control de UI/UX (evita que el vendedor
+                IMPORTANTE: esto es solo control de UI/UX (evita que el usuario
                 vea o navegue a esas opciones por accidente). NO reemplaza la
-                validación de permisos en el backend: usuarios.html y
-                precios-personalizados.html deben seguir validando el rol contra
-                Supabase (por ejemplo con RLS policies o un chequeo de
-                profiles.role al cargar la página), ya que un usuario con
-                conocimientos técnicos podría acceder directamente a esas URLs.
+                validación de permisos en el backend: cada página restringida
+                (usuarios.html, precios-personalizados.html, ventas.html, etc.)
+                debe seguir validando el rol contra Supabase (profiles.role al
+                cargar la página) y las RLS policies deben reforzar lo mismo a
+                nivel de base de datos, ya que un usuario con conocimientos
+                técnicos podría acceder directamente a esas URLs.
             -->
             <nav class="space-y-2">
                 <a href="index.html" class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg"><i
                         class="fas fa-home w-5"></i><span class="font-medium">Dashboard</span></a>
-                <a href="ventas.html"
+                <!-- Ventas: no visible para supervisor (rol de supervisión, no de venta). -->
+                <a href="ventas.html" x-show="userRole !== 'supervisor'"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
                         class="fas fa-shopping-cart w-5"></i><span>Ventas</span></a>
                 <a href="cuentas-cobrar.html"
@@ -143,8 +149,8 @@
                 <a href="gastos.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
                         class="fas fa-receipt w-5"></i><span>Gastos</span></a>
-                <!-- Usuarios: solo visible para admin. Los vendedores no gestionan cuentas de usuario. -->
-                <a href="usuarios.html" x-show="userRole === 'admin'"
+                <!-- Usuarios: visible para admin y supervisor. Los vendedores no gestionan cuentas de usuario. -->
+                <a href="usuarios.html" x-show="userRole === 'admin' || userRole === 'supervisor'"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
                         class="fas fa-user-cog w-5"></i><span>Usuarios</span></a>
                 <a href="reportes.html"
@@ -186,8 +192,8 @@
                 </div>
             </div>
             <div class="flex items-center space-x-4">
-                <!-- Dropdown de Sucursales (SOLO ADMIN) -->
-                <div x-show="userRole === 'admin'" class="hidden md:block">
+                <!-- Dropdown de Sucursales (ADMIN y SUPERVISOR) -->
+                <div x-show="userRole === 'admin' || userRole === 'supervisor'" class="hidden md:block">
                     <select x-model="selectedBranch" @change="refreshDashboard()"
                         class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white text-sm">
                         <option value="all">🌐 Todas las Sucursales (Consolidado)</option>
@@ -525,12 +531,12 @@
                             this.userBranch = profile.branch;
                             this.userInitials = this.getInitials(profile.full_name);
 
-                            // ✅ CONSOLIDADO POR DEFECTO PARA ADMIN, SUCURSAL PARA VENDEDORES
-                            this.selectedBranch = (profile.role === 'admin') ? 'all' : profile.branch;
+                            // ✅ CONSOLIDADO POR DEFECTO PARA ADMIN Y SUPERVISOR, SUCURSAL PARA VENDEDORES
+                            this.selectedBranch = (profile.role === 'admin' || profile.role === 'supervisor') ? 'all' : profile.branch;
                         }
 
-                        // Cargar sucursales disponibles si es admin
-                        if (this.userRole === 'admin') {
+                        // Cargar sucursales disponibles si es admin o supervisor
+                        if (this.userRole === 'admin' || this.userRole === 'supervisor') {
                             await this.loadAvailableBranches();
                         }
 
