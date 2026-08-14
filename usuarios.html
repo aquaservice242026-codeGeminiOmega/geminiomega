@@ -101,7 +101,7 @@
                 <a href="index.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
                         class="fas fa-home w-5"></i><span>Dashboard</span></a>
-                <a href="ventas.html"
+                <a href="ventas.html" x-show="userRole !== 'supervisor'"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
                         class="fas fa-shopping-cart w-5"></i><span>Ventas</span></a>
                 <a href="cuentas-cobrar.html"
@@ -272,6 +272,7 @@
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">Seleccionar rol...</option>
                         <option value="admin">Administrador</option>
+                        <option value="supervisor">Supervisor</option>
                         <option value="vendedor">Vendedor</option>
                         <option value="delivery">Delivery</option>
                         <option value="cajero">Cajero</option>
@@ -399,8 +400,8 @@
                             this.userBranch = profile.branch;
                             this.userInitials = this.getInitials(profile.full_name);
 
-                            // Verificar que sea admin
-                            if (profile.role !== 'admin') {
+                            // Verificar que sea admin o supervisor
+                            if (profile.role !== 'admin' && profile.role !== 'supervisor') {
                                 notify('No tienes permisos para acceder a esta sección', 'error');
                                 setTimeout(() => {
                                     window.location.href = 'index.html';
