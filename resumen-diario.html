@@ -95,7 +95,7 @@
                     <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
                     <p class="text-xs text-blue-200 capitalize"><span
                             x-text="userRole === 'admin' ? 'Administrador' : (userRole === 'supervisor' ? 'Supervisor' : 'Vendedor')"></span>
-                        | <span x-text="userBranch"></span></p>
+                        | <span x-text="userBranch === 'all' ? 'Todas las Sucursales' : userBranch"></span></p>
                 </div>
             </div>
         </div>
@@ -116,6 +116,7 @@
                         <label class="block text-xs text-gray-600 mb-1">Sucursal</label>
                         <select x-model="userBranch" @change="loadReportData()"
                             class="px-3 py-2 border rounded-lg text-sm capitalize focus:ring-2 focus:ring-blue-500">
+                            <option value="all">Todas las Sucursales</option>
                             <option value="geminis">Geminis</option>
                             <option value="omega">Omega</option>
                         </select>
@@ -155,7 +156,8 @@
                     <i class="far fa-clock mr-1"></i>Generado: <span x-text="currentDateTime"
                         class="font-semibold"></span> (Caracas, VE) |
                     Fecha: <span x-text="formatDate(filters.date)"></span> |
-                    Sucursal: <span class="capitalize font-bold text-blue-700" x-text="userBranch"></span> |
+                    Sucursal: <span class="capitalize font-bold text-blue-700"
+                        x-text="userBranch === 'all' ? 'Todas las Sucursales' : userBranch"></span> |
                     Tasa: Bs. <span x-text="formatVE(exchangeRate)"></span>
                 </p>
             </div>
@@ -497,9 +499,15 @@
 
                     const { data: profile, error } = await supabase.from('profiles').select('branch, full_name, role').eq('id', session.user.id).single();
                     if (profile) {
-                        this.userBranch = profile.branch || 'geminis';
                         this.userName = profile.full_name || 'Usuario';
                         this.userRole = profile.role || 'vendedor';
+                        // ✅ Admin y supervisor arrancan en "Todas las Sucursales" (consolidado);
+                        // el resto queda fijo en su propia sucursal.
+                        if (this.userRole === 'admin' || this.userRole === 'supervisor') {
+                            this.userBranch = 'all';
+                        } else {
+                            this.userBranch = profile.branch || 'geminis';
+                        }
                     } else { console.error('Error cargando perfil:', error); }
 
                     // ✅ Tasa de cambio y datos del reporte en paralelo (antes eran secuenciales)
@@ -541,37 +549,48 @@
                         // fecha y filtramos por sucursal directamente, sin depender de un join
                         // anidado a credit_accounts (si esa relación no está expuesta en el
                         // schema de Supabase, la consulta fallaba completa y no mostraba nada).
-                        const [salesResult, creditPaymentsResult, expensesResult] = await Promise.all([
-                            supabase
-                                .from('sales')
-                                .select(`
-                                    id,
+                        // ✅ Cuando userBranch === 'all' (Todas las Sucursales), se omite el
+                        // .eq('branch', ...) para que cada consulta traiga las ventas/cobros/
+                        // gastos de AMBAS sucursales juntas; processSales/processCreditPayments/
+                        // processExpenses ya suman todo lo que reciben, así que el consolidado
+                        // sale solo con este cambio, sin tocar esas funciones.
+                        let salesQuery = supabase
+                            .from('sales')
+                            .select(`
+                                id,
+                                total,
+                                payment_method,
+                                delivery_type,
+                                created_at,
+                                sale_payments ( payment_method, amount_usd ),
+                                sale_items (
+                                    quantity,
                                     total,
-                                    payment_method,
-                                    delivery_type,
-                                    created_at,
-                                    sale_payments ( payment_method, amount_usd ),
-                                    sale_items (
-                                        quantity,
-                                        total,
-                                        products ( name, size_liters )
-                                    )
-                                `)
-                                .gte('created_at', startOfDay)
-                                .lte('created_at', endOfDay)
-                                .eq('branch', this.userBranch),
-                            supabase
-                                .from('credit_payments')
-                                .select('payment_method, amount, payment_date')
-                                .eq('payment_date', dateStr)
-                                .eq('branch', this.userBranch),
-                            // ✅ Total de gastos aprobados del día (misma sucursal)
-                            supabase
-                                .from('expenses')
-                                .select('amount, status, expense_date')
-                                .eq('expense_date', dateStr)
-                                .eq('branch', this.userBranch)
-                                .eq('status', 'approved')
+                                    products ( name, size_liters )
+                                )
+                            `)
+                            .gte('created_at', startOfDay)
+                            .lte('created_at', endOfDay);
+                        if (this.userBranch !== 'all') salesQuery = salesQuery.eq('branch', this.userBranch);
+
+                        let creditPaymentsQuery = supabase
+                            .from('credit_payments')
+                            .select('payment_method, amount, payment_date')
+                            .eq('payment_date', dateStr);
+                        if (this.userBranch !== 'all') creditPaymentsQuery = creditPaymentsQuery.eq('branch', this.userBranch);
+
+                        // ✅ Total de gastos aprobados del día (misma sucursal, o ambas si es 'all')
+                        let expensesQuery = supabase
+                            .from('expenses')
+                            .select('amount, status, expense_date')
+                            .eq('expense_date', dateStr)
+                            .eq('status', 'approved');
+                        if (this.userBranch !== 'all') expensesQuery = expensesQuery.eq('branch', this.userBranch);
+
+                        const [salesResult, creditPaymentsResult, expensesResult] = await Promise.all([
+                            salesQuery,
+                            creditPaymentsQuery,
+                            expensesQuery
                         ]);
 
                         if (salesResult.error) throw salesResult.error;
