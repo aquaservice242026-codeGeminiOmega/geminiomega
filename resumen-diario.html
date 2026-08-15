@@ -74,8 +74,8 @@
                 <a href="gastos.html"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
                         class="fas fa-receipt w-5"></i><span>Gastos</span></a>
-                <!-- Usuarios: solo visible para admin (mismo patrón que index.html) -->
-                <a href="usuarios.html" x-show="userRole === 'admin'"
+                <!-- Usuarios: visible para admin y supervisor (mismo patrón que index.html) -->
+                <a href="usuarios.html" x-show="userRole === 'admin' || userRole === 'supervisor'"
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition"><i
                         class="fas fa-user-cog w-5"></i><span>Usuarios</span></a>
                 <a href="reportes.html"
@@ -94,8 +94,8 @@
                 <div>
                     <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
                     <p class="text-xs text-blue-200 capitalize"><span
-                            x-text="userRole === 'admin' ? 'Administrador' : 'Vendedor'"></span> | <span
-                            x-text="userBranch"></span></p>
+                            x-text="userRole === 'admin' ? 'Administrador' : (userRole === 'supervisor' ? 'Supervisor' : 'Vendedor')"></span>
+                        | <span x-text="userBranch"></span></p>
                 </div>
             </div>
         </div>
@@ -112,7 +112,7 @@
                         <label class="block text-xs text-gray-600 mb-1">Fecha</label>
                         <input type="date" x-model="filters.date" class="px-3 py-2 border rounded-lg text-sm">
                     </div>
-                    <div x-show="userRole === 'admin'">
+                    <div x-show="userRole === 'admin' || userRole === 'supervisor'">
                         <label class="block text-xs text-gray-600 mb-1">Sucursal</label>
                         <select x-model="userBranch" @change="loadReportData()"
                             class="px-3 py-2 border rounded-lg text-sm capitalize focus:ring-2 focus:ring-blue-500">
@@ -120,7 +120,7 @@
                             <option value="omega">Omega</option>
                         </select>
                     </div>
-                    <div x-show="userRole !== 'admin'" class="flex items-end pb-2">
+                    <div x-show="userRole !== 'admin' && userRole !== 'supervisor'" class="flex items-end pb-2">
                         <span
                             class="text-xs text-gray-600 font-semibold capitalize bg-gray-100 px-3 py-2 rounded-lg border flex items-center">
                             <i class="fas fa-store mr-2 text-blue-500"></i> <span x-text="userBranch"></span>
