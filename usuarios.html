@@ -156,7 +156,7 @@
                 </div>
             </div>
             <div class="flex items-center space-x-4">
-                <button @click="openCreateModal()"
+                <button @click="openCreateModal()" x-show="userRole === 'admin'"
                     class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
                     <i class="fas fa-plus mr-2"></i>Nuevo Usuario
                 </button>
@@ -445,6 +445,10 @@
                 },
 
                 openCreateModal() {
+                    if (this.userRole !== 'admin') {
+                        notify('Solo un administrador puede crear usuarios', 'error');
+                        return;
+                    }
                     this.editingUser = null;
                     this.formData = {
                         full_name: '',
