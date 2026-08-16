@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Servicios Agua Potable - Venta de Cisternas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+        }
+
+        .gradient-bg-cisterna {
+            background: linear-gradient(135deg, #0369a1 0%, #0e7490 100%);
+        }
+
+        .toastify {
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 500 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
+            padding: 14px 20px !important;
+            min-width: 280px;
+            font-size: 14px !important;
+            color: white !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        .toastify-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        }
+
+        .toastify-error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+        }
+
+        .toastify-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+        }
+
+        .toastify-info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+        }
+
+        .product-card {
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .product-card:active {
+            transform: scale(0.97);
+        }
+
+        .touch-btn {
+            min-height: 40px;
+            min-width: 40px;
+        }
+
+        .cart-item-compact {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 10px 12px;
+        }
+
+        .animate-bounce-in {
+            animation: bounceIn 0.25s ease;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .cart-drawer {
+            transition: transform 0.25s ease;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50" x-data="cisternasApp()" x-init="initCisternas()" x-cloak>
+    <!-- Guard de carga -->
+    <div x-show="loading" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="text-center">
+            <i class="fas fa-truck-monster text-4xl text-cyan-600 animate-pulse mb-3"></i>
+            <p class="text-gray-500 text-sm">Cargando módulo de Cisternas...</p>
+        </div>
+    </div>
+
+    <!-- Sidebar (idéntico patrón al resto del sistema) -->
+    <aside class="hidden lg:block fixed left-0 top-0 h-full w-64 gradient-bg-cisterna text-white z-40">
+        <div class="p-6">
+            <div class="mb-6">
+                <div class="flex items-center space-x-3 mb-3">
+                    <i class="fas fa-truck-monster text-3xl"></i>
+                    <div>
+                        <h1 class="text-xl font-bold">Servicios Agua Potable</h1>
+                        <p class="text-xs text-cyan-100">Cisternas - Géminis</p>
+                    </div>
+                </div>
+                <div class="bg-white bg-opacity-10 rounded-lg px-3 py-2">
+                    <p class="text-xs text-cyan-100 mb-0.5">Sucursal</p>
+                    <p class="font-semibold capitalize text-sm" x-text="userBranch || 'Cargando...'"></p>
+                </div>
+            </div>
+            <nav class="space-y-2">
+                <a href="index.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-home w-5"></i><span>Dashboard</span>
+                </a>
+                <a href="ventas.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-shopping-cart w-5"></i><span>Ventas (Botellones)</span>
+                </a>
+                <a href="ventas-cisternas.html"
+                    class="flex items-center space-x-3 px-4 py-3 bg-white bg-opacity-20 rounded-lg">
+                    <i class="fas fa-truck-monster w-5"></i><span class="font-medium">Cisternas</span>
+                </a>
+                <a href="cuentas-cobrar.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-file-invoice-dollar w-5"></i><span>Cuentas por Cobrar</span>
+                </a>
+                <a href="clientes.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-users w-5"></i><span>Clientes</span>
+                </a>
+                <a href="reportes.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
+                </a>
+                <a href="resumen-diario.html"
+                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
+                    <i class="fas fa-file-alt w-5"></i><span>Resumen Diario</span>
+                </a>
+            </nav>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center font-bold"
+                    x-text="userInitials"></div>
+                <div>
+                    <p class="text-sm font-medium" x-text="userName || 'Usuario'"></p>
+                    <p class="text-xs text-cyan-100 capitalize" x-text="userRole || 'Cargando...'"></p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="lg:ml-64 min-h-screen">
+        <!-- Header Desktop -->
+        <header class="hidden lg:block bg-white shadow-sm border-b px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Venta de Cisternas</h2>
+                    <p class="text-sm text-gray-500">Despacho de cisternas de agua potable - Sucursal Géminis</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="bg-blue-50 px-4 py-2 rounded-lg flex items-center space-x-2">
+                        <span class="text-sm text-gray-600">Tasa USD:</span>
+                        <input type="number" x-model.number="exchangeRate" step="0.01"
+                            class="w-24 px-2 py-1 text-sm font-bold text-blue-600 bg-transparent border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-center"
+                            @change="exchangeRate = ensureValidRate(exchangeRate)">
+                    </div>
+                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Salir
+                    </button>
+                </div>
+            </div>
+        </header>
+        <!-- Header Móvil -->
+        <header class="lg:hidden bg-white shadow-sm border-b sticky top-0 z-20">
+            <div class="px-3 py-2 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <button @click="window.location.href='index.html'"
+                        class="touch-btn text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-arrow-left text-xl"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-truck-monster text-cyan-600 text-xl"></i>
+                        <div>
+                            <h1 class="text-base font-bold text-gray-800 leading-tight">Cisternas</h1>
+                            <span
+                                class="inline-block px-2 py-0.5 rounded text-[10px] font-bold text-white bg-cyan-700 capitalize"
+                                x-text="userBranch || '...'"></span>
+                        </div>
+                    </div>
+                </div>
+                <button @click="cartOpen = true" class="relative touch-btn text-gray-600 hover:text-gray-800 p-1">
+                    <i class="fas fa-shopping-cart text-xl"></i>
+                    <span x-show="cartItemCount > 0"
+                        class="absolute -top-1 -right-1 bg-cyan-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold"
+                        x-text="cartItemCount"></span>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex">
+            <!-- Área principal: catálogo -->
+            <main class="flex-1 p-3 lg:p-6">
+                <div class="mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h2 class="text-sm font-semibold text-gray-700">Presentaciones de Cisterna</h2>
+                        <span class="text-xs text-gray-500" x-text="products.length + ' presentaciones'"></span>
+                    </div>
+                    <div x-show="!loading && products.length === 0" class="text-center py-8 text-gray-400">
+                        <i class="fas fa-box-open text-4xl mb-2"></i>
+                        <p class="text-sm">No hay presentaciones de cisterna configuradas</p>
+                    </div>
+                    <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
+                        <template x-for="product in products" :key="product.id">
+                            <button @click="addProduct(product)"
+                                class="product-card rounded-xl text-white p-4 lg:p-6 relative overflow-hidden bg-gradient-to-br from-sky-500 to-cyan-700">
+                                <i class="fas fa-truck-monster text-2xl opacity-30 absolute top-2 right-2"></i>
+                                <p class="text-xs opacity-90 mb-1">Cisterna</p>
+                                <p class="text-2xl lg:text-3xl font-bold"
+                                    x-text="product.size_liters.toLocaleString('es-VE') + 'L'"></p>
+                                <p class="text-sm font-semibold mt-2">$<span x-text="product.price.toFixed(2)"></span>
+                                </p>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Carrito (solo visible en desktop, aquí; en móvil se abre como drawer) -->
+                <div class="mt-6 lg:hidden" x-show="cart.length > 0">
+                    <p class="text-xs text-gray-500 text-center">
+                        <i class="fas fa-arrow-up mr-1"></i>Toca el carrito arriba para completar la venta
+                    </p>
+                </div>
+            </main>
+
+            <!-- Panel de Carrito + Checkout: fijo en desktop, drawer en móvil -->
+            <aside class="cart-drawer fixed inset-y-0 right-0 w-full sm:w-96 bg-white border-l z-30 overflow-y-auto
+                          lg:static lg:translate-x-0 lg:w-96 lg:block lg:max-h-screen lg:sticky lg:top-0"
+                :class="cartOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'">
+                <div class="p-4 lg:p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                            <i class="fas fa-shopping-cart text-cyan-600 mr-2"></i>
+                            Venta
+                            <span x-show="cartItemCount > 0"
+                                class="ml-2 bg-cyan-600 text-white rounded-full px-2 py-0.5 text-xs font-bold"
+                                x-text="cartItemCount"></span>
+                        </h3>
+                        <button @click="cartOpen = false" class="lg:hidden touch-btn text-gray-500">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <!-- Items del carrito -->
+                    <div class="space-y-2 mb-4">
+                        <template x-for="(item, index) in cart" :key="index">
+                            <div class="animate-bounce-in cart-item-compact rounded-xl">
+                                <div class="flex items-center justify-between mb-1">
+                                    <h4 class="font-semibold text-gray-800 text-sm" x-text="item.name"></h4>
+                                    <button @click="removeFromCart(index)"
+                                        class="text-red-500 hover:text-red-700 touch-btn p-1">
+                                        <i class="fas fa-trash text-sm"></i>
+                                    </button>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-1">
+                                        <button @click="updateQuantity(index, -1)"
+                                            class="touch-btn w-7 h-7 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400">
+                                            <i class="fas fa-minus text-xs"></i>
+                                        </button>
+                                        <span class="font-bold text-base w-6 text-center text-gray-800"
+                                            x-text="item.quantity"></span>
+                                        <button @click="updateQuantity(index, 1)"
+                                            class="touch-btn w-7 h-7 bg-cyan-600 text-white rounded-full flex items-center justify-center hover:bg-cyan-700">
+                                            <i class="fas fa-plus text-xs"></i>
+                                        </button>
+                                    </div>
+                                    <p class="font-bold text-cyan-700 text-sm"
+                                        x-text="'$' + (item.price * item.quantity).toFixed(2)"></p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <div x-show="cart.length === 0" class="text-center py-8 text-gray-400">
+                        <i class="fas fa-shopping-cart text-4xl mb-2"></i>
+                        <p class="text-sm">Carrito vacío</p>
+                    </div>
+
+                    <template x-if="cart.length > 0">
+                        <div class="border-t pt-4 space-y-4">
+                            <!-- Total -->
+                            <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-3 border border-blue-200">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-semibold text-gray-700">Total:</span>
+                                    <span class="text-xl font-bold text-blue-600">$<span
+                                            x-text="totalUSD.toFixed(2)"></span></span>
+                                </div>
+                                <div class="flex justify-between items-center text-xs text-gray-500 mt-1">
+                                    <span>Bs. <span x-text="totalBs.toFixed(2)"></span></span>
+                                    <span>Tasa: <span x-text="exchangeRate.toFixed(2)"></span></span>
+                                </div>
+                            </div>
+
+                            <!-- Cliente -->
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Cliente</label>
+                                <div class="flex space-x-2">
+                                    <select x-model="selectedCustomer"
+                                        class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-cyan-500">
+                                        <option value="">Sin registrar</option>
+                                        <template x-for="c in customers" :key="c.id">
+                                            <option :value="c.id" x-text="c.full_name"></option>
+                                        </template>
+                                    </select>
+                                    <button @click="showCustomerModal = true"
+                                        class="touch-btn px-3 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Entrega -->
+                            <div>
+                                <label class="flex items-center space-x-2 text-xs font-medium text-gray-700 mb-1">
+                                    <input type="checkbox" x-model="isDelivery" class="rounded">
+                                    <span>Con entrega (usualmente sin costo)</span>
+                                </label>
+                                <textarea x-show="isDelivery" x-model="deliveryAddress"
+                                    @input="deliveryAddress = deliveryAddress.toUpperCase()"
+                                    placeholder="Dirección de entrega"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-cyan-500"
+                                    rows="2"></textarea>
+                            </div>
+
+                            <!-- Método de pago -->
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Método de Pago</label>
+                                <select x-model="paymentMethod"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-cyan-500">
+                                    <option value="efectivo_bs">Efectivo Bs</option>
+                                    <option value="efectivo_divisas">Efectivo Divisas (USD)</option>
+                                    <option value="pago_movil">Pago Móvil</option>
+                                    <option value="transferencia">Transferencia</option>
+                                    <option value="punto_venta">Punto de Venta</option>
+                                    <option value="credito">Crédito</option>
+                                </select>
+                            </div>
+
+                            <div x-show="['pago_movil', 'transferencia'].includes(paymentMethod)" class="mt-1">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Referencia</label>
+                                <input type="text" x-model="paymentReference" maxlength="20"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-cyan-500">
+                            </div>
+
+                            <div x-show="paymentMethod === 'efectivo_bs'" class="p-3 bg-green-50 rounded-lg">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Monto Recibido (Bs.)</label>
+                                <input type="number" x-model.number="amountReceivedBs" step="0.01"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+                            </div>
+                            <div x-show="paymentMethod === 'efectivo_divisas'" class="p-3 bg-green-50 rounded-lg">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Monto Recibido (USD)</label>
+                                <input type="number" x-model.number="amountReceivedUsd" step="0.01"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+                            </div>
+
+                            <!-- Bloque de crédito -->
+                            <div x-show="paymentMethod === 'credito'" class="p-3 bg-red-50 rounded-lg space-y-2">
+                                <p class="text-xs text-red-700 font-semibold"><i
+                                        class="fas fa-info-circle mr-1"></i>Requiere cliente registrado con cédula</p>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Cédula del Cliente
+                                        *</label>
+                                    <input type="text" x-model="creditForm.customer_id_card"
+                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Fecha de Pago *</label>
+                                    <input type="date" x-model="creditForm.payment_date"
+                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Pago Inicial
+                                        (USD)</label>
+                                    <input type="number" x-model.number="creditForm.initial_payment" step="0.01" min="0"
+                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+                                </div>
+                            </div>
+
+                            <button @click="processSale()"
+                                :disabled="processing || (paymentMethod === 'credito' && !canProcessCredit())"
+                                class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 text-white py-3 rounded-xl font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 touch-btn">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                <span x-text="processing ? 'Procesando...' : 'Confirmar Venta'"></span>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </aside>
+            <!-- Fondo oscuro al abrir carrito en móvil -->
+            <div x-show="cartOpen" @click="cartOpen = false"
+                class="lg:hidden fixed inset-0 bg-black bg-opacity-40 z-20"></div>
+        </div>
+    </div>
+
+    <!-- Modal: Nuevo Cliente de Cisternas -->
+    <div x-show="showCustomerModal" x-cloak
+        class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md space-y-3" @click.outside="showCustomerModal = false">
+            <h3 class="text-lg font-bold text-gray-800">Nuevo Cliente (Cisternas)</h3>
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Nombre / Razón Social *</label>
+                <input type="text" x-model="newCustomer.full_name" placeholder="Ej: CONDOMINIO RESIDENCIAS DEL MAR"
+                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Tipo de Cliente</label>
+                <select x-model="newCustomer.tipo"
+                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50">
+                    <option value="condominio">Condominio</option>
+                    <option value="negocio">Negocio</option>
+                    <option value="finca">Finca</option>
+                    <option value="galpon">Galpón</option>
+                    <option value="particular">Particular</option>
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Cédula / RIF</label>
+                    <input type="text" x-model="newCustomer.cedula"
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Teléfono</label>
+                    <input type="text" x-model="newCustomer.phone"
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Dirección</label>
+                <textarea x-model="newCustomer.address"
+                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50" rows="2"></textarea>
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button @click="showCustomerModal = false"
+                    class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold">Cancelar</button>
+                <button @click="saveCustomer()" :disabled="savingCustomer"
+                    class="flex-1 px-4 py-2 bg-cyan-600 text-white rounded-lg font-semibold disabled:opacity-50">
+                    <span x-text="savingCustomer ? 'Guardando...' : 'Guardar'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://wotoslngwrsddohowkba.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdG9zbG5nd3JzZGRvaG93a2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMDk5MTksImV4cCI6MjA5ODc4NTkxOX0.zvce9AmOBwPxmtOikfyT0FdbyGF0Szec-AZfTiYqzBs';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ✅ Mismas utilidades que ventas.html (copiadas, no importadas, para no depender de ese archivo)
+        async function logout() {
+            await supabase.auth.signOut();
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        function showToast(message, type = 'success') {
+            const gradients = {
+                success: 'linear-gradient(to right, #10b981, #059669)',
+                error: 'linear-gradient(to right, #ef4444, #dc2626)',
+                warning: 'linear-gradient(to right, #f59e0b, #d97706)',
+                info: 'linear-gradient(to right, #3b82f6, #2563eb)'
+            };
+            const icons = { success: '✓', error: '✗', warning: '⚠', info: 'ℹ' };
+            Toastify({
+                text: `${icons[type]} ${message}`,
+                duration: 3000,
+                close: true,
+                gravity: 'top',
+                position: 'right',
+                stopOnFocus: true,
+                style: {
+                    background: gradients[type],
+                    borderRadius: '12px',
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: '500',
+                    fontSize: '14px',
+                    padding: '14px 20px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
+                    minWidth: '280px'
+                }
+            }).showToast();
+        }
+
+        function round2(num) {
+            if (num === null || num === undefined || isNaN(num)) return 0;
+            return Math.round((parseFloat(num) + Number.EPSILON) * 100) / 100;
+        }
+
+        function ensureValidRate(rate) {
+            const parsed = parseFloat(rate);
+            if (isNaN(parsed) || parsed <= 0) return 700.22;
+            return round2(parsed);
+        }
+
+        // ✅ Misma función de fecha de Caracas usada en ventas.html / cuentas-cobrar.html
+        function getCaracasDate() {
+            const now = new Date();
+            return new Date(now.toLocaleString('en-US', { timeZone: 'America/Caracas' }));
+        }
+
+        function getInitials(name) {
+            if (!name) return '??';
+            const parts = name.trim().split(/\s+/);
+            return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase();
+        }
+
+        function cisternasApp() {
+            return {
+                loading: true,
+                processing: false,
+                savingCustomer: false,
+                cartOpen: false,
+                showCustomerModal: false,
+                cart: [],
+                products: [],
+                customers: [],
+                selectedCustomer: '',
+                isDelivery: true,
+                deliveryAddress: '',
+                paymentMethod: 'efectivo_bs',
+                paymentReference: '',
+                amountReceivedBs: 0,
+                amountReceivedUsd: 0,
+                exchangeRate: 700.22,
+                userName: '',
+                userRole: '',
+                userBranch: '',
+                userInitials: '??',
+                newCustomer: { full_name: '', tipo: 'condominio', cedula: '', phone: '', address: '' },
+                creditForm: { customer_id_card: '', payment_date: '', initial_payment: 0 },
+
+                get subtotal() {
+                    return round2(this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0));
+                },
+                get totalUSD() {
+                    return this.subtotal;
+                },
+                get totalBs() {
+                    return round2(this.totalUSD * ensureValidRate(this.exchangeRate));
+                },
+                get cartItemCount() {
+                    return this.cart.reduce((sum, item) => sum + item.quantity, 0);
+                },
+
+                round2, ensureValidRate,
+
+                async initCisternas() {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (!session) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    try {
+                        const { data: profile } = await supabase.from('profiles')
+                            .select('full_name, role, branch').eq('id', session.user.id).single();
+                        if (profile) {
+                            this.userName = profile.full_name;
+                            this.userRole = profile.role;
+                            this.userBranch = profile.branch;
+                            this.userInitials = getInitials(profile.full_name);
+                        }
+                    } catch (err) {
+                        console.error('Error obteniendo perfil:', err);
+                    }
+                    // ✅ Solo el usuario de la sucursal Géminis puede acceder a este módulo
+                    if (this.userBranch !== 'geminis') {
+                        showToast('No tienes acceso a este módulo', 'error');
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                    await Promise.all([
+                        this.loadExchangeRate(),
+                        this.loadProducts(),
+                        this.loadCustomers()
+                    ]);
+                    this.loading = false;
+                },
+
+                async loadExchangeRate() {
+                    try {
+                        const { data, error } = await supabase.rpc('get_active_exchange_rate');
+                        this.exchangeRate = (!error && data) ? ensureValidRate(data) : 700.22;
+                    } catch (err) {
+                        console.error('Error cargando tasa:', err);
+                        this.exchangeRate = 700.22;
+                    }
+                },
+
+                // ✅ Carga directa: catálogo + precio de Géminis para product_type = 'cisterna'.
+                // No usa el RPC de inventario virtual porque cisternas no maneja stock.
+                async loadProducts() {
+                    try {
+                        const { data: productsData, error: productsError } = await supabase
+                            .from('products')
+                            .select('id, name, size_liters')
+                            .eq('product_type', 'cisterna')
+                            .eq('is_active', true)
+                            .order('size_liters');
+                        if (productsError) throw productsError;
+
+                        const { data: pricesData, error: pricesError } = await supabase
+                            .from('product_prices')
+                            .select('product_id, price_usd')
+                            .eq('branch', this.userBranch)
+                            .eq('is_active', true);
+                        if (pricesError) throw pricesError;
+
+                        const priceMap = {};
+                        (pricesData || []).forEach(p => { priceMap[p.product_id] = p.price_usd; });
+
+                        this.products = (productsData || []).map(p => ({
+                            id: p.id,
+                            name: p.name,
+                            size_liters: p.size_liters,
+                            price: round2(parseFloat(priceMap[p.id]) || 0)
+                        }));
+                    } catch (err) {
+                        console.error('Error cargando productos de cisterna:', err);
+                        showToast('Error al cargar presentaciones de cisterna', 'error');
+                        this.products = [];
+                    }
+                },
+
+                // ✅ Solo clientes con customer_type = 'cisterna' (distintos a los de botellones)
+                async loadCustomers() {
+                    try {
+                        const { data, error } = await supabase
+                            .from('customers')
+                            .select('id, full_name, phone, cedula, address')
+                            .eq('branch', this.userBranch)
+                            .eq('customer_type', 'cisterna')
+                            .eq('is_active', true)
+                            .order('full_name');
+                        if (error) throw error;
+                        this.customers = data || [];
+                    } catch (err) {
+                        console.error('Error cargando clientes de cisterna:', err);
+                        this.customers = [];
+                    }
+                },
+
+                addProduct(product) {
+                    const existing = this.cart.find(item => item.product_id === product.id);
+                    if (existing) {
+                        existing.quantity++;
+                    } else {
+                        this.cart.push({
+                            product_id: product.id,
+                            name: product.name,
+                            size_liters: product.size_liters,
+                            price: product.price,
+                            quantity: 1
+                        });
+                    }
+                    if (window.innerWidth < 1024) this.cartOpen = true;
+                },
+
+                updateQuantity(index, delta) {
+                    const item = this.cart[index];
+                    item.quantity += delta;
+                    if (item.quantity <= 0) this.cart.splice(index, 1);
+                },
+
+                removeFromCart(index) {
+                    this.cart.splice(index, 1);
+                },
+
+                async saveCustomer() {
+                    if (!this.newCustomer.full_name || !this.newCustomer.full_name.trim()) {
+                        showToast('El nombre es obligatorio', 'error');
+                        return;
+                    }
+                    this.savingCustomer = true;
+                    try {
+                        const { data, error } = await supabase.from('customers').insert({
+                            full_name: this.newCustomer.full_name.toUpperCase(),
+                            cedula: this.newCustomer.cedula ? this.newCustomer.cedula.toUpperCase() : null,
+                            phone: this.newCustomer.phone || null,
+                            address: this.newCustomer.address ? this.newCustomer.address.toUpperCase() : null,
+                            notes: 'Tipo: ' + this.newCustomer.tipo,
+                            branch: this.userBranch,
+                            customer_type: 'cisterna'
+                        }).select().single();
+                        if (error) throw error;
+                        showToast('Cliente creado', 'success');
+                        this.customers.push(data);
+                        this.selectedCustomer = data.id;
+                        this.showCustomerModal = false;
+                        this.newCustomer = { full_name: '', tipo: 'condominio', cedula: '', phone: '', address: '' };
+                    } catch (err) {
+                        console.error('Error creando cliente:', err);
+                        showToast('Error al crear cliente: ' + err.message, 'error');
+                    } finally {
+                        this.savingCustomer = false;
+                    }
+                },
+
+                canProcessCredit() {
+                    if (this.cart.length === 0) return false;
+                    if (!this.creditForm.customer_id_card || !this.creditForm.customer_id_card.trim()) return false;
+                    if (!this.creditForm.payment_date) return false;
+                    if (this.creditForm.initial_payment > this.totalUSD) return false;
+                    return true;
+                },
+
+                // ✅ Un solo flujo para contado y crédito (a diferencia de ventas.html,
+                // aquí no hace falta separar processSale/processCreditSale porque no
+                // hay lógica de inventario/tanques/tapas que complicar).
+                async processSale() {
+                    this.exchangeRate = ensureValidRate(this.exchangeRate);
+                    if (this.cart.length === 0) {
+                        showToast('El carrito está vacío', 'error');
+                        return;
+                    }
+                    if (this.isDelivery && (!this.deliveryAddress || !this.deliveryAddress.trim())) {
+                        showToast('Debe ingresar la dirección de entrega', 'error');
+                        return;
+                    }
+                    const esCredito = this.paymentMethod === 'credito';
+                    if (esCredito && !this.canProcessCredit()) {
+                        showToast('Complete los campos obligatorios de crédito', 'error');
+                        return;
+                    }
+                    if (!esCredito) {
+                        if (['pago_movil', 'transferencia'].includes(this.paymentMethod) && !this.paymentReference) {
+                            showToast('Debe ingresar la referencia', 'error');
+                            return;
+                        }
+                        if (this.paymentMethod === 'efectivo_bs' && round2(this.amountReceivedBs) < this.totalBs) {
+                            showToast('Monto recibido insuficiente', 'error');
+                            return;
+                        }
+                        if (this.paymentMethod === 'efectivo_divisas' && round2(this.amountReceivedUsd) < this.totalUSD) {
+                            showToast('Monto recibido insuficiente', 'error');
+                            return;
+                        }
+                    }
+
+                    const customer = this.customers.find(c => c.id === this.selectedCustomer);
+                    const creditAmount = esCredito ? round2(this.totalUSD - (this.creditForm.initial_payment || 0)) : 0;
+
+                    this.processing = true;
+                    try {
+                        const { data: { session } } = await supabase.auth.getSession();
+                        const caracasDate = getCaracasDate();
+                        const rateDateStr = caracasDate.toISOString().split('T')[0];
+
+                        const { data: sale, error: saleError } = await supabase.from('sales').insert({
+                            branch: this.userBranch,
+                            customer_id: this.selectedCustomer || null,
+                            customer_name: customer?.full_name || 'Cliente no registrado',
+                            subtotal: this.subtotal,
+                            tax: 0,
+                            total: this.totalUSD,
+                            payment_method: esCredito ? 'credito' : this.paymentMethod,
+                            payment_reference: !esCredito ? (this.paymentReference || null) : null,
+                            status: esCredito ? (creditAmount > 0 ? 'pending' : 'completed') : 'completed',
+                            notes: esCredito ? `Crédito Cisterna - Pago inicial: $${round2(this.creditForm.initial_payment).toFixed(2)}` : null,
+                            exchange_rate_used: this.exchangeRate,
+                            rate_date: rateDateStr,
+                            amount_received: this.paymentMethod === 'efectivo_bs' ? this.amountReceivedBs :
+                                (this.paymentMethod === 'efectivo_divisas' ? this.amountReceivedUsd : null),
+                            is_delivery: this.isDelivery,
+                            delivery_address: this.isDelivery ? this.deliveryAddress : null,
+                            delivery_cost: 0,
+                            delivery_type: this.isDelivery ? 'delivery' : 'pickup',
+                            created_by: session.user.id
+                        }).select().single();
+                        if (saleError) throw saleError;
+
+                        const saleItems = this.cart.map(item => ({
+                            sale_id: sale.id,
+                            product_id: item.product_id,
+                            quantity: item.quantity,
+                            unit_price: item.price,
+                            total: round2(item.price * item.quantity)
+                        }));
+                        const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
+                        if (itemsError) throw itemsError;
+
+                        if (!esCredito) {
+                            const { error: paymentError } = await supabase.from('sale_payments').insert({
+                                sale_id: sale.id,
+                                payment_method: this.paymentMethod,
+                                amount_usd: this.totalUSD
+                            });
+                            if (paymentError) throw paymentError;
+                        } else {
+                            const { error: creditError } = await supabase.from('credit_accounts').insert({
+                                sale_id: sale.id,
+                                customer_id: this.selectedCustomer,
+                                customer_name: customer?.full_name,
+                                customer_phone: customer?.phone,
+                                customer_id_card: this.creditForm.customer_id_card,
+                                total_amount: this.totalUSD,
+                                paid_amount: round2(this.creditForm.initial_payment || 0),
+                                remaining_amount: creditAmount,
+                                payment_date: this.creditForm.payment_date,
+                                payment_terms: 'Cisterna',
+                                notes: 'Venta de cisterna a crédito',
+                                status: this.creditForm.initial_payment > 0 ? 'partial' : 'pending',
+                                created_by: session.user.id,
+                                branch: this.userBranch
+                            });
+                            if (creditError) throw creditError;
+
+                            if (this.creditForm.initial_payment > 0) {
+                                const { data: creditAccount } = await supabase.from('credit_accounts')
+                                    .select('id').eq('sale_id', sale.id).single();
+                                if (creditAccount) {
+                                    await supabase.from('credit_payments').insert({
+                                        credit_account_id: creditAccount.id,
+                                        amount: round2(this.creditForm.initial_payment),
+                                        payment_method: 'efectivo',
+                                        notes: 'Pago inicial - Cisterna',
+                                        created_by: session.user.id,
+                                        payment_date: getCaracasDate().toISOString().split('T')[0]
+                                    });
+                                }
+                            }
+                        }
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Venta de Cisterna Registrada!',
+                            html: `<div class="text-center"><p class="text-2xl font-bold text-cyan-700">$${this.totalUSD.toFixed(2)}</p></div>`,
+                            timer: 2500,
+                            showConfirmButton: false
+                        });
+
+                        this.cart = [];
+                        this.selectedCustomer = '';
+                        this.deliveryAddress = '';
+                        this.isDelivery = true;
+                        this.paymentReference = '';
+                        this.amountReceivedBs = 0;
+                        this.amountReceivedUsd = 0;
+                        this.creditForm = { customer_id_card: '', payment_date: '', initial_payment: 0 };
+                        this.cartOpen = false;
+                    } catch (err) {
+                        console.error('Error:', err);
+                        Swal.fire({ icon: 'error', title: 'Error al Procesar Venta', text: err.message, confirmButtonText: 'Entendido' });
+                    } finally {
+                        this.processing = false;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
