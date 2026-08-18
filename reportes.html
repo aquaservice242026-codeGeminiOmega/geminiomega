@@ -1459,6 +1459,26 @@
             return { data, error: firstError };
         }
 
+        // ✅ Fix: por defecto Supabase/PostgREST corta cualquier respuesta en 1000 filas sin
+        // avisar (no da error). El resumen de un solo día casi nunca llega a esa cantidad,
+        // pero al consolidar sucursales en un rango de fechas amplio es fácil superarlo, y la
+        // suma queda por debajo de la realidad de forma silenciosa. Esta función pagina una
+        // consulta YA CONSTRUIDA (con sus filtros/orden aplicados) usando .range() hasta traer
+        // todas las filas, sin tocar la tabla, los filtros ni la conexión a la base de datos.
+        async function fetchAllRows(query, pageSize = 1000) {
+            let from = 0;
+            let allData = [];
+            while (true) {
+                const { data, error } = await query.range(from, from + pageSize - 1);
+                if (error) return { data: allData, error };
+                if (!data || data.length === 0) break;
+                allData = allData.concat(data);
+                if (data.length < pageSize) break;
+                from += pageSize;
+            }
+            return { data: allData, error: null };
+        }
+
         function formatCurrency(num) {
             return round2(num).toLocaleString('es-VE', {
                 style: 'currency',
@@ -1547,6 +1567,11 @@
             return {
                 loading: true,
                 processing: false,
+                // ✅ Fix: id de la última petición de generateReport() disparada. Cada llamada
+                // se compara contra este valor antes de pintar sus resultados, para que si dos
+                // peticiones se solapan (cambio rápido de filtros) siempre gane la más reciente
+                // pedida y no la que por azar de la red termine resolviendo primero.
+                _latestReportRequestId: 0,
                 compactMode: false,
                 userBranch: '',
                 userName: '',
@@ -1795,40 +1820,50 @@
                 },
 
                 async generateReport() {
+                    // ✅ Fix: id único de esta petición. Se pasa a cada generate*Report() para que,
+                    // justo antes de pintar sus resultados, pueda comprobar si sigue siendo la
+                    // última petición pedida (this._latestReportRequestId) y descartarse en
+                    // silencio si el usuario ya cambió de filtro mientras tanto.
+                    const requestId = ++this._latestReportRequestId;
                     this.loading = true;
                     try {
                         switch (this.reportType) {
                             case 'ventas':
-                                await this.generateSalesReport();
+                                await this.generateSalesReport(requestId);
                                 break;
                             case 'ventas_producto':
-                                await this.generateSalesByProductReport();
+                                await this.generateSalesByProductReport(requestId);
                                 break;
                             case 'ventas_metodo':
-                                await this.generateSalesByPaymentMethodReport();
+                                await this.generateSalesByPaymentMethodReport(requestId);
                                 break;
                             case 'clientes':
-                                await this.generateClientsReport();
+                                await this.generateClientsReport(requestId);
                                 break;
                             case 'inventario':
-                                await this.generateInventoryReport();
+                                await this.generateInventoryReport(requestId);
                                 break;
                             case 'cuentas':
-                                await this.generateAccountsReport();
+                                await this.generateAccountsReport(requestId);
                                 break;
                             case 'resumen':
-                                await this.generateDailyReport();
+                                await this.generateDailyReport(requestId);
                                 break;
                             case 'deliverys':
-                                await this.generateDeliveryReport();
+                                await this.generateDeliveryReport(requestId);
                                 break;
                         }
+                        // ✅ Si mientras esta petición estaba en vuelo se disparó otra más nueva,
+                        // no pintamos gráficas con datos ya obsoletos.
+                        if (requestId !== this._latestReportRequestId) return;
                         this.initCharts();
                     } catch (err) {
                         console.error('Error generando reporte:', err);
                         showToast('Error al generar reporte: ' + (err.message || ''), 'error');
                     } finally {
-                        this.loading = false;
+                        // ✅ Solo la petición más reciente puede apagar el loader; si una petición
+                        // vieja termina después, no debe ocultar el estado de carga de la nueva.
+                        if (requestId === this._latestReportRequestId) this.loading = false;
                     }
                 },
 
@@ -1839,7 +1874,7 @@
                     return this.endDate + 'T23:59:59-04:00';
                 },
 
-                async generateSalesReport() {
+                async generateSalesReport(requestId) {
                     let query = supabase
                         .from('sales')
                         .select('*')
@@ -1850,7 +1885,9 @@
                     if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
                     if (this.paymentMethod) query = query.eq('payment_method', this.paymentMethod);
 
-                    const { data: sales, error } = await query;
+                    // ✅ Fix: paginado con fetchAllRows para no perder ventas si el rango
+                    // consolidado supera las 1000 filas del límite por defecto de PostgREST.
+                    const { data: sales, error } = await fetchAllRows(query);
                     if (error) throw error;
                     const salesList = sales || [];
                     const saleIds = salesList.map(s => s.id);
@@ -1875,12 +1912,17 @@
                         supabase.from('products').select('id, name, size_liters'),
                         custQuery,
                         invQuery,
-                        credQuery
+                        fetchAllRows(credQuery) // ✅ Fix: paginado, cuentas por cobrar también puede superar 1000 filas
                     ]);
 
                     if (itemsResult.error) throw itemsResult.error;
                     const items = itemsResult.data || [];
                     const productsData = productsResult.data || [];
+
+                    // ✅ Fix: si mientras se esperaban estas consultas el usuario cambió de fecha o
+                    // tipo de reporte, esta ya no es la última petición pedida: no pintamos datos
+                    // obsoletos encima de un filtro más reciente.
+                    if (requestId !== this._latestReportRequestId) return;
 
                     const productMap = {};
                     const productSizeMap = {};
@@ -1924,7 +1966,7 @@
                 },
 
                 // Reporte de Ventas por Producto
-                async generateSalesByProductReport() {
+                async generateSalesByProductReport(requestId) {
                     let query = supabase
                         .from('sales')
                         .select('*')
@@ -1934,7 +1976,8 @@
                     if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
                     if (this.paymentMethod) query = query.eq('payment_method', this.paymentMethod);
 
-                    const { data: sales, error } = await query;
+                    // ✅ Fix: paginado con fetchAllRows para no perder ventas al superar 1000 filas.
+                    const { data: sales, error } = await fetchAllRows(query);
                     if (error) throw error;
                     const salesList = sales || [];
                     const saleIds = salesList.map(s => s.id);
@@ -1947,6 +1990,9 @@
                     if (itemsResult.error) throw itemsResult.error;
                     const items = itemsResult.data || [];
                     const productsData = productsResult.data || [];
+
+                    // ✅ Fix: descartar resultados obsoletos si ya se pidió otro reporte/filtro.
+                    if (requestId !== this._latestReportRequestId) return;
 
                     const productMap = {};
                     productsData.forEach(p => {
@@ -1973,7 +2019,7 @@
                 },
 
                 // Reporte de Ventas por Método de Pago
-                async generateSalesByPaymentMethodReport() {
+                async generateSalesByPaymentMethodReport(requestId) {
                     let query = supabase
                         .from('sales')
                         .select('*')
@@ -1984,8 +2030,11 @@
                     // ✅ Ahora sí respeta el filtro de Método de Pago (antes lo ignoraba en este reporte)
                     if (this.paymentMethod) query = query.eq('payment_method', this.paymentMethod);
 
-                    const { data: sales, error } = await query;
+                    // ✅ Fix: paginado con fetchAllRows para no perder ventas al superar 1000 filas.
+                    const { data: sales, error } = await fetchAllRows(query);
                     if (error) throw error;
+                    // ✅ Fix: descartar resultados obsoletos si ya se pidió otro reporte/filtro.
+                    if (requestId !== this._latestReportRequestId) return;
                     const salesList = sales || [];
 
                     // Agrupar por método de pago
@@ -2007,7 +2056,7 @@
                     this.totalSales = round2(rawSalesTotalUSD * this.exchangeRate);
                 },
 
-                async generateClientsReport() {
+                async generateClientsReport(requestId) {
                     let query = supabase.from('customers').select('*').order('full_name');
                     if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
 
@@ -2026,10 +2075,13 @@
                     if (this.selectedBranch) newCustQuery = newCustQuery.eq('branch', this.selectedBranch);
 
                     // ✅ Clientes, sus compras y clientes nuevos en paralelo (consultas independientes)
+                    // ✅ Fix: cada una paginada con fetchAllRows para no perder filas al superar 1000.
                     const [{ data: customers, error }, { data: salesForClients }, { data: newCustomers, error: newCustError }] =
-                        await Promise.all([query, salesQuery, newCustQuery]);
+                        await Promise.all([fetchAllRows(query), fetchAllRows(salesQuery), fetchAllRows(newCustQuery)]);
                     if (error) throw error;
                     if (newCustError) throw newCustError;
+                    // ✅ Fix: descartar resultados obsoletos si ya se pidió otro reporte/filtro.
+                    if (requestId !== this._latestReportRequestId) return;
                     const customersList = customers || [];
 
                     const spentMap = {};
@@ -2089,7 +2141,7 @@
 
                     // ✅ NUEVO: clientes inactivos / riesgo de churn (independiente del rango de fechas
                     // del reporte, ya que el churn se mide siempre contra la fecha actual)
-                    await this.generateChurnReport();
+                    await this.generateChurnReport(requestId);
                 },
 
                 // ✅ NUEVO: Clientes inactivos / riesgo de churn.
@@ -2103,13 +2155,15 @@
                 // función aplique LIMIT en la propia consulta SQL (ver explicación de rendimiento).
                 // Aislado en su propio try/catch: si la función RPC aún no existe en Supabase,
                 // no rompe el resto del reporte de Clientes.
-                async generateChurnReport() {
+                async generateChurnReport(requestId) {
                     try {
                         const { data, error } = await supabase.rpc('get_churn_customers_report', {
                             branch_param: this.selectedBranch || null,
                             limit_count: this.churnLimit || 35
                         });
                         if (error) throw error;
+                        // ✅ Fix: descartar resultados obsoletos si ya se pidió otro reporte/filtro.
+                        if (requestId !== undefined && requestId !== this._latestReportRequestId) return;
                         this.churnData = (data || []).map(c => ({
                             full_name: c.full_name,
                             phone: c.phone,
@@ -2122,7 +2176,7 @@
                     }
                 },
 
-                async generateInventoryReport() {
+                async generateInventoryReport(requestId) {
                     const DEFAULT_MIN_STOCK = 15;
                     const branches = this.selectedBranch ? [this.selectedBranch] : ['geminis', 'omega'];
                     const combined = {};
@@ -2134,6 +2188,9 @@
                                 .then(res => ({ branch, res }))
                         )
                     );
+
+                    // ✅ Fix: descartar resultados obsoletos si ya se pidió otro reporte/filtro.
+                    if (requestId !== undefined && requestId !== this._latestReportRequestId) return;
 
                     results.forEach(({ branch, res }) => {
                         if (res.error) {
@@ -2162,11 +2219,14 @@
                     this.lowStockProducts = this.inventoryData.filter(p => p.stock <= p.min_stock);
                 },
 
-                async generateAccountsReport() {
+                async generateAccountsReport(requestId) {
                     let query = supabase.from('credit_accounts').select('*').order('payment_date');
                     if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
-                    const { data, error } = await query;
+                    // ✅ Fix: paginado con fetchAllRows para no perder cuentas al superar 1000 filas.
+                    const { data, error } = await fetchAllRows(query);
                     if (error) throw error;
+                    // ✅ Fix: descartar resultados obsoletos si ya se pidió otro reporte/filtro.
+                    if (requestId !== undefined && requestId !== this._latestReportRequestId) return;
                     this.accountsData = data || [];
 
                     const rawTotalPendingUSD = this.accountsData.filter(a => a.status !== 'completed').reduce((sum, a) => sum + (a.remaining_amount || 0), 0);
@@ -2194,7 +2254,7 @@
                     this.accountsOver15 = round2(over15 * this.exchangeRate);
                 },
 
-                async generateDailyReport() {
+                async generateDailyReport(requestId) {
                     const dateStr = this.endDate;
                     const startOfDay = dateStr + 'T00:00:00-04:00';
                     const endOfDay = dateStr + 'T23:59:59-04:00';
@@ -2203,7 +2263,9 @@
                     if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
                     // ✅ Ahora sí respeta el filtro de Método de Pago (antes lo ignoraba en este reporte)
                     if (this.paymentMethod) query = query.eq('payment_method', this.paymentMethod);
-                    const { data: sales, error } = await query;
+                    // ✅ Fix: paginado con fetchAllRows por consistencia con el resto de consultas
+                    // de ventas (un solo día rara vez supera 1000 filas, pero puede pasar).
+                    const { data: sales, error } = await fetchAllRows(query);
                     if (error) throw error;
                     const salesList = sales || [];
 
@@ -2227,6 +2289,9 @@
                         invQuery
                     ]);
                     if (itemsResult.error) throw itemsResult.error;
+
+                    // ✅ Fix: descartar resultados obsoletos si ya se pidió otro reporte/filtro.
+                    if (requestId !== undefined && requestId !== this._latestReportRequestId) return;
 
                     const items = itemsResult.data || [];
                     const productsData = productsResult.data || [];
@@ -2291,7 +2356,7 @@
                     return address.trim().toUpperCase();
                 },
 
-                async generateDeliveryReport() {
+                async generateDeliveryReport(requestId) {
                     // ✅ NUEVO: se agregan customer_name, total y created_at al select (antes solo
                     // traía delivery_address/delivery_type/payment_method) para poder mostrar el
                     // detalle de direcciones y calcular el total vendido por delivery.
@@ -2315,9 +2380,12 @@
                     if (this.selectedBranch) periodQuery = periodQuery.eq('branch', this.selectedBranch);
                     if (this.paymentMethod) periodQuery = periodQuery.eq('payment_method', this.paymentMethod);
 
-                    const [{ data, error }, { data: periodData, error: periodError }] = await Promise.all([query, periodQuery]);
+                    // ✅ Fix: ambas paginadas con fetchAllRows para no perder ventas/deliveries al superar 1000 filas.
+                    const [{ data, error }, { data: periodData, error: periodError }] = await Promise.all([fetchAllRows(query), fetchAllRows(periodQuery)]);
                     if (error) throw error;
                     if (periodError) throw periodError;
+                    // ✅ Fix: descartar resultados obsoletos si ya se pidió otro reporte/filtro.
+                    if (requestId !== undefined && requestId !== this._latestReportRequestId) return;
                     const deliveries = data || [];
 
                     this.totalDeliverys = deliveries.length;
@@ -2643,13 +2711,17 @@
                             margin: { left: 10, right: 10 }
                         });
 
-                        const totalUSD = datos.reduce((sum, s) => sum + (s.total || 0), 0);
-                        const totalBs = datos.reduce((sum, s) => sum + (s.total || 0) * (s.exchange_rate_used || this.exchangeRate), 0);
+                        // ✅ Fix: el total exportado ahora excluye ventas a crédito, igual que la
+                        // tarjeta "Ventas Totales" en pantalla (antes sumaba también el crédito y
+                        // el PDF salía más alto que lo mostrado en la pantalla).
+                        const datosContado = datos.filter(s => s.payment_method !== 'credito');
+                        const totalUSD = datosContado.reduce((sum, s) => sum + (s.total || 0), 0);
+                        const totalBs = datosContado.reduce((sum, s) => sum + (s.total || 0) * (s.exchange_rate_used || this.exchangeRate), 0);
                         const finalY = doc.lastAutoTable.finalY + 6;
                         doc.setFontSize(9);
                         doc.setFont('helvetica', 'bold');
                         doc.setTextColor(0, 0, 0);
-                        doc.text(`Total registros: ${datos.length}   |   Total Bs.: ${formatNumber(totalBs)}   |   Total ($): ${formatNumber(totalUSD)}`, 14, finalY);
+                        doc.text(`Total registros: ${datos.length}   |   Total Bs. (contado): ${formatNumber(totalBs)}   |   Total $ (contado): ${formatNumber(totalUSD)}`, 14, finalY);
 
                         doc.save(`reporte_ventas_${this.startDate}_a_${this.endDate}.pdf`);
                         showToast('PDF generado', 'success');
@@ -2751,10 +2823,14 @@
                             rowNum++;
                         });
 
-                        const totalUSD = datos.reduce((sum, s) => sum + (s.total || 0), 0);
-                        const totalBs = datos.reduce((sum, s) => sum + (s.total || 0) * (s.exchange_rate_used || this.exchangeRate), 0);
+                        // ✅ Fix: el total exportado ahora excluye ventas a crédito, igual que la
+                        // tarjeta "Ventas Totales" en pantalla (antes sumaba también el crédito y
+                        // el Excel salía más alto que lo mostrado en la pantalla).
+                        const datosContado = datos.filter(s => s.payment_method !== 'credito');
+                        const totalUSD = datosContado.reduce((sum, s) => sum + (s.total || 0), 0);
+                        const totalBs = datosContado.reduce((sum, s) => sum + (s.total || 0) * (s.exchange_rate_used || this.exchangeRate), 0);
                         const totalRow = ws.getRow(rowNum);
-                        totalRow.getCell(6).value = 'TOTALES:';
+                        totalRow.getCell(6).value = 'TOTALES (contado):';
                         totalRow.getCell(7).value = round2(totalBs);
                         totalRow.getCell(8).value = round2(totalUSD);
                         [6, 7, 8].forEach(c => {
