@@ -460,6 +460,14 @@
                                 class="fas fa-file-pdf"></i><span>Exportar PDF</span></button>
                         <button @click="exportReport('excel')" class="export-btn flex items-center space-x-2"><i
                                 class="fas fa-file-excel"></i><span>Exportar Excel</span></button>
+                        <!-- ✅ NUEVO: descarga en un solo Excel TODAS las ventas registradas hasta
+                             ahora (histórico completo, sin importar el rango de fechas elegido arriba) -->
+                        <button @click="downloadAllSalesExcel()" :disabled="exportingAllSales"
+                            class="export-btn flex items-center space-x-2"
+                            :class="{ 'opacity-60 cursor-not-allowed': exportingAllSales }">
+                            <i class="fas" :class="exportingAllSales ? 'fa-spinner fa-spin' : 'fa-database'"></i>
+                            <span x-text="exportingAllSales ? 'Generando...' : 'Descargar Todas las Ventas'"></span>
+                        </button>
                     </div>
                 </div>
 
@@ -523,6 +531,7 @@
                                 <option value="pago_movil">Pago Móvil</option>
                                 <option value="transferencia">Transferencia</option>
                                 <option value="punto_venta">Punto de Venta</option>
+                                <option value="multiple">Múltiple</option>
                                 <option value="credito">Crédito</option>
                             </select>
                         </div>
@@ -1533,6 +1542,11 @@
                 'pago_movil': 'Pago Móvil',
                 'transferencia': 'Transferencia',
                 'punto_venta': 'Punto de Venta',
+                // ✅ Fix: faltaba 'multiple' — la BD sí tiene ventas con este método (confirmado
+                // con SELECT DISTINCT payment_method FROM sales) y antes se mostraba el valor
+                // crudo "multiple" en vez de una etiqueta legible, y no se podía filtrar por él
+                // porque tampoco estaba en el <select> de Método de Pago.
+                'multiple': 'Múltiple',
                 'credito': 'Crédito'
             };
             return names[method] || method;
@@ -1572,6 +1586,8 @@
                 // peticiones se solapan (cambio rápido de filtros) siempre gane la más reciente
                 // pedida y no la que por azar de la red termine resolviendo primero.
                 _latestReportRequestId: 0,
+                // ✅ NUEVO: estado del botón "Descargar Todas las Ventas" (histórico completo)
+                exportingAllSales: false,
                 compactMode: false,
                 userBranch: '',
                 userName: '',
@@ -2857,6 +2873,111 @@
                     } catch (err) {
                         console.error('Error generando Excel de ventas:', err);
                         showToast('Error al generar el Excel', 'error');
+                    }
+                },
+
+                // ✅ NUEVO: descarga en un solo Excel TODAS las ventas registradas hasta ahora,
+                // sin importar el rango de fechas seleccionado en los filtros (histórico completo).
+                // Usa fetchAllRows() para traer todo, sin quedarse corta por el límite de 1000
+                // filas de PostgREST.
+                async downloadAllSalesExcel() {
+                    if (this.exportingAllSales) return;
+                    this.exportingAllSales = true;
+                    try {
+                        if (typeof ExcelJS === 'undefined') {
+                            showToast('La librería de Excel no está cargada', 'error');
+                            return;
+                        }
+
+                        let query = supabase.from('sales').select('*').order('created_at', { ascending: false });
+                        if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
+
+                        const { data, error } = await fetchAllRows(query);
+                        if (error) throw error;
+                        const datos = data || [];
+                        if (datos.length === 0) {
+                            showToast('No hay ventas registradas', 'warning');
+                            return;
+                        }
+
+                        const workbook = new ExcelJS.Workbook();
+                        workbook.creator = this.userName || 'Sistema';
+                        workbook.created = new Date();
+                        const { colores, borde } = this.excelStyleKit();
+
+                        const ws = workbook.addWorksheet('Todas las Ventas', { views: [{ state: 'frozen', ySplit: 6 }] });
+
+                        ws.mergeCells('A1:H1');
+                        ws.getCell('A1').value = 'GÉMINIS - OMEGA';
+                        ws.getCell('A1').font = { name: 'Calibri', size: 18, bold: true, color: { argb: colores.headerBg } };
+                        ws.getCell('A1').alignment = { horizontal: 'center' };
+                        ws.getRow(1).height = 28;
+
+                        ws.mergeCells('A2:H2');
+                        ws.getCell('A2').value = 'HISTÓRICO COMPLETO DE VENTAS';
+                        ws.getCell('A2').font = { name: 'Calibri', size: 12, bold: true };
+                        ws.getCell('A2').alignment = { horizontal: 'center' };
+
+                        ws.mergeCells('A3:H3');
+                        ws.getCell('A3').value = `Sucursal: ${this.branchLabel()}`;
+                        ws.getCell('A3').alignment = { horizontal: 'center' };
+                        ws.getCell('A3').font = { name: 'Calibri', size: 10 };
+
+                        ws.mergeCells('A4:H4');
+                        ws.getCell('A4').value = `Todas las ventas registradas hasta ${formatDate(getCaracasDateString())} (${datos.length} registros)`;
+                        ws.getCell('A4').alignment = { horizontal: 'center' };
+                        ws.getCell('A4').font = { name: 'Calibri', size: 10, italic: true };
+
+                        const headers = ['Fecha', 'Cliente', 'Sucursal', 'Total Bs.', 'Total ($)', 'Forma de Pago', 'Servicio', 'Estado'];
+                        const rows = datos.map(s => {
+                            const rate = s.exchange_rate_used || this.exchangeRate;
+                            return [
+                                formatDate(s.created_at),
+                                s.customer_name || 'Cliente Anónimo',
+                                s.branch === 'geminis' ? 'Géminis' : s.branch === 'omega' ? 'Omega' : (s.branch || ''),
+                                round2((s.total || 0) * rate),
+                                round2(s.total || 0),
+                                getPaymentMethodName(s.payment_method),
+                                s.delivery_type === 'delivery' ? 'Delivery' : 'Tienda',
+                                s.status || ''
+                            ];
+                        });
+
+                        const nextRow = this.excelWriteRows(ws, headers, rows, [1, 2]);
+
+                        // ✅ Mismo criterio que el resto de reportes: total "contado" excluye crédito.
+                        const datosContado = datos.filter(s => s.payment_method !== 'credito');
+                        const totalUSD = datosContado.reduce((sum, s) => sum + (s.total || 0), 0);
+                        const totalBs = datosContado.reduce((sum, s) => sum + (s.total || 0) * (s.exchange_rate_used || this.exchangeRate), 0);
+                        const totalRow = ws.getRow(nextRow);
+                        totalRow.getCell(3).value = 'TOTALES (contado):';
+                        totalRow.getCell(4).value = round2(totalBs);
+                        totalRow.getCell(5).value = round2(totalUSD);
+                        [3, 4, 5].forEach(c => {
+                            totalRow.getCell(c).font = { bold: true };
+                            totalRow.getCell(c).border = borde;
+                            totalRow.getCell(c).alignment = { horizontal: 'center' };
+                        });
+
+                        ws.columns = [
+                            { width: 12 }, { width: 24 }, { width: 12 }, { width: 14 },
+                            { width: 12 }, { width: 16 }, { width: 12 }, { width: 12 }
+                        ];
+
+                        const buffer = await workbook.xlsx.writeBuffer();
+                        const blob = new Blob([buffer], { type: 'application/octet-stream' });
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = `todas_las_ventas_${getCaracasDateString()}.xlsx`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        showToast(`Excel generado: ${datos.length} ventas`, 'success');
+                    } catch (err) {
+                        console.error('Error descargando todas las ventas:', err);
+                        showToast('Error al generar el archivo: ' + (err.message || ''), 'error');
+                    } finally {
+                        this.exportingAllSales = false;
                     }
                 },
 
