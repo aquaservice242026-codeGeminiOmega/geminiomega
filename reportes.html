@@ -1472,18 +1472,49 @@
         // avisar (no da error). El resumen de un solo día casi nunca llega a esa cantidad,
         // pero al consolidar sucursales en un rango de fechas amplio es fácil superarlo, y la
         // suma queda por debajo de la realidad de forma silenciosa. Esta función pagina una
-        // consulta YA CONSTRUIDA (con sus filtros/orden aplicados) usando .range() hasta traer
-        // todas las filas, sin tocar la tabla, los filtros ni la conexión a la base de datos.
-        async function fetchAllRows(query, pageSize = 1000) {
-            let from = 0;
+        // consulta usando .range() hasta traer todas las filas, sin tocar la tabla, los filtros
+        // ni la conexión a la base de datos.
+        //
+        // ✅ Optimización de velocidad: recibe una FACTORÍA (una función que arma y devuelve una
+        // consulta nueva cada vez que se llama), no una consulta ya construida. Así, cuando hacen
+        // falta varias páginas, se piden en paralelo con Promise.all() en vez de una por una en
+        // secuencia (esperando cada respuesta antes de pedir la siguiente), lo cual acorta bastante
+        // el tiempo total, que antes se sentía lento aun con pocos miles de registros. Usar una
+        // consulta nueva por página (en vez de reutilizar y mutar la misma) evita que dos peticiones
+        // en simultáneo se pisen los parámetros de rango entre sí.
+        async function fetchAllRows(queryFactory, pageSize = 1000) {
             let allData = [];
-            while (true) {
-                const { data, error } = await query.range(from, from + pageSize - 1);
-                if (error) return { data: allData, error };
-                if (!data || data.length === 0) break;
-                allData = allData.concat(data);
-                if (data.length < pageSize) break;
-                from += pageSize;
+            let from = 0;
+
+            // Primera página sola: la mayoría de los reportes caben aquí, así que no vale la
+            // pena disparar peticiones extra "por si acaso" cuando el dato es chico.
+            let { data, error } = await queryFactory().range(from, from + pageSize - 1);
+            if (error) return { data: allData, error };
+            data = data || [];
+            allData = allData.concat(data);
+            if (data.length < pageSize) return { data: allData, error: null };
+            from += pageSize;
+
+            // La primera página vino llena → probablemente hay más. A partir de aquí se piden
+            // las siguientes páginas en lotes EN PARALELO (no una por una).
+            const BATCH = 4;
+            let more = true;
+            while (more) {
+                const requests = [];
+                for (let i = 0; i < BATCH; i++) {
+                    const start = from + i * pageSize;
+                    requests.push(queryFactory().range(start, start + pageSize - 1));
+                }
+                const results = await Promise.all(requests);
+                more = true;
+                for (const r of results) {
+                    if (r.error) return { data: allData, error: r.error };
+                    const rows = r.data || [];
+                    if (rows.length === 0) { more = false; break; }
+                    allData = allData.concat(rows);
+                    if (rows.length < pageSize) { more = false; break; }
+                }
+                from += BATCH * pageSize;
             }
             return { data: allData, error: null };
         }
@@ -1891,19 +1922,23 @@
                 },
 
                 async generateSalesReport(requestId) {
-                    let query = supabase
-                        .from('sales')
-                        .select('*')
-                        .gte('created_at', this.rangeStart())
-                        .lte('created_at', this.rangeEnd())
-                        .order('created_at', { ascending: false });
-
-                    if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
-                    if (this.paymentMethod) query = query.eq('payment_method', this.paymentMethod);
+                    // ✅ Factoría: arma una consulta nueva cada vez que se llama, para poder
+                    // pedir varias páginas en paralelo de forma segura (ver fetchAllRows).
+                    const buildSalesQuery = () => {
+                        let q = supabase
+                            .from('sales')
+                            .select('*')
+                            .gte('created_at', this.rangeStart())
+                            .lte('created_at', this.rangeEnd())
+                            .order('created_at', { ascending: false });
+                        if (this.selectedBranch) q = q.eq('branch', this.selectedBranch);
+                        if (this.paymentMethod) q = q.eq('payment_method', this.paymentMethod);
+                        return q;
+                    };
 
                     // ✅ Fix: paginado con fetchAllRows para no perder ventas si el rango
                     // consolidado supera las 1000 filas del límite por defecto de PostgREST.
-                    const { data: sales, error } = await fetchAllRows(query);
+                    const { data: sales, error } = await fetchAllRows(buildSalesQuery);
                     if (error) throw error;
                     const salesList = sales || [];
                     const saleIds = salesList.map(s => s.id);
@@ -1920,15 +1955,18 @@
                     let invQuery = supabase.from('inventory').select('quantity');
                     if (this.selectedBranch) invQuery = invQuery.eq('branch', this.selectedBranch);
 
-                    let credQuery = supabase.from('credit_accounts').select('remaining_amount, status').neq('status', 'completed');
-                    if (this.selectedBranch) credQuery = credQuery.eq('branch', this.selectedBranch);
+                    const buildCredQuery = () => {
+                        let q = supabase.from('credit_accounts').select('remaining_amount, status').neq('status', 'completed');
+                        if (this.selectedBranch) q = q.eq('branch', this.selectedBranch);
+                        return q;
+                    };
 
                     const [itemsResult, productsResult, custResult, invResult, credResult] = await Promise.all([
                         fetchSaleItemsChunked(saleIds, 'sale_id, product_id, quantity, unit_price, total'),
                         supabase.from('products').select('id, name, size_liters'),
                         custQuery,
                         invQuery,
-                        fetchAllRows(credQuery) // ✅ Fix: paginado, cuentas por cobrar también puede superar 1000 filas
+                        fetchAllRows(buildCredQuery) // ✅ Fix: paginado, cuentas por cobrar también puede superar 1000 filas
                     ]);
 
                     if (itemsResult.error) throw itemsResult.error;
@@ -1983,17 +2021,19 @@
 
                 // Reporte de Ventas por Producto
                 async generateSalesByProductReport(requestId) {
-                    let query = supabase
-                        .from('sales')
-                        .select('*')
-                        .gte('created_at', this.rangeStart())
-                        .lte('created_at', this.rangeEnd());
-
-                    if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
-                    if (this.paymentMethod) query = query.eq('payment_method', this.paymentMethod);
+                    const buildQuery = () => {
+                        let q = supabase
+                            .from('sales')
+                            .select('*')
+                            .gte('created_at', this.rangeStart())
+                            .lte('created_at', this.rangeEnd());
+                        if (this.selectedBranch) q = q.eq('branch', this.selectedBranch);
+                        if (this.paymentMethod) q = q.eq('payment_method', this.paymentMethod);
+                        return q;
+                    };
 
                     // ✅ Fix: paginado con fetchAllRows para no perder ventas al superar 1000 filas.
-                    const { data: sales, error } = await fetchAllRows(query);
+                    const { data: sales, error } = await fetchAllRows(buildQuery);
                     if (error) throw error;
                     const salesList = sales || [];
                     const saleIds = salesList.map(s => s.id);
@@ -2036,18 +2076,20 @@
 
                 // Reporte de Ventas por Método de Pago
                 async generateSalesByPaymentMethodReport(requestId) {
-                    let query = supabase
-                        .from('sales')
-                        .select('*')
-                        .gte('created_at', this.rangeStart())
-                        .lte('created_at', this.rangeEnd());
-
-                    if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
-                    // ✅ Ahora sí respeta el filtro de Método de Pago (antes lo ignoraba en este reporte)
-                    if (this.paymentMethod) query = query.eq('payment_method', this.paymentMethod);
+                    const buildQuery = () => {
+                        let q = supabase
+                            .from('sales')
+                            .select('*')
+                            .gte('created_at', this.rangeStart())
+                            .lte('created_at', this.rangeEnd());
+                        if (this.selectedBranch) q = q.eq('branch', this.selectedBranch);
+                        // ✅ Ahora sí respeta el filtro de Método de Pago (antes lo ignoraba en este reporte)
+                        if (this.paymentMethod) q = q.eq('payment_method', this.paymentMethod);
+                        return q;
+                    };
 
                     // ✅ Fix: paginado con fetchAllRows para no perder ventas al superar 1000 filas.
-                    const { data: sales, error } = await fetchAllRows(query);
+                    const { data: sales, error } = await fetchAllRows(buildQuery);
                     if (error) throw error;
                     // ✅ Fix: descartar resultados obsoletos si ya se pidió otro reporte/filtro.
                     if (requestId !== this._latestReportRequestId) return;
@@ -2073,27 +2115,36 @@
                 },
 
                 async generateClientsReport(requestId) {
-                    let query = supabase.from('customers').select('*').order('full_name');
-                    if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
+                    const buildCustQuery = () => {
+                        let q = supabase.from('customers').select('*').order('full_name');
+                        if (this.selectedBranch) q = q.eq('branch', this.selectedBranch);
+                        return q;
+                    };
 
-                    let salesQuery = supabase.from('sales').select('customer_id, total')
-                        .gte('created_at', this.rangeStart())
-                        .lte('created_at', this.rangeEnd())
-                        .not('customer_id', 'is', null);
-                    if (this.selectedBranch) salesQuery = salesQuery.eq('branch', this.selectedBranch);
+                    const buildSalesQuery = () => {
+                        let q = supabase.from('sales').select('customer_id, total')
+                            .gte('created_at', this.rangeStart())
+                            .lte('created_at', this.rangeEnd())
+                            .not('customer_id', 'is', null);
+                        if (this.selectedBranch) q = q.eq('branch', this.selectedBranch);
+                        return q;
+                    };
 
                     // ✅ NUEVO: clientes registrados dentro del período/fechas seleccionadas
                     // (consulta independiente, en paralelo con las de arriba)
-                    let newCustQuery = supabase.from('customers').select('*')
-                        .gte('created_at', this.rangeStart())
-                        .lte('created_at', this.rangeEnd())
-                        .order('created_at', { ascending: false });
-                    if (this.selectedBranch) newCustQuery = newCustQuery.eq('branch', this.selectedBranch);
+                    const buildNewCustQuery = () => {
+                        let q = supabase.from('customers').select('*')
+                            .gte('created_at', this.rangeStart())
+                            .lte('created_at', this.rangeEnd())
+                            .order('created_at', { ascending: false });
+                        if (this.selectedBranch) q = q.eq('branch', this.selectedBranch);
+                        return q;
+                    };
 
                     // ✅ Clientes, sus compras y clientes nuevos en paralelo (consultas independientes)
                     // ✅ Fix: cada una paginada con fetchAllRows para no perder filas al superar 1000.
                     const [{ data: customers, error }, { data: salesForClients }, { data: newCustomers, error: newCustError }] =
-                        await Promise.all([fetchAllRows(query), fetchAllRows(salesQuery), fetchAllRows(newCustQuery)]);
+                        await Promise.all([fetchAllRows(buildCustQuery), fetchAllRows(buildSalesQuery), fetchAllRows(buildNewCustQuery)]);
                     if (error) throw error;
                     if (newCustError) throw newCustError;
                     // ✅ Fix: descartar resultados obsoletos si ya se pidió otro reporte/filtro.
@@ -2236,10 +2287,13 @@
                 },
 
                 async generateAccountsReport(requestId) {
-                    let query = supabase.from('credit_accounts').select('*').order('payment_date');
-                    if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
+                    const buildQuery = () => {
+                        let q = supabase.from('credit_accounts').select('*').order('payment_date');
+                        if (this.selectedBranch) q = q.eq('branch', this.selectedBranch);
+                        return q;
+                    };
                     // ✅ Fix: paginado con fetchAllRows para no perder cuentas al superar 1000 filas.
-                    const { data, error } = await fetchAllRows(query);
+                    const { data, error } = await fetchAllRows(buildQuery);
                     if (error) throw error;
                     // ✅ Fix: descartar resultados obsoletos si ya se pidió otro reporte/filtro.
                     if (requestId !== undefined && requestId !== this._latestReportRequestId) return;
@@ -2275,13 +2329,16 @@
                     const startOfDay = dateStr + 'T00:00:00-04:00';
                     const endOfDay = dateStr + 'T23:59:59-04:00';
 
-                    let query = supabase.from('sales').select('*').gte('created_at', startOfDay).lte('created_at', endOfDay);
-                    if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
-                    // ✅ Ahora sí respeta el filtro de Método de Pago (antes lo ignoraba en este reporte)
-                    if (this.paymentMethod) query = query.eq('payment_method', this.paymentMethod);
+                    const buildQuery = () => {
+                        let q = supabase.from('sales').select('*').gte('created_at', startOfDay).lte('created_at', endOfDay);
+                        if (this.selectedBranch) q = q.eq('branch', this.selectedBranch);
+                        // ✅ Ahora sí respeta el filtro de Método de Pago (antes lo ignoraba en este reporte)
+                        if (this.paymentMethod) q = q.eq('payment_method', this.paymentMethod);
+                        return q;
+                    };
                     // ✅ Fix: paginado con fetchAllRows por consistencia con el resto de consultas
                     // de ventas (un solo día rara vez supera 1000 filas, pero puede pasar).
-                    const { data: sales, error } = await fetchAllRows(query);
+                    const { data: sales, error } = await fetchAllRows(buildQuery);
                     if (error) throw error;
                     const salesList = sales || [];
 
@@ -2376,28 +2433,33 @@
                     // ✅ NUEVO: se agregan customer_name, total y created_at al select (antes solo
                     // traía delivery_address/delivery_type/payment_method) para poder mostrar el
                     // detalle de direcciones y calcular el total vendido por delivery.
-                    let query = supabase
-                        .from('sales')
-                        .select('id, customer_name, delivery_address, delivery_type, payment_method, total, created_at')
-                        .eq('delivery_type', 'delivery')
-                        .gte('created_at', this.rangeStart())
-                        .lte('created_at', this.rangeEnd());
-
-                    if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
-                    if (this.paymentMethod) query = query.eq('payment_method', this.paymentMethod);
+                    const buildQuery = () => {
+                        let q = supabase
+                            .from('sales')
+                            .select('id, customer_name, delivery_address, delivery_type, payment_method, total, created_at')
+                            .eq('delivery_type', 'delivery')
+                            .gte('created_at', this.rangeStart())
+                            .lte('created_at', this.rangeEnd());
+                        if (this.selectedBranch) q = q.eq('branch', this.selectedBranch);
+                        if (this.paymentMethod) q = q.eq('payment_method', this.paymentMethod);
+                        return q;
+                    };
 
                     // ✅ NUEVO: consulta paralela (liviana) con el total de ventas del período
                     // completo, usada solo como base para calcular el % de ventas por delivery.
-                    let periodQuery = supabase
-                        .from('sales')
-                        .select('total, payment_method')
-                        .gte('created_at', this.rangeStart())
-                        .lte('created_at', this.rangeEnd());
-                    if (this.selectedBranch) periodQuery = periodQuery.eq('branch', this.selectedBranch);
-                    if (this.paymentMethod) periodQuery = periodQuery.eq('payment_method', this.paymentMethod);
+                    const buildPeriodQuery = () => {
+                        let q = supabase
+                            .from('sales')
+                            .select('total, payment_method')
+                            .gte('created_at', this.rangeStart())
+                            .lte('created_at', this.rangeEnd());
+                        if (this.selectedBranch) q = q.eq('branch', this.selectedBranch);
+                        if (this.paymentMethod) q = q.eq('payment_method', this.paymentMethod);
+                        return q;
+                    };
 
                     // ✅ Fix: ambas paginadas con fetchAllRows para no perder ventas/deliveries al superar 1000 filas.
-                    const [{ data, error }, { data: periodData, error: periodError }] = await Promise.all([fetchAllRows(query), fetchAllRows(periodQuery)]);
+                    const [{ data, error }, { data: periodData, error: periodError }] = await Promise.all([fetchAllRows(buildQuery), fetchAllRows(buildPeriodQuery)]);
                     if (error) throw error;
                     if (periodError) throw periodError;
                     // ✅ Fix: descartar resultados obsoletos si ya se pidió otro reporte/filtro.
@@ -2889,10 +2951,13 @@
                             return;
                         }
 
-                        let query = supabase.from('sales').select('*').order('created_at', { ascending: false });
-                        if (this.selectedBranch) query = query.eq('branch', this.selectedBranch);
+                        const buildQuery = () => {
+                            let q = supabase.from('sales').select('*').order('created_at', { ascending: false });
+                            if (this.selectedBranch) q = q.eq('branch', this.selectedBranch);
+                            return q;
+                        };
 
-                        const { data, error } = await fetchAllRows(query);
+                        const { data, error } = await fetchAllRows(buildQuery);
                         if (error) throw error;
                         const datos = data || [];
                         if (datos.length === 0) {
