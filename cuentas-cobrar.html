@@ -895,6 +895,8 @@
                 },
                 // ✅ Filtro por defecto: "Pendiente" al abrir el módulo (el usuario puede cambiarlo libremente)
                 filters: { search: '', status: 'pending', dateFilter: '' },
+                // ✅ Caché: { credit_account_id: fecha_ultimo_pago } tomada de credit_payments.payment_date
+                cancellationDates: {},
                 paymentForm: { amount: 0, payment_method: 'efectivo', reference: '', notes: '' },
                 paymentNotesAuto: true,
 
@@ -1018,6 +1020,34 @@
                     }
                 },
 
+                // ✅ Obtiene, desde credit_payments, la fecha del último pago (payment_date) de cada
+                // cuenta indicada — esa es la "Fecha de Cancelación" cuando la cuenta quedó en 'paid'.
+                // Solo consulta lo que falte en caché (this.cancellationDates), para no repetir llamadas.
+                async loadCancellationDates(accounts) {
+                    try {
+                        const ids = [...new Set((accounts || []).map(a => a.id))];
+                        const faltantes = ids.filter(id => !(id in this.cancellationDates));
+                        if (faltantes.length === 0) return;
+
+                        const { data, error } = await supabase
+                            .from('credit_payments')
+                            .select('credit_account_id, payment_date')
+                            .in('credit_account_id', faltantes)
+                            .order('payment_date', { ascending: false });
+                        if (error) throw error;
+
+                        const nuevo = { ...this.cancellationDates };
+                        faltantes.forEach(id => { if (!(id in nuevo)) nuevo[id] = null; });
+                        (data || []).forEach(p => {
+                            // Al venir ordenado descendente, el primer registro por cuenta es el más reciente
+                            if (!nuevo[p.credit_account_id]) nuevo[p.credit_account_id] = p.payment_date;
+                        });
+                        this.cancellationDates = nuevo;
+                    } catch (err) {
+                        console.error('Error cargando fechas de cancelación:', err);
+                    }
+                },
+
                 // ✅ Calcula las estadísticas de encabezado sobre el conjunto de datos que se le pase
                 // (se usa con filteredCuentas para que las tarjetas reflejen el filtro/búsqueda activos)
                 calculateStats(dataset) {
@@ -1080,6 +1110,11 @@
                     this.filteredCuentas.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
                     // ✅ Las tarjetas de encabezado se recalculan según lo que está filtrado/buscado
                     this.calculateStats(filtered);
+                    // ✅ Si el filtro activo es "Cancelado", carga (en segundo plano) la fecha de
+                    // cancelación de las cuentas visibles, tomada de credit_payments
+                    if (this.filters.status === 'paid') {
+                        this.loadCancellationDates(this.filteredCuentas);
+                    }
                 },
 
                 resetFilters() {
@@ -1090,13 +1125,17 @@
                 // ============================================
                 // 📄 EXPORTAR PDF (respeta filtros/búsqueda activos)
                 // ============================================
-                exportarPDF() {
+                async exportarPDF() {
                     const datos = this.filteredCuentas;
                     if (!datos || datos.length === 0) {
                         Swal.fire('Atención', 'No hay cuentas para generar el reporte', 'warning');
                         return;
                     }
                     try {
+                        // ✅ Si se va a incluir "Fecha de Cancelación", asegura tener las fechas cargadas
+                        if (this.filters.status === 'paid') {
+                            await this.loadCancellationDates(datos);
+                        }
                         const { jsPDF } = window.jspdf;
                         const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
 
@@ -1189,6 +1228,11 @@
                         if (typeof ExcelJS === 'undefined') {
                             showToast('La librería ExcelJS no está cargada', 'error');
                             return;
+                        }
+
+                        // ✅ Si se va a incluir "Fecha de Cancelación", asegura tener las fechas cargadas
+                        if (this.filters.status === 'paid') {
+                            await this.loadCancellationDates(datos);
                         }
 
                         const workbook = new ExcelJS.Workbook();
@@ -1338,10 +1382,11 @@
                     return account.status;
                 },
 
-                // ✅ Fecha de Cancelación: usa el campo ya existente en credit_accounts (select('*') ya lo trae).
-                // Se contemplan varios nombres posibles de columna por robustez; si ninguno existe, muestra '—'.
+                // ✅ Fecha de Cancelación: es la fecha del último pago registrado en credit_payments
+                // (payment_date) para esa cuenta — no confundir con credit_accounts.payment_date,
+                // que es la fecha límite. Se apoya en this.cancellationDates (ver loadCancellationDates).
                 getCancellationDate(account) {
-                    const raw = account.cancelled_at || account.paid_at || account.cancellation_date || account.payment_completed_at;
+                    const raw = this.cancellationDates[account.id];
                     if (!raw) return '—';
                     return this.formatDate(raw);
                 },
