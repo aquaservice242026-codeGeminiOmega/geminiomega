@@ -462,12 +462,12 @@
                                 class="fas fa-file-excel"></i><span>Exportar Excel</span></button>
                         <!-- ✅ NUEVO: descarga en un solo Excel TODAS las ventas registradas hasta
                              ahora (histórico completo, sin importar el rango de fechas elegido arriba) -->
-                        <!-- <button @click="downloadAllSalesExcel()" :disabled="exportingAllSales"
+                        <button @click="downloadAllSalesExcel()" :disabled="exportingAllSales"
                             class="export-btn flex items-center space-x-2"
                             :class="{ 'opacity-60 cursor-not-allowed': exportingAllSales }">
                             <i class="fas" :class="exportingAllSales ? 'fa-spinner fa-spin' : 'fa-database'"></i>
                             <span x-text="exportingAllSales ? 'Generando...' : 'Descargar Todas las Ventas'"></span>
-                        </button>-->
+                        </button>
                     </div>
                 </div>
 
