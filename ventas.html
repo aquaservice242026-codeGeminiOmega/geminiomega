@@ -3288,6 +3288,229 @@ ${this.creditForm.notes || ''}`,
             }
         }
     </script>
+
+    <!-- ============================================ -->
+    <!-- MODAL RECORDATORIO DE MENSUALIDAD (ventas.html) -->
+    <!-- Se muestra cada hora en punto y media, de 12:30pm a 9:30pm -->
+    <!-- ============================================ -->
+    <style>
+        #modalRecordatorioPago {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(3px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            animation: mrpFadeIn 0.25s ease-out;
+        }
+
+        #modalRecordatorioPago.activo {
+            display: flex;
+        }
+
+        @keyframes mrpFadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .mrp-card {
+            background: #ffffff;
+            border-radius: 16px;
+            max-width: 420px;
+            width: 90%;
+            padding: 32px 28px 24px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+            position: relative;
+            animation: mrpPopIn 0.3s ease-out;
+        }
+
+        @keyframes mrpPopIn {
+            from {
+                transform: scale(0.92);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .mrp-close {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #94a3b8;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .mrp-close:hover {
+            color: #475569;
+        }
+
+        .mrp-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 16px;
+            border-radius: 50%;
+            background: #fef3c7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .mrp-title {
+            font-size: 19px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 10px;
+        }
+
+        .mrp-msg {
+            font-size: 14.5px;
+            color: #475569;
+            line-height: 1.5;
+            margin-bottom: 22px;
+        }
+
+        .mrp-btn-primary {
+            display: inline-block;
+            width: 100%;
+            background: #16a34a;
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14.5px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+            text-decoration: none;
+            box-sizing: border-box;
+        }
+
+        .mrp-btn-primary:hover {
+            background: #15803d;
+        }
+
+        .mrp-btn-secondary {
+            display: inline-block;
+            width: 100%;
+            background: transparent;
+            color: #64748b;
+            border: none;
+            padding: 8px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .mrp-btn-secondary:hover {
+            text-decoration: underline;
+        }
+
+        .mrp-timer {
+            margin-top: 12px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+    </style>
+
+    <div id="modalRecordatorioPago">
+        <div class="mrp-card">
+            <button class="mrp-close" onclick="cerrarModalRecordatorioPago()" title="Cerrar">✕</button>
+            <div class="mrp-icon">🔔</div>
+            <div class="mrp-title">Recordatorio de pago</div>
+            <div class="mrp-msg">Este es un recordatorio automático: Tu suscripción está pendiente de pago. Las ventas
+                siguen funcionando con normalidad, pero para mantener activas todas las funciones del sistema,
+                incluyendo reportes y resumen diario. Regulariza tu pago cuando puedas.</div>
+            <a href="#" id="mrpBotonPagar" class="mrp-btn-primary" target="_blank">Regularizar pago</a>
+            <button class="mrp-btn-secondary" onclick="cerrarModalRecordatorioPago()">Cerrar</button>
+            <div class="mrp-timer" id="mrpTimer"></div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURACIÓN — ajusta esto a tu lógica real
+        // ============================================
+        const MRP_WHATSAPP_URL = "https://wa.me/584148004708?text=Hola,%20quiero%20regularizar%20el%20pago%20de%20mi%20mensualidad"; // TODO: tu número/link real
+        const MRP_DURACION_MODAL_MS = 3 * 60 * 1000; // 3 minutos en pantalla, o se cierra manualmente antes
+        // Horas en que debe aparecer: 12:30pm, 1:30pm, 2:30pm ... 9:30pm (13:30 a 21:30 en formato 24h, más el mediodía 12:30)
+        const MRP_HORAS_MINUTOS_DISPARO = [
+            [12, 30], [13, 30], [14, 30], [15, 30],
+            [16, 30], [17, 30], [18, 30], [19, 30],
+            [20, 30], [21, 30]
+        ];
+
+        let mrpTimeoutId = null;
+        let mrpIntervalId = null;
+
+        function mostrarModalRecordatorioPago() {
+            const modal = document.getElementById('modalRecordatorioPago');
+            document.getElementById('mrpBotonPagar').href = MRP_WHATSAPP_URL;
+            modal.classList.add('activo');
+
+            let restante = MRP_DURACION_MODAL_MS / 1000;
+            const timerEl = document.getElementById('mrpTimer');
+            timerEl.innerText = `Este aviso se cerrará en ${mrpFormatTiempo(restante)}`;
+
+            clearInterval(mrpIntervalId);
+            mrpIntervalId = setInterval(() => {
+                restante--;
+                if (restante <= 0) {
+                    clearInterval(mrpIntervalId);
+                } else {
+                    timerEl.innerText = `Este aviso se cerrará en ${mrpFormatTiempo(restante)}`;
+                }
+            }, 1000);
+
+            clearTimeout(mrpTimeoutId);
+            mrpTimeoutId = setTimeout(cerrarModalRecordatorioPago, MRP_DURACION_MODAL_MS);
+        }
+
+        function cerrarModalRecordatorioPago() {
+            document.getElementById('modalRecordatorioPago').classList.remove('activo');
+            clearTimeout(mrpTimeoutId);
+            clearInterval(mrpIntervalId);
+        }
+
+        function mrpFormatTiempo(segundos) {
+            const m = Math.floor(segundos / 60);
+            const s = segundos % 60;
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // Revisa cada 20 segundos si la hora actual coincide con alguno de los
+        // horarios de disparo (12:30, 1:30, ... 9:30pm), y evita repetirlo
+        // más de una vez dentro del mismo minuto.
+        let mrpUltimoDisparo = null;
+        setInterval(() => {
+            const ahora = new Date();
+            const h = ahora.getHours();
+            const m = ahora.getMinutes();
+            const claveActual = `${h}:${m}`;
+
+            const coincide = MRP_HORAS_MINUTOS_DISPARO.some(([hh, mm]) => hh === h && mm === m);
+
+            if (coincide && mrpUltimoDisparo !== claveActual) {
+                mrpUltimoDisparo = claveActual;
+                mostrarModalRecordatorioPago();
+            }
+        }, 20000);
+    </script>
 </body>
 
 </html>
