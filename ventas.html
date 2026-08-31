@@ -417,14 +417,6 @@
                     class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
                     <i class="fas fa-user-cog w-5"></i><span>Usuarios</span>
                 </a>
-                <a href="reportes.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-chart-line w-5"></i><span>Reportes</span>
-                </a>
-                <a href="resumen-diario.html"
-                    class="flex items-center space-x-3 px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition">
-                    <i class="fas fa-file-alt w-5"></i><span>Resumen Diario</span>
-                </a>
             </nav>
         </div>
         <div class="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-20">
@@ -3497,6 +3489,24 @@ ${this.creditForm.notes || ''}`,
         // horarios de disparo (12:30, 1:30, ... 9:30pm), y evita repetirlo
         // más de una vez dentro del mismo minuto.
         let mrpUltimoDisparo = null;
+
+        // ✅ Solo dispara el modal desde 3 días antes de subscription_status.due_date en adelante
+        // (incluye los días ya vencidos, para seguir recordando hasta que se pague).
+        async function mrpDebeMostrarse() {
+            try {
+                const { data, error } = await supabase.from('subscription_status').select('due_date').eq('id', 1).single();
+                if (error || !data) return false;
+                const hoy = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Caracas' });
+                const limite = new Date(data.due_date + 'T00:00:00');
+                limite.setDate(limite.getDate() - 3);
+                const limiteStr = limite.toLocaleDateString('en-CA', { timeZone: 'America/Caracas' });
+                return hoy >= limiteStr;
+            } catch (err) {
+                console.error('Error verificando fecha de mensualidad:', err);
+                return false;
+            }
+        }
+
         setInterval(() => {
             const ahora = new Date();
             const h = ahora.getHours();
@@ -3507,7 +3517,9 @@ ${this.creditForm.notes || ''}`,
 
             if (coincide && mrpUltimoDisparo !== claveActual) {
                 mrpUltimoDisparo = claveActual;
-                mostrarModalRecordatorioPago();
+                mrpDebeMostrarse().then(mostrar => {
+                    if (mostrar) mostrarModalRecordatorioPago();
+                });
             }
         }, 20000);
     </script>
