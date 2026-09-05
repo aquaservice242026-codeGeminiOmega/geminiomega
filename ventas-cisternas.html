@@ -797,7 +797,8 @@
                             delivery_address: this.isDelivery ? this.deliveryAddress : null,
                             delivery_cost: 0,
                             delivery_type: this.isDelivery ? 'delivery' : 'pickup',
-                            created_by: session.user.id
+                            created_by: session.user.id,
+                            sale_type: 'cisterna'
                         }).select().single();
                         if (saleError) throw saleError;
 
