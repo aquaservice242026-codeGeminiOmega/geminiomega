@@ -3446,11 +3446,12 @@
 
     <script>
         // ============================================
-        // CONFIGURACIÓN — ajusta esto a tu lógica real
+        // CONFIGURACIÓN DEL RECORDATORIO DE PAGO (OPTIMIZADO)
         // ============================================
-        const MRP_WHATSAPP_URL = "https://wa.me/584148004708?text=Hola,%20quiero%20regularizar%20el%20pago%20de%20mi%20mensualidad"; // TODO: tu número/link real
-        const MRP_DURACION_MODAL_MS = 3 * 60 * 1000; // 3 minutos en pantalla, o se cierra manualmente antes
-        // Horas en que debe aparecer: 12:30pm, 1:30pm, 2:30pm ... 9:30pm (13:30 a 21:30 en formato 24h, más el mediodía 12:30)
+        const MRP_WHATSAPP_URL = "https://wa.me/584148004708?text=Hola,%20quiero%20regularizar%20el%20pago%20de%20mi%20mensualidad";
+        const MRP_DURACION_MODAL_MS = 3 * 60 * 1000; // 3 minutos en pantalla
+
+        // Horas en que debe aparecer: 12:30pm, 1:30pm, 2:30pm ... 9:30pm
         const MRP_HORAS_MINUTOS_DISPARO = [
             [12, 30], [13, 30], [14, 30], [15, 30],
             [16, 30], [17, 30], [18, 30], [19, 30],
@@ -3458,16 +3459,34 @@
         ];
 
         let mrpTimeoutId = null;
-        let mrpIntervalId = null;
+        let mrpIntervalId = null; // Intervalo del temporizador visual del modal
+        let mrpCheckTimeIntervalId = null; // Intervalo que revisa la hora (20 seg)
+        let mrpUltimoDisparo = null;
+
+        // 1. Lógica puramente LOCAL para saber si estamos en periodo de aviso
+        function estaEnPeriodoDeAviso(dueDateStr) {
+            if (!dueDateStr) return false;
+
+            const hoy = new Date();
+            const hoyCaracas = new Date(hoy.toLocaleString('en-US', { timeZone: 'America/Caracas' }));
+
+            const limite = new Date(dueDateStr + 'T00:00:00');
+            limite.setDate(limite.getDate() - 3); // 3 días antes del vencimiento
+
+            // Si hoy es mayor o igual a la fecha límite, estamos en periodo de aviso
+            return hoyCaracas >= limite;
+        }
 
         function mostrarModalRecordatorioPago() {
             const modal = document.getElementById('modalRecordatorioPago');
+            if (!modal) return;
+
             document.getElementById('mrpBotonPagar').href = MRP_WHATSAPP_URL;
             modal.classList.add('activo');
 
             let restante = MRP_DURACION_MODAL_MS / 1000;
             const timerEl = document.getElementById('mrpTimer');
-            timerEl.innerText = `Este aviso se cerrará en ${mrpFormatTiempo(restante)}`;
+            if (timerEl) timerEl.innerText = `Este aviso se cerrará en ${mrpFormatTiempo(restante)}`;
 
             clearInterval(mrpIntervalId);
             mrpIntervalId = setInterval(() => {
@@ -3475,7 +3494,7 @@
                 if (restante <= 0) {
                     clearInterval(mrpIntervalId);
                 } else {
-                    timerEl.innerText = `Este aviso se cerrará en ${mrpFormatTiempo(restante)}`;
+                    if (timerEl) timerEl.innerText = `Este aviso se cerrará en ${mrpFormatTiempo(restante)}`;
                 }
             }, 1000);
 
@@ -3484,7 +3503,8 @@
         }
 
         function cerrarModalRecordatorioPago() {
-            document.getElementById('modalRecordatorioPago').classList.remove('activo');
+            const modal = document.getElementById('modalRecordatorioPago');
+            if (modal) modal.classList.remove('activo');
             clearTimeout(mrpTimeoutId);
             clearInterval(mrpIntervalId);
         }
@@ -3495,43 +3515,52 @@
             return `${m}:${s.toString().padStart(2, '0')}`;
         }
 
-        // Revisa cada 20 segundos si la hora actual coincide con alguno de los
-        // horarios de disparo (12:30, 1:30, ... 9:30pm), y evita repetirlo
-        // más de una vez dentro del mismo minuto.
-        let mrpUltimoDisparo = null;
-
-        // ✅ Solo dispara el modal desde 3 días antes de subscription_status.due_date en adelante
-        // (incluye los días ya vencidos, para seguir recordando hasta que se pague).
-        async function mrpDebeMostrarse() {
+        // 2. Función que se ejecuta UNA SOLA VEZ al cargar la aplicación
+        async function inicializarRecordatorioPago() {
             try {
-                const { data, error } = await supabase.from('subscription_status').select('due_date').eq('id', 1).single();
-                if (error || !data) return false;
-                const hoy = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Caracas' });
-                const limite = new Date(data.due_date + 'T00:00:00');
-                limite.setDate(limite.getDate() - 3);
-                const limiteStr = limite.toLocaleDateString('en-CA', { timeZone: 'America/Caracas' });
-                return hoy >= limiteStr;
+                // ✅ UNA SOLA CONSULTA a Supabase al cargar la página
+                const { data, error } = await supabase
+                    .from('subscription_status')
+                    .select('due_date')
+                    .eq('id', 1)
+                    .single();
+
+                if (error || !data) {
+                    console.warn('⚠️ No se pudo verificar el estado de la suscripción:', error?.message);
+                    return;
+                }
+
+                // 3. EVALUACIÓN LOCAL: ¿Faltan 3 días o menos para el vencimiento?
+                if (estaEnPeriodoDeAviso(data.due_date)) {
+                    console.log('⚠️ Suscripción próxima a vencer. Activando monitoreo de horario (cada 20s).');
+
+                    // ✅ SOLO AHORA iniciamos el bucle de 20 segundos para revisar la hora
+                    mrpCheckTimeIntervalId = setInterval(() => {
+                        const ahora = new Date();
+                        const h = ahora.getHours();
+                        const m = ahora.getMinutes();
+                        const claveActual = `${h}:${m}`;
+
+                        const coincide = MRP_HORAS_MINUTOS_DISPARO.some(([hh, mm]) => hh === h && mm === m);
+
+                        if (coincide && mrpUltimoDisparo !== claveActual) {
+                            mrpUltimoDisparo = claveActual;
+                            mostrarModalRecordatorioPago();
+                        }
+                    }, 20000); // 20 segundos (como lo tenías originalmente)
+
+                } else {
+                    console.log('✅ Suscripción al día. Monitoreo en segundo plano DESACTIVADO (0 consultas extra).');
+                }
             } catch (err) {
-                console.error('Error verificando fecha de mensualidad:', err);
-                return false;
+                console.error('Error crítico verificando suscripción:', err);
             }
         }
 
-        setInterval(() => {
-            const ahora = new Date();
-            const h = ahora.getHours();
-            const m = ahora.getMinutes();
-            const claveActual = `${h}:${m}`;
-
-            const coincide = MRP_HORAS_MINUTOS_DISPARO.some(([hh, mm]) => hh === h && mm === m);
-
-            if (coincide && mrpUltimoDisparo !== claveActual) {
-                mrpUltimoDisparo = claveActual;
-                mrpDebeMostrarse().then(mostrar => {
-                    if (mostrar) mostrarModalRecordatorioPago();
-                });
-            }
-        }, 20000);
+        // Ejecutar al cargar el DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            inicializarRecordatorioPago();
+        });
     </script>
 </body>
 
