@@ -347,7 +347,7 @@
                             <option value="rejected">Rechazado</option>
                         </select>
                     </div>
-                    <div>
+                    <div x-show="userBranch === 'geminis'">
                         <label class="block text-xs font-medium text-gray-700 mb-1">Tipo de Gasto</label>
                         <select x-model="filters.saleType" @change="loadExpenses()"
                             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
@@ -539,7 +539,7 @@
                         </template>
                     </select>
                 </div>
-                <div>
+                <div x-show="userBranch === 'geminis'">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Gasto *</label>
                     <select x-model="formData.sale_type"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
@@ -848,7 +848,10 @@
                             query = query.eq('status', this.filters.status);
                         }
                         if (this.filters.saleType) {
-                            query = query.eq('sale_type', this.filters.saleType);
+                            // ✅ Solo Géminis puede consultar/listar gastos de cisterna; para
+                            // cualquier otro usuario se fuerza 'agua_potable' sin importar lo
+                            // que tenga this.filters.saleType (defensa además del x-show en la UI).
+                            query = query.eq('sale_type', this.userBranch === 'geminis' ? this.filters.saleType : 'agua_potable');
                         }
 
                         query = query.order('expense_date', { ascending: false });
@@ -958,7 +961,7 @@
                             payment_method: this.formData.payment_method,
                             reference: this.formData.reference ? this.formData.reference.trim().toUpperCase() : null,
                             notes: this.formData.notes ? this.formData.notes.trim().toUpperCase() : null,
-                            sale_type: this.formData.sale_type,
+                            sale_type: this.userBranch === 'geminis' ? this.formData.sale_type : 'agua_potable',
                             created_by: session.user.id
                         };
 
