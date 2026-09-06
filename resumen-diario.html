@@ -852,16 +852,32 @@
                     try {
                         const { data, error } = await supabase
                             .from('subscription_status')
-                            .select('status')
+                            .select('due_date')
                             .eq('id', 1)
                             .single();
 
-                        if (error || !data || data.status !== 'active') {
+                        if (error || !data) {
+                            console.warn('⚠️ No se pudo verificar suscripción:', error?.message);
+                            return; // No bloquear si hay error de consulta
+                        }
+
+                        // Calcular si está vencido (más de 3 días después del due_date)
+                        const hoy = new Date();
+                        const hoyCaracas = new Date(hoy.toLocaleString('en-US', { timeZone: 'America/Caracas' }));
+                        const fechaVencimiento = new Date(data.due_date + 'T00:00:00');
+                        const fechaLimite = new Date(fechaVencimiento);
+                        fechaLimite.setDate(fechaLimite.getDate() + 3); // 3 días de gracia después del vencimiento
+
+                        // Solo suspender si ya pasaron los 3 días de gracia
+                        if (hoyCaracas > fechaLimite) {
+                            console.log('⚠️ Suscripción vencida hace más de 3 días');
                             document.getElementById('servicioSuspendido').classList.remove('hidden');
+                        } else {
+                            console.log('✅ Suscripción activa o en periodo de gracia');
                         }
                     } catch (err) {
                         console.error('Error verificando suscripción:', err);
-                        document.getElementById('servicioSuspendido').classList.remove('hidden');
+                        // No bloquear por errores de consulta
                     }
                 },
 
