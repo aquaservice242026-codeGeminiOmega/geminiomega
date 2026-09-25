@@ -2176,7 +2176,42 @@
                         }
                     }
                 },
-                // ✅ OPTIMIZADO: peticiones independientes lanzadas en paralelo con Promise.all
+                // ✅ NUEVO: manejo específico del error "JWT expired" (sesión de Supabase
+                // vencida, típicamente tras inactividad larga o la laptop suspendida).
+                // Si la renovación automática funciona, no se muestra ningún error — solo
+                // se avisa que reintente. Solo si el refresh también falla, se pide volver
+                // a iniciar sesión. Para cualquier otro tipo de error, se mantiene el
+                // comportamiento original (mostrar err.message tal cual).
+                async handleSaleError(err, title) {
+                    const isJwtExpired = typeof err?.message === 'string' && /jwt/i.test(err.message) && /expired/i.test(err.message);
+                    if (!isJwtExpired) {
+                        Swal.fire({ icon: 'error', title: title, text: err.message, confirmButtonText: 'Entendido' });
+                        return;
+                    }
+                    try {
+                        const { error: refreshError } = await supabase.auth.refreshSession();
+                        if (!refreshError) {
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Sesión renovada',
+                                text: 'Tu sesión había vencido y se renovó automáticamente. El carrito sigue intacto: por favor intenta cobrar de nuevo.',
+                                confirmButtonText: 'Entendido'
+                            });
+                            return;
+                        }
+                        throw refreshError;
+                    } catch (refreshErr) {
+                        console.error('No se pudo renovar la sesión:', refreshErr);
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Sesión expirada',
+                            text: 'Tu sesión venció y no se pudo renovar automáticamente. Debes iniciar sesión de nuevo para continuar. El carrito no se ha perdido.',
+                            confirmButtonText: 'Ir a Iniciar Sesión'
+                        }).then(() => {
+                            window.location.href = 'login.html';
+                        });
+                    }
+                },
                 // en vez de 3 awaits secuenciales. loadProducts depende de this.userBranch
                 // (ya cargado por el paso anterior de perfil), no de la tasa ni de clientes.
                 async initVentas() {
@@ -3042,7 +3077,7 @@
                         await this.loadProducts();
                     } catch (err) {
                         console.error('Error:', err);
-                        Swal.fire({ icon: 'error', title: 'Error al Procesar Venta', text: err.message, confirmButtonText: 'Entendido' });
+                        await this.handleSaleError(err, 'Error al Procesar Venta');
                     } finally {
                         this.processing = false;
                     }
@@ -3282,7 +3317,7 @@
                         await this.loadProducts();
                     } catch (err) {
                         console.error('Error:', err);
-                        Swal.fire({ icon: 'error', title: 'Error', text: err.message, confirmButtonText: 'Entendido' });
+                        await this.handleSaleError(err, 'Error');
                     } finally {
                         this.processing = false;
                     }
