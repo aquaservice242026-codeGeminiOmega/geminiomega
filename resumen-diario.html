@@ -520,13 +520,30 @@
                     return new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
                 },
 
+                // ✅ FECHA "HOY" DESDE EL SERVIDOR (Supabase) EN VEZ DEL RELOJ DEL NAVEGADOR
+                // Evita que un reloj de PC mal configurado muestre el resumen de un día
+                // equivocado o desbloquee/bloquee mal la verificación de mensualidad.
+                // Usa la función get_today_caracas() creada en Supabase (now() del servidor).
+                // Si falla (sin internet, RPC no disponible, etc.) cae de vuelta al cálculo
+                // anterior basado en el reloj local, para que la página nunca se rompa.
+                async getServerToday() {
+                    try {
+                        const { data, error } = await supabase.rpc('get_today_caracas');
+                        if (error || !data) throw error || new Error('get_today_caracas sin datos');
+                        return data; // ya viene en formato 'YYYY-MM-DD'
+                    } catch (err) {
+                        console.error('⚠️ No se pudo obtener la fecha del servidor, usando reloj local como respaldo:', err);
+                        return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Caracas' });
+                    }
+                },
+
                 // ✅ Bloqueo por mensualidad vencida: consulta la tabla subscription_status.
                 // Se aplica a TODOS los usuarios sin excepción de rol (admin/supervisor incluidos).
                 async checkMensualidad() {
                     try {
                         const { data, error } = await supabase.from('subscription_status').select('due_date').eq('id', 1).single();
                         if (error || !data) return false;
-                        const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Caracas' });
+                        const todayStr = await this.getServerToday();
                         return todayStr > data.due_date;
                     } catch (err) {
                         console.error('Error verificando mensualidad:', err);
@@ -561,6 +578,10 @@
                     this.updateCurrentDateTime();
                     const { data: { session } } = await supabase.auth.getSession();
                     if (!session) { window.location.href = 'login.html'; return; }
+
+                    // ✅ Fecha "hoy" tomada del servidor (no del reloj de la PC del usuario),
+                    // con fallback automático al reloj local si no hay conexión al RPC.
+                    this.filters.date = await this.getServerToday();
 
                     // ✅ Se verifica ANTES de cargar cualquier dato del reporte, sin importar el rol
                     this.mensualidadVencida = await this.checkMensualidad();
