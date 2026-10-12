@@ -278,28 +278,49 @@
                     <div class="space-y-2 mb-4">
                         <template x-for="(item, index) in cart" :key="index">
                             <div class="animate-bounce-in cart-item-compact rounded-xl">
-                                <div class="flex items-center justify-between mb-1">
-                                    <h4 class="font-semibold text-gray-800 text-sm" x-text="item.name"></h4>
+                                <div class="flex items-start justify-between mb-2">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800 text-sm" x-text="item.name"></h4>
+                                        <p class="text-[10px] text-gray-500">$<span
+                                                x-text="item.pricePerLiter.toFixed(4)"></span>/L
+                                            <span x-show="item.hasCustomPrice"
+                                                class="ml-1 text-amber-600 font-semibold">· precio especial</span>
+                                        </p>
+                                    </div>
                                     <button @click="removeFromCart(index)"
                                         class="text-red-500 hover:text-red-700 touch-btn p-1">
                                         <i class="fas fa-trash text-sm"></i>
                                     </button>
                                 </div>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center space-x-1">
-                                        <button @click="updateQuantity(index, -1)"
-                                            class="touch-btn w-7 h-7 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400">
-                                            <i class="fas fa-minus text-xs"></i>
-                                        </button>
-                                        <span class="font-bold text-base w-6 text-center text-gray-800"
-                                            x-text="item.quantity"></span>
-                                        <button @click="updateQuantity(index, 1)"
-                                            class="touch-btn w-7 h-7 bg-cyan-600 text-white rounded-full flex items-center justify-center hover:bg-cyan-700">
-                                            <i class="fas fa-plus text-xs"></i>
-                                        </button>
+                                <div class="grid grid-cols-2 gap-2 mb-2">
+                                    <div>
+                                        <label class="block text-[10px] font-medium text-gray-600 mb-0.5">Litros por
+                                            viaje</label>
+                                        <input type="number" min="1" step="1" inputmode="numeric"
+                                            x-model.number="item.liters" @change="normalizeLiters(item)"
+                                            class="w-full px-2 py-1 text-sm font-bold border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-cyan-500">
                                     </div>
+                                    <div>
+                                        <label class="block text-[10px] font-medium text-gray-600 mb-0.5">Viajes</label>
+                                        <div class="flex items-center space-x-1">
+                                            <button @click="updateQuantity(index, -1)"
+                                                class="touch-btn w-7 h-7 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400">
+                                                <i class="fas fa-minus text-xs"></i>
+                                            </button>
+                                            <span class="font-bold text-base w-6 text-center text-gray-800"
+                                                x-text="item.quantity"></span>
+                                            <button @click="updateQuantity(index, 1)"
+                                                class="touch-btn w-7 h-7 bg-cyan-600 text-white rounded-full flex items-center justify-center hover:bg-cyan-700">
+                                                <i class="fas fa-plus text-xs"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[10px] text-gray-500"
+                                        x-text="((Number(item.liters) || 0) * item.quantity).toLocaleString('es-VE') + ' L en total'"></span>
                                     <p class="font-bold text-cyan-700 text-sm"
-                                        x-text="'$' + (item.price * item.quantity).toFixed(2)"></p>
+                                        x-text="'$' + lineTotal(item).toFixed(2)"></p>
                                 </div>
                             </div>
                         </template>
@@ -519,6 +540,21 @@
             return Math.round((parseFloat(num) + Number.EPSILON) * 100) / 100;
         }
 
+        async function showConfirm(title, html, confirmText = 'Confirmar', cancelText = 'Cancelar') {
+            const result = await Swal.fire({
+                title, html, icon: 'question', showCancelButton: true,
+                confirmButtonText: confirmText, cancelButtonText: cancelText,
+                reverseButtons: true, focusCancel: true,
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold',
+                    cancelButton: 'bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold'
+                },
+                buttonsStyling: false
+            });
+            return result.isConfirmed;
+        }
+
         function ensureValidRate(rate) {
             const parsed = parseFloat(rate);
             if (isNaN(parsed) || parsed <= 0) return 700.22;
@@ -561,9 +597,18 @@
                 userInitials: '??',
                 newCustomer: { full_name: '', tipo: 'condominio', cedula: '', phone: '', address: '' },
                 creditForm: { customer_id_card: '', payment_date: '', initial_payment: 0 },
+                customerPrices: {},
+
+                // Precio por litro = precio de la presentación / su capacidad. El usuario edita los litros.
+                unitPrice(item) { return round2(item.pricePerLiter * (Number(item.liters) || 0)); },
+                lineTotal(item) { return round2(this.unitPrice(item) * item.quantity); },
+                normalizeLiters(item) {
+                    const v = Math.round(Number(item.liters));
+                    item.liters = (isNaN(v) || v <= 0) ? item.size_liters : v;
+                },
 
                 get subtotal() {
-                    return round2(this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0));
+                    return round2(this.cart.reduce((sum, item) => sum + this.lineTotal(item), 0));
                 },
                 get totalUSD() {
                     return this.subtotal;
@@ -606,6 +651,21 @@
                         this.loadProducts(),
                         this.loadCustomers()
                     ]);
+                    this.$watch('selectedCustomer', () => this.onCustomerChange());
+                    this.$watch('paymentMethod', (m) => {
+                        if (m === 'credito' && !this.creditForm.payment_date) {
+                            const d = getCaracasDate(); d.setDate(d.getDate() + 30);
+                            this.creditForm.payment_date = d.toISOString().split('T')[0];
+                        }
+                    });
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape') { this.cartOpen = false; this.showCustomerModal = false; }
+                        if (e.key === 'F4' && !e.ctrlKey) {
+                            e.preventDefault();
+                            if (this.cart.length > 0 && !this.processing) this.processSale();
+                        }
+                        if (e.key === 'F8') { e.preventDefault(); this.clearCart(); }
+                    });
                     this.loading = false;
                 },
 
@@ -673,7 +733,11 @@
                 },
 
                 addProduct(product) {
-                    const existing = this.cart.find(item => item.product_id === product.id);
+                    const custom = this.customerPrices[product.id];
+                    const basePrice = custom || product.price;
+                    const perLiter = product.size_liters > 0 ? basePrice / product.size_liters : 0;
+                    // Misma línea solo si conserva los litros de la presentación (si editó litros, es otra línea)
+                    const existing = this.cart.find(i => i.product_id === product.id && Number(i.liters) === product.size_liters);
                     if (existing) {
                         existing.quantity++;
                     } else {
@@ -681,11 +745,56 @@
                             product_id: product.id,
                             name: product.name,
                             size_liters: product.size_liters,
-                            price: product.price,
+                            liters: product.size_liters,
+                            pricePerLiter: perLiter,
+                            originalPricePerLiter: product.size_liters > 0 ? product.price / product.size_liters : 0,
+                            hasCustomPrice: !!custom,
                             quantity: 1
                         });
                     }
                     if (window.innerWidth < 1024) this.cartOpen = true;
+                },
+
+                async loadCustomerPrices(customerId) {
+                    this.customerPrices = {};
+                    if (!customerId) return;
+                    try {
+                        const { data, error } = await supabase.from('customer_prices')
+                            .select('product_id, custom_price').eq('customer_id', customerId).eq('is_active', true);
+                        if (error) throw error;
+                        (data || []).forEach(p => { this.customerPrices[p.product_id] = p.custom_price; });
+                    } catch (err) {
+                        console.error('Error cargando precios personalizados:', err);
+                    }
+                },
+
+                applyCustomerPricesToCart() {
+                    this.cart.forEach(item => {
+                        const custom = this.customerPrices[item.product_id];
+                        if (custom && item.size_liters > 0) {
+                            item.pricePerLiter = custom / item.size_liters;
+                            item.hasCustomPrice = true;
+                        } else {
+                            item.pricePerLiter = item.originalPricePerLiter;
+                            item.hasCustomPrice = false;
+                        }
+                    });
+                },
+
+                async onCustomerChange() {
+                    await this.loadCustomerPrices(this.selectedCustomer);
+                    this.applyCustomerPricesToCart();
+                    const c = this.customers.find(x => x.id === this.selectedCustomer);
+                    if (c) {
+                        if (c.cedula && !this.creditForm.customer_id_card) this.creditForm.customer_id_card = c.cedula;
+                        if (this.isDelivery && c.address && !this.deliveryAddress) this.deliveryAddress = c.address;
+                    }
+                },
+
+                clearCart() {
+                    if (this.cart.length === 0) return;
+                    this.cart = [];
+                    showToast('Carrito vaciado', 'info');
                 },
 
                 updateQuantity(index, delta) {
@@ -730,9 +839,10 @@
 
                 canProcessCredit() {
                     if (this.cart.length === 0) return false;
+                    if (!this.selectedCustomer) return false;
                     if (!this.creditForm.customer_id_card || !this.creditForm.customer_id_card.trim()) return false;
                     if (!this.creditForm.payment_date) return false;
-                    if (this.creditForm.initial_payment > this.totalUSD) return false;
+                    if ((this.creditForm.initial_payment || 0) < 0 || (this.creditForm.initial_payment || 0) >= this.totalUSD) return false;
                     return true;
                 },
 
@@ -769,8 +879,46 @@
                         }
                     }
 
+                    if (this.cart.some(i => !(Number(i.liters) > 0))) {
+                        showToast('Revise los litros: deben ser mayores a 0', 'error');
+                        return;
+                    }
+                    if (this.cart.some(i => this.unitPrice(i) <= 0)) {
+                        showToast('Hay una presentación sin precio configurado', 'error');
+                        return;
+                    }
+
                     const customer = this.customers.find(c => c.id === this.selectedCustomer);
                     const creditAmount = esCredito ? round2(this.totalUSD - (this.creditForm.initial_payment || 0)) : 0;
+                    const totalLitros = this.cart.reduce((s, i) => s + (Number(i.liters) || 0) * i.quantity, 0);
+                    const methodNames = {
+                        efectivo_bs: 'Efectivo Bs', efectivo_divisas: 'Efectivo USD', pago_movil: 'Pago Móvil',
+                        transferencia: 'Transferencia', punto_venta: 'Punto de Venta', credito: 'Crédito'
+                    };
+
+                    const confirmed = await showConfirm('Confirmar Venta de Cisterna', `
+                        <div class="text-left space-y-2 text-sm">
+                            <p><i class="fas fa-user text-blue-500 mr-1"></i><strong>Cliente:</strong> ${customer?.full_name || 'Cliente no registrado'}</p>
+                            <p><i class="fas fa-water text-blue-500 mr-1"></i><strong>Litros totales:</strong> ${totalLitros.toLocaleString('es-VE')} L</p>
+                            <p><i class="fas fa-credit-card text-blue-500 mr-1"></i><strong>Método:</strong> ${methodNames[this.paymentMethod] || this.paymentMethod}</p>
+                            ${esCredito ? `<p><i class="fas fa-calendar text-blue-500 mr-1"></i><strong>A financiar:</strong> $${creditAmount.toFixed(2)} (vence ${this.creditForm.payment_date})</p>` : ''}
+                            <div class="p-3 bg-green-50 rounded-lg border border-green-200 flex justify-between"><span class="font-semibold">Total USD</span><span class="text-xl font-bold text-green-600">$${this.totalUSD.toFixed(2)}</span></div>
+                            <div class="p-3 bg-blue-50 rounded-lg border border-blue-200 flex justify-between"><span class="font-semibold">Total Bs.</span><span class="text-xl font-bold text-blue-600">Bs. ${this.totalBs.toFixed(2)}</span></div>
+                            <p class="text-xs text-gray-500 text-center">Tasa: Bs. ${this.exchangeRate.toFixed(2)} por USD</p>
+                        </div>`, 'Procesar Venta', 'Cancelar');
+                    if (!confirmed) return;
+
+                    const notes = [`Tasa aplicada: Bs. ${this.exchangeRate.toFixed(2)}`, `Litros totales: ${totalLitros}`];
+                    if (esCredito) notes.push(`Crédito Cisterna - Pago inicial: $${round2(this.creditForm.initial_payment).toFixed(2)}`);
+                    if (this.paymentReference && !esCredito) notes.push(`Ref: ${this.paymentReference}`);
+                    if (this.paymentMethod === 'efectivo_bs' && this.amountReceivedBs > 0) {
+                        notes.push(`Recibido Bs: ${round2(this.amountReceivedBs).toFixed(2)}`);
+                        notes.push(`Cambio Bs: ${(round2(this.amountReceivedBs) - this.totalBs).toFixed(2)}`);
+                    }
+                    if (this.paymentMethod === 'efectivo_divisas' && this.amountReceivedUsd > 0) {
+                        notes.push(`Recibido USD: $${round2(this.amountReceivedUsd).toFixed(2)}`);
+                        notes.push(`Cambio USD: $${(round2(this.amountReceivedUsd) - this.totalUSD).toFixed(2)}`);
+                    }
 
                     this.processing = true;
                     try {
@@ -788,7 +936,7 @@
                             payment_method: esCredito ? 'credito' : this.paymentMethod,
                             payment_reference: !esCredito ? (this.paymentReference || null) : null,
                             status: esCredito ? (creditAmount > 0 ? 'pending' : 'completed') : 'completed',
-                            notes: esCredito ? `Crédito Cisterna - Pago inicial: $${round2(this.creditForm.initial_payment).toFixed(2)}` : null,
+                            notes: notes.join('\n'),
                             exchange_rate_used: this.exchangeRate,
                             rate_date: rateDateStr,
                             amount_received: this.paymentMethod === 'efectivo_bs' ? this.amountReceivedBs :
@@ -806,8 +954,9 @@
                             sale_id: sale.id,
                             product_id: item.product_id,
                             quantity: item.quantity,
-                            unit_price: item.price,
-                            total: round2(item.price * item.quantity)
+                            unit_price: this.unitPrice(item),
+                            total: this.lineTotal(item),
+                            liters: round2(item.liters)
                         }));
                         const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
                         if (itemsError) throw itemsError;
@@ -816,7 +965,11 @@
                             const { error: paymentError } = await supabase.from('sale_payments').insert({
                                 sale_id: sale.id,
                                 payment_method: this.paymentMethod,
-                                amount_usd: this.totalUSD
+                                amount_usd: round2(this.totalUSD),
+                                amount_bs: round2(this.totalBs),
+                                reference: this.paymentReference || null,
+                                notes: 'Pago único',
+                                created_by: session.user.id
                             });
                             if (paymentError) throw paymentError;
                         } else {
@@ -870,6 +1023,7 @@
                         this.amountReceivedBs = 0;
                         this.amountReceivedUsd = 0;
                         this.creditForm = { customer_id_card: '', payment_date: '', initial_payment: 0 };
+                        this.customerPrices = {};
                         this.cartOpen = false;
                     } catch (err) {
                         console.error('Error:', err);
@@ -880,6 +1034,278 @@
                 }
             }
         }
+    </script>
+
+    <!-- ============================================ -->
+    <!-- MODAL RECORDATORIO DE MENSUALIDAD (ventas.html) -->
+    <!-- Se muestra cada hora en punto y media, de 12:30pm a 9:30pm -->
+    <!-- ============================================ -->
+    <style>
+        #modalRecordatorioPago {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(3px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            animation: mrpFadeIn 0.25s ease-out;
+        }
+
+        #modalRecordatorioPago.activo {
+            display: flex;
+        }
+
+        @keyframes mrpFadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .mrp-card {
+            background: #ffffff;
+            border-radius: 16px;
+            max-width: 420px;
+            width: 90%;
+            padding: 32px 28px 24px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+            position: relative;
+            animation: mrpPopIn 0.3s ease-out;
+        }
+
+        @keyframes mrpPopIn {
+            from {
+                transform: scale(0.92);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .mrp-close {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #94a3b8;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .mrp-close:hover {
+            color: #475569;
+        }
+
+        .mrp-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 16px;
+            border-radius: 50%;
+            background: #fef3c7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .mrp-title {
+            font-size: 19px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 10px;
+        }
+
+        .mrp-msg {
+            font-size: 14.5px;
+            color: #475569;
+            line-height: 1.5;
+            margin-bottom: 22px;
+        }
+
+        .mrp-btn-primary {
+            display: inline-block;
+            width: 100%;
+            background: #16a34a;
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14.5px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+            text-decoration: none;
+            box-sizing: border-box;
+        }
+
+        .mrp-btn-primary:hover {
+            background: #15803d;
+        }
+
+        .mrp-btn-secondary {
+            display: inline-block;
+            width: 100%;
+            background: transparent;
+            color: #64748b;
+            border: none;
+            padding: 8px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .mrp-btn-secondary:hover {
+            text-decoration: underline;
+        }
+
+        .mrp-timer {
+            margin-top: 12px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+    </style>
+
+    <div id="modalRecordatorioPago">
+        <div class="mrp-card">
+            <button class="mrp-close" onclick="cerrarModalRecordatorioPago()" title="Cerrar">✕</button>
+            <div class="mrp-icon">🔔</div>
+            <div class="mrp-title">Recordatorio de pago Modulos de Resumen Diario y Reportes SUSPENDIDO!</div>
+            <div class="mrp-msg">Este es un recordatorio automático: Tu suscripción está pendiente de pago. Las ventas
+                siguen funcionando con normalidad, pero para mantener activas todas las funciones del sistema,
+                incluyendo reportes y resumen diario. Regulariza tu pago cuando puedas.</div>
+            <a href="#" id="mrpBotonPagar" class="mrp-btn-primary" target="_blank">Regularizar pago</a>
+            <button class="mrp-btn-secondary" onclick="cerrarModalRecordatorioPago()">Cerrar</button>
+            <div class="mrp-timer" id="mrpTimer"></div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURACIÓN DEL RECORDATORIO DE PAGO (OPTIMIZADO)
+        // ============================================
+        const MRP_WHATSAPP_URL = "https://wa.me/584148004708?text=Hola,%20quiero%20regularizar%20el%20pago%20de%20mi%20mensualidad";
+        const MRP_DURACION_MODAL_MS = 3 * 60 * 1000; // 3 minutos en pantalla
+
+        // Horas en que debe aparecer: 12:30pm, 1:30pm, 2:30pm ... 9:30pm
+        const MRP_HORAS_MINUTOS_DISPARO = [
+            [12, 30], [13, 30], [14, 30], [15, 30],
+            [16, 30], [17, 30], [18, 30], [19, 30],
+            [20, 30], [21, 30]
+        ];
+
+        let mrpTimeoutId = null;
+        let mrpIntervalId = null; // Intervalo del temporizador visual del modal
+        let mrpCheckTimeIntervalId = null; // Intervalo que revisa la hora (20 seg)
+        let mrpUltimoDisparo = null;
+
+        // 1. Lógica puramente LOCAL para saber si estamos en periodo de aviso
+        function estaEnPeriodoDeAviso(dueDateStr) {
+            if (!dueDateStr) return false;
+
+            const hoy = new Date();
+            const hoyCaracas = new Date(hoy.toLocaleString('en-US', { timeZone: 'America/Caracas' }));
+
+            const limite = new Date(dueDateStr + 'T00:00:00');
+            limite.setDate(limite.getDate() - 3); // 3 días antes del vencimiento
+
+            // Si hoy es mayor o igual a la fecha límite, estamos en periodo de aviso
+            return hoyCaracas >= limite;
+        }
+
+        function mostrarModalRecordatorioPago() {
+            const modal = document.getElementById('modalRecordatorioPago');
+            if (!modal) return;
+
+            document.getElementById('mrpBotonPagar').href = MRP_WHATSAPP_URL;
+            modal.classList.add('activo');
+
+            let restante = MRP_DURACION_MODAL_MS / 1000;
+            const timerEl = document.getElementById('mrpTimer');
+            if (timerEl) timerEl.innerText = `Este aviso se cerrará en ${mrpFormatTiempo(restante)}`;
+
+            clearInterval(mrpIntervalId);
+            mrpIntervalId = setInterval(() => {
+                restante--;
+                if (restante <= 0) {
+                    clearInterval(mrpIntervalId);
+                } else {
+                    if (timerEl) timerEl.innerText = `Este aviso se cerrará en ${mrpFormatTiempo(restante)}`;
+                }
+            }, 1000);
+
+            clearTimeout(mrpTimeoutId);
+            mrpTimeoutId = setTimeout(cerrarModalRecordatorioPago, MRP_DURACION_MODAL_MS);
+        }
+
+        function cerrarModalRecordatorioPago() {
+            const modal = document.getElementById('modalRecordatorioPago');
+            if (modal) modal.classList.remove('activo');
+            clearTimeout(mrpTimeoutId);
+            clearInterval(mrpIntervalId);
+        }
+
+        function mrpFormatTiempo(segundos) {
+            const m = Math.floor(segundos / 60);
+            const s = segundos % 60;
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // 2. Función que se ejecuta UNA SOLA VEZ al cargar la aplicación
+        async function inicializarRecordatorioPago() {
+            try {
+                // ✅ UNA SOLA CONSULTA a Supabase al cargar la página
+                const { data, error } = await supabase
+                    .from('subscription_status')
+                    .select('due_date')
+                    .eq('id', 1)
+                    .single();
+
+                if (error || !data) {
+                    console.warn('⚠️ No se pudo verificar el estado de la suscripción:', error?.message);
+                    return;
+                }
+
+                // 3. EVALUACIÓN LOCAL: ¿Faltan 3 días o menos para el vencimiento?
+                if (estaEnPeriodoDeAviso(data.due_date)) {
+                    console.log('⚠️ Suscripción próxima a vencer. Activando monitoreo de horario (cada 20s).');
+
+                    // ✅ SOLO AHORA iniciamos el bucle de 20 segundos para revisar la hora
+                    mrpCheckTimeIntervalId = setInterval(() => {
+                        const ahora = new Date();
+                        const h = ahora.getHours();
+                        const m = ahora.getMinutes();
+                        const claveActual = `${h}:${m}`;
+
+                        const coincide = MRP_HORAS_MINUTOS_DISPARO.some(([hh, mm]) => hh === h && mm === m);
+
+                        if (coincide && mrpUltimoDisparo !== claveActual) {
+                            mrpUltimoDisparo = claveActual;
+                            mostrarModalRecordatorioPago();
+                        }
+                    }, 20000); // 20 segundos (como lo tenías originalmente)
+
+                } else {
+                    console.log('✅ Suscripción al día. Monitoreo en segundo plano DESACTIVADO (0 consultas extra).');
+                }
+            } catch (err) {
+                console.error('Error crítico verificando suscripción:', err);
+            }
+        }
+
+        // Ejecutar al cargar el DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            inicializarRecordatorioPago();
+        });
     </script>
 </body>
 
