@@ -5,13 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Servicios Agua Potable - Dashboard</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://wotoslngwrsddohowkba.supabase.co" crossorigin>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Scripts diferidos: Alpine debe ir ÚLTIMO para que Chart.js y alertify ya estén cargados -->
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/alertify.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -318,7 +323,8 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-white rounded-2xl shadow-sm p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Actividad Reciente</h3>
-                        <div x-show="recentActivity.length === 0" class="text-center py-8 text-gray-400">
+                        <div x-show="activityLoaded && recentActivity.length === 0"
+                            class="text-center py-8 text-gray-400">
                             <i class="fas fa-history text-4xl mb-2"></i>
                             <p>No hay actividad reciente</p>
                         </div>
@@ -363,7 +369,7 @@
                             <i class="fas fa-database text-blue-500 mr-2"></i>
                             Tanques de Almacenamiento
                         </h3>
-                        <div x-show="tanks.length === 0" class="text-center py-8 text-gray-400">
+                        <div x-show="tanksLoaded && tanks.length === 0" class="text-center py-8 text-gray-400">
                             <i class="fas fa-database text-4xl mb-2"></i>
                             <p>No hay tanques registrados</p>
                         </div>
@@ -474,6 +480,10 @@
             }
         };
 
+        // Instancias de Chart.js FUERA del estado de Alpine (evita que Alpine las envuelva en proxies reactivos)
+        let salesChartInstance = null;
+        let productChartInstance = null;
+
         function dashboardApp() {
             return {
                 mobileMenuOpen: false,
@@ -484,12 +494,14 @@
                 userBranch: '',
                 userInitials: '??',
                 exchangeRate: 700.22,
-                salesChart: null,
-                productChart: null,
 
                 // Control de sucursales
                 selectedBranch: 'all',
                 availableBranches: [],
+
+                // Evitan mostrar "No hay actividad/tanques" mientras todavía se están cargando
+                activityLoaded: false,
+                tanksLoaded: false,
 
                 stats: {
                     todaySales: 0,
@@ -539,14 +551,26 @@
                             this.selectedBranch = (profile.role === 'admin' || profile.role === 'supervisor') ? 'all' : profile.branch;
                         }
 
-                        // Cargar sucursales disponibles si es admin o supervisor
+                        // ⚡ Secundarias: se cargan en segundo plano, sin bloquear el dashboard
+                        const secondary = [this.loadRecentActivity(), this.loadTanks()];
                         if (this.userRole === 'admin' || this.userRole === 'supervisor') {
-                            await this.loadAvailableBranches();
+                            secondary.push(this.loadAvailableBranches());
                         }
 
-                        await this.loadExchangeRate();
-                        await this.refreshDashboard();
+                        // ⚡ Críticas (tarjetas + gráficos): todo en paralelo, ya no una tras otra
+                        await Promise.all([
+                            this.loadExchangeRate(),
+                            this.loadTodayStats(),
+                            this.loadWeeklySales(),
+                            this.loadCreditAccounts()
+                        ]);
 
+                        // Mostrar el dashboard y crear los gráficos cuando los canvas ya son visibles
+                        this.loading = false;
+                        await this.$nextTick();
+                        this.initCharts();
+
+                        await Promise.all(secondary);
                     } catch (err) {
                         console.error('Error inicializando dashboard:', err);
                     } finally {
@@ -563,33 +587,30 @@
                             .not('branch', 'is', null);
 
                         if (!error && data) {
-                            const uniqueBranches = [...new Set(data.map(p => p.branch))];
-                            this.availableBranches = uniqueBranches;
+                            this.availableBranches = [...new Set(data.map(p => p.branch))];
                         }
                     } catch (err) {
                         console.error('Error cargando sucursales:', err);
                     }
                 },
 
+                // Se usa al cambiar de sucursal (los canvas ya están visibles)
                 async refreshDashboard() {
                     await Promise.all([
                         this.loadTodayStats(),
                         this.loadWeeklySales(),
-                        this.loadProductDistribution(),
                         this.loadCreditAccounts(),
                         this.loadRecentActivity(),
                         this.loadTanks()
                     ]);
-
-                    this.$nextTick(() => { this.initCharts(); });
+                    this.initCharts();
                 },
 
                 async loadExchangeRate() {
                     try {
                         const { data, error } = await supabase.rpc('get_active_exchange_rate');
                         if (!error && data) {
-                            const rate = ensureValidRate(data);
-                            this.exchangeRate = rate;
+                            this.exchangeRate = ensureValidRate(data);
                         } else {
                             this.exchangeRate = 700.22;
                         }
@@ -598,45 +619,41 @@
                     }
                 },
 
+                // ⚡ Las 3 consultas de hoy van en paralelo y la de sale_items se usa
+                // para las dos cosas: botellones vendidos y distribución por producto.
                 async loadTodayStats() {
                     try {
-                        // Fechas calculadas en zona horaria Caracas
                         const todayStr = DateUtils.getStartOfDay(new Date());
                         const yesterday = new Date();
                         yesterday.setDate(yesterday.getDate() - 1);
                         const yesterdayStr = DateUtils.getStartOfDay(yesterday);
 
-                        let query = supabase.from('sales').select('total, status, payment_method').gte('created_at', todayStr);
-                        if (this.selectedBranch !== 'all') {
-                            query = query.eq('branch', this.selectedBranch);
-                        }
-                        const { data: todaySales } = await query;
+                        const byBranch = (q, column = 'branch') =>
+                            this.selectedBranch !== 'all' ? q.eq(column, this.selectedBranch) : q;
 
-                        let yesterdayQuery = supabase.from('sales').select('total').gte('created_at', yesterdayStr).lt('created_at', todayStr);
-                        if (this.selectedBranch !== 'all') {
-                            yesterdayQuery = yesterdayQuery.eq('branch', this.selectedBranch);
-                        }
-                        const { data: yesterdaySales } = await yesterdayQuery;
+                        const [{ data: todaySales }, { data: yesterdaySales }, { data: saleItems }] = await Promise.all([
+                            byBranch(supabase.from('sales').select('total, status, payment_method').gte('created_at', todayStr)),
+                            byBranch(supabase.from('sales').select('total').gte('created_at', yesterdayStr).lt('created_at', todayStr)),
+                            byBranch(
+                                supabase.from('sale_items')
+                                    .select(`quantity, products!inner(size_liters), sales!inner(branch, created_at)`)
+                                    .gte('sales.created_at', todayStr),
+                                'sales.branch'
+                            )
+                        ]);
 
                         this.stats.todaySales = todaySales?.length || 0;
                         this.stats.yesterdaySales = yesterdaySales?.length || 0;
                         this.stats.todayRevenue = todaySales?.filter(s => s.status === 'completed').reduce((sum, s) => sum + s.total, 0) || 0;
 
-                        let itemsQuery = supabase.from('sale_items').select(`quantity, products!inner(size_liters), sales!inner(branch, created_at)`).gte('sales.created_at', todayStr);
-                        if (this.selectedBranch !== 'all') {
-                            itemsQuery = itemsQuery.eq('sales.branch', this.selectedBranch);
-                        }
-                        const { data: saleItems } = await itemsQuery;
-
                         this.stats.totalBottlesSold = saleItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-                        this.stats.bottlesBySize = { 5: 0, 13: 0, 20: 0 };
-
+                        const bySize = { 5: 0, 13: 0, 20: 0 };
                         saleItems?.forEach(item => {
                             const size = item.products.size_liters;
-                            if (this.stats.bottlesBySize[size] !== undefined) {
-                                this.stats.bottlesBySize[size] += item.quantity;
-                            }
+                            if (bySize[size] !== undefined) bySize[size] += item.quantity;
                         });
+                        this.stats.bottlesBySize = bySize;
+                        this.productDistribution.data = [bySize[5], bySize[13], bySize[20]];
 
                     } catch (err) {
                         console.error('Error cargando estadísticas de hoy:', err);
@@ -647,8 +664,7 @@
                     try {
                         // Calcular el lunes de la semana actual en hora Caracas
                         const now = new Date();
-                        const caracasTimeStr = now.toLocaleString('en-US', { timeZone: 'America/Caracas' });
-                        const caracasDate = new Date(caracasTimeStr);
+                        const caracasDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Caracas' }));
 
                         const dayOfWeek = caracasDate.getDay() || 7; // 1 = Lunes, 7 = Domingo
                         const monday = new Date(caracasDate);
@@ -677,32 +693,6 @@
                     }
                 },
 
-                async loadProductDistribution() {
-                    try {
-                        const todayStr = DateUtils.getStartOfDay(new Date());
-                        let query = supabase.from('sale_items').select(`quantity, products!inner(size_liters), sales!inner(branch, created_at)`).gte('sales.created_at', todayStr);
-
-                        if (this.selectedBranch !== 'all') {
-                            query = query.eq('sales.branch', this.selectedBranch);
-                        }
-
-                        const { data: items } = await query;
-                        const distribution = { 5: 0, 13: 0, 20: 0 };
-
-                        items?.forEach(item => {
-                            const size = item.products.size_liters;
-                            if (distribution[size] !== undefined) {
-                                distribution[size] += item.quantity;
-                            }
-                        });
-
-                        this.productDistribution.data = [distribution[5], distribution[13], distribution[20]];
-
-                    } catch (err) {
-                        console.error('Error cargando distribución:', err);
-                    }
-                },
-
                 async loadCreditAccounts() {
                     try {
                         let query = supabase.from('sales').select('total, customer_id').eq('payment_method', 'credito').eq('status', 'pending');
@@ -712,8 +702,7 @@
 
                         const { data: creditSales } = await query;
                         this.stats.creditAccounts = creditSales?.reduce((sum, s) => sum + s.total, 0) || 0;
-                        const uniqueCustomers = new Set(creditSales?.map(s => s.customer_id));
-                        this.stats.creditCustomers = uniqueCustomers.size;
+                        this.stats.creditCustomers = new Set(creditSales?.map(s => s.customer_id)).size;
 
                     } catch (err) {
                         console.error('Error cargando cuentas por cobrar:', err);
@@ -739,6 +728,8 @@
 
                     } catch (err) {
                         console.error('Error cargando actividad reciente:', err);
+                    } finally {
+                        this.activityLoaded = true;
                     }
                 },
 
@@ -757,20 +748,23 @@
 
                     } catch (err) {
                         console.error('Error cargando tanques:', err);
+                    } finally {
+                        this.tanksLoaded = true;
                     }
                 },
 
                 initCharts() {
+                    // Se pasan copias planas de los arrays para que Chart.js no reciba proxies de Alpine
                     const salesCtx = document.getElementById('salesChart');
                     if (salesCtx) {
-                        if (this.salesChart) this.salesChart.destroy();
-                        this.salesChart = new Chart(salesCtx, {
+                        if (salesChartInstance) salesChartInstance.destroy();
+                        salesChartInstance = new Chart(salesCtx, {
                             type: 'line',
                             data: {
-                                labels: this.weeklySales.labels,
+                                labels: [...this.weeklySales.labels],
                                 datasets: [{
                                     label: 'Ventas ($)',
-                                    data: this.weeklySales.data,
+                                    data: [...this.weeklySales.data],
                                     borderColor: '#0ea5e9',
                                     backgroundColor: 'rgba(14, 165, 233, 0.1)',
                                     tension: 0.4, fill: true, borderWidth: 2, pointRadius: 3, pointHoverRadius: 5
@@ -789,13 +783,13 @@
 
                     const productCtx = document.getElementById('productChart');
                     if (productCtx) {
-                        if (this.productChart) this.productChart.destroy();
-                        this.productChart = new Chart(productCtx, {
+                        if (productChartInstance) productChartInstance.destroy();
+                        productChartInstance = new Chart(productCtx, {
                             type: 'doughnut',
                             data: {
-                                labels: this.productDistribution.labels,
+                                labels: [...this.productDistribution.labels],
                                 datasets: [{
-                                    data: this.productDistribution.data,
+                                    data: [...this.productDistribution.data],
                                     backgroundColor: ['#06b6d4', '#0ea5e9', '#0284c7'],
                                     borderWidth: 0, cutout: '70%'
                                 }]
@@ -845,6 +839,7 @@
                 }
             }
         }
+
     </script>
 </body>
 
