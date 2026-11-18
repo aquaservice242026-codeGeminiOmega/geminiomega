@@ -544,7 +544,8 @@
                                 class="product-card rounded-xl text-white p-3 lg:p-6 relative overflow-hidden" :class="{
 'bg-gradient-to-br from-cyan-400 to-cyan-600': product.size_liters === 5,
 'bg-gradient-to-br from-blue-400 to-blue-600': product.size_liters === 13,
-'bg-gradient-to-br from-indigo-500 to-indigo-700': product.size_liters === 20,
+'bg-gradient-to-br from-indigo-500 to-indigo-700': product.size_liters === 20 && !/mayor/i.test(product.name),
+'bg-gradient-to-br from-green-300 to-green-500': /mayor/i.test(product.name),
 'bg-gradient-to-br from-amber-600 to-amber-800': product.product_type === 'empty_bottle' && product.size_liters === 15,
 'bg-gradient-to-br from-orange-600 to-orange-800': product.product_type === 'empty_bottle' && product.size_liters === 20,
 'low-stock': product.stock <= 10 && product.stock > 0,
@@ -2346,7 +2347,7 @@
                                 const size = item.size_liters || item.size;
                                 const productType = item.product_type || item.type;
                                 return {
-                                    id: productType === 'empty_bottle' ? 'empty_' + size : 'size_' + size,
+                                    id: item.product_id, // ✅ FIX: id único real (antes 'size_'+size se repetía con 2 productos de 20L)
                                     product_id: item.product_id,
                                     name: item.product_name || item.name,
                                     size_liters: size,
@@ -2874,8 +2875,8 @@
                         const saleItems = this.cart.map(item => ({
                             sale_id: sale.id,
                             product_id: item.product_type === 'empty_bottle' ?
-                                emptyBottleProducts.find(p => p.size_liters === item.size_liters)?.id || null :
-                                sizeToProductId[item.size_liters],
+                                (item.product_id || emptyBottleProducts.find(p => p.size_liters === item.size_liters)?.id || null) :
+                                (item.product_id || sizeToProductId[item.size_liters]),
                             quantity: item.quantity,
                             unit_price: item.price,
                             total: round2(item.price * item.quantity)
@@ -2887,7 +2888,7 @@
                         // ✅ BUCLE 1: Botellones CON AGUA (5L, 13L, 20L)
                         for (const item of this.cart) {
                             if (item.product_type !== 'empty_bottle') {
-                                const realProductId = sizeToProductId[item.size_liters];
+                                const realProductId = item.product_id || sizeToProductId[item.size_liters];
                                 if (!realProductId) continue;
                                 console.log(`💧 Procesando botellón con agua ${item.size_liters}L - Cantidad: ${item.quantity}`);
                                 const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
@@ -2908,7 +2909,7 @@
                         // ✅ BUCLE 2: Botellones VACÍOS (15L y 20L)
                         for (const item of this.cart) {
                             if (item.product_type === 'empty_bottle') {
-                                const emptyProduct = emptyBottleProducts.find(p => p.size_liters === item.size_liters);
+                                const emptyProduct = emptyBottleProducts.find(p => p.id === item.product_id) || emptyBottleProducts.find(p => p.size_liters === item.size_liters);
                                 if (!emptyProduct) continue;
                                 console.log(`🏺 Procesando botellón vacío ${item.size_liters}L - Cantidad: ${item.quantity}`);
                                 // ✅ NUEVO: Descontar agua del tanque (15L o 20L según el producto)
@@ -3197,7 +3198,7 @@
                         const capProduct = productsFromDB.find(p => p.product_type === 'cap');
                         const saleItems = this.cart.map(item => ({
                             sale_id: sale.id,
-                            product_id: sizeToProductId[item.size_liters],
+                            product_id: item.product_id || sizeToProductId[item.size_liters],
                             quantity: item.quantity,
                             unit_price: item.price,
                             total: round2(item.price * item.quantity)
@@ -3206,7 +3207,7 @@
                         if (itemsError) throw itemsError;
                         let totalCapsNeeded = 0;
                         for (const item of this.cart) {
-                            const realProductId = sizeToProductId[item.size_liters];
+                            const realProductId = item.product_id || sizeToProductId[item.size_liters];
                             if (!realProductId) continue;
                             const { data: tankResult, error: tankError } = await supabase.rpc('sell_and_deduct_from_tank', {
                                 branch_param: this.userBranch,
