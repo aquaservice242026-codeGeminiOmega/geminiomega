@@ -2339,7 +2339,11 @@
                                 const hasValidSize = size !== null && size !== undefined && size > 0;
                                 const isNotCap = productType !== 'cap';
                                 const isValidProduct = (productType === 'bottle' || productType === 'empty_bottle');
-                                return hasStock && hasValidSize && isNotCap && isValidProduct;
+                                // ✅ "Botellón al Mayor" solo se vende en Géminis
+                                const branchNorm = String(this.userBranch || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                                const isMayor = /mayor/i.test(item.product_name || item.name || '');
+                                const mayorAllowed = !isMayor || branchNorm === 'geminis';
+                                return hasStock && hasValidSize && isNotCap && isValidProduct && mayorAllowed;
                             });
                             console.log(`✅ Productos filtrados: ${productsToShow.length}`);
                             this.products = productsToShow.map(item => {
@@ -2356,6 +2360,8 @@
                                     stock: parseInt(stock) || 0
                                 };
                             });
+                            // ✅ "Botellón al Mayor" siempre al final (abajo a la derecha)
+                            this.products.sort((a, b) => (/mayor/i.test(a.name) ? 1 : 0) - (/mayor/i.test(b.name) ? 1 : 0));
                             console.log(`✅ Productos cargados exitosamente: ${this.products.length}`);
                             return; // Éxito total
                         } catch (err) {
